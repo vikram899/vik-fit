@@ -9,7 +9,15 @@
       "Bash(find:*)",
       "Bash(npx expo start:*)",
       "Bash(dir:*)",
-      "Bash(npm start)"
+      "Bash(npm start)",
+      "Bash(npm run build:*)",
+      "Bash(npm run:*)",
+      "WebSearch",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(npm ls:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

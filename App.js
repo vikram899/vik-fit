@@ -116,32 +116,6 @@ function LogWorkoutScreen({ navigation, route }) {
     return unsubscribe;
   }, [navigation]);
 
-  // Handle delete plan with confirmation
-  const handleDeletePlan = (planId, planName) => {
-    Alert.alert(
-      "Delete Plan",
-      `Are you sure you want to delete "${planName}"? This action cannot be undone.`,
-      [
-        {
-          text: "Cancel",
-          onPress: () => console.log("Delete cancelled"),
-          style: "cancel",
-        },
-        {
-          text: "Delete",
-          onPress: async () => {
-            try {
-              await deletePlan(planId);
-              loadPlans(); // Refresh the list
-            } catch (error) {
-              Alert.alert("Error", "Failed to delete plan");
-            }
-          },
-          style: "destructive",
-        },
-      ]
-    );
-  };
 
   return (
     <View
@@ -190,16 +164,6 @@ function LogWorkoutScreen({ navigation, route }) {
                   name="chevron-right"
                   size={24}
                   color="#007AFF"
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => handleDeletePlan(plan.id, plan.name)}
-              >
-                <MaterialCommunityIcons
-                  name="trash-can"
-                  size={20}
-                  color="#fff"
                 />
               </TouchableOpacity>
             </View>
@@ -546,8 +510,11 @@ function ExecuteWorkoutScreen({ navigation, route }) {
   const { planId, planName } = route.params;
   const [exercises, setExercises] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+  const [isEditMode, setIsEditMode] = React.useState(false);
   const [editingExerciseId, setEditingExerciseId] = React.useState(null);
   const [editModalVisible, setEditModalVisible] = React.useState(false);
+  const [menuVisible, setMenuVisible] = React.useState(false);
+  const [selectedExerciseId, setSelectedExerciseId] = React.useState(null);
   const [editExercise, setEditExercise] = React.useState({
     name: "",
     sets: "3",
@@ -572,6 +539,22 @@ function ExecuteWorkoutScreen({ navigation, route }) {
 
     loadExercises();
   }, [planId]);
+
+  // Handle open kebab menu
+  const openKebabMenu = () => {
+    setMenuVisible(true);
+  };
+
+  // Handle enable edit mode
+  const handleEnableEditMode = () => {
+    setMenuVisible(false);
+    setIsEditMode(true);
+  };
+
+  // Handle disable edit mode
+  const handleDisableEditMode = () => {
+    setIsEditMode(false);
+  };
 
   // Handle delete exercise
   const handleDeleteExercise = (exerciseId, exerciseName) => {
@@ -661,8 +644,23 @@ function ExecuteWorkoutScreen({ navigation, route }) {
       ]}
     >
       <View style={styles.compactHeader}>
-        <Text style={styles.compactTitle}>{planName}</Text>
-        <Text style={styles.compactSubtitle}>{exercises.length} exercises</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.compactTitle}>{planName}</Text>
+          <Text style={styles.compactSubtitle}>{exercises.length} exercises</Text>
+        </View>
+        {isEditMode && (
+          <TouchableOpacity
+            onPress={handleDisableEditMode}
+            style={styles.kebabButton}
+          >
+            <Text style={styles.doneButtonText}>Done</Text>
+          </TouchableOpacity>
+        )}
+        {!isEditMode && (
+          <TouchableOpacity onPress={openKebabMenu} style={styles.kebabButton}>
+            <MaterialCommunityIcons name="dots-vertical" size={24} color="#000" />
+          </TouchableOpacity>
+        )}
       </View>
 
       <ScrollView
@@ -679,8 +677,8 @@ function ExecuteWorkoutScreen({ navigation, route }) {
             <ExerciseCard
               key={exercise.id}
               exercise={exercise}
-              showDeleteButton={true}
-              showEditButton={true}
+              showDeleteButton={isEditMode}
+              showEditButton={isEditMode}
               onDelete={() =>
                 handleDeleteExercise(exercise.id, exercise.name)
               }
@@ -689,6 +687,38 @@ function ExecuteWorkoutScreen({ navigation, route }) {
           ))
         )}
       </ScrollView>
+
+      <Modal
+        visible={menuVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
+          <View style={styles.menuOverlay}>
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <View style={styles.menuContent}>
+                <Text style={styles.menuTitle}>Options</Text>
+
+                <TouchableOpacity
+                  style={[styles.menuItem, styles.menuItemLast]}
+                  onPress={handleEnableEditMode}
+                >
+                  <MaterialCommunityIcons name="pencil" size={20} color="#007AFF" />
+                  <Text style={styles.menuItemText}>Edit Exercises</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.menuItem, styles.menuItemLast]}
+                  onPress={() => setMenuVisible(false)}
+                >
+                  <Text style={[styles.menuItemText, { color: '#666' }]}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
 
       <Modal
         visible={editModalVisible}
@@ -1078,6 +1108,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 16,
     backgroundColor: "#fff",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  kebabButton: {
+    padding: 8,
+  },
+  doneButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#007AFF",
   },
   compactTitle: {
     fontSize: 18,
@@ -1227,5 +1268,42 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
     marginTop: 20,
+  },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  menuContent: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 0,
+    width: "80%",
+    overflow: "hidden",
+  },
+  menuTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#000",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  menuItemLast: {
+    borderBottomWidth: 0,
+  },
+  menuItemText: {
+    fontSize: 16,
+    color: "#000",
+    fontWeight: "500",
   },
 });
