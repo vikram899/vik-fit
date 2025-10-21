@@ -38,6 +38,15 @@ export const initializeDatabase = async () => {
       );
     `);
 
+    // Migration: Add time column if it doesn't exist
+    try {
+      await db.execAsync('ALTER TABLE exercises ADD COLUMN time INTEGER DEFAULT 0;');
+      console.log('✅ Added time column to exercises table');
+    } catch (error) {
+      // Column already exists, no need to add it
+      console.log('✅ Time column already exists');
+    }
+
     console.log('✅ Database initialized successfully');
   } catch (error) {
     console.error('❌ Error initializing database:', error);

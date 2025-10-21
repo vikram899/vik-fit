@@ -556,6 +556,33 @@ function ExecuteWorkoutScreen({ navigation, route }) {
     setIsEditMode(false);
   };
 
+  // Handle delete plan
+  const handleDeletePlan = () => {
+    Alert.alert(
+      "Delete Plan",
+      `Are you sure you want to delete "${planName}"? This action cannot be undone.`,
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Delete cancelled"),
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: async () => {
+            try {
+              await deletePlan(planId);
+              navigation.goBack();
+            } catch (error) {
+              Alert.alert("Error", "Failed to delete plan");
+            }
+          },
+          style: "destructive",
+        },
+      ]
+    );
+  };
+
   // Handle delete exercise
   const handleDeleteExercise = (exerciseId, exerciseName) => {
     Alert.alert(
@@ -701,11 +728,22 @@ function ExecuteWorkoutScreen({ navigation, route }) {
                 <Text style={styles.menuTitle}>Options</Text>
 
                 <TouchableOpacity
-                  style={[styles.menuItem, styles.menuItemLast]}
+                  style={styles.menuItem}
                   onPress={handleEnableEditMode}
                 >
                   <MaterialCommunityIcons name="pencil" size={20} color="#007AFF" />
                   <Text style={styles.menuItemText}>Edit Exercises</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => {
+                    setMenuVisible(false);
+                    handleDeletePlan();
+                  }}
+                >
+                  <MaterialCommunityIcons name="trash-can" size={20} color="#FF3B30" />
+                  <Text style={[styles.menuItemText, { color: '#FF3B30' }]}>Delete Plan</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -1172,6 +1210,22 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     flexGrow: 1,
   },
+  createPlanContent: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    paddingTop: 8,
+    gap: 24,
+  },
+  createPlanHeader: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: "#fff",
+  },
+  exercisesScrollContent: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    gap: 12,
+  },
   formGroup: {
     marginBottom: 20,
   },
@@ -1227,6 +1281,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 16,
+  },
+  headerActions: {
+    flexDirection: "row",
+    gap: 12,
+    alignItems: "center",
   },
   sectionTitle: {
     fontSize: 18,

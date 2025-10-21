@@ -15,6 +15,7 @@ const ExerciseCard = ({ exercise, onDelete, onEdit, showDeleteButton = true, sho
             <TouchableOpacity
               onPress={onEdit}
               disabled={disabled}
+              activeOpacity={0.7}
             >
               <MaterialCommunityIcons name="pencil" size={20} color="#007AFF" />
             </TouchableOpacity>
@@ -23,6 +24,7 @@ const ExerciseCard = ({ exercise, onDelete, onEdit, showDeleteButton = true, sho
             <TouchableOpacity
               onPress={onDelete}
               disabled={disabled}
+              activeOpacity={0.7}
             >
               <MaterialCommunityIcons name="close-circle" size={20} color="#FF3B30" />
             </TouchableOpacity>
