@@ -562,10 +562,26 @@ export const getMacroGoals = async (goalDate) => {
       'SELECT * FROM macro_goals WHERE goalDate = ?',
       [goalDate]
     );
+
+    // Return default goals if none are set for this date
+    if (!result) {
+      return {
+        calorieGoal: 2500,
+        proteinGoal: 120,
+        carbsGoal: 300,
+        fatsGoal: 80,
+      };
+    }
     return result;
   } catch (error) {
     console.error('Error getting macro goals:', error);
-    return null;
+    // Return default goals on error
+    return {
+      calorieGoal: 2500,
+      proteinGoal: 120,
+      carbsGoal: 300,
+      fatsGoal: 80,
+    };
   }
 };
 
@@ -701,27 +717,20 @@ export const getPlanExecutionStatus = async (planId, executionDate) => {
  */
 export const startWorkoutLog = async (planId, logDate = new Date().toISOString().split('T')[0]) => {
   try {
-    console.log('startWorkoutLog called with planId:', planId, 'logDate:', logDate);
-
     const insertResult = await db.runAsync(
       'INSERT INTO workout_logs (planId, logDate, status) VALUES (?, ?, ?)',
       [planId, logDate, 'in_progress']
     );
-    console.log('Insert result:', insertResult);
 
     const result = await db.getFirstAsync(
       'SELECT id FROM workout_logs WHERE planId = ? AND logDate = ? ORDER BY id DESC LIMIT 1',
       [planId, logDate]
     );
 
-    console.log('Query result:', result);
-
     if (!result || !result.id) {
-      console.error('Failed to retrieve inserted workout log ID. Result:', result);
       throw new Error('Failed to create workout log');
     }
 
-    console.log('Returning workoutLogId:', result.id);
     return result.id;
   } catch (error) {
     console.error('Error starting workout log:', error);
@@ -735,7 +744,6 @@ export const startWorkoutLog = async (planId, logDate = new Date().toISOString()
 export const getActiveWorkoutLog = async (planId) => {
   try {
     const today = new Date().toISOString().split('T')[0];
-    console.log('getActiveWorkoutLog: looking for planId:', planId, 'on date:', today);
 
     // First try to find an in_progress workout
     let result = await db.getFirstAsync(
@@ -744,7 +752,6 @@ export const getActiveWorkoutLog = async (planId) => {
     );
 
     if (result) {
-      console.log('Found in_progress workout:', result.id);
       return result;
     }
 
@@ -756,10 +763,8 @@ export const getActiveWorkoutLog = async (planId) => {
     );
 
     if (result) {
-      console.log('Found existing workout with status:', result.status, 'ID:', result.id);
       // If it exists but not in_progress, update it to in_progress
       if (result.status !== 'in_progress') {
-        console.log('Updating status to in_progress');
         await db.runAsync(
           'UPDATE workout_logs SET status = ? WHERE id = ?',
           ['in_progress', result.id]
@@ -769,7 +774,6 @@ export const getActiveWorkoutLog = async (planId) => {
       return result;
     }
 
-    console.log('No existing workout found for today');
     return null;
   } catch (error) {
     console.error('Error getting active workout log:', error);
@@ -778,38 +782,70 @@ export const getActiveWorkoutLog = async (planId) => {
 };
 
 /**
+ * Check if there's any active/in-progress workout for today
+ * Returns the first active workout found, or null
+ */
+export const getTodayActiveWorkout = async () => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+
+    const result = await db.getFirstAsync(
+      `SELECT wl.*, p.name as planName
+       FROM workout_logs wl
+       JOIN plans p ON wl.planId = p.id
+       WHERE wl.logDate = ? AND wl.status = ?`,
+      [today, 'in_progress']
+    );
+
+    return result || null;
+  } catch (error) {
+    console.error('Error getting today active workout:', error);
+    return null;
+  }
+};
+
+/**
+ * Get workout log for a specific plan for today (any status)
+ * Used to check if workout is in progress or completed
+ */
+export const getTodayWorkoutLogForPlan = async (planId) => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+
+    const result = await db.getFirstAsync(
+      `SELECT * FROM workout_logs
+       WHERE planId = ? AND logDate = ?`,
+      [planId, today]
+    );
+
+    return result || null;
+  } catch (error) {
+    console.error('Error getting today workout log:', error);
+    return null;
+  }
+};
+
+/**
  * Log a set for an exercise during workout
  */
-export const logExerciseSet = async (workoutLogId, exerciseId, setNumber, repsCompleted, weightUsed, rpe = null, notes = '') => {
+export const logExerciseSet = async (workoutLogId, exerciseId, setNumber, repsCompleted, weightUsed, rpe = null, notes = '', durationSeconds = 0, restTimeUsedSeconds = 0) => {
   try {
-    console.log('logExerciseSet called with:', {
-      workoutLogId,
-      exerciseId,
-      setNumber,
-      repsCompleted,
-      weightUsed,
-      rpe,
-      notes,
-    });
-
     // Validate workoutLogId
     if (!workoutLogId) {
       throw new Error('workoutLogId is required and must not be null');
     }
 
     const insertResult = await db.runAsync(
-      `INSERT INTO set_logs (workoutLogId, exerciseId, setNumber, repsCompleted, weightUsed, rpe, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [workoutLogId, exerciseId, setNumber, repsCompleted, weightUsed, rpe, notes]
+      `INSERT INTO set_logs (workoutLogId, exerciseId, setNumber, repsCompleted, weightUsed, rpe, notes, durationSeconds, restTimeUsedSeconds)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [workoutLogId, exerciseId, setNumber, repsCompleted, weightUsed, rpe, notes, durationSeconds, restTimeUsedSeconds]
     );
-    console.log('Set log insert result:', insertResult);
 
     const result = await db.getFirstAsync(
       'SELECT id FROM set_logs WHERE workoutLogId = ? AND exerciseId = ? AND setNumber = ? ORDER BY id DESC LIMIT 1',
       [workoutLogId, exerciseId, setNumber]
     );
 
-    console.log('Retrieved set log:', result);
     return result?.id;
   } catch (error) {
     console.error('Error logging exercise set:', error);
@@ -896,6 +932,72 @@ export const cancelWorkoutLog = async (workoutLogId) => {
   } catch (error) {
     console.error('Error cancelling workout log:', error);
     throw error;
+  }
+};
+
+/**
+ * Get complete workout summary with all exercises and sets
+ */
+export const getWorkoutSummary = async (workoutLogId) => {
+  try {
+    // Get workout info
+    const workoutLog = await db.getFirstAsync(
+      `SELECT wl.*, p.name as planName
+       FROM workout_logs wl
+       JOIN plans p ON wl.planId = p.id
+       WHERE wl.id = ?`,
+      [workoutLogId]
+    );
+
+    if (!workoutLog) {
+      return null;
+    }
+
+    // Get all sets for this workout
+    const setLogs = await db.getAllAsync(
+      `SELECT sl.*, e.name as exerciseName
+       FROM set_logs sl
+       JOIN exercises e ON sl.exerciseId = e.id
+       WHERE sl.workoutLogId = ?
+       ORDER BY sl.exerciseId, sl.setNumber`,
+      [workoutLogId]
+    );
+
+    // Group sets by exercise
+    const exerciseGroups = {};
+    setLogs.forEach(set => {
+      if (!exerciseGroups[set.exerciseId]) {
+        exerciseGroups[set.exerciseId] = {
+          id: set.exerciseId,
+          name: set.exerciseName,
+          sets: [],
+        };
+      }
+      exerciseGroups[set.exerciseId].sets.push(set);
+    });
+
+    // Convert to array
+    const exercises = Object.values(exerciseGroups);
+
+    // Calculate totals
+    const totalDuration = workoutLog.totalDurationSeconds || 0;
+    const totalRestTime = setLogs.reduce((sum, set) => sum + (set.restTimeUsedSeconds || 0), 0);
+    const totalExerciseTime = setLogs.reduce((sum, set) => sum + (set.durationSeconds || 0), 0);
+
+    return {
+      workout: workoutLog,
+      exercises,
+      sets: setLogs,
+      stats: {
+        totalDuration,
+        totalRestTime,
+        totalExerciseTime,
+        totalSets: setLogs.length,
+      },
+    };
+  } catch (error) {
+    console.error('Error getting workout summary:', error);
+    return null;
   }
 };
 

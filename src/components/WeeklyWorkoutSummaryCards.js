@@ -1,16 +1,13 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS } from '../styles';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { COLORS } from "../styles";
 
 /**
  * WeeklyWorkoutSummaryCards Component
  * Shows weekly workout and exercise totals vs last week with percentage change
  */
-const WeeklyWorkoutSummaryCards = ({
-  currentWeekData,
-  lastWeekData,
-}) => {
+const WeeklyWorkoutSummaryCards = ({ currentWeekData, lastWeekData }) => {
   const calculateChange = (current, previous) => {
     if (previous === 0) {
       return current > 0 ? 100 : 0;
@@ -19,15 +16,15 @@ const WeeklyWorkoutSummaryCards = ({
   };
 
   const getTrendIcon = (percentage) => {
-    if (percentage > 5) return 'trending-up';
-    if (percentage < -5) return 'trending-down';
-    return 'minus';
+    if (percentage > 5) return "trending-up";
+    if (percentage < -5) return "trending-down";
+    return "minus";
   };
 
   const getTrendColor = (percentage) => {
-    if (percentage > 5) return '#FF6B6B'; // Red for increase
-    if (percentage < -5) return '#4CAF50'; // Green for decrease
-    return '#999'; // Gray for stable
+    if (percentage > 5) return "#FF6B6B"; // Red for increase
+    if (percentage < -5) return "#4CAF50"; // Green for decrease
+    return "#999"; // Gray for stable
   };
 
   const StatCard = ({ label, icon, currentValue, previousValue, unit }) => {
@@ -39,17 +36,22 @@ const WeeklyWorkoutSummaryCards = ({
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <View style={styles.labelSection}>
-            <MaterialCommunityIcons name={icon} size={20} color={COLORS.primary} />
+            <MaterialCommunityIcons
+              name={icon}
+              size={20}
+              color={COLORS.primary}
+            />
             <Text style={styles.label}>{label}</Text>
           </View>
           <View style={styles.trendSection}>
             <MaterialCommunityIcons
               name={trendIcon}
-              size={18}
+              size={16}
               color={trendColor}
             />
             <Text style={[styles.percentageChange, { color: trendColor }]}>
-              {percentageChange > 0 ? '+' : ''}{percentageChange.toFixed(1)}%
+              {percentageChange > 0 ? "+" : ""}
+              {percentageChange.toFixed(1)}%
             </Text>
           </View>
         </View>
@@ -57,13 +59,15 @@ const WeeklyWorkoutSummaryCards = ({
         <View style={styles.cardBody}>
           <View style={styles.valueRow}>
             <Text style={styles.currentValue}>
-              {Math.round(currentValue)}{unit}
+              {Math.round(currentValue)}
+              {unit}
             </Text>
           </View>
 
           {previousValue > 0 && (
             <Text style={styles.previousValue}>
-              Last week: {Math.round(previousValue)}{unit}
+              Last week: {Math.round(previousValue)}
+              {unit}
             </Text>
           )}
         </View>
@@ -104,75 +108,78 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   titleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 16,
   },
   title: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#000',
+    fontWeight: "700",
+    color: "#000",
   },
   subtitle: {
     fontSize: 12,
-    color: '#999',
+    color: "#999",
   },
   cardsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
     gap: 12,
   },
   card: {
-    width: '48%',
-    backgroundColor: '#f9f9f9',
+    flex: 1,
+    backgroundColor: "#f9f9f9",
     borderRadius: 10,
-    padding: 12,
+    paddingLeft: 5,
+    paddingRight: 5,
+    paddingTop: 12,
+    paddingBottom: 12,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: "#e0e0e0",
   },
   cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 12,
   },
   labelSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
+    flex: 1,
   },
   label: {
     fontSize: 13,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
   trendSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
   },
   percentageChange: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   cardBody: {
     gap: 8,
   },
   valueRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
+    flexDirection: "row",
+    alignItems: "baseline",
     gap: 4,
   },
   currentValue: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#000',
+    fontWeight: "700",
+    color: "#000",
   },
   previousValue: {
     fontSize: 10,
-    color: '#999',
-    fontStyle: 'italic',
+    color: "#999",
+    fontStyle: "italic",
   },
 });
 

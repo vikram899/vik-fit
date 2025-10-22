@@ -31,7 +31,9 @@
       "Bash(\"src/screens/PlanDetailScreen.js\" )",
       "Bash(\"src/screens/WorkoutExecutionScreen.js\" )",
       "Bash(\"src/services/supabase.js\")",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(for:*)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

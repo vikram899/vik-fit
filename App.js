@@ -34,6 +34,7 @@ import MealsScreen from "./src/screens/MealsScreen";
 import AddWorkoutScreen from "./src/screens/AddWorkoutScreen";
 import AddMealScreen from "./src/screens/AddMealScreen";
 import StartWorkoutScreen from "./src/screens/StartWorkoutScreen";
+import WorkoutSummaryScreen from "./src/screens/WorkoutSummaryScreen";
 import { COLORS } from "./src/styles";
 import {
   initializeDatabase,
@@ -63,6 +64,7 @@ import {
   removePlanFromDays,
   markPlanCompleted,
   getPlanExecutionStatus,
+  getTodayWorkoutLogForPlan,
 } from "./src/services/database";
 import MealCard from "./src/components/MealCard";
 
@@ -80,9 +82,16 @@ function HomeScreen({ navigation }) {
     totalCarbs: 0,
     totalFats: 0,
   });
-  const [macroGoals, setMacroGoalsState] = React.useState(null);
+  const [macroGoals, setMacroGoalsState] = React.useState({
+    calorieGoal: 2500,
+    proteinGoal: 120,
+    carbsGoal: 300,
+    fatsGoal: 80,
+  });
+  const [todayWorkouts, setTodayWorkouts] = React.useState([]);
+  const [todayWorkoutLogs, setTodayWorkoutLogs] = React.useState({});
 
-  // Load today's meal data
+  // Load today's meal and workout data
   React.useEffect(() => {
     const loadTodayData = async () => {
       try {
@@ -91,6 +100,23 @@ function HomeScreen({ navigation }) {
 
         const goals = await getMacroGoals(today);
         setMacroGoalsState(goals);
+
+        // Load today's workouts
+        const todayDayOfWeek = new Date().getDay();
+        const workouts = await getPlansForDay(todayDayOfWeek);
+        setTodayWorkouts(workouts || []);
+
+        // Load today's workout logs to check completion status
+        const workoutLogsMap = {};
+        if (workouts) {
+          for (const workout of workouts) {
+            const log = await getTodayWorkoutLogForPlan(workout.id);
+            if (log) {
+              workoutLogsMap[workout.id] = log;
+            }
+          }
+        }
+        setTodayWorkoutLogs(workoutLogsMap);
       } catch (error) {
         console.error("Error loading today's data:", error);
       }
@@ -108,6 +134,23 @@ function HomeScreen({ navigation }) {
 
         const goals = await getMacroGoals(today);
         setMacroGoalsState(goals);
+
+        // Reload today's workouts
+        const todayDayOfWeek = new Date().getDay();
+        const workouts = await getPlansForDay(todayDayOfWeek);
+        setTodayWorkouts(workouts || []);
+
+        // Reload today's workout logs to check completion status
+        const workoutLogsMap = {};
+        if (workouts) {
+          for (const workout of workouts) {
+            const log = await getTodayWorkoutLogForPlan(workout.id);
+            if (log) {
+              workoutLogsMap[workout.id] = log;
+            }
+          }
+        }
+        setTodayWorkoutLogs(workoutLogsMap);
       } catch (error) {
         console.error("Error loading today's data:", error);
       }
@@ -122,158 +165,223 @@ function HomeScreen({ navigation }) {
         { justifyContent: "flex-start", paddingTop: 0 },
       ]}
     >
-      <View
-        style={[styles.headerWithButton, { paddingTop: insets.top + 16 }]}
-      ></View>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View
+          style={[styles.headerWithButton, { paddingTop: insets.top + 16 }]}
+        ></View>
 
-      {/* Today's Summary Card */}
-      <View style={styles.summaryCard}>
-        <Text style={styles.summaryTitle}>Today's Summary</Text>
-        <View style={styles.summaryContent}>
-          <View style={styles.summaryItem}>
-            <MaterialCommunityIcons
-              name="silverware-fork-knife"
-              size={24}
-              color="#007AFF"
-            />
-            <View style={{ marginLeft: 12, flex: 1 }}>
-              <Text style={styles.summaryLabel}>Calories</Text>
-              <Text style={styles.summaryValue}>
-                {Math.round(dailyTotals.totalCalories)}
-              </Text>
-              {macroGoals && (
-                <Text style={styles.summaryGoal}>
-                  Goal: {macroGoals.calorieGoal}
-                </Text>
-              )}
+        {/* Today's Summary Card */}
+        <View style={styles.summaryCard}>
+          <Text style={styles.summaryTitle}>Today's Summary</Text>
+          <View style={styles.summaryContent}>
+            <View style={styles.summaryItem}>
+              <View
+                style={[
+                  styles.summaryItemProgressOverlay,
+                  {
+                    width: `${Math.min(
+                      (dailyTotals.totalCalories / macroGoals.calorieGoal) * 100,
+                      100
+                    )}%`,
+                    backgroundColor: '#007AFF',
+                  },
+                ]}
+              />
+              <View style={{ flexDirection: 'row', alignItems: 'flex-start', flex: 1, zIndex: 1 }}>
+                <MaterialCommunityIcons
+                  name="silverware-fork-knife"
+                  size={20}
+                  color="#007AFF"
+                />
+                <View style={{ marginLeft: 8, flex: 1 }}>
+                  <Text style={styles.summaryLabel}>Calories</Text>
+                  <View style={styles.summaryValueRow}>
+                    <Text style={styles.summaryValue}>
+                      {Math.round(dailyTotals.totalCalories)}
+                    </Text>
+                    <Text style={styles.summaryGoalSmall}>
+                      / {Math.round(macroGoals.calorieGoal)}
+                    </Text>
+                  </View>
+                </View>
+              </View>
             </View>
-          </View>
-          <View style={styles.summaryItem}>
-            <MaterialCommunityIcons name="flash" size={24} color="#FF9800" />
-            <View style={{ marginLeft: 12, flex: 1 }}>
-              <Text style={styles.summaryLabel}>Protein</Text>
-              <Text style={styles.summaryValue}>
-                {Math.round(dailyTotals.totalProtein)}g
-              </Text>
-              {macroGoals && (
-                <Text style={styles.summaryGoal}>
-                  Goal: {macroGoals.proteinGoal}g
-                </Text>
-              )}
+            <View style={styles.summaryItem}>
+              <View
+                style={[
+                  styles.summaryItemProgressOverlay,
+                  {
+                    width: `${Math.min(
+                      (dailyTotals.totalProtein / macroGoals.proteinGoal) * 100,
+                      100
+                    )}%`,
+                    backgroundColor: '#FF9800',
+                  },
+                ]}
+              />
+              <View style={{ flexDirection: 'row', alignItems: 'flex-start', flex: 1, zIndex: 1 }}>
+                <MaterialCommunityIcons name="flash" size={20} color="#FF9800" />
+                <View style={{ marginLeft: 8, flex: 1 }}>
+                  <Text style={styles.summaryLabel}>Protein</Text>
+                  <View style={styles.summaryValueRow}>
+                    <Text style={styles.summaryValue}>
+                      {Math.round(dailyTotals.totalProtein)}
+                    </Text>
+                    <Text style={styles.summaryGoalSmall}>
+                      / {Math.round(macroGoals.proteinGoal)}g
+                    </Text>
+                  </View>
+                </View>
+              </View>
             </View>
-          </View>
-          <View style={styles.summaryItem}>
-            <MaterialCommunityIcons
-              name="bread-slice"
-              size={24}
-              color="#4CAF50"
-            />
-            <View style={{ marginLeft: 12, flex: 1 }}>
-              <Text style={styles.summaryLabel}>Carbs</Text>
-              <Text style={styles.summaryValue}>
-                {Math.round(dailyTotals.totalCarbs)}g
-              </Text>
-              {macroGoals && (
-                <Text style={styles.summaryGoal}>
-                  Goal: {macroGoals.carbsGoal}g
-                </Text>
-              )}
+            <View style={styles.summaryItem}>
+              <View
+                style={[
+                  styles.summaryItemProgressOverlay,
+                  {
+                    width: `${Math.min(
+                      (dailyTotals.totalCarbs / macroGoals.carbsGoal) * 100,
+                      100
+                    )}%`,
+                    backgroundColor: '#4CAF50',
+                  },
+                ]}
+              />
+              <View style={{ flexDirection: 'row', alignItems: 'flex-start', flex: 1, zIndex: 1 }}>
+                <MaterialCommunityIcons
+                  name="bread-slice"
+                  size={20}
+                  color="#4CAF50"
+                />
+                <View style={{ marginLeft: 8, flex: 1 }}>
+                  <Text style={styles.summaryLabel}>Carbs</Text>
+                  <View style={styles.summaryValueRow}>
+                    <Text style={styles.summaryValue}>
+                      {Math.round(dailyTotals.totalCarbs)}
+                    </Text>
+                    <Text style={styles.summaryGoalSmall}>
+                      / {Math.round(macroGoals.carbsGoal)}g
+                    </Text>
+                  </View>
+                </View>
+              </View>
             </View>
-          </View>
-          <View style={styles.summaryItem}>
-            <MaterialCommunityIcons name="water" size={24} color="#FF6B6B" />
-            <View style={{ marginLeft: 12, flex: 1 }}>
-              <Text style={styles.summaryLabel}>Fats</Text>
-              <Text style={styles.summaryValue}>
-                {Math.round(dailyTotals.totalFats)}g
-              </Text>
-              {macroGoals && (
-                <Text style={styles.summaryGoal}>
-                  Goal: {macroGoals.fatsGoal}g
-                </Text>
-              )}
+            <View style={styles.summaryItem}>
+              <View
+                style={[
+                  styles.summaryItemProgressOverlay,
+                  {
+                    width: `${Math.min(
+                      (dailyTotals.totalFats / macroGoals.fatsGoal) * 100,
+                      100
+                    )}%`,
+                    backgroundColor: '#FF6B6B',
+                  },
+                ]}
+              />
+              <View style={{ flexDirection: 'row', alignItems: 'flex-start', flex: 1, zIndex: 1 }}>
+                <MaterialCommunityIcons name="water" size={20} color="#FF6B6B" />
+                <View style={{ marginLeft: 8, flex: 1 }}>
+                  <Text style={styles.summaryLabel}>Fats</Text>
+                  <View style={styles.summaryValueRow}>
+                    <Text style={styles.summaryValue}>
+                      {Math.round(dailyTotals.totalFats)}
+                    </Text>
+                    <Text style={styles.summaryGoalSmall}>
+                      / {Math.round(macroGoals.fatsGoal)}g
+                    </Text>
+                  </View>
+                </View>
+              </View>
             </View>
           </View>
         </View>
 
-        {/* Progress Bars */}
-        {macroGoals && (
-          <View style={styles.progressContainer}>
-            <View style={styles.progressItem}>
-              <Text style={styles.progressLabel}>Protein Progress</Text>
-              <View style={styles.progressBarContainer}>
-                <View
-                  style={[
-                    styles.progressBar,
-                    {
-                      width: `${Math.min(
-                        (dailyTotals.totalProtein / macroGoals.proteinGoal) *
-                          100,
-                        100
-                      )}%`,
-                      backgroundColor: "#FF9800",
-                    },
-                  ]}
-                />
-              </View>
-              <Text style={styles.progressText}>
-                {Math.round(
-                  (dailyTotals.totalProtein / macroGoals.proteinGoal) * 100
-                )}
-                %
-              </Text>
-            </View>
+        {/* Today's Workouts Section */}
+        {todayWorkouts.length > 0 && (
+          <View style={styles.workoutsSection}>
+            <Text style={styles.workoutsSectionTitle}>Today's Workouts</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.workoutsScrollView}
+              contentContainerStyle={styles.workoutsScrollContent}
+            >
+              {todayWorkouts.map((workout) => {
+                // Check if workout is completed today
+                const isCompleted =
+                  todayWorkoutLogs?.[workout.id]?.status === "completed";
 
-            <View style={styles.progressItem}>
-              <Text style={styles.progressLabel}>Calorie Progress</Text>
-              <View style={styles.progressBarContainer}>
-                <View
-                  style={[
-                    styles.progressBar,
-                    {
-                      width: `${Math.min(
-                        (dailyTotals.totalCalories / macroGoals.calorieGoal) *
-                          100,
-                        100
-                      )}%`,
-                      backgroundColor: "#007AFF",
-                    },
-                  ]}
-                />
-              </View>
-              <Text style={styles.progressText}>
-                {Math.round(
-                  (dailyTotals.totalCalories / macroGoals.calorieGoal) * 100
-                )}
-                %
-              </Text>
-            </View>
+                return (
+                  <TouchableOpacity
+                    key={workout.id}
+                    style={styles.workoutCard}
+                    onPress={() => navigation.navigate("LogWorkout")}
+                  >
+                    <View style={styles.workoutCardHeader}>
+                      <MaterialCommunityIcons
+                        name="dumbbell"
+                        size={24}
+                        color={COLORS.primary}
+                        style={styles.workoutCardIcon}
+                      />
+                      <Text style={styles.workoutCardName} numberOfLines={1}>
+                        {workout.name}
+                      </Text>
+                    </View>
+                    <View
+                      style={[
+                        styles.workoutCardStatus,
+                        isCompleted && styles.workoutCardStatusCompleted,
+                      ]}
+                    >
+                      <MaterialCommunityIcons
+                        name={isCompleted ? "check-circle" : "clock-outline"}
+                        size={14}
+                        color={isCompleted ? "#fff" : "#666"}
+                      />
+                      <Text
+                        style={[
+                          styles.workoutCardStatusText,
+                          isCompleted && styles.workoutCardStatusTextCompleted,
+                        ]}
+                      >
+                        {isCompleted ? "Done" : "Pending"}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
           </View>
         )}
-      </View>
 
-      {/* Action Buttons */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate("LogWorkout")}
-        >
-          <MaterialCommunityIcons name="dumbbell" size={24} color="#fff" />
-          <Text style={styles.buttonText}>Log Workout</Text>
-        </TouchableOpacity>
+        {/* Action Buttons */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("LogWorkout")}
+          >
+            <MaterialCommunityIcons name="dumbbell" size={24} color="#fff" />
+            <Text style={styles.buttonText}>Log Workout</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate("LogMeals")}
-        >
-          <MaterialCommunityIcons
-            name="silverware-fork-knife"
-            size={24}
-            color="#fff"
-          />
-          <Text style={styles.buttonText}>Log Meals</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("LogMeals")}
+          >
+            <MaterialCommunityIcons
+              name="silverware-fork-knife"
+              size={24}
+              color="#fff"
+            />
+            <Text style={styles.buttonText}>Log Meals</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -1018,7 +1126,13 @@ function HomeStackNavigator() {
           title: "Log Workouts",
           headerLeft: () => (
             <TouchableOpacity
-              onPress={() => navigation.goBack()}
+              onPress={() => {
+                if (navigation.canGoBack()) {
+                  navigation.goBack();
+                } else {
+                  navigation.navigate("HomeScreen");
+                }
+              }}
               style={{ paddingLeft: 16 }}
             >
               <MaterialCommunityIcons
@@ -1046,6 +1160,11 @@ function HomeStackNavigator() {
       <Stack.Screen
         name="StartWorkout"
         component={StartWorkoutScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="WorkoutSummary"
+        component={WorkoutSummaryScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen
@@ -1295,7 +1414,6 @@ export default function App() {
             }}
           />
         </Tab.Navigator>
-
       </NavigationContainer>
     </SafeAreaProvider>
   );
@@ -1322,6 +1440,8 @@ const styles = StyleSheet.create({
   buttonContainer: {
     width: "100%",
     gap: 15,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   button: {
     backgroundColor: "#007AFF",
@@ -1666,34 +1786,55 @@ const styles = StyleSheet.create({
   summaryCard: {
     backgroundColor: "#fff",
     marginVertical: 16,
+    marginHorizontal: 16,
     paddingHorizontal: 16,
     paddingVertical: 20,
-    borderRadius: 0,
-    borderWidth: 0,
-    borderColor: "#e0e0e0",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#e8e8e8",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  summaryCardInner: {
+    backgroundColor: "#fafafa",
   },
   summaryTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "700",
     color: "#000",
-    marginBottom: 16,
+    marginBottom: 18,
   },
   summaryContent: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginBottom: 16,
+    marginBottom: 20,
     justifyContent: "space-between",
+    gap: 12,
   },
   summaryItem: {
     width: "48%",
     flexDirection: "row",
     alignItems: "flex-start",
-    paddingBottom: 12,
+    paddingBottom: 0,
+    backgroundColor: "#f5f5f5",
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#efefef",
+    overflow: "hidden",
+    position: "relative",
+  },
+  summaryItemProgressOverlay: {
+    position: "absolute",
+    left: -10,
+    top: -10,
+    right: -10,
+    bottom: -10,
+    opacity: 0.15,
+    borderRadius: 8,
   },
   divider: {
     width: 1,
@@ -1701,51 +1842,142 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   summaryLabel: {
-    fontSize: 13,
+    fontSize: 11,
     color: "#999",
-    fontWeight: "500",
+    fontWeight: "600",
     marginBottom: 4,
   },
   summaryValue: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "700",
     color: "#000",
-    marginBottom: 4,
+    marginBottom: 2,
   },
   summaryGoal: {
     fontSize: 12,
     color: "#007AFF",
     fontWeight: "600",
   },
+  summaryValueRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 4,
+  },
+  summaryGoalSmall: {
+    fontSize: 11,
+    color: "#999",
+    fontWeight: "500",
+  },
   progressContainer: {
-    borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
-    paddingTop: 16,
+    borderTopWidth: 1.5,
+    borderTopColor: "#e8e8e8",
+    paddingTop: 18,
+    gap: 14,
   },
   progressItem: {
-    marginBottom: 12,
+    marginBottom: 0,
   },
   progressLabel: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 6,
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#000",
+    marginBottom: 10,
   },
   progressBarContainer: {
     height: 8,
-    backgroundColor: "#e0e0e0",
+    backgroundColor: "#e8e8e8",
     borderRadius: 4,
     overflow: "hidden",
-    marginBottom: 6,
+    marginBottom: 8,
   },
   progressBar: {
     height: "100%",
     borderRadius: 4,
   },
   progressText: {
-    fontSize: 12,
-    fontWeight: "600",
+    fontSize: 13,
+    fontWeight: "700",
     color: "#666",
+  },
+  workoutsSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    marginVertical: 12,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    marginHorizontal: 16,
+    borderWidth: 1,
+    borderColor: "#e8e8e8",
+  },
+  workoutsSectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#000",
+    marginBottom: 14,
+  },
+  workoutsScrollView: {
+    marginHorizontal: -16,
+    paddingHorizontal: 16,
+  },
+  workoutsScrollContent: {
+    gap: 12,
+    paddingRight: 16,
+  },
+  workoutCard: {
+    width: 160,
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1.5,
+    borderColor: "#e8e8e8",
+    justifyContent: "space-between",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  workoutCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 10,
+  },
+  workoutCardIcon: {
+    padding: 8,
+    backgroundColor: "rgba(0, 122, 255, 0.1)",
+    borderRadius: 10,
+  },
+  workoutCardName: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#000",
+    flex: 1,
+  },
+  workoutCardStatus: {
+    backgroundColor: "#f0f0f0",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    width: "100%",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  workoutCardStatusCompleted: {
+    backgroundColor: "#E8F5E9",
+    borderColor: "#4CAF50",
+  },
+  workoutCardStatusText: {
+    color: "#666",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  workoutCardStatusTextCompleted: {
+    color: "#2E7D32",
   },
   headerWithButton: {
     paddingHorizontal: 20,

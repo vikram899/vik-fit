@@ -20,6 +20,9 @@ import {
   assignPlanToDays,
   deletePlan,
   getPlansForDay,
+  getTodayActiveWorkout,
+  getTodayWorkoutLogForPlan,
+  removePlanFromDays,
 } from '../services/database';
 import {
   getWeeklyWorkoutCompletions,
@@ -47,6 +50,7 @@ export default function LogWorkoutScreen({ navigation }) {
   const [scheduledDays, setScheduledDays] = useState({});
   const [fadeAnim] = useState(new Animated.Value(0));
   const [activeTab, setActiveTab] = useState('today'); // 'today' or 'all'
+  const [todayWorkoutLogs, setTodayWorkoutLogs] = useState({}); // Map of planId -> workoutLog
 
   const todayDayOfWeek = new Date().getDay();
   const weekStartDate = getSundayOfWeek(new Date().toISOString().split('T')[0]);
@@ -87,6 +91,16 @@ export default function LogWorkoutScreen({ navigation }) {
         completionCountsMap[plan.id] = count;
       }
       setCompletionCounts(completionCountsMap);
+
+      // Get today's workout logs for each plan
+      const workoutLogsMap = {};
+      for (const plan of plans) {
+        const log = await getTodayWorkoutLogForPlan(plan.id);
+        if (log) {
+          workoutLogsMap[plan.id] = log;
+        }
+      }
+      setTodayWorkoutLogs(workoutLogsMap);
 
       // Trigger fade-in animation
       Animated.timing(fadeAnim, {
@@ -153,13 +167,20 @@ export default function LogWorkoutScreen({ navigation }) {
     setAssignModalVisible(true);
   };
 
-  const handleSaveDays = async (selectedDays) => {
+  const handleSaveDays = async (workoutIdOrSelectedDays, daysOverride = null) => {
     try {
-      await assignPlanToDays(selectedWorkoutForAssign.id, selectedDays);
-      setAssignModalVisible(false);
-      setSelectedWorkoutForAssign(null);
-      loadWorkouts();
-      Alert.alert('Success', 'Workout schedule updated!');
+      // If called with (workoutId, days), use those directly
+      if (typeof workoutIdOrSelectedDays === 'number' && daysOverride !== null) {
+        await assignPlanToDays(workoutIdOrSelectedDays, daysOverride);
+        loadWorkouts();
+      } else {
+        // Original behavior: called from modal with selected days
+        await assignPlanToDays(selectedWorkoutForAssign.id, workoutIdOrSelectedDays);
+        setAssignModalVisible(false);
+        setSelectedWorkoutForAssign(null);
+        loadWorkouts();
+        Alert.alert('Success', 'Workout schedule updated!');
+      }
     } catch (error) {
       console.error('Error saving plan schedule:', error);
       Alert.alert('Error', 'Failed to save plan schedule');
@@ -170,28 +191,60 @@ export default function LogWorkoutScreen({ navigation }) {
     navigation.navigate('ExecuteWorkout', { planId: workout.id });
   };
 
-  const handleStartWorkout = (workout) => {
-    navigation.navigate('StartWorkout', { planId: workout.id });
+  const handleStartWorkout = async (workout) => {
+    try {
+      // Check if there's already a workout in progress
+      const activeWorkout = await getTodayActiveWorkout();
+
+      if (activeWorkout && activeWorkout.planId !== workout.id) {
+        // There's a different workout in progress
+        Alert.alert(
+          'Workout Already Scheduled',
+          `There is already a workout scheduled: "${activeWorkout.planName}". Do you still want to start "${workout.name}"?`,
+          [
+            {
+              text: 'Cancel',
+              style: 'cancel',
+            },
+            {
+              text: 'Yes, Start',
+              onPress: () => {
+                navigation.navigate('StartWorkout', { planId: workout.id });
+              },
+            },
+          ]
+        );
+      } else {
+        // No conflict, start the workout
+        navigation.navigate('StartWorkout', { planId: workout.id });
+      }
+    } catch (error) {
+      console.error('Error checking active workout:', error);
+      // If there's an error, just start the workout
+      navigation.navigate('StartWorkout', { planId: workout.id });
+    }
   };
 
-  const handleDeleteWorkout = (workout) => {
+  const handleRemoveFromToday = (workout) => {
+    const todayDayOfWeek = new Date().getDay();
+
     Alert.alert(
-      'Delete Workout',
-      `Are you sure you want to delete "${workout.name}"?`,
+      'Remove from Today',
+      `Are you sure you want to remove "${workout.name}" from today's plan? It will still appear next week.`,
       [
         {
           text: 'Cancel',
           style: 'cancel',
         },
         {
-          text: 'Delete',
+          text: 'Remove',
           onPress: async () => {
             try {
-              await deletePlan(workout.id);
+              await removePlanFromDays(workout.id, [todayDayOfWeek]);
               loadWorkouts();
             } catch (error) {
-              console.error('Error deleting workout:', error);
-              Alert.alert('Error', 'Failed to delete workout');
+              console.error('Error removing workout:', error);
+              Alert.alert('Error', 'Failed to remove workout');
             }
           },
           style: 'destructive',
@@ -200,30 +253,56 @@ export default function LogWorkoutScreen({ navigation }) {
     );
   };
 
-  const handleWorkoutMenu = (workout) => {
-    Alert.alert(
-      'Workout Options',
-      workout.name,
-      [
-        {
-          text: 'Assign Days',
-          onPress: () => handleAssignDays(workout),
-        },
-        {
-          text: 'View Exercises',
-          onPress: () => handleViewExercises(workout),
-        },
-        {
-          text: 'Delete',
-          onPress: () => handleDeleteWorkout(workout),
-          style: 'destructive',
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-      ]
-    );
+  const handleWorkoutMenu = (workout, isToday = false) => {
+    if (isToday) {
+      // For today's workouts, show: Remove, View Exercises, Cancel
+      Alert.alert(
+        'Workout Options',
+        workout.name,
+        [
+          {
+            text: 'Remove',
+            onPress: () => handleRemoveFromToday(workout),
+            style: 'destructive',
+          },
+          {
+            text: 'View Exercises',
+            onPress: () => handleViewExercises(workout),
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+        ]
+      );
+    } else {
+      // For all workouts, show: View Exercises, Add to Today's Schedule, Cancel
+      Alert.alert(
+        'Workout Options',
+        workout.name,
+        [
+          {
+            text: 'View Exercises',
+            onPress: () => handleViewExercises(workout),
+          },
+          {
+            text: 'Add to Today\'s Schedule',
+            onPress: () => {
+              const todayDayOfWeek = new Date().getDay();
+              if (!scheduledDays[workout.id]?.includes(todayDayOfWeek)) {
+                handleSaveDays(workout.id, [...(scheduledDays[workout.id] || []), todayDayOfWeek]);
+              } else {
+                Alert.alert('Already Scheduled', `${workout.name} is already scheduled for today.`);
+              }
+            },
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+        ]
+      );
+    }
   };
 
   const getScheduledDaysDisplay = (workoutId) => {
@@ -247,6 +326,18 @@ export default function LogWorkoutScreen({ navigation }) {
   const WorkoutCard = ({ workout, isToday = false }) => {
     const progress = getCompletionProgress(workout.id);
     const exerciseCount = exerciseCounts[workout.id] || 0;
+    const todayWorkoutLog = todayWorkoutLogs[workout.id];
+    const isWorkoutCompleted = todayWorkoutLog && todayWorkoutLog.status === 'completed';
+
+    const handleButtonPress = () => {
+      if (isWorkoutCompleted) {
+        // Show summary for completed workout
+        navigation.navigate('WorkoutSummary', { workoutLogId: todayWorkoutLog.id });
+      } else {
+        // Start or resume workout
+        handleStartWorkout(workout);
+      }
+    };
 
     return (
       <View key={workout.id} style={[styles.workoutCard, isToday && styles.todayWorkoutCard]}>
@@ -264,7 +355,7 @@ export default function LogWorkoutScreen({ navigation }) {
             </Text>
           </View>
           <TouchableOpacity
-            onPress={() => handleWorkoutMenu(workout)}
+            onPress={() => handleWorkoutMenu(workout, isToday)}
             style={styles.kebabButton}
           >
             <MaterialCommunityIcons
@@ -322,14 +413,16 @@ export default function LogWorkoutScreen({ navigation }) {
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.actionButton, styles.primaryButton]}
-            onPress={() => handleStartWorkout(workout)}
+            onPress={handleButtonPress}
           >
             <MaterialCommunityIcons
-              name="play"
+              name={isWorkoutCompleted ? 'eye' : 'play'}
               size={18}
               color="#fff"
             />
-            <Text style={styles.primaryButtonText}>Start</Text>
+            <Text style={styles.primaryButtonText}>
+              {isWorkoutCompleted ? 'Summary' : 'Start'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

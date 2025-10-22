@@ -267,15 +267,15 @@ export const STRINGS = {
       "Profile features including user stats, settings, and data export will be available soon!",
     features: {
       stats: {
-        title: "📊 Stats",
+        title: "Stats",
         text: "View your fitness journey",
       },
       settings: {
-        title: "⚙️ Settings",
+        title: "Settings",
         text: "Customize your experience",
       },
       export: {
-        title: "📥 Export",
+        title: "Export",
         text: "Download your fitness data",
       },
     },

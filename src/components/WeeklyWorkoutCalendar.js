@@ -1,87 +1,132 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 /**
  * WeeklyWorkoutCalendar Component
- * Shows which days had workouts completed with counts
+ * Shows which days had workouts completed with counts in a horizontal scrollable list
+ * Current day is highlighted and automatically centered
  */
 const WeeklyWorkoutCalendar = ({ weeklyData }) => {
   const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const scrollRef = useRef(null);
 
-  const getCompletionColor = (completedCount) => {
-    if (completedCount >= 3) return '#4CAF50'; // Green
-    if (completedCount >= 2) return '#FFC107'; // Yellow
-    if (completedCount >= 1) return '#FF9800'; // Orange
-    return '#e0e0e0'; // Gray for no workouts
+  // Get today's date to highlight current day
+  const today = new Date();
+  const todayDate = today.toISOString().split('T')[0];
+
+  const getCompletionColor = (completedCount, assignedCount) => {
+    if (assignedCount === 0) return '#e0e0e0'; // Gray for no assigned workouts
+    const percentage = (completedCount / assignedCount) * 100;
+    if (percentage >= 100) return '#4CAF50'; // Green
+    if (percentage >= 66) return '#FFC107'; // Yellow
+    if (percentage >= 33) return '#FF9800'; // Orange
+    return '#e0e0e0'; // Gray for low completion
   };
+
+  const getCompletionPercentage = (completedCount, assignedCount) => {
+    if (assignedCount === 0) return 0;
+    return Math.round((completedCount / assignedCount) * 100);
+  };
+
+  // Auto-scroll to today's card on mount
+  useEffect(() => {
+    if (scrollRef.current) {
+      // Find index of today
+      const todayIndex = weeklyData.findIndex(day => day.date === todayDate);
+      if (todayIndex !== -1) {
+        // Scroll to center today's card
+        const scrollPosition = Math.max(0, todayIndex * 110 - 100);
+        setTimeout(() => {
+          scrollRef.current?.scrollTo({
+            x: scrollPosition,
+            animated: true,
+          });
+        }, 300);
+      }
+    }
+  }, [todayDate, weeklyData]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Weekly Completion</Text>
 
-      <View style={styles.weekGrid}>
+      <ScrollView
+        ref={scrollRef}
+        horizontal
+        showsHorizontalScrollIndicator={true}
+        scrollEventThrottle={16}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
         {weeklyData.map((day, index) => {
-          const color = getCompletionColor(day.totalWorkoutsCompleted);
+          const color = getCompletionColor(day.totalWorkoutsCompleted, day.totalWorkoutsAssigned);
           const hasWorkouts = day.totalWorkoutsCompleted > 0;
+          const isToday = day.date === todayDate;
+          const percentage = getCompletionPercentage(day.totalWorkoutsCompleted, day.totalWorkoutsAssigned);
 
           return (
             <TouchableOpacity
               key={day.date}
               style={[
                 styles.dayCard,
-                { backgroundColor: color },
-                !hasWorkouts && styles.dayCardEmpty,
+                isToday && styles.todayCard,
               ]}
             >
-              <Text style={styles.dayName}>{DAYS[index]}</Text>
+              <Text style={[styles.dayName, isToday && styles.todayDayName]}>
+                {DAYS[index]}
+              </Text>
 
               <View style={styles.circleContainer}>
                 <View
                   style={[
                     styles.circle,
                     {
-                      borderColor: hasWorkouts ? '#fff' : '#999',
+                      borderColor: color,
+                      borderWidth: 3,
+                      backgroundColor: color,
                     },
+                    isToday && styles.circleToday,
                   ]}
                 >
-                  <Text style={[styles.workoutCount, { color: hasWorkouts ? '#fff' : '#999' }]}>
-                    {day.totalWorkoutsCompleted}
+                  <Text style={[styles.percentage, { color: hasWorkouts ? '#fff' : '#999' }]}>
+                    {percentage}%
                   </Text>
                 </View>
               </View>
 
-              {hasWorkouts && (
-                <View style={styles.checkmarkContainer}>
-                  <MaterialCommunityIcons
-                    name="check-circle"
-                    size={16}
-                    color="#fff"
-                  />
-                </View>
-              )}
+              <View style={styles.workoutCountContainer}>
+                <MaterialCommunityIcons
+                  name="dumbbell"
+                  size={12}
+                  color="#666"
+                />
+                <Text style={styles.workoutCountText}>
+                  {day.totalWorkoutsCompleted}/{day.totalWorkoutsAssigned}
+                </Text>
+              </View>
             </TouchableOpacity>
           );
         })}
-      </View>
+      </ScrollView>
 
       {/* Legend */}
       <View style={styles.legendContainer}>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: '#4CAF50' }]} />
-          <Text style={styles.legendText}>3+ workouts</Text>
+          <Text style={styles.legendText}>100%</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: '#FFC107' }]} />
-          <Text style={styles.legendText}>2 workouts</Text>
+          <Text style={styles.legendText}>66-99%</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: '#FF9800' }]} />
-          <Text style={styles.legendText}>1 workout</Text>
+          <Text style={styles.legendText}>33-65%</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: '#e0e0e0' }]} />
-          <Text style={styles.legendText}>None</Text>
+          <Text style={styles.legendText}>0%</Text>
         </View>
       </View>
     </View>
@@ -99,55 +144,88 @@ const styles = StyleSheet.create({
     color: '#000',
     marginBottom: 12,
   },
-  weekGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 8,
-    marginBottom: 12,
+  scrollView: {
+    marginBottom: 16,
+  },
+  scrollContent: {
+    paddingRight: 16,
+    gap: 10,
   },
   dayCard: {
-    flex: 1,
+    width: 110,
     borderRadius: 10,
-    padding: 8,
+    padding: 12,
     alignItems: 'center',
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#e0e0e0',
-  },
-  dayCardEmpty: {
     backgroundColor: '#fff',
   },
+  dayCardEmpty: {
+    backgroundColor: '#f5f5f5',
+  },
+  todayCard: {
+    borderColor: '#4CAF50',
+    borderWidth: 3,
+    backgroundColor: '#f1f8f5',
+  },
   dayName: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 6,
+    marginBottom: 8,
+  },
+  todayDayName: {
+    color: '#4CAF50',
+    fontWeight: '700',
+  },
+  todayBadge: {
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  todayBadgeText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#fff',
   },
   circleContainer: {
-    marginBottom: 6,
+    marginBottom: 8,
   },
   circle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderWidth: 2,
+    borderWidth: 3,
   },
-  workoutCount: {
+  circleToday: {
+    borderColor: '#4CAF50',
+    backgroundColor: 'rgba(76, 175, 80, 0.2)',
+  },
+  percentage: {
     fontSize: 16,
     fontWeight: '700',
   },
-  checkmarkContainer: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
+  workoutCountContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    justifyContent: 'center',
+  },
+  workoutCountText: {
+    fontSize: 11,
+    color: '#666',
+    fontWeight: '600',
   },
   legendContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
     justifyContent: 'space-between',
+    marginTop: 8,
   },
   legendItem: {
     flexDirection: 'row',

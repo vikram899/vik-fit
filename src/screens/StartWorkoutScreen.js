@@ -58,6 +58,10 @@ export default function StartWorkoutScreen({ navigation, route }) {
   // Prevent double-clicking/rapid submissions
   const [isLoggingSet, setIsLoggingSet] = useState(false);
 
+  // Timing tracking
+  const [setStartTime, setSetStartTime] = useState(null);
+  const [restTimeUsed, setRestTimeUsed] = useState(0);
+
   // Horizontal scroll ref for exercise list
   const upcomingExercisesScrollRef = useRef(null);
 
@@ -67,47 +71,30 @@ export default function StartWorkoutScreen({ navigation, route }) {
       const loadData = async () => {
         try {
           setLoading(true);
-          console.log('=== STARTING WORKOUT LOAD ===');
-          console.log('planId:', planId);
 
           const planData = await getPlanById(planId);
-          console.log('Plan loaded:', planData);
           setPlan(planData);
 
           const exercisesData = await getExercisesByPlanId(planId);
-          console.log('Exercises loaded:', exercisesData.length, 'exercises');
           setExercises(exercisesData);
 
           // Check if active workout exists
-          console.log('Checking for active workout log...');
           const existingLog = await getActiveWorkoutLog(planId);
-          console.log('Existing log result:', existingLog);
 
           if (existingLog) {
-            console.log('Using existing log ID:', existingLog.id);
             setWorkoutLogId(existingLog.id);
           } else {
-            console.log('Creating new workout log...');
             const logId = await startWorkoutLog(planId);
-            console.log('New log ID:', logId);
             setWorkoutLogId(logId);
           }
 
           // Initialize first exercise
           if (exercisesData.length > 0) {
-            console.log('Initializing first exercise:', exercisesData[0]);
             initializeExercise(exercisesData[0]);
           }
-
-          console.log('=== LOAD COMPLETE ===');
         } catch (error) {
-          console.error('Error loading:', error);
-          console.error('Error details:', {
-            message: error.message,
-            code: error.code,
-            stack: error.stack,
-          });
-          Alert.alert('Error', 'Failed to load workout: ' + error.message);
+          console.error('Error loading workout:', error);
+          Alert.alert('Error', 'Failed to load workout');
         } finally {
           setLoading(false);
         }
@@ -123,6 +110,7 @@ export default function StartWorkoutScreen({ navigation, route }) {
     setRepsInput(exercise.reps?.toString() || '');
     setWeightInput(exercise.weight?.toString() || '');
     setCurrentExerciseSets([]);
+    setSetStartTime(new Date()); // Start timing for this set
   };
 
   // Workout elapsed time effect
@@ -213,15 +201,8 @@ export default function StartWorkoutScreen({ navigation, route }) {
     setIsLoggingSet(true);
 
     try {
-      // Debug logs
-      console.log('=== LOGGING SET ===');
-      console.log('workoutLogId:', workoutLogId);
-      console.log('currentExercise:', currentExercise?.name);
-      console.log('currentSetNumber:', currentSetNumber);
-
       // Validate workoutLogId first
       if (!workoutLogId) {
-        console.error('workoutLogId is null/undefined');
         Alert.alert('Error', 'Workout not initialized. Please try again.');
         return;
       }
@@ -239,24 +220,21 @@ export default function StartWorkoutScreen({ navigation, route }) {
         return;
       }
 
-      console.log('Calling logExerciseSet with:', {
-        workoutLogId,
-        exerciseId: currentExercise.id,
-        setNumber: currentSetNumber,
-        reps,
-        weight,
-      });
+      // Calculate set duration
+      const setDuration = setStartTime ? Math.floor((new Date() - setStartTime) / 1000) : 0;
 
-      // Save to database
+      // Save to database with timing
       await logExerciseSet(
         workoutLogId,
         currentExercise.id,
         currentSetNumber,
         reps,
-        weight
+        weight,
+        null,
+        '',
+        setDuration,
+        0 // rest time will be updated when rest completes
       );
-
-      console.log('Successfully logged set');
 
       // Add to current exercise sets
       setCurrentExerciseSets([
@@ -266,24 +244,22 @@ export default function StartWorkoutScreen({ navigation, route }) {
           set: currentSetNumber,
           reps,
           weight,
+          duration: setDuration,
         },
       ]);
 
-      // Start rest timer
+      // Start rest timer and reset set start time
       setIsResting(true);
       setRestTimeLeft(90);
+      setSetStartTime(null); // Reset for next set
+      setRestTimeUsed(0);
 
       // Clear inputs for next set
       setRepsInput(weight.toString());
       setWeightInput(weight.toString());
     } catch (error) {
       console.error('Error logging set:', error);
-      console.error('Error details:', {
-        message: error.message,
-        code: error.code,
-        stack: error.stack,
-      });
-      Alert.alert('Error', 'Failed to log set: ' + error.message);
+      Alert.alert('Error', 'Failed to log set');
     } finally {
       // Re-enable the button after operation completes
       setIsLoggingSet(false);
@@ -299,12 +275,14 @@ export default function StartWorkoutScreen({ navigation, route }) {
       setCurrentSetNumber(currentSetNumber + 1);
       setIsResting(false);
       setRestTimeLeft(90);
+      setSetStartTime(new Date()); // Start timing for next set
     } else if (currentExerciseIndex < exercises.length - 1) {
       // Move to next exercise
       setCurrentExerciseIndex(currentExerciseIndex + 1);
       setCurrentSetNumber(1);
       setIsResting(false);
       setRestTimeLeft(90);
+      setSetStartTime(new Date()); // Start timing for next exercise
       initializeExercise(exercises[currentExerciseIndex + 1]);
     } else {
       // Workout complete
@@ -345,12 +323,8 @@ export default function StartWorkoutScreen({ navigation, route }) {
       const duration = Math.floor((new Date() - workoutStartTime) / 1000);
       await completeWorkoutLog(workoutLogId, duration);
 
-      Alert.alert('Success', 'Workout completed!', [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack(),
-        },
-      ]);
+      // Navigate to summary screen instead of showing alert
+      navigation.navigate('WorkoutSummary', { workoutLogId });
     } catch (error) {
       console.error('Error completing:', error);
       Alert.alert('Error', 'Failed to complete workout');
@@ -469,7 +443,6 @@ export default function StartWorkoutScreen({ navigation, route }) {
                     returnKeyType="done"
                     blurOnSubmit={false}
                     onSubmitEditing={() => {
-                      console.log('onSubmitEditing called');
                       Keyboard.dismiss();
                       setTimeout(() => handleLogSet(), 100);
                     }}

@@ -21,8 +21,8 @@ export const getWeeklyWorkoutCompletions = async (planId, startDate) => {
 
     const result = await db.getFirstAsync(
       `SELECT COUNT(*) as completionCount
-       FROM plan_execution
-       WHERE planId = ? AND executionDate >= ? AND executionDate <= ? AND status = 'completed'`,
+       FROM workout_logs
+       WHERE planId = ? AND logDate >= ? AND logDate <= ? AND status = 'completed'`,
       [planId, startDate, endDate]
     );
 
@@ -44,10 +44,10 @@ export const getAllWorkoutsWithMetrics = async (startDate) => {
         p.name,
         p.description,
         COUNT(DISTINCT ps.dayOfWeek) as assignedDaysCount,
-        (SELECT COUNT(*) FROM plan_execution
+        (SELECT COUNT(*) FROM workout_logs
          WHERE planId = p.id
-         AND executionDate >= ?
-         AND executionDate <= ?
+         AND logDate >= ?
+         AND logDate <= ?
          AND status = 'completed') as completionCount
        FROM plans p
        LEFT JOIN plan_schedule ps ON p.id = ps.planId
@@ -140,9 +140,9 @@ export const getWeeklyWorkoutStats = async (startDate) => {
         COALESCE(SUM(exerciseCount), 0) as exercisesCompleted
        FROM (
         SELECT DISTINCT planId,
-          (SELECT COUNT(*) FROM exercises WHERE planId = plan_execution.planId) as exerciseCount
-        FROM plan_execution
-        WHERE executionDate >= ? AND executionDate <= ? AND status = 'completed'
+          (SELECT COUNT(*) FROM exercises WHERE planId = workout_logs.planId) as exerciseCount
+        FROM workout_logs
+        WHERE logDate >= ? AND logDate <= ? AND status = 'completed'
        )`,
       [startDate, endDate]
     );
@@ -170,6 +170,16 @@ export const getWeeklyWorkoutBreakdown = async (startDate) => {
       const currentDate = new Date(startDateObj);
       currentDate.setDate(currentDate.getDate() + i);
       const dateStr = currentDate.toISOString().split('T')[0];
+      const dayOfWeek = currentDate.getDay();
+
+      // Get all assigned workouts for this day of the week
+      const assignedWorkouts = await db.getAllAsync(
+        `SELECT DISTINCT p.id, p.name
+         FROM plans p
+         JOIN plan_schedule ps ON p.id = ps.planId
+         WHERE ps.dayOfWeek = ?`,
+        [dayOfWeek]
+      );
 
       // Get all completed workouts for this day
       const completedWorkouts = await db.getAllAsync(
@@ -177,10 +187,10 @@ export const getWeeklyWorkoutBreakdown = async (startDate) => {
           p.id,
           p.name,
           COUNT(e.id) as exerciseCount
-         FROM plan_execution pe
-         JOIN plans p ON pe.planId = p.id
+         FROM workout_logs wl
+         JOIN plans p ON wl.planId = p.id
          LEFT JOIN exercises e ON p.id = e.planId
-         WHERE pe.executionDate = ? AND pe.status = 'completed'
+         WHERE wl.logDate = ? AND wl.status = 'completed'
          GROUP BY p.id`,
         [dateStr]
       );
@@ -189,6 +199,8 @@ export const getWeeklyWorkoutBreakdown = async (startDate) => {
         date: dateStr,
         day: dayNames[i],
         dayNumber: i,
+        assignedWorkouts: assignedWorkouts || [],
+        totalWorkoutsAssigned: (assignedWorkouts || []).length,
         completedWorkouts: completedWorkouts || [],
         totalWorkoutsCompleted: (completedWorkouts || []).length,
       });

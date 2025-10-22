@@ -155,7 +155,7 @@ export default function MealsScreen({ navigation }) {
   const daysWithMeals = weeklyBreakdown.filter(
     day => day.totalCalories > 0
   ).length;
-  const consistencyBadge = daysWithMeals === 7 ? '✓ Complete' : `${daysWithMeals}/7 days`;
+  const consistencyBadge = daysWithMeals === 7 ? 'Complete' : `${daysWithMeals}/7 days`;
 
   // Check if week has any data
   const hasData = weeklyBreakdown.some(day => day.totalCalories > 0);
