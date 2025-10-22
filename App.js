@@ -1551,7 +1551,6 @@ function LogMealsScreen({ navigation, route }) {
                                     const totals = await getDailyTotals(today);
                                     setDailyTotals(totals);
 
-                                    setAddExistingMealModalVisible(false);
                                     Alert.alert("Success", `${meal.name} added to today's meals!`);
                                   });
                                 }
