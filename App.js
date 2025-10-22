@@ -1058,6 +1058,8 @@ function LogMealsScreen({ navigation, route }) {
 
   const [addMealModalVisible, setAddMealModalVisible] = React.useState(false);
   const [addExistingMealModalVisible, setAddExistingMealModalVisible] = React.useState(false);
+  const [existingMealEditMode, setExistingMealEditMode] = React.useState(false);
+  const [editingMealId, setEditingMealId] = React.useState(null);
   const [mealForm, setMealForm] = React.useState({
     name: "",
     calories: "",
@@ -1427,7 +1429,19 @@ function LogMealsScreen({ navigation, route }) {
             <View style={styles.modalOverlay}>
               <TouchableWithoutFeedback onPress={() => {}}>
                 <View style={styles.modalContent}>
-                  <Text style={styles.modalTitle}>Add Existing Meal</Text>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                    <Text style={styles.modalTitle}>Add Existing Meal</Text>
+                    <TouchableOpacity
+                      onPress={() => setExistingMealEditMode(!existingMealEditMode)}
+                      style={{ paddingHorizontal: 12, paddingVertical: 8 }}
+                    >
+                      <MaterialCommunityIcons
+                        name={existingMealEditMode ? "check" : "pencil"}
+                        size={24}
+                        color={existingMealEditMode ? "#34C759" : "#007AFF"}
+                      />
+                    </TouchableOpacity>
+                  </View>
 
                   <ScrollView style={{ maxHeight: 400, marginBottom: 20 }}>
                     {existingMeals.length === 0 ? (
@@ -1436,48 +1450,145 @@ function LogMealsScreen({ navigation, route }) {
                       </Text>
                     ) : (
                       existingMeals.map((meal) => (
-                        <TouchableOpacity
-                          key={meal.id}
-                          onPress={async () => {
-                            await logMeal(
-                              meal.id,
-                              today,
-                              meal.calories || 0,
-                              meal.protein || 0,
-                              meal.carbs || 0,
-                              meal.fats || 0
-                            );
+                        <View key={meal.id} style={{ borderBottomWidth: 1, borderBottomColor: "#f0f0f0" }}>
+                          {existingMealEditMode && editingMealId === meal.id ? (
+                            <View style={{ paddingVertical: 12, paddingHorizontal: 16 }}>
+                              <TextInput
+                                style={[styles.input, { marginBottom: 10 }]}
+                                placeholder="Meal Name"
+                                value={mealForm.name}
+                                onChangeText={(value) => setMealForm({ ...mealForm, name: value })}
+                              />
+                              <View style={{ flexDirection: "row", gap: 10, marginBottom: 10 }}>
+                                <TextInput
+                                  style={[styles.input, { flex: 1 }]}
+                                  placeholder="Calories"
+                                  value={mealForm.calories}
+                                  onChangeText={(value) => setMealForm({ ...mealForm, calories: value })}
+                                  keyboardType="decimal-pad"
+                                />
+                                <TextInput
+                                  style={[styles.input, { flex: 1 }]}
+                                  placeholder="Protein (g)"
+                                  value={mealForm.protein}
+                                  onChangeText={(value) => setMealForm({ ...mealForm, protein: value })}
+                                  keyboardType="decimal-pad"
+                                />
+                              </View>
+                              <View style={{ flexDirection: "row", gap: 10, marginBottom: 10 }}>
+                                <TextInput
+                                  style={[styles.input, { flex: 1 }]}
+                                  placeholder="Carbs (g)"
+                                  value={mealForm.carbs}
+                                  onChangeText={(value) => setMealForm({ ...mealForm, carbs: value })}
+                                  keyboardType="decimal-pad"
+                                />
+                                <TextInput
+                                  style={[styles.input, { flex: 1 }]}
+                                  placeholder="Fats (g)"
+                                  value={mealForm.fats}
+                                  onChangeText={(value) => setMealForm({ ...mealForm, fats: value })}
+                                  keyboardType="decimal-pad"
+                                />
+                              </View>
+                              <View style={{ flexDirection: "row", gap: 10 }}>
+                                <TouchableOpacity
+                                  style={[styles.button, { flex: 1 }]}
+                                  onPress={async () => {
+                                    await updateMeal(
+                                      meal.id,
+                                      mealForm.name || meal.name,
+                                      "General",
+                                      parseFloat(mealForm.calories) || meal.calories,
+                                      parseFloat(mealForm.protein) || meal.protein,
+                                      parseFloat(mealForm.carbs) || meal.carbs,
+                                      parseFloat(mealForm.fats) || meal.fats
+                                    );
+                                    const meals = await getAllMeals();
+                                    setExistingMeals(meals);
+                                    setEditingMealId(null);
+                                    setMealForm({ name: "", calories: "", protein: "", carbs: "", fats: "" });
+                                    Alert.alert("Success", "Meal updated!");
+                                  }}
+                                >
+                                  <Text style={styles.buttonText}>Save</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  style={[styles.button, styles.cancelButton, { flex: 1 }]}
+                                  onPress={() => {
+                                    setEditingMealId(null);
+                                    setMealForm({ name: "", calories: "", protein: "", carbs: "", fats: "" });
+                                  }}
+                                >
+                                  <Text style={styles.buttonText}>Cancel</Text>
+                                </TouchableOpacity>
+                              </View>
+                            </View>
+                          ) : (
+                            <TouchableOpacity
+                              onPress={() => {
+                                if (existingMealEditMode) {
+                                  setEditingMealId(meal.id);
+                                  setMealForm({
+                                    name: meal.name,
+                                    calories: meal.calories.toString(),
+                                    protein: meal.protein.toString(),
+                                    carbs: meal.carbs.toString(),
+                                    fats: meal.fats.toString(),
+                                  });
+                                } else {
+                                  logMeal(
+                                    meal.id,
+                                    today,
+                                    meal.calories || 0,
+                                    meal.protein || 0,
+                                    meal.carbs || 0,
+                                    meal.fats || 0
+                                  ).then(async () => {
+                                    const meals = await getMealLogsForDate(today);
+                                    setTodaysMeals(meals || []);
 
-                            const meals = await getMealLogsForDate(today);
-                            setTodaysMeals(meals || []);
+                                    const totals = await getDailyTotals(today);
+                                    setDailyTotals(totals);
 
-                            const totals = await getDailyTotals(today);
-                            setDailyTotals(totals);
-
-                            setAddExistingMealModalVisible(false);
-                            Alert.alert("Success", `${meal.name} added to today's meals!`);
-                          }}
-                          style={{
-                            paddingVertical: 12,
-                            paddingHorizontal: 16,
-                            borderBottomWidth: 1,
-                            borderBottomColor: "#f0f0f0",
-                          }}
-                        >
-                          <Text style={{ fontSize: 16, fontWeight: "600", color: "#000", marginBottom: 4 }}>
-                            {meal.name}
-                          </Text>
-                          <Text style={{ fontSize: 13, color: "#666" }}>
-                            {Math.round(meal.calories)} cal • {Math.round(meal.protein)}g protein
-                          </Text>
-                        </TouchableOpacity>
+                                    setAddExistingMealModalVisible(false);
+                                    Alert.alert("Success", `${meal.name} added to today's meals!`);
+                                  });
+                                }
+                              }}
+                              style={{ paddingVertical: 12, paddingHorizontal: 16 }}
+                            >
+                              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                                <View style={{ flex: 1 }}>
+                                  <Text style={{ fontSize: 16, fontWeight: "600", color: "#000", marginBottom: 4 }}>
+                                    {meal.name}
+                                  </Text>
+                                  <Text style={{ fontSize: 13, color: "#666" }}>
+                                    {Math.round(meal.calories)} cal • {Math.round(meal.protein)}g protein
+                                  </Text>
+                                </View>
+                                <MaterialCommunityIcons
+                                  name={existingMealEditMode ? "pencil" : "plus"}
+                                  size={24}
+                                  color={existingMealEditMode ? "#007AFF" : "#34C759"}
+                                  style={{ marginLeft: 12 }}
+                                />
+                              </View>
+                            </TouchableOpacity>
+                          )}
+                        </View>
                       ))
                     )}
                   </ScrollView>
 
                   <TouchableOpacity
                     style={[styles.button, styles.cancelButton]}
-                    onPress={() => setAddExistingMealModalVisible(false)}
+                    onPress={() => {
+                      setAddExistingMealModalVisible(false);
+                      setExistingMealEditMode(false);
+                      setEditingMealId(null);
+                      setMealForm({ name: "", calories: "", protein: "", carbs: "", fats: "" });
+                    }}
                   >
                     <Text style={styles.buttonText}>Close</Text>
                   </TouchableOpacity>
