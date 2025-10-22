@@ -1102,11 +1102,68 @@ function WorkoutsStackNavigator() {
   );
 }
 
-function ProfileScreen() {
+function ProgressStackNavigator() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: true,
+        headerBackTitleVisible: false,
+        headerTintColor: "#007AFF",
+      }}
+    >
+      <Stack.Screen
+        name="ProgressHome"
+        component={ProgressScreen}
+        options={{
+          title: "Progress",
+        }}
+      />
+      <Stack.Screen
+        name="WorkoutProgress"
+        component={WorkoutsStackNavigator}
+        options={{
+          title: "Workout Progress",
+        }}
+      />
+      <Stack.Screen
+        name="MealProgress"
+        component={MealsScreen}
+        options={{
+          title: "Meal Progress",
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+/**
+ * ProgressScreen
+ * Main screen to select between workout and meal progress
+ */
+function ProgressScreen({ navigation }) {
   return (
     <View style={styles.screenContainer}>
-      <Text style={styles.title}>Profile</Text>
-      <Text style={styles.subtitle}>Your profile information</Text>
+      <View style={styles.progressSelectContainer}>
+        <TouchableOpacity
+          style={styles.progressButton}
+          onPress={() => navigation.navigate("WorkoutProgress")}
+        >
+          <MaterialCommunityIcons name="dumbbell" size={40} color="#007AFF" />
+          <Text style={styles.progressButtonText}>Workout Progress</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.progressButton}
+          onPress={() => navigation.navigate("MealProgress")}
+        >
+          <MaterialCommunityIcons
+            name="silverware-fork-knife"
+            size={40}
+            color="#007AFF"
+          />
+          <Text style={styles.progressButtonText}>Meal Progress</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -1116,9 +1173,6 @@ function ProfileScreen() {
  * Main entry point with Bottom Tab Navigation
  */
 export default function App() {
-  const [fabModalVisible, setFabModalVisible] = React.useState(false);
-  const [fabNavigation, setFabNavigation] = React.useState(null);
-
   // Initialize database on app start
   React.useEffect(() => {
     const initDB = async () => {
@@ -1135,11 +1189,7 @@ export default function App() {
         backgroundColor="#fff"
         translucent={false}
       />
-      <NavigationContainer
-        ref={(navigationRef) => {
-          setFabNavigation(navigationRef);
-        }}
-      >
+      <NavigationContainer>
         <Tab.Navigator
           screenOptions={({ route }) => ({
             tabBarIcon: ({ focused, color, size }) => {
@@ -1148,22 +1198,12 @@ export default function App() {
                 iconName = focused ? "home" : "home-outline";
               } else if (route.name === "Workouts") {
                 iconName = focused ? "dumbbell" : "dumbbell";
-              } else if (route.name === "AddAction") {
-                return (
-                  <View style={fabStyles.tabBarIconContainer}>
-                    <MaterialCommunityIcons
-                      name="menu"
-                      size={28}
-                      color="#fff"
-                    />
-                  </View>
-                );
               } else if (route.name === "Meals") {
                 iconName = focused
                   ? "silverware-fork-knife"
                   : "silverware-fork-knife";
-              } else if (route.name === "Profile") {
-                iconName = focused ? "account" : "account-outline";
+              } else if (route.name === "Progress") {
+                iconName = focused ? "chart-line" : "chart-line";
               }
               return (
                 <MaterialCommunityIcons
@@ -1197,42 +1237,9 @@ export default function App() {
           />
           <Tab.Screen
             name="Workouts"
-            component={WorkoutsStackNavigator}
-            options={{
-              tabBarLabel: "Workouts",
-              headerShown: false,
-            }}
-          />
-          <Tab.Screen
-            name="AddAction"
-            component={() => null}
-            listeners={({ navigation }) => ({
-              tabPress: (e) => {
-                e.preventDefault();
-                setFabModalVisible(true);
-              },
-            })}
-            options={{
-              tabBarLabel: "",
-              headerShown: false,
-            }}
-          />
-          <Tab.Screen
-            name="Meals"
-            component={MealsScreen}
-            options={{ tabBarLabel: "Meals" }}
-          />
-          <Tab.Screen
-            name="Profile"
-            component={ProfileScreen}
-            options={{ tabBarLabel: "Profile" }}
-          />
-          <Tab.Screen
-            name="AddWorkout"
             component={AddWorkoutScreen}
             options={({ navigation }) => ({
-              tabBarLabel: "Add Workout",
-              tabBarButton: () => null,
+              tabBarLabel: "Workouts",
               headerShown: true,
               title: "Workouts",
               headerRight: () => (
@@ -1250,17 +1257,15 @@ export default function App() {
             })}
           />
           <Tab.Screen
-            name="AddMeal"
+            name="Meals"
             component={AddMealScreen}
             options={({ navigation }) => ({
-              tabBarLabel: "Add Meal",
-              tabBarButton: () => null,
+              tabBarLabel: "Meals",
               headerShown: true,
               title: "Meals",
               headerRight: () => (
                 <TouchableOpacity
                   onPress={() => {
-                    // Trigger modal in AddMealScreen by resetting navigation to itself with params
                     navigation.setParams({ openAddModal: true });
                   }}
                   style={{ paddingRight: 16 }}
@@ -1274,55 +1279,16 @@ export default function App() {
               ),
             })}
           />
+          <Tab.Screen
+            name="Progress"
+            component={ProgressStackNavigator}
+            options={{
+              tabBarLabel: "Progress",
+              headerShown: false,
+            }}
+          />
         </Tab.Navigator>
 
-        {/* FAB Modal */}
-        <Modal
-          visible={fabModalVisible}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setFabModalVisible(false)}
-        >
-          <TouchableWithoutFeedback onPress={() => setFabModalVisible(false)}>
-            <View style={fabStyles.modalOverlay}>
-              <View style={fabStyles.modalContent}>
-                <TouchableOpacity
-                  style={fabStyles.modalOption}
-                  onPress={() => {
-                    setFabModalVisible(false);
-                    if (fabNavigation) {
-                      fabNavigation.navigate("AddWorkout");
-                    }
-                  }}
-                >
-                  <MaterialCommunityIcons
-                    name="dumbbell"
-                    size={28}
-                    color={COLORS.primary}
-                  />
-                  <Text style={fabStyles.modalOptionText}>Manage Workouts</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={fabStyles.modalOption}
-                  onPress={() => {
-                    setFabModalVisible(false);
-                    if (fabNavigation) {
-                      fabNavigation.navigate("AddMeal");
-                    }
-                  }}
-                >
-                  <MaterialCommunityIcons
-                    name="silverware-fork-knife"
-                    size={28}
-                    color={COLORS.primary}
-                  />
-                  <Text style={fabStyles.modalOptionText}>Manage Meals</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
       </NavigationContainer>
     </SafeAreaProvider>
   );
@@ -1998,6 +1964,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     color: "#666",
+  },
+  progressSelectContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 20,
+    paddingHorizontal: 16,
+  },
+  progressButton: {
+    width: "100%",
+    backgroundColor: "#f9f9f9",
+    borderRadius: 16,
+    padding: 30,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#e0e0e0",
+    gap: 12,
+  },
+  progressButtonText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
   },
 });
 
