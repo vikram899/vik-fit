@@ -175,7 +175,15 @@ function HomeScreen({ navigation }) {
 
         {/* Today's Summary Card */}
         <View style={styles.summaryCard}>
-          <Text style={styles.summaryTitle}>Today's Summary</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <Text style={styles.summaryTitle}>Today's Summary</Text>
+            <TouchableOpacity
+              style={[styles.button, { paddingVertical: 6, paddingHorizontal: 12, justifyContent: 'center', alignItems: 'center', height: 28 }]}
+              onPress={() => navigation.navigate("LogMeals")}
+            >
+              <Text style={[styles.buttonText, { fontSize: 12, lineHeight: 12 }]}>+ Log</Text>
+            </TouchableOpacity>
+          </View>
           <View style={styles.summaryContent}>
             <View style={styles.summaryItem}>
               <View
@@ -303,7 +311,15 @@ function HomeScreen({ navigation }) {
         {/* Today's Workouts Section */}
         {todayWorkouts.length > 0 && (
           <View style={styles.workoutsSection}>
-            <Text style={styles.workoutsSectionTitle}>Today's Workouts</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <Text style={styles.workoutsSectionTitle}>Today's Workouts</Text>
+              <TouchableOpacity
+                style={[styles.button, { paddingVertical: 6, paddingHorizontal: 12, justifyContent: 'center', alignItems: 'center', height: 28 }]}
+                onPress={() => navigation.navigate("LogWorkout")}
+              >
+                <Text style={[styles.buttonText, { fontSize: 12, lineHeight: 12 }]}>+ Log</Text>
+              </TouchableOpacity>
+            </View>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -358,29 +374,6 @@ function HomeScreen({ navigation }) {
             </ScrollView>
           </View>
         )}
-
-        {/* Action Buttons */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate("LogWorkout")}
-          >
-            <MaterialCommunityIcons name="dumbbell" size={24} color="#fff" />
-            <Text style={styles.buttonText}>Log Workout</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate("LogMeals")}
-          >
-            <MaterialCommunityIcons
-              name="silverware-fork-knife"
-              size={24}
-              color="#fff"
-            />
-            <Text style={styles.buttonText}>Log Meals</Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
     </View>
   );
@@ -1785,11 +1778,11 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     backgroundColor: "#fff",
-    marginVertical: 16,
+    marginVertical: 12,
     marginHorizontal: 16,
     paddingHorizontal: 16,
-    paddingVertical: 20,
-    borderRadius: 16,
+    paddingVertical: 14,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: "#e8e8e8",
     shadowColor: "#000",
@@ -1802,15 +1795,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#fafafa",
   },
   summaryTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "700",
     color: "#000",
-    marginBottom: 18,
+    marginBottom: 0,
   },
   summaryContent: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginBottom: 20,
+    marginBottom: 0,
+    marginTop: 12,
     justifyContent: "space-between",
     gap: 12,
   },
@@ -1901,19 +1895,19 @@ const styles = StyleSheet.create({
   },
   workoutsSection: {
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingVertical: 12,
     marginVertical: 12,
     backgroundColor: "#fff",
-    borderRadius: 16,
+    borderRadius: 12,
     marginHorizontal: 16,
     borderWidth: 1,
     borderColor: "#e8e8e8",
   },
   workoutsSectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "700",
     color: "#000",
-    marginBottom: 14,
+    marginBottom: 0,
   },
   workoutsScrollView: {
     marginHorizontal: -16,
@@ -1922,6 +1916,7 @@ const styles = StyleSheet.create({
   workoutsScrollContent: {
     gap: 12,
     paddingRight: 16,
+    marginTop: 12,
   },
   workoutCard: {
     width: 160,
