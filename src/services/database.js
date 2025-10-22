@@ -47,6 +47,48 @@ export const initializeDatabase = async () => {
       console.log('✅ Time column already exists');
     }
 
+    // Create meals table if it doesn't exist
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS meals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        category TEXT,
+        calories REAL,
+        protein REAL,
+        carbs REAL,
+        fats REAL,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Create meal_logs table if it doesn't exist
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS meal_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        mealId INTEGER NOT NULL,
+        mealDate TEXT NOT NULL,
+        calories REAL,
+        protein REAL,
+        carbs REAL,
+        fats REAL,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (mealId) REFERENCES meals(id) ON DELETE CASCADE
+      );
+    `);
+
+    // Create macro_goals table if it doesn't exist
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS macro_goals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        goalDate TEXT UNIQUE,
+        calorieGoal REAL,
+        proteinGoal REAL,
+        carbsGoal REAL,
+        fatsGoal REAL,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     console.log('✅ Database initialized successfully');
   } catch (error) {
     console.error('❌ Error initializing database:', error);
@@ -268,6 +310,215 @@ export const seedDummyData = async () => {
     console.log('✅ Dummy data seeded successfully!');
   } catch (error) {
     console.error('❌ Error seeding dummy data:', error);
+    throw error;
+  }
+};
+
+/**
+ * Add a new meal template
+ */
+export const addMeal = async (name, category, calories = 0, protein = 0, carbs = 0, fats = 0) => {
+  try {
+    await db.runAsync(
+      'INSERT INTO meals (name, category, calories, protein, carbs, fats) VALUES (?, ?, ?, ?, ?, ?)',
+      [name, category, calories, protein, carbs, fats]
+    );
+
+    const lastMeal = await db.getFirstAsync(
+      'SELECT id FROM meals ORDER BY id DESC LIMIT 1'
+    );
+
+    return lastMeal?.id;
+  } catch (error) {
+    console.error('Error adding meal:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get all meals (templates)
+ */
+export const getAllMeals = async () => {
+  try {
+    const result = await db.getAllAsync('SELECT * FROM meals ORDER BY category ASC, name ASC');
+    return result || [];
+  } catch (error) {
+    console.error('Error getting meals:', error);
+    return [];
+  }
+};
+
+/**
+ * Get meals by category
+ */
+export const getMealsByCategory = async (category) => {
+  try {
+    const result = await db.getAllAsync(
+      'SELECT * FROM meals WHERE category = ? ORDER BY name ASC',
+      [category]
+    );
+    return result || [];
+  } catch (error) {
+    console.error('Error getting meals by category:', error);
+    return [];
+  }
+};
+
+/**
+ * Search meals by name
+ */
+export const searchMeals = async (searchText) => {
+  try {
+    const result = await db.getAllAsync(
+      'SELECT * FROM meals WHERE name LIKE ? ORDER BY category ASC, name ASC',
+      [`%${searchText}%`]
+    );
+    return result || [];
+  } catch (error) {
+    console.error('Error searching meals:', error);
+    return [];
+  }
+};
+
+/**
+ * Delete a meal
+ */
+export const deleteMeal = async (mealId) => {
+  try {
+    await db.runAsync('DELETE FROM meals WHERE id = ?', [mealId]);
+  } catch (error) {
+    console.error('Error deleting meal:', error);
+    throw error;
+  }
+};
+
+/**
+ * Log a meal for a specific date
+ */
+export const logMeal = async (mealId, mealDate, calories, protein, carbs, fats) => {
+  try {
+    await db.runAsync(
+      'INSERT INTO meal_logs (mealId, mealDate, calories, protein, carbs, fats) VALUES (?, ?, ?, ?, ?, ?)',
+      [mealId, mealDate, calories, protein, carbs, fats]
+    );
+
+    const lastLog = await db.getFirstAsync(
+      'SELECT id FROM meal_logs ORDER BY id DESC LIMIT 1'
+    );
+
+    return lastLog?.id;
+  } catch (error) {
+    console.error('Error logging meal:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get all meal logs for a specific date
+ */
+export const getMealLogsForDate = async (mealDate) => {
+  try {
+    const result = await db.getAllAsync(
+      'SELECT ml.*, m.name FROM meal_logs ml LEFT JOIN meals m ON ml.mealId = m.id WHERE ml.mealDate = ? ORDER BY ml.createdAt DESC',
+      [mealDate]
+    );
+    return result || [];
+  } catch (error) {
+    console.error('Error getting meal logs:', error);
+    return [];
+  }
+};
+
+/**
+ * Get daily totals for a specific date
+ */
+export const getDailyTotals = async (mealDate) => {
+  try {
+    const result = await db.getFirstAsync(
+      'SELECT SUM(calories) as totalCalories, SUM(protein) as totalProtein, SUM(carbs) as totalCarbs, SUM(fats) as totalFats FROM meal_logs WHERE mealDate = ?',
+      [mealDate]
+    );
+    return {
+      totalCalories: result?.totalCalories || 0,
+      totalProtein: result?.totalProtein || 0,
+      totalCarbs: result?.totalCarbs || 0,
+      totalFats: result?.totalFats || 0,
+    };
+  } catch (error) {
+    console.error('Error getting daily totals:', error);
+    return { totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFats: 0 };
+  }
+};
+
+/**
+ * Update a meal log
+ */
+export const updateMealLog = async (mealLogId, calories, protein, carbs, fats) => {
+  try {
+    await db.runAsync(
+      'UPDATE meal_logs SET calories = ?, protein = ?, carbs = ?, fats = ? WHERE id = ?',
+      [calories, protein, carbs, fats, mealLogId]
+    );
+  } catch (error) {
+    console.error('Error updating meal log:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a meal log
+ */
+export const deleteMealLog = async (mealLogId) => {
+  try {
+    await db.runAsync('DELETE FROM meal_logs WHERE id = ?', [mealLogId]);
+  } catch (error) {
+    console.error('Error deleting meal log:', error);
+    throw error;
+  }
+};
+
+/**
+ * Set macro goals for a date
+ */
+export const setMacroGoals = async (goalDate, calorieGoal, proteinGoal, carbsGoal, fatsGoal) => {
+  try {
+    await db.runAsync(
+      'INSERT OR REPLACE INTO macro_goals (goalDate, calorieGoal, proteinGoal, carbsGoal, fatsGoal) VALUES (?, ?, ?, ?, ?)',
+      [goalDate, calorieGoal, proteinGoal, carbsGoal, fatsGoal]
+    );
+  } catch (error) {
+    console.error('Error setting macro goals:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get macro goals for a date
+ */
+export const getMacroGoals = async (goalDate) => {
+  try {
+    const result = await db.getFirstAsync(
+      'SELECT * FROM macro_goals WHERE goalDate = ?',
+      [goalDate]
+    );
+    return result;
+  } catch (error) {
+    console.error('Error getting macro goals:', error);
+    return null;
+  }
+};
+
+/**
+ * Update a meal template
+ */
+export const updateMeal = async (mealId, name, category, calories = 0, protein = 0, carbs = 0, fats = 0) => {
+  try {
+    await db.runAsync(
+      'UPDATE meals SET name = ?, category = ?, calories = ?, protein = ?, carbs = ?, fats = ? WHERE id = ?',
+      [name, category, calories, protein, carbs, fats, mealId]
+    );
+  } catch (error) {
+    console.error('Error updating meal:', error);
     throw error;
   }
 };

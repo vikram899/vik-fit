@@ -19,12 +19,13 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, useFocusEffect } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Toast from "./src/components/Toast";
 import ExerciseCard from "./src/components/ExerciseCard";
+import ProgressBadges from "./src/components/ProgressBadges";
 import {
   initializeDatabase,
   seedDummyData,
@@ -36,18 +37,177 @@ import {
   addExercise,
   deleteExercise,
   updateExercise,
+  addMeal,
+  getAllMeals,
+  searchMeals,
+  logMeal,
+  getMealLogsForDate,
+  getDailyTotals,
+  updateMealLog,
+  deleteMealLog,
+  getMacroGoals,
+  setMacroGoals,
+  updateMeal,
 } from "./src/services/database";
+import MealCard from "./src/components/MealCard";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 // Screen Components
 function HomeScreen({ navigation }) {
-  return (
-    <View style={styles.screenContainer}>
-      <Text style={styles.title}>Home</Text>
-      <Text style={styles.subtitle}>Welcome to VikFit</Text>
+  const insets = useSafeAreaInsets();
+  const today = new Date().toISOString().split("T")[0];
 
+  const [dailyTotals, setDailyTotals] = React.useState({
+    totalCalories: 0,
+    totalProtein: 0,
+    totalCarbs: 0,
+    totalFats: 0,
+  });
+  const [macroGoals, setMacroGoalsState] = React.useState(null);
+
+  // Load today's meal data
+  React.useEffect(() => {
+    const loadTodayData = async () => {
+      try {
+        const totals = await getDailyTotals(today);
+        setDailyTotals(totals);
+
+        const goals = await getMacroGoals(today);
+        setMacroGoalsState(goals);
+      } catch (error) {
+        console.error("Error loading today's data:", error);
+      }
+    };
+
+    loadTodayData();
+  }, []);
+
+  // Reload data when screen is focused
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", async () => {
+      try {
+        const totals = await getDailyTotals(today);
+        setDailyTotals(totals);
+
+        const goals = await getMacroGoals(today);
+        setMacroGoalsState(goals);
+      } catch (error) {
+        console.error("Error loading today's data:", error);
+      }
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+  return (
+    <View
+      style={[
+        styles.screenContainer,
+        { justifyContent: "flex-start", paddingTop: 0 },
+      ]}
+    >
+      <View style={[styles.headerWithButton, { paddingTop: insets.top + 16 }]}>
+        <Text style={styles.title}>Home</Text>
+        <Text style={styles.subtitle}>Welcome to VikFit</Text>
+      </View>
+
+      {/* Today's Summary Card */}
+      <View style={styles.summaryCard}>
+        <Text style={styles.summaryTitle}>Today's Summary</Text>
+        <View style={styles.summaryContent}>
+          <View style={styles.summaryItem}>
+            <MaterialCommunityIcons
+              name="silverware-fork-knife"
+              size={24}
+              color="#007AFF"
+            />
+            <View style={{ marginLeft: 12, flex: 1 }}>
+              <Text style={styles.summaryLabel}>Calories</Text>
+              <Text style={styles.summaryValue}>
+                {Math.round(dailyTotals.totalCalories)}
+              </Text>
+              {macroGoals && (
+                <Text style={styles.summaryGoal}>
+                  Goal: {macroGoals.calorieGoal}
+                </Text>
+              )}
+            </View>
+          </View>
+          <View style={styles.divider} />
+          <View style={styles.summaryItem}>
+            <MaterialCommunityIcons name="flash" size={24} color="#FF9800" />
+            <View style={{ marginLeft: 12, flex: 1 }}>
+              <Text style={styles.summaryLabel}>Protein</Text>
+              <Text style={styles.summaryValue}>
+                {Math.round(dailyTotals.totalProtein)}g
+              </Text>
+              {macroGoals && (
+                <Text style={styles.summaryGoal}>
+                  Goal: {macroGoals.proteinGoal}g
+                </Text>
+              )}
+            </View>
+          </View>
+        </View>
+
+        {/* Progress Bars */}
+        {macroGoals && (
+          <View style={styles.progressContainer}>
+            <View style={styles.progressItem}>
+              <Text style={styles.progressLabel}>Protein Progress</Text>
+              <View style={styles.progressBarContainer}>
+                <View
+                  style={[
+                    styles.progressBar,
+                    {
+                      width: `${Math.min(
+                        (dailyTotals.totalProtein / macroGoals.proteinGoal) *
+                          100,
+                        100
+                      )}%`,
+                      backgroundColor: "#FF9800",
+                    },
+                  ]}
+                />
+              </View>
+              <Text style={styles.progressText}>
+                {Math.round(
+                  (dailyTotals.totalProtein / macroGoals.proteinGoal) * 100
+                )}
+                %
+              </Text>
+            </View>
+
+            <View style={styles.progressItem}>
+              <Text style={styles.progressLabel}>Calorie Progress</Text>
+              <View style={styles.progressBarContainer}>
+                <View
+                  style={[
+                    styles.progressBar,
+                    {
+                      width: `${Math.min(
+                        (dailyTotals.totalCalories / macroGoals.calorieGoal) *
+                          100,
+                        100
+                      )}%`,
+                      backgroundColor: "#007AFF",
+                    },
+                  ]}
+                />
+              </View>
+              <Text style={styles.progressText}>
+                {Math.round(
+                  (dailyTotals.totalCalories / macroGoals.calorieGoal) * 100
+                )}
+                %
+              </Text>
+            </View>
+          </View>
+        )}
+      </View>
+
+      {/* Action Buttons */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.button}
@@ -115,7 +275,6 @@ function LogWorkoutScreen({ navigation, route }) {
     });
     return unsubscribe;
   }, [navigation]);
-
 
   return (
     <View
@@ -599,9 +758,7 @@ function ExecuteWorkoutScreen({ navigation, route }) {
           onPress: async () => {
             try {
               await deleteExercise(exerciseId);
-              setExercises(
-                exercises.filter((ex) => ex.id !== exerciseId)
-              );
+              setExercises(exercises.filter((ex) => ex.id !== exerciseId));
             } catch (error) {
               Alert.alert("Error", "Failed to delete exercise");
             }
@@ -673,7 +830,9 @@ function ExecuteWorkoutScreen({ navigation, route }) {
       <View style={styles.compactHeader}>
         <View style={{ flex: 1 }}>
           <Text style={styles.compactTitle}>{planName}</Text>
-          <Text style={styles.compactSubtitle}>{exercises.length} exercises</Text>
+          <Text style={styles.compactSubtitle}>
+            {exercises.length} exercises
+          </Text>
         </View>
         {isEditMode && (
           <TouchableOpacity
@@ -685,7 +844,11 @@ function ExecuteWorkoutScreen({ navigation, route }) {
         )}
         {!isEditMode && (
           <TouchableOpacity onPress={openKebabMenu} style={styles.kebabButton}>
-            <MaterialCommunityIcons name="dots-vertical" size={24} color="#000" />
+            <MaterialCommunityIcons
+              name="dots-vertical"
+              size={24}
+              color="#000"
+            />
           </TouchableOpacity>
         )}
       </View>
@@ -706,9 +869,7 @@ function ExecuteWorkoutScreen({ navigation, route }) {
               exercise={exercise}
               showDeleteButton={isEditMode}
               showEditButton={isEditMode}
-              onDelete={() =>
-                handleDeleteExercise(exercise.id, exercise.name)
-              }
+              onDelete={() => handleDeleteExercise(exercise.id, exercise.name)}
               onEdit={() => handleEditExercise(exercise)}
             />
           ))
@@ -731,7 +892,11 @@ function ExecuteWorkoutScreen({ navigation, route }) {
                   style={styles.menuItem}
                   onPress={handleEnableEditMode}
                 >
-                  <MaterialCommunityIcons name="pencil" size={20} color="#007AFF" />
+                  <MaterialCommunityIcons
+                    name="pencil"
+                    size={20}
+                    color="#007AFF"
+                  />
                   <Text style={styles.menuItemText}>Edit Exercises</Text>
                 </TouchableOpacity>
 
@@ -742,15 +907,23 @@ function ExecuteWorkoutScreen({ navigation, route }) {
                     handleDeletePlan();
                   }}
                 >
-                  <MaterialCommunityIcons name="trash-can" size={20} color="#FF3B30" />
-                  <Text style={[styles.menuItemText, { color: '#FF3B30' }]}>Delete Plan</Text>
+                  <MaterialCommunityIcons
+                    name="trash-can"
+                    size={20}
+                    color="#FF3B30"
+                  />
+                  <Text style={[styles.menuItemText, { color: "#FF3B30" }]}>
+                    Delete Plan
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={[styles.menuItem, styles.menuItemLast]}
                   onPress={() => setMenuVisible(false)}
                 >
-                  <Text style={[styles.menuItemText, { color: '#666' }]}>Cancel</Text>
+                  <Text style={[styles.menuItemText, { color: "#666" }]}>
+                    Cancel
+                  </Text>
                 </TouchableOpacity>
               </View>
             </TouchableWithoutFeedback>
@@ -879,18 +1052,439 @@ function ExecuteWorkoutScreen({ navigation, route }) {
   );
 }
 
-function LogMealsScreen({ navigation }) {
-  return (
-    <View style={styles.screenContainer}>
-      <Text style={styles.title}>Log Meals</Text>
-      <Text style={styles.subtitle}>Record your meals here</Text>
+function LogMealsScreen({ navigation, route }) {
+  const insets = useSafeAreaInsets();
+  const today = new Date().toISOString().split("T")[0];
 
-      <TouchableOpacity
-        style={[styles.button, { marginTop: 30 }]}
-        onPress={() => navigation.goBack()}
+  const [addMealModalVisible, setAddMealModalVisible] = React.useState(false);
+  const [addExistingMealModalVisible, setAddExistingMealModalVisible] = React.useState(false);
+  const [mealForm, setMealForm] = React.useState({
+    name: "",
+    calories: "",
+    protein: "",
+    carbs: "",
+    fats: "",
+  });
+  const [existingMeals, setExistingMeals] = React.useState([]);
+  const [todaysMeals, setTodaysMeals] = React.useState([]);
+  const [dailyTotals, setDailyTotals] = React.useState({
+    totalCalories: 0,
+    totalProtein: 0,
+    totalCarbs: 0,
+    totalFats: 0,
+  });
+
+  // Fetch today's meals and totals when screen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchTodaysMeals = async () => {
+        try {
+          const meals = await getMealLogsForDate(today);
+          console.log("Fetched meals:", meals);
+          setTodaysMeals(meals || []);
+
+          const totals = await getDailyTotals(today);
+          console.log("Fetched totals:", totals);
+          setDailyTotals(totals);
+        } catch (error) {
+          console.error("Error fetching meals:", error);
+        }
+      };
+
+      fetchTodaysMeals();
+    }, [today])
+  );
+
+  const handleAddMeal = async () => {
+    if (!mealForm.name.trim()) {
+      Alert.alert("Error", "Please enter meal name");
+      return;
+    }
+
+    if (!mealForm.calories.trim()) {
+      Alert.alert("Error", "Calories is mandatory");
+      return;
+    }
+
+    if (!mealForm.protein.trim()) {
+      Alert.alert("Error", "Protein is mandatory");
+      return;
+    }
+
+    try {
+      const mealName = mealForm.name.trim();
+
+      // Add meal to existing meals table
+      const mealId = await addMeal(
+        mealName,
+        "General",
+        parseFloat(mealForm.calories) || 0,
+        parseFloat(mealForm.protein) || 0,
+        parseFloat(mealForm.carbs) || 0,
+        parseFloat(mealForm.fats) || 0
+      );
+
+      // Log it to today's meals
+      await logMeal(
+        mealId,
+        today,
+        parseFloat(mealForm.calories) || 0,
+        parseFloat(mealForm.protein) || 0,
+        parseFloat(mealForm.carbs) || 0,
+        parseFloat(mealForm.fats) || 0
+      );
+
+      // Reset form and close modal
+      setMealForm({
+        name: "",
+        calories: "",
+        protein: "",
+        carbs: "",
+        fats: "",
+      });
+      setAddMealModalVisible(false);
+
+      // Refresh meals list
+      const meals = await getMealLogsForDate(today);
+      console.log("Meals after adding:", meals);
+      setTodaysMeals(meals || []);
+
+      const totals = await getDailyTotals(today);
+      console.log("Totals after adding:", totals);
+      setDailyTotals(totals);
+
+      Alert.alert("Success", `${mealName} added successfully!`);
+    } catch (error) {
+      console.error("Error adding meal:", error);
+      Alert.alert("Error", "Failed to add meal");
+    }
+  };
+
+  return (
+    <View
+      style={[
+        styles.screenContainer,
+        {
+          justifyContent: "flex-start",
+          paddingTop: 0,
+          flex: 1,
+          paddingHorizontal: 0,
+          alignItems: "stretch",
+        },
+      ]}
+    >
+      {/* Date Header - Minimal */}
+      <View
+        style={{
+          paddingHorizontal: 16,
+
+          paddingBottom: 8,
+        }}
       >
-        <Text style={styles.buttonText}>Go Back</Text>
-      </TouchableOpacity>
+        <Text style={styles.dateHeader}>{today}</Text>
+      </View>
+
+      {/* Macro Cards Grid - 2x2 - Fixed */}
+      <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
+        <View style={styles.macroGridContainer}>
+          <View style={styles.macroCard}>
+            <Text style={styles.macroLabel}>Calories</Text>
+            <View style={{ flexDirection: "row", alignItems: "baseline" }}>
+              <Text style={styles.macroValue}>
+                {Math.round(dailyTotals.totalCalories)}
+              </Text>
+              <Text style={styles.macroGoal}> / 2500</Text>
+            </View>
+          </View>
+          <View style={styles.macroCard}>
+            <Text style={styles.macroLabel}>Protein</Text>
+            <View style={{ flexDirection: "row", alignItems: "baseline" }}>
+              <Text style={styles.macroValue}>
+                {Math.round(dailyTotals.totalProtein)}g
+              </Text>
+              <Text style={styles.macroGoal}> / 150g</Text>
+            </View>
+          </View>
+          <View style={styles.macroCard}>
+            <Text style={styles.macroLabel}>Carbs</Text>
+            <View style={{ flexDirection: "row", alignItems: "baseline" }}>
+              <Text style={styles.macroValue}>
+                {Math.round(dailyTotals.totalCarbs)}g
+              </Text>
+              <Text style={styles.macroGoal}> / 300g</Text>
+            </View>
+          </View>
+          <View style={styles.macroCard}>
+            <Text style={styles.macroLabel}>Fats</Text>
+            <View style={{ flexDirection: "row", alignItems: "baseline" }}>
+              <Text style={styles.macroValue}>
+                {Math.round(dailyTotals.totalFats)}g
+              </Text>
+              <Text style={styles.macroGoal}> / 85g</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Scrollable Meals List */}
+      <ScrollView
+        style={{ flex: 1, width: "100%" }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingTop: 20, paddingBottom: 20 }}
+      >
+        <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
+          <Text style={{ fontSize: 18, fontWeight: "600", color: "#000" }}>
+            Today's Meals
+          </Text>
+        </View>
+        {todaysMeals.map((meal) => (
+          <View
+            key={meal.id}
+            style={{
+              backgroundColor: "#fff",
+              padding: 16,
+              borderRadius: 10,
+              borderWidth: 1,
+              borderColor: "#e0e0e0",
+              marginBottom: 12,
+              marginHorizontal: 16,
+            }}
+          >
+            <Text style={{ fontSize: 16, fontWeight: "600", color: "#000" }}>
+              {meal.name}
+            </Text>
+            <Text style={{ fontSize: 13, color: "#666", marginTop: 8 }}>
+              {Math.round(meal.calories)} cal • {Math.round(meal.protein)}g
+              protein
+            </Text>
+          </View>
+        ))}
+      </ScrollView>
+
+      {/* Add Meal Buttons - Fixed at Bottom */}
+      <View style={{ padding: 16, backgroundColor: "#fff", gap: 12 }}>
+        <TouchableOpacity
+          style={[styles.button]}
+          onPress={() => setAddMealModalVisible(true)}
+        >
+          <MaterialCommunityIcons name="plus" size={24} color="#fff" />
+          <Text style={styles.buttonText}>Add New Meal</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: "#34C759" }]}
+          onPress={async () => {
+            const meals = await getAllMeals();
+            setExistingMeals(meals);
+            setAddExistingMealModalVisible(true);
+          }}
+        >
+          <MaterialCommunityIcons name="check" size={24} color="#fff" />
+          <Text style={styles.buttonText}>Add Existing Meal</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Add Meal Modal */}
+      <Modal
+        visible={addMealModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setAddMealModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <TouchableWithoutFeedback
+            onPress={() => setAddMealModalVisible(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <TouchableWithoutFeedback onPress={() => {}}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>Add New Meal</Text>
+
+                  {/* Meal Name */}
+                  <View style={styles.formGroup}>
+                    <Text style={styles.label}>Meal Name *</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="e.g., Chicken Curry"
+                      placeholderTextColor="#999"
+                      value={mealForm.name}
+                      onChangeText={(value) =>
+                        setMealForm({ ...mealForm, name: value })
+                      }
+                    />
+                  </View>
+
+                  {/* Calories and Protein (mandatory) */}
+                  <View style={styles.rowGroup}>
+                    <View style={[styles.formGroup, { flex: 1 }]}>
+                      <Text style={styles.label}>Calories * </Text>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="e.g., 350"
+                        placeholderTextColor="#999"
+                        value={mealForm.calories}
+                        onChangeText={(value) =>
+                          setMealForm({ ...mealForm, calories: value })
+                        }
+                        keyboardType="decimal-pad"
+                      />
+                    </View>
+
+                    <View style={[styles.formGroup, { flex: 1 }]}>
+                      <Text style={styles.label}>Protein (g) *</Text>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="e.g., 35"
+                        placeholderTextColor="#999"
+                        value={mealForm.protein}
+                        onChangeText={(value) =>
+                          setMealForm({ ...mealForm, protein: value })
+                        }
+                        keyboardType="decimal-pad"
+                      />
+                    </View>
+                  </View>
+
+                  {/* Carbs and Fats (optional) */}
+                  <View style={styles.rowGroup}>
+                    <View style={[styles.formGroup, { flex: 1 }]}>
+                      <Text style={styles.label}>Carbs (g)</Text>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="e.g., 25"
+                        placeholderTextColor="#999"
+                        value={mealForm.carbs}
+                        onChangeText={(value) =>
+                          setMealForm({ ...mealForm, carbs: value })
+                        }
+                        keyboardType="decimal-pad"
+                      />
+                    </View>
+
+                    <View style={[styles.formGroup, { flex: 1 }]}>
+                      <Text style={styles.label}>Fats (g)</Text>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="e.g., 12"
+                        placeholderTextColor="#999"
+                        value={mealForm.fats}
+                        onChangeText={(value) =>
+                          setMealForm({ ...mealForm, fats: value })
+                        }
+                        keyboardType="decimal-pad"
+                      />
+                    </View>
+                  </View>
+
+                  {/* Buttons */}
+                  <View style={styles.modalButtonGroup}>
+                    <TouchableOpacity
+                      style={[styles.button, styles.buttonHalf]}
+                      onPress={handleAddMeal}
+                    >
+                      <MaterialCommunityIcons
+                        name="check"
+                        size={20}
+                        color="#fff"
+                      />
+                      <Text style={styles.buttonText}>Add</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[
+                        styles.button,
+                        styles.buttonHalf,
+                        styles.cancelButton,
+                      ]}
+                      onPress={() => setAddMealModalVisible(false)}
+                    >
+                      <Text style={styles.buttonText}>Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Add Existing Meal Modal */}
+      <Modal
+        visible={addExistingMealModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setAddExistingMealModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <TouchableWithoutFeedback onPress={() => setAddExistingMealModalVisible(false)}>
+            <View style={styles.modalOverlay}>
+              <TouchableWithoutFeedback onPress={() => {}}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>Add Existing Meal</Text>
+
+                  <ScrollView style={{ maxHeight: 400, marginBottom: 20 }}>
+                    {existingMeals.length === 0 ? (
+                      <Text style={{ textAlign: "center", color: "#999", marginVertical: 20 }}>
+                        No existing meals found
+                      </Text>
+                    ) : (
+                      existingMeals.map((meal) => (
+                        <TouchableOpacity
+                          key={meal.id}
+                          onPress={async () => {
+                            await logMeal(
+                              meal.id,
+                              today,
+                              meal.calories || 0,
+                              meal.protein || 0,
+                              meal.carbs || 0,
+                              meal.fats || 0
+                            );
+
+                            const meals = await getMealLogsForDate(today);
+                            setTodaysMeals(meals || []);
+
+                            const totals = await getDailyTotals(today);
+                            setDailyTotals(totals);
+
+                            setAddExistingMealModalVisible(false);
+                            Alert.alert("Success", `${meal.name} added to today's meals!`);
+                          }}
+                          style={{
+                            paddingVertical: 12,
+                            paddingHorizontal: 16,
+                            borderBottomWidth: 1,
+                            borderBottomColor: "#f0f0f0",
+                          }}
+                        >
+                          <Text style={{ fontSize: 16, fontWeight: "600", color: "#000", marginBottom: 4 }}>
+                            {meal.name}
+                          </Text>
+                          <Text style={{ fontSize: 13, color: "#666" }}>
+                            {Math.round(meal.calories)} cal • {Math.round(meal.protein)}g protein
+                          </Text>
+                        </TouchableOpacity>
+                      ))
+                    )}
+                  </ScrollView>
+
+                  <TouchableOpacity
+                    style={[styles.button, styles.cancelButton]}
+                    onPress={() => setAddExistingMealModalVisible(false)}
+                  >
+                    <Text style={styles.buttonText}>Close</Text>
+                  </TouchableOpacity>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }
@@ -1266,6 +1860,9 @@ const styles = StyleSheet.create({
   buttonHalf: {
     flex: 1,
   },
+  buttonThird: {
+    flex: 1,
+  },
   cancelButton: {
     backgroundColor: "#999",
   },
@@ -1364,5 +1961,356 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#000",
     fontWeight: "500",
+  },
+  totalsCard: {
+    backgroundColor: "#E8F4FF",
+    margin: 16,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#B3D9F2",
+  },
+  totalsTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#007AFF",
+    marginBottom: 12,
+  },
+  totalsGrid: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  totalItem: {
+    flex: 1,
+    backgroundColor: "#fff",
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#D1E7F5",
+  },
+  totalLabel: {
+    fontSize: 11,
+    color: "#666",
+    fontWeight: "500",
+    marginBottom: 4,
+  },
+  totalValue: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#007AFF",
+  },
+  goalText: {
+    fontSize: 10,
+    color: "#999",
+    marginTop: 2,
+  },
+  summaryCard: {
+    backgroundColor: "#fff",
+    marginHorizontal: 16,
+    marginVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  summaryTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#000",
+    marginBottom: 16,
+  },
+  summaryContent: {
+    flexDirection: "row",
+    marginBottom: 16,
+  },
+  summaryItem: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  divider: {
+    width: 1,
+    backgroundColor: "#e0e0e0",
+    marginHorizontal: 16,
+  },
+  summaryLabel: {
+    fontSize: 13,
+    color: "#999",
+    fontWeight: "500",
+    marginBottom: 4,
+  },
+  summaryValue: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#000",
+    marginBottom: 4,
+  },
+  summaryGoal: {
+    fontSize: 12,
+    color: "#007AFF",
+    fontWeight: "600",
+  },
+  progressContainer: {
+    borderTopWidth: 1,
+    borderTopColor: "#e0e0e0",
+    paddingTop: 16,
+  },
+  progressItem: {
+    marginBottom: 12,
+  },
+  progressLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 6,
+  },
+  progressBarContainer: {
+    height: 8,
+    backgroundColor: "#e0e0e0",
+    borderRadius: 4,
+    overflow: "hidden",
+    marginBottom: 6,
+  },
+  progressBar: {
+    height: "100%",
+    borderRadius: 4,
+  },
+  progressText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#666",
+  },
+  headerWithButton: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  mealsListContent: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    gap: 12,
+  },
+  categoryPicker: {
+    flexDirection: "row",
+    gap: 8,
+    flexWrap: "wrap",
+  },
+  categoryButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    backgroundColor: "#f0f0f0",
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  categoryButtonActive: {
+    backgroundColor: "#007AFF",
+    borderColor: "#0056D4",
+  },
+  categoryButtonText: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#666",
+  },
+  categoryButtonTextActive: {
+    color: "#fff",
+  },
+  existingMealItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f9f9f9",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginHorizontal: 16,
+    marginVertical: 6,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    gap: 12,
+    flex: 1,
+  },
+  existingMealName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#000",
+    marginBottom: 4,
+  },
+  existingMealCategory: {
+    fontSize: 12,
+    color: "#999",
+    fontWeight: "500",
+  },
+  existingMealNutrition: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  existingMealNutritionText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#007AFF",
+    backgroundColor: "#E8F4FF",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  existingMealContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginHorizontal: 16,
+    marginVertical: 6,
+  },
+  editMealButton: {
+    backgroundColor: "#007AFF",
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  editModeToggleButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: "#007AFF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  editModeToggleButtonActive: {
+    backgroundColor: "#007AFF",
+    borderColor: "#007AFF",
+  },
+  confirmIconContainer: {
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  mealNameConfirm: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#000",
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  confirmNutritionGrid: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 24,
+    flexWrap: "wrap",
+  },
+  confirmNutritionItem: {
+    flex: 1,
+    minWidth: "48%",
+    backgroundColor: "#f9f9f9",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  confirmNutritionLabel: {
+    fontSize: 12,
+    color: "#666",
+    fontWeight: "500",
+    marginBottom: 4,
+  },
+  confirmNutritionValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#34C759",
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#000",
+    marginBottom: 12,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#999",
+    marginTop: 12,
+    fontWeight: "500",
+  },
+  mealItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    paddingVertical: 16,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  mealItemName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#000",
+    marginBottom: 6,
+  },
+  mealItemMacros: {
+    fontSize: 13,
+    color: "#666",
+    fontWeight: "400",
+  },
+  macroGridContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  macroCard: {
+    width: "48%",
+    backgroundColor: "#f9f9f9",
+    borderRadius: 10,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
+  },
+  macroLabel: {
+    fontSize: 12,
+    color: "#666",
+    fontWeight: "500",
+    marginBottom: 3,
+  },
+  macroValue: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#007AFF",
+    marginBottom: 2,
+  },
+  macroGoal: {
+    fontSize: 11,
+    color: "#999",
+    fontWeight: "400",
+  },
+  dateHeader: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#666",
   },
 });

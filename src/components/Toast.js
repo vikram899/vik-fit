@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const Toast = ({ message, type = 'info', visible, onHide }) => {
@@ -25,12 +25,16 @@ const Toast = ({ message, type = 'info', visible, onHide }) => {
     }
   }, [visible, animatedValue, onHide]);
 
-  if (!visible) return null;
+  if (!visible) {
+    return null;
+  }
 
-  const translateY = animatedValue.interpolate({
+  const scale = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [100, 0],
+    outputRange: [0.8, 1],
   });
+
+  const opacity = animatedValue;
 
   const getIcon = () => {
     switch (type) {
@@ -50,44 +54,46 @@ const Toast = ({ message, type = 'info', visible, onHide }) => {
   const backgroundColor = type === 'success' ? '#4CAF50' : type === 'error' ? '#FF3B30' : type === 'warning' ? '#FF9500' : '#007AFF';
 
   return (
-    <Animated.View
-      style={[
-        styles.toastContainer,
-        {
-          transform: [{ translateY }],
-        },
-      ]}
-    >
-      <View style={[styles.toast, { backgroundColor }]}>
+    <View style={styles.toastContainer} pointerEvents="box-none">
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.toast,
+          {
+            backgroundColor,
+            opacity,
+            transform: [{ scale }],
+          },
+        ]}
+      >
         <MaterialCommunityIcons name={icon.name} size={20} color="#fff" />
         <Text style={styles.toastText}>{message}</Text>
-      </View>
-    </Animated.View>
+      </Animated.View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   toastContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    flex: 1,
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    paddingBottom: 20,
-    zIndex: 1000,
+    paddingBottom: 40,
+    paddingHorizontal: 16,
   },
   toast: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 10,
     gap: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3,
-    elevation: 5,
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 10,
+    maxWidth: '90%',
   },
   toastText: {
     color: '#fff',
