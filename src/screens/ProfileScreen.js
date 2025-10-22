@@ -8,13 +8,14 @@ import {
 import Card from '../components/Card';
 import { COLORS } from '../constants/colors';
 import { SPACING, TYPOGRAPHY } from '../constants/spacing';
+import { STRINGS } from '../constants/strings';
 
 /**
  * ProfileScreen
  * User profile screen - placeholder for future features
  */
 export default function ProfileScreen() {
-  const APP_VERSION = '1.0.0';
+  const APP_VERSION = STRINGS.profileScreen.version.appVersion;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -25,33 +26,33 @@ export default function ProfileScreen() {
         </View>
 
         {/* Coming Soon Message */}
-        <Text style={styles.comingSoonTitle}>Coming Soon</Text>
+        <Text style={styles.comingSoonTitle}>{STRINGS.profileScreen.title}</Text>
         <Text style={styles.comingSoonSubtitle}>
-          Profile features including user stats, settings, and data export will be available soon!
+          {STRINGS.profileScreen.subtitle}
         </Text>
 
         {/* Placeholder Cards */}
         <View style={styles.featurePreview}>
           <Card style={styles.featureCard}>
-            <Text style={styles.featureTitle}>📊 Stats</Text>
-            <Text style={styles.featureText}>View your fitness journey</Text>
+            <Text style={styles.featureTitle}>{STRINGS.profileScreen.features.stats.title}</Text>
+            <Text style={styles.featureText}>{STRINGS.profileScreen.features.stats.text}</Text>
           </Card>
 
           <Card style={styles.featureCard}>
-            <Text style={styles.featureTitle}>⚙️ Settings</Text>
-            <Text style={styles.featureText}>Customize your experience</Text>
+            <Text style={styles.featureTitle}>{STRINGS.profileScreen.features.settings.title}</Text>
+            <Text style={styles.featureText}>{STRINGS.profileScreen.features.settings.text}</Text>
           </Card>
 
           <Card style={styles.featureCard}>
-            <Text style={styles.featureTitle}>📥 Export</Text>
-            <Text style={styles.featureText}>Download your fitness data</Text>
+            <Text style={styles.featureTitle}>{STRINGS.profileScreen.features.export.title}</Text>
+            <Text style={styles.featureText}>{STRINGS.profileScreen.features.export.text}</Text>
           </Card>
         </View>
 
         {/* Version Info */}
         <View style={styles.footer}>
           <Text style={styles.versionText}>VikFit v{APP_VERSION}</Text>
-          <Text style={styles.versionSubtext}>Built for simplicity and speed</Text>
+          <Text style={styles.versionSubtext}>{STRINGS.profileScreen.version.tagline}</Text>
         </View>
       </View>
     </SafeAreaView>

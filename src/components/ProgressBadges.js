@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { STRINGS } from '../constants/strings';
 
 const ProgressBadges = ({ dailyTotals, macroGoals }) => {
   /**
@@ -56,37 +57,37 @@ const ProgressBadges = ({ dailyTotals, macroGoals }) => {
   if (!macroGoals) {
     return (
       <View style={styles.noBadgesContainer}>
-        <Text style={styles.noBadgesText}>Set macro goals to see progress</Text>
+        <Text style={styles.noBadgesText}>{STRINGS.progressBadges.emptyState}</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Daily Progress</Text>
+      <Text style={styles.title}>{STRINGS.progressBadges.title}</Text>
       <View style={styles.badgesGrid}>
         <ProgressBadge
-          label="Calories"
+          label={STRINGS.progressBadges.labels.calories}
           actual={dailyTotals.totalCalories}
           goal={macroGoals.calorieGoal}
         />
         <ProgressBadge
-          label="Protein"
+          label={STRINGS.progressBadges.labels.protein}
           actual={dailyTotals.totalProtein}
           goal={macroGoals.proteinGoal}
-          unit="g"
+          unit={STRINGS.progressBadges.units.protein}
         />
         <ProgressBadge
-          label="Carbs"
+          label={STRINGS.progressBadges.labels.carbs}
           actual={dailyTotals.totalCarbs}
           goal={macroGoals.carbsGoal}
-          unit="g"
+          unit={STRINGS.progressBadges.units.carbs}
         />
         <ProgressBadge
-          label="Fats"
+          label={STRINGS.progressBadges.labels.fats}
           actual={dailyTotals.totalFats}
           goal={macroGoals.fatsGoal}
-          unit="g"
+          unit={STRINGS.progressBadges.units.fats}
         />
       </View>
     </View>

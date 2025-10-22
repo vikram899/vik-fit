@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { STRINGS } from '../constants/strings';
 
 const MealCard = ({ meal, onEdit, onDelete, onDuplicate, disabled = false }) => {
   return (
@@ -9,7 +10,7 @@ const MealCard = ({ meal, onEdit, onDelete, onDuplicate, disabled = false }) => 
         <View style={{ flex: 1 }}>
           <Text style={styles.mealName}>{meal.name}</Text>
           <View style={styles.categoryBadge}>
-            <Text style={styles.categoryText}>{meal.category || 'General'}</Text>
+            <Text style={styles.categoryText}>{meal.category || STRINGS.mealCard.defaultCategory}</Text>
           </View>
         </View>
         <View style={styles.mealActions}>
@@ -45,19 +46,19 @@ const MealCard = ({ meal, onEdit, onDelete, onDuplicate, disabled = false }) => 
 
       <View style={styles.nutritionGrid}>
         <View style={styles.nutritionItem}>
-          <Text style={styles.nutritionLabel}>Calories</Text>
+          <Text style={styles.nutritionLabel}>{STRINGS.mealCard.nutritionLabels.calories}</Text>
           <Text style={styles.nutritionValue}>{meal.calories || 0}</Text>
         </View>
         <View style={styles.nutritionItem}>
-          <Text style={styles.nutritionLabel}>Protein</Text>
+          <Text style={styles.nutritionLabel}>{STRINGS.mealCard.nutritionLabels.protein}</Text>
           <Text style={styles.nutritionValue}>{meal.protein || 0}g</Text>
         </View>
         <View style={styles.nutritionItem}>
-          <Text style={styles.nutritionLabel}>Carbs</Text>
+          <Text style={styles.nutritionLabel}>{STRINGS.mealCard.nutritionLabels.carbs}</Text>
           <Text style={styles.nutritionValue}>{meal.carbs || 0}g</Text>
         </View>
         <View style={styles.nutritionItem}>
-          <Text style={styles.nutritionLabel}>Fats</Text>
+          <Text style={styles.nutritionLabel}>{STRINGS.mealCard.nutritionLabels.fats}</Text>
           <Text style={styles.nutritionValue}>{meal.fats || 0}g</Text>
         </View>
       </View>

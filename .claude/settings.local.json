@@ -17,7 +17,20 @@
       "WebFetch(domain:github.com)",
       "Bash(npm ls:*)",
       "Bash(npm uninstall:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(cat:*)",
+      "Bash(\"src/components/NumberPicker.js\" )",
+      "Bash(\"src/components/InputField.js\" )",
+      "Bash(\"src/components/EmptyState.js\" )",
+      "Bash(\"src/components/LoadingState.js\" )",
+      "Bash(\"src/components/SwipeableCard.js\" )",
+      "Bash(\"src/screens/HomeScreen.js\" )",
+      "Bash(\"src/screens/MealsScreen.js\" )",
+      "Bash(\"src/screens/CreatePlanScreen.js\" )",
+      "Bash(\"src/screens/WorkoutPlansScreen.js\" )",
+      "Bash(\"src/screens/PlanDetailScreen.js\" )",
+      "Bash(\"src/screens/WorkoutExecutionScreen.js\" )",
+      "Bash(\"src/services/supabase.js\")"
     ],
     "deny": [],
     "ask": []

@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, Animated } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { toastStyles, COLORS } from '../styles';
 
 const Toast = ({ message, type = 'info', visible, onHide }) => {
   const animatedValue = React.useRef(new Animated.Value(0)).current;
@@ -36,71 +37,52 @@ const Toast = ({ message, type = 'info', visible, onHide }) => {
 
   const opacity = animatedValue;
 
-  const getIcon = () => {
+  const getToastStyle = () => {
     switch (type) {
       case 'success':
-        return { name: 'check-circle', color: '#4CAF50' };
+        return toastStyles.toastSuccess;
       case 'error':
-        return { name: 'alert-circle', color: '#FF3B30' };
+        return toastStyles.toastError;
       case 'warning':
-        return { name: 'alert', color: '#FF9500' };
+        return toastStyles.toastWarning;
       case 'info':
       default:
-        return { name: 'information', color: '#007AFF' };
+        return toastStyles.toastInfo;
     }
   };
 
-  const icon = getIcon();
-  const backgroundColor = type === 'success' ? '#4CAF50' : type === 'error' ? '#FF3B30' : type === 'warning' ? '#FF9500' : '#007AFF';
+  const getIcon = () => {
+    switch (type) {
+      case 'success':
+        return 'check-circle';
+      case 'error':
+        return 'alert-circle';
+      case 'warning':
+        return 'alert';
+      case 'info':
+      default:
+        return 'information';
+    }
+  };
 
   return (
-    <View style={styles.toastContainer} pointerEvents="box-none">
+    <View style={toastStyles.container} pointerEvents="box-none">
       <Animated.View
         pointerEvents="none"
         style={[
-          styles.toast,
+          toastStyles.toast,
+          getToastStyle(),
           {
-            backgroundColor,
             opacity,
             transform: [{ scale }],
           },
         ]}
       >
-        <MaterialCommunityIcons name={icon.name} size={20} color="#fff" />
-        <Text style={styles.toastText}>{message}</Text>
+        <MaterialCommunityIcons name={getIcon()} size={20} color={COLORS.white} />
+        <Text style={toastStyles.toastText}>{message}</Text>
       </Animated.View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  toastContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingBottom: 40,
-    paddingHorizontal: 16,
-  },
-  toast: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    gap: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 10,
-    maxWidth: '90%',
-  },
-  toastText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '500',
-    flex: 1,
-  },
-});
 
 export default Toast;

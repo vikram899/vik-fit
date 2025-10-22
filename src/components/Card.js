@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { cardStyles, COLORS } from '../styles';
 
 const Card = ({
   title,
@@ -14,79 +15,36 @@ const Card = ({
   variant = 'default', // default, highlighted
 }) => {
   return (
-    <View style={[styles.wrapper, style]}>
+    <View style={[{ flexDirection: 'row', alignItems: 'center', gap: 10 }, style]}>
       <TouchableOpacity
         style={[
-          styles.card,
-          variant === 'highlighted' && styles.cardHighlighted,
+          cardStyles.card,
+          cardStyles.cardRow,
+          variant === 'highlighted' && cardStyles.cardHighlighted,
         ]}
         onPress={onPress}
         disabled={disabled}
       >
-        <View style={styles.content}>
-          <Text style={styles.title}>{title}</Text>
-          {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+        <View style={cardStyles.cardContent}>
+          <Text style={cardStyles.cardTitle}>{title}</Text>
+          {subtitle && <Text style={cardStyles.cardSubtitle}>{subtitle}</Text>}
         </View>
         {rightIcon && (
-          <MaterialCommunityIcons name={rightIcon} size={24} color="#007AFF" />
+          <MaterialCommunityIcons name={rightIcon} size={24} color={COLORS.primary} />
         )}
       </TouchableOpacity>
 
       {rightAction && (
         <TouchableOpacity
-          style={styles.actionButton}
+          style={cardStyles.cardAction}
           onPress={onRightActionPress}
           disabled={disabled}
         >
-          <MaterialCommunityIcons name={rightAction} size={20} color="#fff" />
+          <MaterialCommunityIcons name={rightAction} size={20} color={COLORS.white} />
         </TouchableOpacity>
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  wrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  card: {
-    flex: 1,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-    padding: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  cardHighlighted: {
-    backgroundColor: '#E8F4FD',
-    borderColor: '#007AFF',
-  },
-  content: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#666',
-  },
-  actionButton: {
-    backgroundColor: '#FF3B30',
-    width: 44,
-    height: 44,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
 
 export default Card;

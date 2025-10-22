@@ -1,0 +1,223 @@
+import React from "react";
+import { View, Text, TouchableOpacity, Alert, ScrollView } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { logMealsScreenStyles, COLORS } from "../styles";
+import { STRINGS } from "../constants/strings";
+import {
+  getMealLogsForDate,
+  getDailyTotals,
+  getAllMeals,
+  deleteMealLog,
+} from "../services/database";
+import AddMealModal from "../components/AddMealModal";
+import ExistingMealsModal from "../components/ExistingMealsModal";
+import EditMealModal from "../components/EditMealModal";
+import MealMacroCards from "../components/MealMacroCards";
+import TodaysMealsList from "../components/TodaysMealsList";
+
+const LogMealsScreen = ({ navigation }) => {
+  const today = new Date().toISOString().split("T")[0];
+
+  // Modals visibility
+  const [addMealModalVisible, setAddMealModalVisible] = React.useState(false);
+  const [addExistingMealModalVisible, setAddExistingMealModalVisible] =
+    React.useState(false);
+  const [editMealModalVisible, setEditMealModalVisible] = React.useState(false);
+  const [mealMenuVisible, setMealMenuVisible] = React.useState(false);
+
+  // Data
+  const [todaysMeals, setTodaysMeals] = React.useState([]);
+  const [existingMeals, setExistingMeals] = React.useState([]);
+  const [dailyTotals, setDailyTotals] = React.useState({
+    totalCalories: 0,
+    totalProtein: 0,
+    totalCarbs: 0,
+    totalFats: 0,
+  });
+  const [selectedMealForEdit, setSelectedMealForEdit] = React.useState(null);
+
+  // Fetch today's meals and totals when screen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const meals = await getMealLogsForDate(today);
+          setTodaysMeals(meals || []);
+
+          const totals = await getDailyTotals(today);
+          setDailyTotals(totals);
+        } catch (error) {
+          console.error("Error fetching meals:", error);
+        }
+      };
+
+      fetchData();
+    }, [today])
+  );
+
+  const handleAddMealModalClose = () => {
+    setAddMealModalVisible(false);
+  };
+
+  const handleMealAdded = async ({ meals, totals }) => {
+    setTodaysMeals(meals || []);
+    setDailyTotals(totals);
+  };
+
+  const handleOpenAddExistingModal = async () => {
+    try {
+      const meals = await getAllMeals();
+      setExistingMeals(meals);
+      setAddExistingMealModalVisible(true);
+    } catch (error) {
+      console.error("Error fetching existing meals:", error);
+      Alert.alert(
+        STRINGS.logMealsScreen.alerts.errorLoadingMeals.title,
+        STRINGS.logMealsScreen.alerts.errorLoadingMeals.message
+      );
+    }
+  };
+
+  const handleMealSelected = async ({ meals, totals }) => {
+    setTodaysMeals(meals || []);
+    setDailyTotals(totals);
+  };
+
+  const handleEditMeal = (meal) => {
+    setSelectedMealForEdit(meal);
+    setMealMenuVisible(false);
+    setEditMealModalVisible(true);
+  };
+
+  const handleDeleteMeal = (mealId) => {
+    Alert.alert(
+      STRINGS.logMealsScreen.alerts.deleteConfirm.title,
+      STRINGS.logMealsScreen.alerts.deleteConfirm.message,
+      [
+        {
+          text: STRINGS.logMealsScreen.alerts.deleteCancel,
+          onPress: () => {},
+          style: "cancel",
+        },
+        {
+          text: STRINGS.logMealsScreen.alerts.deleteConfirm,
+          onPress: async () => {
+            try {
+              await deleteMealLog(mealId);
+              const meals = await getMealLogsForDate(today);
+              setTodaysMeals(meals || []);
+
+              const totals = await getDailyTotals(today);
+              setDailyTotals(totals);
+
+              setMealMenuVisible(false);
+              Alert.alert(
+                STRINGS.logMealsScreen.alerts.deleteSuccess.title,
+                STRINGS.logMealsScreen.alerts.deleteSuccess.message
+              );
+            } catch (error) {
+              console.error("Error deleting meal:", error);
+              Alert.alert(
+                STRINGS.logMealsScreen.alerts.deleteError.title,
+                STRINGS.logMealsScreen.alerts.deleteError.message
+              );
+            }
+          },
+          style: "destructive",
+        },
+      ]
+    );
+  };
+
+  const handleMealUpdated = async ({ meals, totals }) => {
+    setTodaysMeals(meals || []);
+    setDailyTotals(totals);
+    setEditMealModalVisible(false);
+  };
+
+  return (
+    <View style={logMealsScreenStyles.container}>
+      {/* Date Header - Minimal */}
+      <View style={logMealsScreenStyles.dateHeader}>
+        <Text style={logMealsScreenStyles.dateText}>{today}</Text>
+      </View>
+
+      {/* Macro Cards Grid */}
+      <MealMacroCards dailyTotals={dailyTotals} />
+
+      {/* Meals List with fixed title */}
+      <TodaysMealsList
+        meals={todaysMeals}
+        onMealPress={(meal) => {
+          Alert.alert(
+            STRINGS.logMealsScreen.alerts.mealOptions(meal.name).title,
+            STRINGS.logMealsScreen.alerts.mealOptions(meal.name).message,
+            [
+              {
+                text: STRINGS.logMealsScreen.alerts.edit,
+                onPress: () => handleEditMeal(meal),
+              },
+              {
+                text: STRINGS.logMealsScreen.alerts.deleteConfirm,
+                onPress: () => handleDeleteMeal(meal.id),
+                style: "destructive",
+              },
+              {
+                text: STRINGS.logMealsScreen.alerts.deleteCancel,
+                onPress: () => {},
+                style: "cancel",
+              },
+            ]
+          );
+        }}
+      />
+
+      {/* Add Meal Buttons - Fixed at Bottom */}
+      <View style={logMealsScreenStyles.buttonsContainer}>
+        <TouchableOpacity
+          style={logMealsScreenStyles.buttonPrimary}
+          onPress={() => setAddMealModalVisible(true)}
+        >
+          <MaterialCommunityIcons name="plus" size={24} color={COLORS.white} />
+          <Text style={logMealsScreenStyles.buttonText}>{STRINGS.logMealsScreen.buttons.addNewMeal}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={logMealsScreenStyles.buttonSecondary}
+          onPress={handleOpenAddExistingModal}
+        >
+          <MaterialCommunityIcons name="check" size={24} color={COLORS.white} />
+          <Text style={logMealsScreenStyles.buttonText}>{STRINGS.logMealsScreen.buttons.addExistingMeal}</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Modals */}
+      <AddMealModal
+        visible={addMealModalVisible}
+        onClose={handleAddMealModalClose}
+        onMealAdded={handleMealAdded}
+      />
+
+      <ExistingMealsModal
+        visible={addExistingMealModalVisible}
+        meals={existingMeals}
+        onClose={() => setAddExistingMealModalVisible(false)}
+        onMealAdded={handleMealSelected}
+      />
+
+      <EditMealModal
+        visible={editMealModalVisible}
+        meal={selectedMealForEdit}
+        onClose={() => {
+          setEditMealModalVisible(false);
+          setSelectedMealForEdit(null);
+        }}
+        onMealUpdated={handleMealUpdated}
+      />
+
+      {/* TODO: Implement meal menu modal for edit/delete options */}
+    </View>
+  );
+};
+
+export default LogMealsScreen;

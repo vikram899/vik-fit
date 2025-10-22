@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { STRINGS } from '../constants/strings';
 
 const ExerciseCard = ({ exercise, onDelete, onEdit, showDeleteButton = true, showEditButton = false, disabled = false }) => {
   return (
@@ -9,7 +10,7 @@ const ExerciseCard = ({ exercise, onDelete, onEdit, showDeleteButton = true, sho
         <Text style={styles.exerciseName}>{exercise.name}</Text>
         <View style={styles.headerRight}>
           {(exercise.time || 0) > 0 && (
-            <Text style={styles.timeDisplay}>{exercise.time} s</Text>
+            <Text style={styles.timeDisplay}>{exercise.time} {STRINGS.exerciseCard.units.seconds}</Text>
           )}
           {showEditButton && (
             <TouchableOpacity
@@ -33,16 +34,16 @@ const ExerciseCard = ({ exercise, onDelete, onEdit, showDeleteButton = true, sho
       </View>
       <View style={styles.exerciseDetails}>
         <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Sets</Text>
+          <Text style={styles.detailLabel}>{STRINGS.exerciseCard.detailLabels.sets}</Text>
           <Text style={styles.detailValue}>{exercise.sets}</Text>
         </View>
         <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Reps</Text>
+          <Text style={styles.detailLabel}>{STRINGS.exerciseCard.detailLabels.reps}</Text>
           <Text style={styles.detailValue}>{exercise.reps}</Text>
         </View>
         <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Weight</Text>
-          <Text style={styles.detailValue}>{exercise.weight || '0'} kg</Text>
+          <Text style={styles.detailLabel}>{STRINGS.exerciseCard.detailLabels.weight}</Text>
+          <Text style={styles.detailValue}>{exercise.weight || '0'} {STRINGS.exerciseCard.units.kilograms}</Text>
         </View>
       </View>
     </View>
