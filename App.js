@@ -27,6 +27,13 @@ import Toast from "./src/components/Toast";
 import ExerciseCard from "./src/components/ExerciseCard";
 import ProgressBadges from "./src/components/ProgressBadges";
 import LogMealsScreen from "./src/screens/LogMealsScreen";
+import LogWorkoutScreen from "./src/screens/LogWorkoutScreen";
+import WorkoutsScreen from "./src/screens/WorkoutsScreen";
+import WorkoutsLibraryScreen from "./src/screens/WorkoutsLibraryScreen";
+import MealsScreen from "./src/screens/MealsScreen";
+import AddWorkoutScreen from "./src/screens/AddWorkoutScreen";
+import AddMealScreen from "./src/screens/AddMealScreen";
+import { COLORS } from "./src/styles";
 import {
   initializeDatabase,
   seedDummyData,
@@ -49,6 +56,12 @@ import {
   getMacroGoals,
   setMacroGoals,
   updateMeal,
+  assignPlanToDays,
+  getScheduledDaysForPlan,
+  getPlansForDay,
+  removePlanFromDays,
+  markPlanCompleted,
+  getPlanExecutionStatus,
 } from "./src/services/database";
 import MealCard from "./src/components/MealCard";
 
@@ -108,10 +121,9 @@ function HomeScreen({ navigation }) {
         { justifyContent: "flex-start", paddingTop: 0 },
       ]}
     >
-      <View style={[styles.headerWithButton, { paddingTop: insets.top + 16 }]}>
-        <Text style={styles.title}>Home</Text>
-        <Text style={styles.subtitle}>Welcome to VikFit</Text>
-      </View>
+      <View
+        style={[styles.headerWithButton, { paddingTop: insets.top + 16 }]}
+      ></View>
 
       {/* Today's Summary Card */}
       <View style={styles.summaryCard}>
@@ -135,7 +147,6 @@ function HomeScreen({ navigation }) {
               )}
             </View>
           </View>
-          <View style={styles.divider} />
           <View style={styles.summaryItem}>
             <MaterialCommunityIcons name="flash" size={24} color="#FF9800" />
             <View style={{ marginLeft: 12, flex: 1 }}>
@@ -146,6 +157,38 @@ function HomeScreen({ navigation }) {
               {macroGoals && (
                 <Text style={styles.summaryGoal}>
                   Goal: {macroGoals.proteinGoal}g
+                </Text>
+              )}
+            </View>
+          </View>
+          <View style={styles.summaryItem}>
+            <MaterialCommunityIcons
+              name="bread-slice"
+              size={24}
+              color="#4CAF50"
+            />
+            <View style={{ marginLeft: 12, flex: 1 }}>
+              <Text style={styles.summaryLabel}>Carbs</Text>
+              <Text style={styles.summaryValue}>
+                {Math.round(dailyTotals.totalCarbs)}g
+              </Text>
+              {macroGoals && (
+                <Text style={styles.summaryGoal}>
+                  Goal: {macroGoals.carbsGoal}g
+                </Text>
+              )}
+            </View>
+          </View>
+          <View style={styles.summaryItem}>
+            <MaterialCommunityIcons name="water" size={24} color="#FF6B6B" />
+            <View style={{ marginLeft: 12, flex: 1 }}>
+              <Text style={styles.summaryLabel}>Fats</Text>
+              <Text style={styles.summaryValue}>
+                {Math.round(dailyTotals.totalFats)}g
+              </Text>
+              {macroGoals && (
+                <Text style={styles.summaryGoal}>
+                  Goal: {macroGoals.fatsGoal}g
                 </Text>
               )}
             </View>
@@ -229,106 +272,6 @@ function HomeScreen({ navigation }) {
           />
           <Text style={styles.buttonText}>Log Meals</Text>
         </TouchableOpacity>
-      </View>
-    </View>
-  );
-}
-
-function LogWorkoutScreen({ navigation, route }) {
-  const insets = useSafeAreaInsets();
-  const [plans, setPlans] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
-
-  // Fetch plans from database
-  const loadPlans = async () => {
-    try {
-      setLoading(true);
-      const allPlans = await getAllPlans();
-
-      // Get exercise count for each plan
-      const plansWithCount = await Promise.all(
-        allPlans.map(async (plan) => {
-          const exerciseCount = await getExerciseCount(plan.id);
-          return {
-            ...plan,
-            exercises: exerciseCount,
-          };
-        })
-      );
-
-      setPlans(plansWithCount);
-    } catch (error) {
-      console.error("Error loading plans:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Load plans when component mounts or when returning from other screens
-  React.useEffect(() => {
-    loadPlans();
-  }, []);
-
-  // Refresh plans when screen is focused
-  React.useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", () => {
-      loadPlans();
-    });
-    return unsubscribe;
-  }, [navigation]);
-
-  return (
-    <View
-      style={[
-        styles.screenContainer,
-        { justifyContent: "flex-start", paddingTop: 0 },
-      ]}
-    >
-      <View style={[styles.headerWithButton, { paddingTop: insets.top + 16 }]}>
-        <Text style={styles.title}>Your Plans</Text>
-        <TouchableOpacity
-          style={styles.createButton}
-          onPress={() => navigation.navigate("CreatePlan")}
-        >
-          <MaterialCommunityIcons name="plus" size={20} color="#fff" />
-          <Text style={styles.createButtonText}>Create</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.plansList}>
-        {loading ? (
-          <Text style={styles.loadingText}>Loading plans...</Text>
-        ) : plans.length === 0 ? (
-          <Text style={styles.emptyText}>
-            No plans yet. Create one to get started!
-          </Text>
-        ) : (
-          plans.map((plan) => (
-            <View key={plan.id} style={styles.planCardWrapper}>
-              <TouchableOpacity
-                style={styles.planCard}
-                onPress={() =>
-                  navigation.navigate("ExecuteWorkout", {
-                    planId: plan.id,
-                    planName: plan.name,
-                  })
-                }
-              >
-                <View>
-                  <Text style={styles.planName}>{plan.name}</Text>
-                  <Text style={styles.planExercises}>
-                    {plan.exercises} exercises
-                  </Text>
-                </View>
-                <MaterialCommunityIcons
-                  name="chevron-right"
-                  size={24}
-                  color="#007AFF"
-                />
-              </TouchableOpacity>
-            </View>
-          ))
-        )}
       </View>
     </View>
   );
@@ -517,7 +460,7 @@ function CreatePlanScreen({ navigation }) {
           >
             <MaterialCommunityIcons name="check" size={20} color="#fff" />
             <Text style={styles.buttonText}>
-              {loading ? "Creating..." : "Create Plan"}
+              {loading ? "Creating..." : "Create"}
             </Text>
           </TouchableOpacity>
 
@@ -1070,12 +1013,41 @@ function HomeStackNavigator() {
       <Stack.Screen
         name="LogWorkout"
         component={LogWorkoutScreen}
-        options={{ title: "Log Workout", headerShown: false }}
+        options={({ navigation }) => ({
+          title: "Log Workouts",
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={{ paddingLeft: 16 }}
+            >
+              <MaterialCommunityIcons
+                name="arrow-left"
+                size={24}
+                color={COLORS.primary}
+              />
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate("CreatePlan")}
+              style={{ paddingRight: 16 }}
+            >
+              <MaterialCommunityIcons
+                name="plus-circle"
+                size={28}
+                color={COLORS.primary}
+              />
+            </TouchableOpacity>
+          ),
+        })}
       />
       <Stack.Screen
         name="CreatePlan"
         component={CreatePlanScreen}
-        options={{ title: "Create Plan" }}
+        options={{
+          title: "Create Workout",
+          headerTitleStyle: { fontSize: 18, fontWeight: "700" },
+        }}
       />
       <Stack.Screen
         name="ExecuteWorkout"
@@ -1091,21 +1063,42 @@ function HomeStackNavigator() {
   );
 }
 
-function WorkoutsScreen() {
+function WorkoutsStackNavigator() {
   return (
-    <View style={styles.screenContainer}>
-      <Text style={styles.title}>Workouts</Text>
-      <Text style={styles.subtitle}>Manage your workouts here</Text>
-    </View>
-  );
-}
-
-function MealsScreen() {
-  return (
-    <View style={styles.screenContainer}>
-      <Text style={styles.title}>Meals</Text>
-      <Text style={styles.subtitle}>Track your meals here</Text>
-    </View>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: true,
+        headerBackTitleVisible: false,
+        headerTintColor: "#007AFF",
+      }}
+    >
+      <Stack.Screen
+        name="WorkoutsLibrary"
+        component={WorkoutsLibraryScreen}
+        options={{
+          title: "Workouts",
+        }}
+      />
+      <Stack.Screen
+        name="WorkoutsCreatePlan"
+        component={CreatePlanScreen}
+        options={({ navigation }) => ({
+          title: "Create Workout",
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={{ paddingLeft: 16 }}
+            >
+              <MaterialCommunityIcons
+                name="arrow-left"
+                size={24}
+                color={COLORS.primary}
+              />
+            </TouchableOpacity>
+          ),
+        })}
+      />
+    </Stack.Navigator>
   );
 }
 
@@ -1123,6 +1116,9 @@ function ProfileScreen() {
  * Main entry point with Bottom Tab Navigation
  */
 export default function App() {
+  const [fabModalVisible, setFabModalVisible] = React.useState(false);
+  const [fabNavigation, setFabNavigation] = React.useState(null);
+
   // Initialize database on app start
   React.useEffect(() => {
     const initDB = async () => {
@@ -1139,7 +1135,11 @@ export default function App() {
         backgroundColor="#fff"
         translucent={false}
       />
-      <NavigationContainer>
+      <NavigationContainer
+        ref={(navigationRef) => {
+          setFabNavigation(navigationRef);
+        }}
+      >
         <Tab.Navigator
           screenOptions={({ route }) => ({
             tabBarIcon: ({ focused, color, size }) => {
@@ -1148,6 +1148,16 @@ export default function App() {
                 iconName = focused ? "home" : "home-outline";
               } else if (route.name === "Workouts") {
                 iconName = focused ? "dumbbell" : "dumbbell";
+              } else if (route.name === "AddAction") {
+                return (
+                  <View style={fabStyles.tabBarIconContainer}>
+                    <MaterialCommunityIcons
+                      name="menu"
+                      size={28}
+                      color="#fff"
+                    />
+                  </View>
+                );
               } else if (route.name === "Meals") {
                 iconName = focused
                   ? "silverware-fork-knife"
@@ -1187,8 +1197,25 @@ export default function App() {
           />
           <Tab.Screen
             name="Workouts"
-            component={WorkoutsScreen}
-            options={{ tabBarLabel: "Workouts" }}
+            component={WorkoutsStackNavigator}
+            options={{
+              tabBarLabel: "Workouts",
+              headerShown: false,
+            }}
+          />
+          <Tab.Screen
+            name="AddAction"
+            component={() => null}
+            listeners={({ navigation }) => ({
+              tabPress: (e) => {
+                e.preventDefault();
+                setFabModalVisible(true);
+              },
+            })}
+            options={{
+              tabBarLabel: "",
+              headerShown: false,
+            }}
           />
           <Tab.Screen
             name="Meals"
@@ -1200,7 +1227,102 @@ export default function App() {
             component={ProfileScreen}
             options={{ tabBarLabel: "Profile" }}
           />
+          <Tab.Screen
+            name="AddWorkout"
+            component={AddWorkoutScreen}
+            options={({ navigation }) => ({
+              tabBarLabel: "Add Workout",
+              tabBarButton: () => null,
+              headerShown: true,
+              title: "Workouts",
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("CreatePlan")}
+                  style={{ paddingRight: 16 }}
+                >
+                  <MaterialCommunityIcons
+                    name="plus-circle"
+                    size={28}
+                    color={COLORS.primary}
+                  />
+                </TouchableOpacity>
+              ),
+            })}
+          />
+          <Tab.Screen
+            name="AddMeal"
+            component={AddMealScreen}
+            options={({ navigation }) => ({
+              tabBarLabel: "Add Meal",
+              tabBarButton: () => null,
+              headerShown: true,
+              title: "Meals",
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => {
+                    // Trigger modal in AddMealScreen by resetting navigation to itself with params
+                    navigation.setParams({ openAddModal: true });
+                  }}
+                  style={{ paddingRight: 16 }}
+                >
+                  <MaterialCommunityIcons
+                    name="plus-circle"
+                    size={28}
+                    color={COLORS.primary}
+                  />
+                </TouchableOpacity>
+              ),
+            })}
+          />
         </Tab.Navigator>
+
+        {/* FAB Modal */}
+        <Modal
+          visible={fabModalVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setFabModalVisible(false)}
+        >
+          <TouchableWithoutFeedback onPress={() => setFabModalVisible(false)}>
+            <View style={fabStyles.modalOverlay}>
+              <View style={fabStyles.modalContent}>
+                <TouchableOpacity
+                  style={fabStyles.modalOption}
+                  onPress={() => {
+                    setFabModalVisible(false);
+                    if (fabNavigation) {
+                      fabNavigation.navigate("AddWorkout");
+                    }
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="dumbbell"
+                    size={28}
+                    color={COLORS.primary}
+                  />
+                  <Text style={fabStyles.modalOptionText}>Manage Workouts</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={fabStyles.modalOption}
+                  onPress={() => {
+                    setFabModalVisible(false);
+                    if (fabNavigation) {
+                      fabNavigation.navigate("AddMeal");
+                    }
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="silverware-fork-knife"
+                    size={28}
+                    color={COLORS.primary}
+                  />
+                  <Text style={fabStyles.modalOptionText}>Manage Meals</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
       </NavigationContainer>
     </SafeAreaProvider>
   );
@@ -1209,10 +1331,10 @@ export default function App() {
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "flex-start",
+    alignItems: "stretch",
     backgroundColor: "#fff",
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
   },
   title: {
     fontSize: 32,
@@ -1571,12 +1693,11 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     backgroundColor: "#fff",
-    marginHorizontal: 16,
     marginVertical: 16,
     paddingHorizontal: 16,
     paddingVertical: 20,
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: 0,
+    borderWidth: 0,
     borderColor: "#e0e0e0",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -1592,12 +1713,15 @@ const styles = StyleSheet.create({
   },
   summaryContent: {
     flexDirection: "row",
+    flexWrap: "wrap",
     marginBottom: 16,
+    justifyContent: "space-between",
   },
   summaryItem: {
-    flex: 1,
+    width: "48%",
     flexDirection: "row",
     alignItems: "flex-start",
+    paddingBottom: 12,
   },
   divider: {
     width: 1,
@@ -1655,8 +1779,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 16,
     backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
   },
   mealsListContent: {
     paddingHorizontal: 20,
@@ -1876,5 +1998,52 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     color: "#666",
+  },
+});
+
+const fabStyles = StyleSheet.create({
+  tabBarIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: COLORS.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 12,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 24,
+    width: "80%",
+    maxWidth: 300,
+    gap: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    backgroundColor: "#f9f9f9",
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  modalOptionText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
   },
 });

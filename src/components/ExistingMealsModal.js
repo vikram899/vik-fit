@@ -36,6 +36,7 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
     fats: "",
   });
   const [localMeals, setLocalMeals] = React.useState(meals);
+  const [addedMealIds, setAddedMealIds] = React.useState(new Set());
 
   React.useEffect(() => {
     setLocalMeals(meals);
@@ -54,6 +55,9 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
 
       const updatedMeals = await getMealLogsForDate(today);
       const totals = await getDailyTotals(today);
+
+      // Mark meal as added
+      setAddedMealIds(new Set([...addedMealIds, meal.id]));
 
       onMealAdded?.({ meals: updatedMeals, totals });
       Alert.alert(
@@ -111,8 +115,8 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
 
   const handleDeleteMeal = (meal) => {
     Alert.alert(
-      STRINGS.existingMealsModal.alerts.deleteConfirm.title,
-      STRINGS.existingMealsModal.alerts.deleteConfirm.message,
+      STRINGS.existingMealsModal.alerts.deleteConfirmDialog.title,
+      STRINGS.existingMealsModal.alerts.deleteConfirmDialog.message,
       [
         {
           text: STRINGS.existingMealsModal.alerts.deleteCancel,
@@ -120,22 +124,21 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
           style: "cancel",
         },
         {
-          text: STRINGS.existingMealsModal.alerts.deleteConfirm,
+          text: STRINGS.existingMealsModal.alerts.deleteConfirmButton,
           onPress: async () => {
             try {
               await deleteMeal(meal.id);
               const updatedMeals = await getAllMeals();
               setLocalMeals(updatedMeals);
-              Alert.alert(
-                STRINGS.existingMealsModal.alerts.deleteSuccess.title,
-                STRINGS.existingMealsModal.alerts.deleteSuccess.message
-              );
             } catch (error) {
               console.error("Error deleting meal:", error);
-              Alert.alert(
-                STRINGS.existingMealsModal.alerts.deleteError.title,
-                STRINGS.existingMealsModal.alerts.deleteError.message
-              );
+              // Add delay to show error alert after confirmation dialog closes
+              setTimeout(() => {
+                Alert.alert(
+                  STRINGS.existingMealsModal.alerts.deleteError.title,
+                  STRINGS.existingMealsModal.alerts.deleteError.message
+                );
+              }, 500);
             }
           },
           style: "destructive",
@@ -330,6 +333,12 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
                                     />
                                   </TouchableOpacity>
                                 </>
+                              ) : addedMealIds.has(meal.id) ? (
+                                <MaterialCommunityIcons
+                                  name="check"
+                                  size={24}
+                                  color={COLORS.success}
+                                />
                               ) : (
                                 <TouchableOpacity
                                   activeOpacity={0.7}

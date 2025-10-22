@@ -117,7 +117,7 @@ export const STRINGS = {
         title: "Error",
         message: "Failed to update meal",
       },
-      deleteConfirm: {
+      deleteConfirmDialog: {
         title: "Delete Meal",
         message: "Are you sure you want to delete this meal?",
       },
@@ -130,7 +130,7 @@ export const STRINGS = {
         message: "Failed to delete meal",
       },
       deleteCancel: "Cancel",
-      deleteConfirm: "Delete",
+      deleteConfirmButton: "Delete",
     },
   },
 
@@ -220,13 +220,9 @@ export const STRINGS = {
         title: "Error",
         message: "Failed to load existing meals",
       },
-      deleteConfirm: {
+      deleteConfirmDialog: {
         title: "Delete Meal",
         message: "Are you sure you want to delete this meal from today?",
-      },
-      deleteSuccess: {
-        title: "Success",
-        message: "Meal deleted!",
       },
       deleteError: {
         title: "Error",
@@ -237,7 +233,7 @@ export const STRINGS = {
         message: mealName,
       }),
       deleteCancel: "Cancel",
-      deleteConfirm: "Delete",
+      deleteConfirmButton: "Delete",
       edit: "Edit",
     },
   },

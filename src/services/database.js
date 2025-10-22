@@ -89,6 +89,32 @@ export const initializeDatabase = async () => {
       );
     `);
 
+    // Create plan_schedule table for assigning plans to days of week
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS plan_schedule (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        planId INTEGER NOT NULL,
+        dayOfWeek INTEGER NOT NULL,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (planId) REFERENCES plans(id) ON DELETE CASCADE,
+        UNIQUE(planId, dayOfWeek)
+      );
+    `);
+
+    // Create plan_execution table for tracking plan completion
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS plan_execution (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        planId INTEGER NOT NULL,
+        executionDate TEXT NOT NULL,
+        status TEXT DEFAULT 'pending',
+        completedAt TIMESTAMP,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (planId) REFERENCES plans(id) ON DELETE CASCADE,
+        UNIQUE(planId, executionDate)
+      );
+    `);
+
     console.log('✅ Database initialized successfully');
   } catch (error) {
     console.error('❌ Error initializing database:', error);
@@ -520,5 +546,115 @@ export const updateMeal = async (mealId, name, category, calories = 0, protein =
   } catch (error) {
     console.error('Error updating meal:', error);
     throw error;
+  }
+};
+
+// ============================================================================
+// PLAN SCHEDULING FUNCTIONS
+// ============================================================================
+
+/**
+ * Assign a plan to specific days of the week
+ * daysOfWeek: array of numbers (0-6, where 0 = Sunday, 6 = Saturday)
+ */
+export const assignPlanToDays = async (planId, daysOfWeek) => {
+  try {
+    // Delete existing assignments for this plan
+    await db.runAsync('DELETE FROM plan_schedule WHERE planId = ?', [planId]);
+
+    // Add new assignments
+    for (const day of daysOfWeek) {
+      await db.runAsync(
+        'INSERT INTO plan_schedule (planId, dayOfWeek) VALUES (?, ?)',
+        [planId, day]
+      );
+    }
+  } catch (error) {
+    console.error('Error assigning plan to days:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get scheduled days for a plan
+ */
+export const getScheduledDaysForPlan = async (planId) => {
+  try {
+    const result = await db.getAllAsync(
+      'SELECT dayOfWeek FROM plan_schedule WHERE planId = ? ORDER BY dayOfWeek',
+      [planId]
+    );
+    return result ? result.map(r => r.dayOfWeek) : [];
+  } catch (error) {
+    console.error('Error getting scheduled days:', error);
+    return [];
+  }
+};
+
+/**
+ * Get all plans scheduled for a specific day of week
+ */
+export const getPlansForDay = async (dayOfWeek) => {
+  try {
+    const result = await db.getAllAsync(
+      `SELECT p.* FROM plans p
+       INNER JOIN plan_schedule ps ON p.id = ps.planId
+       WHERE ps.dayOfWeek = ?
+       ORDER BY p.name`,
+      [dayOfWeek]
+    );
+    return result || [];
+  } catch (error) {
+    console.error('Error getting plans for day:', error);
+    return [];
+  }
+};
+
+/**
+ * Remove plan assignment from specific days
+ */
+export const removePlanFromDays = async (planId, daysOfWeek) => {
+  try {
+    for (const day of daysOfWeek) {
+      await db.runAsync(
+        'DELETE FROM plan_schedule WHERE planId = ? AND dayOfWeek = ?',
+        [planId, day]
+      );
+    }
+  } catch (error) {
+    console.error('Error removing plan from days:', error);
+    throw error;
+  }
+};
+
+/**
+ * Mark plan as completed for a date
+ */
+export const markPlanCompleted = async (planId, executionDate) => {
+  try {
+    await db.runAsync(
+      `INSERT OR REPLACE INTO plan_execution (planId, executionDate, status, completedAt)
+       VALUES (?, ?, ?, ?)`,
+      [planId, executionDate, 'completed', new Date().toISOString()]
+    );
+  } catch (error) {
+    console.error('Error marking plan as completed:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get execution status for a plan on a specific date
+ */
+export const getPlanExecutionStatus = async (planId, executionDate) => {
+  try {
+    const result = await db.getFirstAsync(
+      'SELECT * FROM plan_execution WHERE planId = ? AND executionDate = ?',
+      [planId, executionDate]
+    );
+    return result;
+  } catch (error) {
+    console.error('Error getting execution status:', error);
+    return null;
   }
 };

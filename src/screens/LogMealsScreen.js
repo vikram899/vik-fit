@@ -92,8 +92,8 @@ const LogMealsScreen = ({ navigation }) => {
 
   const handleDeleteMeal = (mealId) => {
     Alert.alert(
-      STRINGS.logMealsScreen.alerts.deleteConfirm.title,
-      STRINGS.logMealsScreen.alerts.deleteConfirm.message,
+      STRINGS.logMealsScreen.alerts.deleteConfirmDialog.title,
+      STRINGS.logMealsScreen.alerts.deleteConfirmDialog.message,
       [
         {
           text: STRINGS.logMealsScreen.alerts.deleteCancel,
@@ -101,7 +101,7 @@ const LogMealsScreen = ({ navigation }) => {
           style: "cancel",
         },
         {
-          text: STRINGS.logMealsScreen.alerts.deleteConfirm,
+          text: STRINGS.logMealsScreen.alerts.deleteConfirmButton,
           onPress: async () => {
             try {
               await deleteMealLog(mealId);
@@ -112,16 +112,15 @@ const LogMealsScreen = ({ navigation }) => {
               setDailyTotals(totals);
 
               setMealMenuVisible(false);
-              Alert.alert(
-                STRINGS.logMealsScreen.alerts.deleteSuccess.title,
-                STRINGS.logMealsScreen.alerts.deleteSuccess.message
-              );
             } catch (error) {
               console.error("Error deleting meal:", error);
-              Alert.alert(
-                STRINGS.logMealsScreen.alerts.deleteError.title,
-                STRINGS.logMealsScreen.alerts.deleteError.message
-              );
+              // Add delay to show error alert after confirmation dialog closes
+              setTimeout(() => {
+                Alert.alert(
+                  STRINGS.logMealsScreen.alerts.deleteError.title,
+                  STRINGS.logMealsScreen.alerts.deleteError.message
+                );
+              }, 500);
             }
           },
           style: "destructive",
@@ -159,7 +158,7 @@ const LogMealsScreen = ({ navigation }) => {
                 onPress: () => handleEditMeal(meal),
               },
               {
-                text: STRINGS.logMealsScreen.alerts.deleteConfirm,
+                text: STRINGS.logMealsScreen.alerts.deleteConfirmButton,
                 onPress: () => handleDeleteMeal(meal.id),
                 style: "destructive",
               },

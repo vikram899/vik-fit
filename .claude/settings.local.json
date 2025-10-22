@@ -30,7 +30,8 @@
       "Bash(\"src/screens/WorkoutPlansScreen.js\" )",
       "Bash(\"src/screens/PlanDetailScreen.js\" )",
       "Bash(\"src/screens/WorkoutExecutionScreen.js\" )",
-      "Bash(\"src/services/supabase.js\")"
+      "Bash(\"src/services/supabase.js\")",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []
