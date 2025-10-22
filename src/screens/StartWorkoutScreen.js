@@ -161,7 +161,22 @@ export default function StartWorkoutScreen({ navigation, route }) {
   }, [isResting]);
 
   const currentExercise = exercises[currentExerciseIndex];
-  const progress = ((currentExerciseIndex * 100) + ((currentSetNumber / currentExercise?.sets) * 100)) / (exercises.length * 100);
+
+  // Calculate progress: account for completed exercises + progress in current exercise
+  let progress = 0;
+  if (exercises.length > 0 && currentExercise) {
+    // Total number of sets across all exercises
+    const totalSets = exercises.reduce((sum, ex) => sum + (ex.sets || 1), 0);
+
+    // Completed sets = all sets from completed exercises + completed sets in current exercise
+    let completedSets = 0;
+    for (let i = 0; i < currentExerciseIndex; i++) {
+      completedSets += exercises[i].sets || 1;
+    }
+    completedSets += currentExerciseSets.length; // Add completed sets in current exercise
+
+    progress = (completedSets / totalSets) * 100;
+  }
 
   const handleLogSet = async () => {
     // Debug logs
@@ -466,6 +481,52 @@ export default function StartWorkoutScreen({ navigation, route }) {
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Upcoming Exercises Preview */}
+        {currentExerciseIndex < exercises.length - 1 && (
+          <View style={styles.upcomingSection}>
+            <Text style={styles.upcomingSectionTitle}>All Exercises</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={true}
+              scrollEventThrottle={16}
+              style={styles.upcomingScrollView}
+              contentContainerStyle={styles.upcomingScrollContent}
+            >
+              {exercises.map((exercise, index) => (
+                <View
+                  key={exercise.id}
+                  style={[
+                    styles.upcomingExerciseCard,
+                    index === currentExerciseIndex && styles.currentExerciseIndicator,
+                    index < currentExerciseIndex && styles.completedExerciseIndicator,
+                  ]}
+                >
+                  <View style={styles.exerciseIndexBadge}>
+                    <Text style={styles.exerciseIndexText}>{index + 1}</Text>
+                  </View>
+                  <View style={styles.upcomingExerciseHeader}>
+                    <Text style={styles.upcomingExerciseName}>{exercise.name}</Text>
+                  </View>
+                  <Text style={styles.upcomingExerciseSets}>{exercise.sets} sets</Text>
+                  <Text style={styles.upcomingExerciseTarget}>
+                    {exercise.reps} reps {exercise.weight ? `@ ${exercise.weight}kg` : ''}
+                  </Text>
+                  {index < currentExerciseIndex && (
+                    <View style={styles.completedBadge}>
+                      <MaterialCommunityIcons name="check-circle" size={16} color="#4CAF50" />
+                    </View>
+                  )}
+                  {index === currentExerciseIndex && (
+                    <View style={styles.currentBadge}>
+                      <MaterialCommunityIcons name="play-circle" size={16} color={COLORS.primary} />
+                    </View>
+                  )}
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -713,5 +774,97 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#D32F2F',
+  },
+  upcomingSection: {
+    marginTop: 24,
+    marginBottom: 16,
+  },
+  upcomingSectionTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#666',
+    marginBottom: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    paddingHorizontal: 16,
+  },
+  upcomingScrollView: {
+    marginHorizontal: -16,
+    paddingHorizontal: 16,
+  },
+  upcomingScrollContent: {
+    paddingRight: 16,
+    gap: 10,
+  },
+  upcomingExerciseCard: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    padding: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: '#999',
+    minWidth: 140,
+    maxWidth: 160,
+  },
+  currentExerciseIndicator: {
+    backgroundColor: '#E3F2FD',
+    borderLeftColor: COLORS.primary,
+    borderWidth: 1.5,
+    borderLeftWidth: 3,
+  },
+  completedExerciseIndicator: {
+    backgroundColor: '#F1F8E9',
+    borderLeftColor: '#4CAF50',
+    opacity: 0.8,
+  },
+  exerciseIndexBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  exerciseIndexText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  upcomingExerciseHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 6,
+  },
+  upcomingExerciseName: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#333',
+    flex: 1,
+  },
+  upcomingExerciseSets: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#999',
+    backgroundColor: '#fff',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 3,
+    marginBottom: 6,
+  },
+  upcomingExerciseTarget: {
+    fontSize: 11,
+    color: '#666',
+    fontWeight: '500',
+  },
+  completedBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+  },
+  currentBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
   },
 });
