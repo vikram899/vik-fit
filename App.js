@@ -1226,17 +1226,19 @@ function LogMealsScreen({ navigation, route }) {
         </View>
       </View>
 
+      {/* Today's Meals Title - Fixed */}
+      <View style={{ paddingHorizontal: 16, paddingVertical: 12, backgroundColor: "#fff" }}>
+        <Text style={{ fontSize: 18, fontWeight: "600", color: "#000" }}>
+          Today's Meals
+        </Text>
+      </View>
+
       {/* Scrollable Meals List */}
       <ScrollView
         style={{ flex: 1, width: "100%" }}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: 20, paddingBottom: 20 }}
+        contentContainerStyle={{ paddingBottom: 20 }}
       >
-        <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
-          <Text style={{ fontSize: 18, fontWeight: "600", color: "#000" }}>
-            Today's Meals
-          </Text>
-        </View>
         {todaysMeals.map((meal) => (
           <View
             key={meal.id}
