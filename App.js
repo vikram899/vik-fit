@@ -33,6 +33,7 @@ import WorkoutsLibraryScreen from "./src/screens/WorkoutsLibraryScreen";
 import MealsScreen from "./src/screens/MealsScreen";
 import AddWorkoutScreen from "./src/screens/AddWorkoutScreen";
 import AddMealScreen from "./src/screens/AddMealScreen";
+import StartWorkoutScreen from "./src/screens/StartWorkoutScreen";
 import { COLORS } from "./src/styles";
 import {
   initializeDatabase,
@@ -1027,18 +1028,6 @@ function HomeStackNavigator() {
               />
             </TouchableOpacity>
           ),
-          headerRight: () => (
-            <TouchableOpacity
-              onPress={() => navigation.navigate("CreatePlan")}
-              style={{ paddingRight: 16 }}
-            >
-              <MaterialCommunityIcons
-                name="plus-circle"
-                size={28}
-                color={COLORS.primary}
-              />
-            </TouchableOpacity>
-          ),
         })}
       />
       <Stack.Screen
@@ -1053,6 +1042,11 @@ function HomeStackNavigator() {
         name="ExecuteWorkout"
         component={ExecuteWorkoutScreen}
         options={{ title: "Execute Workout" }}
+      />
+      <Stack.Screen
+        name="StartWorkout"
+        component={StartWorkoutScreen}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="LogMeals"
@@ -1116,20 +1110,7 @@ function ProgressStackNavigator() {
         component={ProgressScreen}
         options={{
           title: "Progress",
-        }}
-      />
-      <Stack.Screen
-        name="WorkoutProgress"
-        component={WorkoutsStackNavigator}
-        options={{
-          title: "Workout Progress",
-        }}
-      />
-      <Stack.Screen
-        name="MealProgress"
-        component={MealsScreen}
-        options={{
-          title: "Meal Progress",
+          headerLeft: () => null,
         }}
       />
     </Stack.Navigator>
@@ -1138,31 +1119,57 @@ function ProgressStackNavigator() {
 
 /**
  * ProgressScreen
- * Main screen to select between workout and meal progress
+ * Shows workout and meal progress with tab switching
  */
 function ProgressScreen({ navigation }) {
+  const [activeTab, setActiveTab] = React.useState("workout");
+
   return (
     <View style={styles.screenContainer}>
-      <View style={styles.progressSelectContainer}>
+      {/* Tab Control */}
+      <View style={styles.progressTabsContainer}>
         <TouchableOpacity
-          style={styles.progressButton}
-          onPress={() => navigation.navigate("WorkoutProgress")}
+          style={[
+            styles.progressTab,
+            activeTab === "workout" && styles.progressTabActive,
+          ]}
+          onPress={() => setActiveTab("workout")}
         >
-          <MaterialCommunityIcons name="dumbbell" size={40} color="#007AFF" />
-          <Text style={styles.progressButtonText}>Workout Progress</Text>
+          <Text
+            style={[
+              styles.progressTabText,
+              activeTab === "workout" && styles.progressTabTextActive,
+            ]}
+          >
+            Workouts
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.progressButton}
-          onPress={() => navigation.navigate("MealProgress")}
+          style={[
+            styles.progressTab,
+            activeTab === "meal" && styles.progressTabActive,
+          ]}
+          onPress={() => setActiveTab("meal")}
         >
-          <MaterialCommunityIcons
-            name="silverware-fork-knife"
-            size={40}
-            color="#007AFF"
-          />
-          <Text style={styles.progressButtonText}>Meal Progress</Text>
+          <Text
+            style={[
+              styles.progressTabText,
+              activeTab === "meal" && styles.progressTabTextActive,
+            ]}
+          >
+            Meals
+          </Text>
         </TouchableOpacity>
+      </View>
+
+      {/* Content */}
+      <View style={styles.progressContentContainer}>
+        {activeTab === "workout" ? (
+          <WorkoutsLibraryScreen navigation={navigation} />
+        ) : (
+          <MealsScreen navigation={navigation} />
+        )}
       </View>
     </View>
   );
@@ -1300,7 +1307,6 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "stretch",
     backgroundColor: "#fff",
-    paddingHorizontal: 16,
   },
   title: {
     fontSize: 32,
@@ -1965,27 +1971,34 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#666",
   },
-  progressSelectContainer: {
+  progressTabsContainer: {
+    flexDirection: "row",
+    backgroundColor: "#f5f5f5",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+    marginTop: 12,
+    marginBottom: 12,
+  },
+  progressTab: {
     flex: 1,
-    justifyContent: "center",
+    paddingVertical: 16,
     alignItems: "center",
-    gap: 20,
-    paddingHorizontal: 16,
+    borderBottomWidth: 3,
+    borderBottomColor: "transparent",
   },
-  progressButton: {
-    width: "100%",
-    backgroundColor: "#f9f9f9",
-    borderRadius: 16,
-    padding: 30,
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#e0e0e0",
-    gap: 12,
+  progressTabActive: {
+    borderBottomColor: "#007AFF",
   },
-  progressButtonText: {
-    fontSize: 18,
+  progressTabText: {
+    fontSize: 16,
     fontWeight: "600",
-    color: "#333",
+    color: "#666",
+  },
+  progressTabTextActive: {
+    color: "#007AFF",
+  },
+  progressContentContainer: {
+    flex: 1,
   },
 });
 

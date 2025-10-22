@@ -264,7 +264,7 @@ export default function AddMealScreen({ navigation, route }) {
               </Text>
               {meals.length === 0 && (
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('CreateMeal')}
+                  onPress={() => setAddMealModalVisible(true)}
                   style={styles.emptyStateButton}
                 >
                   <MaterialCommunityIcons name="plus" size={20} color="#fff" />

@@ -165,7 +165,6 @@ export default function AddWorkoutScreen({ navigation }) {
             try {
               await deletePlan(workout.id);
               loadWorkouts();
-              Alert.alert('Success', 'Workout deleted!');
             } catch (error) {
               console.error('Error deleting workout:', error);
               Alert.alert('Error', 'Failed to delete workout');

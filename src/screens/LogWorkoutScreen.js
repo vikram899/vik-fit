@@ -46,6 +46,7 @@ export default function LogWorkoutScreen({ navigation }) {
   const [selectedWorkoutForAssign, setSelectedWorkoutForAssign] = useState(null);
   const [scheduledDays, setScheduledDays] = useState({});
   const [fadeAnim] = useState(new Animated.Value(0));
+  const [activeTab, setActiveTab] = useState('today'); // 'today' or 'all'
 
   const todayDayOfWeek = new Date().getDay();
   const weekStartDate = getSundayOfWeek(new Date().toISOString().split('T')[0]);
@@ -169,6 +170,10 @@ export default function LogWorkoutScreen({ navigation }) {
     navigation.navigate('ExecuteWorkout', { planId: workout.id });
   };
 
+  const handleStartWorkout = (workout) => {
+    navigation.navigate('StartWorkout', { planId: workout.id });
+  };
+
   const handleDeleteWorkout = (workout) => {
     Alert.alert(
       'Delete Workout',
@@ -184,7 +189,6 @@ export default function LogWorkoutScreen({ navigation }) {
             try {
               await deletePlan(workout.id);
               loadWorkouts();
-              Alert.alert('Success', 'Workout deleted!');
             } catch (error) {
               console.error('Error deleting workout:', error);
               Alert.alert('Error', 'Failed to delete workout');
@@ -308,18 +312,26 @@ export default function LogWorkoutScreen({ navigation }) {
           </View>
         )}
 
-        {/* Action Button */}
-        <TouchableOpacity
-          style={styles.viewButton}
-          onPress={() => handleViewExercises(workout)}
-        >
-          <MaterialCommunityIcons
-            name="chevron-right"
-            size={20}
-            color={COLORS.primary}
-          />
-          <Text style={styles.viewButtonText}>View Exercises</Text>
-        </TouchableOpacity>
+        {/* Action Buttons */}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.secondaryButton]}
+            onPress={() => handleViewExercises(workout)}
+          >
+            <Text style={styles.secondaryButtonText}>View</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.primaryButton]}
+            onPress={() => handleStartWorkout(workout)}
+          >
+            <MaterialCommunityIcons
+              name="play"
+              size={18}
+              color="#fff"
+            />
+            <Text style={styles.primaryButtonText}>Start</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   };
@@ -337,152 +349,191 @@ export default function LogWorkoutScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
+        {/* Tab Navigation */}
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'today' && styles.tabActive]}
+            onPress={() => setActiveTab('today')}
+          >
+            <Text style={[styles.tabText, activeTab === 'today' && styles.tabTextActive]}>
+              Today
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'all' && styles.tabActive]}
+            onPress={() => setActiveTab('all')}
+          >
+            <Text style={[styles.tabText, activeTab === 'all' && styles.tabTextActive]}>
+              All Workouts
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={true}
         >
-          {/* Today's Workouts Section */}
-          {todaysWorkouts.length > 0 && (
-            <View style={styles.todaySection}>
-              <View style={styles.sectionHeader}>
-                <MaterialCommunityIcons
-                  name="calendar-today"
-                  size={20}
-                  color="#FF9800"
-                />
-                <Text style={styles.sectionTitle}>Today's Workouts</Text>
+          {activeTab === 'today' ? (
+            // Today's Workouts Tab
+            <>
+              {/* Today's Workouts Section */}
+              <View style={styles.todaySection}>
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons
+                name="calendar-today"
+                size={20}
+                color="#FF9800"
+              />
+              <Text style={styles.sectionTitle}>Today's Workouts</Text>
+              {todaysWorkouts.length > 0 && (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>{todaysWorkouts.length}</Text>
                 </View>
-              </View>
-              {todaysWorkouts.map(workout => (
-                <WorkoutCard key={workout.id} workout={workout} isToday={true} />
-              ))}
+              )}
             </View>
-          )}
-
-          {/* Search Bar */}
-          <View style={styles.searchContainer}>
-            <MaterialCommunityIcons
-              name="magnify"
-              size={20}
-              color="#999"
-              style={styles.searchIcon}
-            />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search workouts..."
-              value={searchText}
-              onChangeText={setSearchText}
-              placeholderTextColor="#999"
-            />
-            {searchText.length > 0 && (
-              <TouchableOpacity
-                onPress={() => setSearchText('')}
-                style={styles.clearButton}
-              >
-                <MaterialCommunityIcons name="close" size={18} color="#999" />
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {/* Filter and Sort Controls */}
-          <View style={styles.controlsContainer}>
-            {/* Filter Dropdown */}
-            <TouchableOpacity
-              style={styles.controlButton}
-              onPress={() => {
-                Alert.alert(
-                  'Filter',
-                  'Show workouts:',
-                  [
-                    {
-                      text: 'All',
-                      onPress: () => setFilterOption('all'),
-                    },
-                    {
-                      text: 'Assigned Only',
-                      onPress: () => setFilterOption('assigned'),
-                    },
-                    {
-                      text: 'Unassigned Only',
-                      onPress: () => setFilterOption('unassigned'),
-                    },
-                    {
-                      text: 'Cancel',
-                      style: 'cancel',
-                    },
-                  ]
-                );
-              }}
-            >
-              <MaterialCommunityIcons name="filter" size={16} color={COLORS.primary} />
-              <Text style={styles.controlButtonText}>
-                {filterOption === 'all' ? 'All' : filterOption === 'assigned' ? 'Assigned' : 'Unassigned'}
-              </Text>
-            </TouchableOpacity>
-
-            {/* Sort Dropdown */}
-            <TouchableOpacity
-              style={styles.controlButton}
-              onPress={() => {
-                Alert.alert(
-                  'Sort',
-                  'Sort by:',
-                  [
-                    {
-                      text: 'Name (A-Z)',
-                      onPress: () => setSortOption('name'),
-                    },
-                    {
-                      text: 'Most Assigned',
-                      onPress: () => setSortOption('assigned'),
-                    },
-                    {
-                      text: 'Recently Created',
-                      onPress: () => setSortOption('recent'),
-                    },
-                    {
-                      text: 'Cancel',
-                      style: 'cancel',
-                    },
-                  ]
-                );
-              }}
-            >
-              <MaterialCommunityIcons name="sort" size={16} color={COLORS.primary} />
-              <Text style={styles.controlButtonText}>
-                {sortOption === 'name' ? 'Name' : sortOption === 'assigned' ? 'Most' : 'Recent'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* All Workouts Section */}
-          <View style={styles.allWorkoutsSection}>
-            <Text style={styles.allWorkoutsTitle}>All Workouts</Text>
-            {filteredWorkouts.length === 0 ? (
-              <View style={styles.emptyStateContainer}>
-                <MaterialCommunityIcons
-                  name="dumbbell"
-                  size={64}
-                  color="#ccc"
-                />
-                <Text style={styles.emptyStateTitle}>
-                  {workouts.length === 0 ? 'No Workouts Created' : 'No Workouts Found'}
-                </Text>
-                <Text style={styles.emptyStateSubtitle}>
-                  {workouts.length === 0
-                    ? 'Create your first workout routine'
-                    : 'Try adjusting your search or filters'}
-                </Text>
-              </View>
-            ) : (
-              filteredWorkouts.map(workout => (
-                <WorkoutCard key={workout.id} workout={workout} isToday={false} />
+            {todaysWorkouts.length > 0 ? (
+              todaysWorkouts.map(workout => (
+                <WorkoutCard key={workout.id} workout={workout} isToday={true} />
               ))
+            ) : (
+              <View style={styles.noWorkoutAssignedContainer}>
+                <MaterialCommunityIcons
+                  name="calendar-blank"
+                  size={48}
+                  color="#FF9800"
+                />
+                <Text style={styles.noWorkoutAssignedText}>No Workouts Assigned for Today</Text>
+              </View>
             )}
           </View>
+
+            </>
+          ) : (
+            // All Workouts Tab
+            <>
+              {/* Search Bar */}
+              <View style={styles.searchContainer}>
+                <MaterialCommunityIcons
+                  name="magnify"
+                  size={20}
+                  color="#999"
+                  style={styles.searchIcon}
+                />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search workouts..."
+                  value={searchText}
+                  onChangeText={setSearchText}
+                  placeholderTextColor="#999"
+                />
+                {searchText.length > 0 && (
+                  <TouchableOpacity
+                    onPress={() => setSearchText('')}
+                    style={styles.clearButton}
+                  >
+                    <MaterialCommunityIcons name="close" size={18} color="#999" />
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {/* Filter and Sort Controls */}
+              <View style={styles.controlsContainer}>
+                {/* Filter Dropdown */}
+                <TouchableOpacity
+                  style={styles.controlButton}
+                  onPress={() => {
+                    Alert.alert(
+                      'Filter',
+                      'Show workouts:',
+                      [
+                        {
+                          text: 'All',
+                          onPress: () => setFilterOption('all'),
+                        },
+                        {
+                          text: 'Assigned Only',
+                          onPress: () => setFilterOption('assigned'),
+                        },
+                        {
+                          text: 'Unassigned Only',
+                          onPress: () => setFilterOption('unassigned'),
+                        },
+                        {
+                          text: 'Cancel',
+                          style: 'cancel',
+                        },
+                      ]
+                    );
+                  }}
+                >
+                  <MaterialCommunityIcons name="filter" size={16} color={COLORS.primary} />
+                  <Text style={styles.controlButtonText}>
+                    {filterOption === 'all' ? 'All' : filterOption === 'assigned' ? 'Assigned' : 'Unassigned'}
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Sort Dropdown */}
+                <TouchableOpacity
+                  style={styles.controlButton}
+                  onPress={() => {
+                    Alert.alert(
+                      'Sort',
+                      'Sort by:',
+                      [
+                        {
+                          text: 'Name (A-Z)',
+                          onPress: () => setSortOption('name'),
+                        },
+                        {
+                          text: 'Most Assigned',
+                          onPress: () => setSortOption('assigned'),
+                        },
+                        {
+                          text: 'Recently Created',
+                          onPress: () => setSortOption('recent'),
+                        },
+                        {
+                          text: 'Cancel',
+                          style: 'cancel',
+                        },
+                      ]
+                    );
+                  }}
+                >
+                  <MaterialCommunityIcons name="sort" size={16} color={COLORS.primary} />
+                  <Text style={styles.controlButtonText}>
+                    {sortOption === 'name' ? 'Name' : sortOption === 'assigned' ? 'Most' : 'Recent'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* All Workouts Section */}
+              <View style={styles.allWorkoutsSection}>
+                {filteredWorkouts.length === 0 ? (
+                  <View style={styles.emptyStateContainer}>
+                    <MaterialCommunityIcons
+                      name="dumbbell"
+                      size={64}
+                      color="#ccc"
+                    />
+                    <Text style={styles.emptyStateTitle}>
+                      {workouts.length === 0 ? 'No Workouts Created' : 'No Workouts Found'}
+                    </Text>
+                    <Text style={styles.emptyStateSubtitle}>
+                      {workouts.length === 0
+                        ? 'Create your first workout routine'
+                        : 'Try adjusting your search or filters'}
+                    </Text>
+                  </View>
+                ) : (
+                  filteredWorkouts.map(workout => (
+                    <WorkoutCard key={workout.id} workout={workout} isToday={false} />
+                  ))
+                )}
+              </View>
+            </>
+          )}
         </ScrollView>
       </Animated.View>
 
@@ -505,6 +556,70 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    paddingHorizontal: 16,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 14,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabActive: {
+    borderBottomColor: COLORS.primary,
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#999',
+  },
+  tabTextActive: {
+    color: COLORS.primary,
+  },
+  optionsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    gap: 16,
+  },
+  optionButton: {
+    width: '100%',
+    backgroundColor: '#f9f9f9',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    gap: 12,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+  },
+  optionButtonTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+  },
+  optionButtonSubtitle: {
+    fontSize: 13,
+    color: '#999',
+    fontWeight: '500',
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  backButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2196F3',
   },
   scrollView: {
     flex: 1,
@@ -553,6 +668,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#fff',
+  },
+  noWorkoutAssignedContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 32,
+    gap: 12,
+  },
+  noWorkoutAssignedText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FF9800',
   },
   todayWorkoutCard: {
     backgroundColor: '#fff',
@@ -723,16 +849,35 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'right',
   },
-  viewButton: {
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  actionButton: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 0,
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 8,
+    gap: 6,
   },
-  viewButtonText: {
+  primaryButton: {
+    backgroundColor: COLORS.primary,
+  },
+  secondaryButton: {
+    backgroundColor: '#f5f5f5',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  primaryButtonText: {
     fontSize: 14,
-    color: COLORS.primary,
     fontWeight: '600',
-    marginLeft: 4,
+    color: '#fff',
+  },
+  secondaryButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.primary,
   },
 });

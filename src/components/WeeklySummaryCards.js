@@ -95,8 +95,10 @@ const WeeklySummaryCards = ({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Weekly Summary</Text>
-      <Text style={styles.subtitle}>vs Last Week</Text>
+      <View style={styles.titleRow}>
+        <Text style={styles.title}>Weekly Summary</Text>
+        <Text style={styles.subtitle}>vs Last Week</Text>
+      </View>
 
       <View style={styles.cardsGrid}>
         <MacroCard
@@ -141,16 +143,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 20,
   },
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   title: {
     fontSize: 18,
     fontWeight: '700',
     color: '#000',
-    marginBottom: 4,
   },
   subtitle: {
     fontSize: 12,
     color: '#999',
-    marginBottom: 16,
   },
   cardsGrid: {
     flexDirection: 'row',
