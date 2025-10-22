@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -53,6 +53,9 @@ export default function StartWorkoutScreen({ navigation, route }) {
 
   // Logged sets for current exercise
   const [currentExerciseSets, setCurrentExerciseSets] = useState([]);
+
+  // Horizontal scroll ref for exercise list
+  const upcomingExercisesScrollRef = useRef(null);
 
   // Load initial data
   useFocusEffect(
@@ -159,6 +162,25 @@ export default function StartWorkoutScreen({ navigation, route }) {
       // User can now log next set
     }
   }, [isResting]);
+
+  // Auto-scroll horizontal exercise list when exercise changes
+  useEffect(() => {
+    if (upcomingExercisesScrollRef.current && exercises.length > 0) {
+      // Calculate scroll position: each card is ~160px wide + 10px gap
+      // We want to scroll to center the current exercise in view
+      const cardWidth = 160;
+      const gap = 10;
+      const totalCardWidth = cardWidth + gap;
+      const scrollPosition = Math.max(0, currentExerciseIndex * totalCardWidth - (cardWidth / 2));
+
+      setTimeout(() => {
+        upcomingExercisesScrollRef.current?.scrollTo({
+          x: scrollPosition,
+          animated: true,
+        });
+      }, 100);
+    }
+  }, [currentExerciseIndex, exercises.length]);
 
   const currentExercise = exercises[currentExerciseIndex];
 
@@ -487,6 +509,7 @@ export default function StartWorkoutScreen({ navigation, route }) {
           <View style={styles.upcomingSection}>
             <Text style={styles.upcomingSectionTitle}>All Exercises</Text>
             <ScrollView
+              ref={upcomingExercisesScrollRef}
               horizontal
               showsHorizontalScrollIndicator={true}
               scrollEventThrottle={16}
