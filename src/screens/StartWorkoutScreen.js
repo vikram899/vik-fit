@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
   TextInput,
+  Keyboard,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -53,6 +54,9 @@ export default function StartWorkoutScreen({ navigation, route }) {
 
   // Logged sets for current exercise
   const [currentExerciseSets, setCurrentExerciseSets] = useState([]);
+
+  // Prevent double-clicking/rapid submissions
+  const [isLoggingSet, setIsLoggingSet] = useState(false);
 
   // Horizontal scroll ref for exercise list
   const upcomingExercisesScrollRef = useRef(null);
@@ -201,33 +205,40 @@ export default function StartWorkoutScreen({ navigation, route }) {
   }
 
   const handleLogSet = async () => {
-    // Debug logs
-    console.log('=== LOGGING SET ===');
-    console.log('workoutLogId:', workoutLogId);
-    console.log('currentExercise:', currentExercise);
-    console.log('currentSetNumber:', currentSetNumber);
-
-    // Validate workoutLogId first
-    if (!workoutLogId) {
-      console.error('workoutLogId is null/undefined');
-      Alert.alert('Error', 'Workout not initialized. Please try again.');
+    // Prevent rapid/double clicks
+    if (isLoggingSet) {
       return;
     }
 
-    if (!repsInput.trim()) {
-      Alert.alert('Error', 'Please enter reps');
-      return;
-    }
-
-    const reps = parseInt(repsInput);
-    const weight = weightInput ? parseFloat(weightInput) : 0;
-
-    if (reps <= 0) {
-      Alert.alert('Error', 'Reps must be greater than 0');
-      return;
-    }
+    setIsLoggingSet(true);
 
     try {
+      // Debug logs
+      console.log('=== LOGGING SET ===');
+      console.log('workoutLogId:', workoutLogId);
+      console.log('currentExercise:', currentExercise?.name);
+      console.log('currentSetNumber:', currentSetNumber);
+
+      // Validate workoutLogId first
+      if (!workoutLogId) {
+        console.error('workoutLogId is null/undefined');
+        Alert.alert('Error', 'Workout not initialized. Please try again.');
+        return;
+      }
+
+      if (!repsInput.trim()) {
+        Alert.alert('Error', 'Please enter reps');
+        return;
+      }
+
+      const reps = parseInt(repsInput);
+      const weight = weightInput ? parseFloat(weightInput) : 0;
+
+      if (reps <= 0) {
+        Alert.alert('Error', 'Reps must be greater than 0');
+        return;
+      }
+
       console.log('Calling logExerciseSet with:', {
         workoutLogId,
         exerciseId: currentExercise.id,
@@ -273,10 +284,16 @@ export default function StartWorkoutScreen({ navigation, route }) {
         stack: error.stack,
       });
       Alert.alert('Error', 'Failed to log set: ' + error.message);
+    } finally {
+      // Re-enable the button after operation completes
+      setIsLoggingSet(false);
     }
   };
 
   const handleSkipRestAndContinue = async () => {
+    // Dismiss keyboard immediately
+    Keyboard.dismiss();
+
     if (currentSetNumber < currentExercise.sets) {
       // More sets for this exercise
       setCurrentSetNumber(currentSetNumber + 1);
@@ -296,6 +313,9 @@ export default function StartWorkoutScreen({ navigation, route }) {
   };
 
   const handleCompleteExercise = async () => {
+    // Dismiss keyboard immediately
+    Keyboard.dismiss();
+
     Alert.alert(
       'Complete Exercise',
       `Skip remaining sets for ${currentExercise.name}?`,
@@ -338,6 +358,9 @@ export default function StartWorkoutScreen({ navigation, route }) {
   };
 
   const handleExit = () => {
+    // Dismiss keyboard immediately
+    Keyboard.dismiss();
+
     Alert.alert(
       'Exit Workout',
       'Are you sure? Your logged sets will be saved.',
@@ -372,7 +395,7 @@ export default function StartWorkoutScreen({ navigation, route }) {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleExit}>
+        <TouchableOpacity onPress={handleExit} activeOpacity={0.7}>
           <MaterialCommunityIcons name="close" size={24} color={COLORS.primary} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
@@ -431,6 +454,8 @@ export default function StartWorkoutScreen({ navigation, route }) {
                     value={repsInput}
                     onChangeText={setRepsInput}
                     autoFocus
+                    returnKeyType="next"
+                    blurOnSubmit={false}
                   />
                 </View>
                 <View style={styles.inputGroup}>
@@ -441,20 +466,46 @@ export default function StartWorkoutScreen({ navigation, route }) {
                     keyboardType="decimal-pad"
                     value={weightInput}
                     onChangeText={setWeightInput}
+                    returnKeyType="done"
+                    blurOnSubmit={false}
+                    onSubmitEditing={() => {
+                      console.log('onSubmitEditing called');
+                      Keyboard.dismiss();
+                      setTimeout(() => handleLogSet(), 100);
+                    }}
                   />
                 </View>
               </View>
 
-              <TouchableOpacity
-                style={[styles.logButton, !workoutLogId && styles.logButtonDisabled]}
-                onPress={handleLogSet}
-                disabled={!workoutLogId}
+              <View
+                style={styles.logButtonWrapper}
+                onTouchEnd={() => {
+                  if (!workoutLogId || isLoggingSet) {
+                    return;
+                  }
+                  Keyboard.dismiss();
+                  setTimeout(() => {
+                    handleLogSet();
+                  }, 50);
+                }}
               >
-                <MaterialCommunityIcons name="check" size={20} color="#fff" />
-                <Text style={styles.logButtonText}>
-                  {workoutLogId ? 'Log Set' : 'Initializing...'}
-                </Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.logButton, (!workoutLogId || isLoggingSet) && styles.logButtonDisabled]}
+                  activeOpacity={0.7}
+                  delayPressIn={0}
+                  delayPressOut={0}
+                >
+                  <MaterialCommunityIcons
+                    name={isLoggingSet ? "loading" : "check"}
+                    size={20}
+                    color="#fff"
+                    style={isLoggingSet ? styles.loadingIcon : {}}
+                  />
+                  <Text style={styles.logButtonText}>
+                    {!workoutLogId ? 'Initializing...' : isLoggingSet ? 'Logging...' : 'Log Set'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </>
           ) : (
             /* Rest Timer Active */
@@ -464,6 +515,7 @@ export default function StartWorkoutScreen({ navigation, route }) {
                 <TouchableOpacity
                   style={[styles.restActionButton, styles.addTimeButton]}
                   onPress={() => setRestTimeLeft(restTimeLeft + 10)}
+                  activeOpacity={0.7}
                 >
                   <MaterialCommunityIcons name="plus" size={18} color="#fff" />
                   <Text style={styles.restActionButtonText}>+10s</Text>
@@ -471,6 +523,7 @@ export default function StartWorkoutScreen({ navigation, route }) {
                 <TouchableOpacity
                   style={[styles.restActionButton, styles.skipButton]}
                   onPress={handleSkipRestAndContinue}
+                  activeOpacity={0.7}
                 >
                   <MaterialCommunityIcons name="skip-next" size={18} color="#fff" />
                   <Text style={styles.restActionButtonText}>Skip</Text>
@@ -498,6 +551,7 @@ export default function StartWorkoutScreen({ navigation, route }) {
             <TouchableOpacity
               style={[styles.actionButton, styles.skipExerciseButton]}
               onPress={handleCompleteExercise}
+              activeOpacity={0.7}
             >
               <Text style={styles.skipExerciseText}>Skip Exercise</Text>
             </TouchableOpacity>
@@ -718,6 +772,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#fff',
+  },
+  loadingIcon: {
+    transform: [{ rotate: '0deg' }],
+  },
+  logButtonWrapper: {
+    zIndex: 1000,
   },
   restingContainer: {
     alignItems: 'center',
