@@ -319,7 +319,26 @@ function MainTabNavigator({ onAddPress }) {
                 e.preventDefault?.();
                 onAddPress?.();
               }}
-            />
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: -70,
+              }}
+            >
+              <MaterialCommunityIcons
+                name="plus-circle"
+                size={50}
+                color={COLORS.primary}
+                style={{
+                  shadowColor: "#007AFF",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 8,
+                }}
+              />
+            </TouchableOpacity>
           ),
         }}
       />

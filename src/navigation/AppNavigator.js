@@ -41,9 +41,9 @@ console.log("🔧 AppNavigator.js - WorkoutStack navigator created");
  * Stack navigation for workout planning and execution
  */
 function WorkoutStackNavigator() {
-  console.log('🔧 WorkoutStackNavigator - RENDERING');
+  console.log("🔧 WorkoutStackNavigator - RENDERING");
   try {
-    console.log('🔧 WorkoutStackNavigator - About to create Navigator');
+    console.log("🔧 WorkoutStackNavigator - About to create Navigator");
     const nav = (
       <WorkoutStack.Navigator
         screenOptions={{
@@ -51,17 +51,14 @@ function WorkoutStackNavigator() {
           cardStyle: { backgroundColor: COLORS.background },
         }}
       >
-        <WorkoutStack.Screen
-          name="Workouts"
-          component={WorkoutsScreen}
-        />
+        <WorkoutStack.Screen name="Workouts" component={WorkoutsScreen} />
       </WorkoutStack.Navigator>
     );
-    console.log('🔧 WorkoutStackNavigator - Navigator created successfully');
+    console.log("🔧 WorkoutStackNavigator - Navigator created successfully");
     return nav;
   } catch (err) {
-    console.error('❌ Error in WorkoutStackNavigator:', err);
-    console.error('❌ Stack:', err.stack);
+    console.error("❌ Error in WorkoutStackNavigator:", err);
+    console.error("❌ Stack:", err.stack);
     throw err;
   }
 }
