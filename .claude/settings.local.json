@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(__NEW_LINE__ echo \"✅ SYNTAX VERIFICATION COMPLETE\")"
+      "Bash(__NEW_LINE__ echo \"✅ SYNTAX VERIFICATION COMPLETE\")",
+      "Bash(npx expo:*)"
     ],
     "deny": [],
     "ask": []
