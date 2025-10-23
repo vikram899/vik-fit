@@ -41,10 +41,8 @@ export const initializeDatabase = async () => {
     // Migration: Add time column if it doesn't exist
     try {
       await db.execAsync('ALTER TABLE exercises ADD COLUMN time INTEGER DEFAULT 0;');
-      console.log('✅ Added time column to exercises table');
     } catch (error) {
       // Column already exists, no need to add it
-      console.log('✅ Time column already exists');
     }
 
     // Create meals table if it doesn't exist
@@ -161,8 +159,6 @@ export const initializeDatabase = async () => {
         FOREIGN KEY (exerciseId) REFERENCES exercises(id) ON DELETE CASCADE
       );
     `);
-
-    console.log('✅ Database initialized successfully');
   } catch (error) {
     console.error('❌ Error initializing database:', error);
     throw error;
@@ -336,20 +332,15 @@ export const seedDummyData = async () => {
     // Check if data already exists
     const existingPlans = await getAllPlans();
     if (existingPlans.length > 0) {
-      console.log('✅ Database already has plans, skipping seed');
       // Seed macro goals with today's date (will apply to today and all future dates)
       const today = new Date().toISOString().split('T')[0];
       const existingMacros = await db.getFirstAsync('SELECT * FROM macro_goals WHERE goalDate = ?', [today]);
       if (!existingMacros) {
-        console.log('Seeding default macro goals for today...');
         await setMacroGoals(today, 2500, 120, 300, 80);
-        console.log('✅ Default macro goals seeded for', today);
       }
 
       // Always reseed weight data with dummy data
-      console.log('Clearing old weight data and seeding fresh dummy data...');
       await db.runAsync('DELETE FROM weight_tracking');
-      console.log('Seeding dummy weight tracking data...');
 
       // Seed dummy weight data for the last 2 months
       const todayDate = new Date();
@@ -387,66 +378,46 @@ export const seedDummyData = async () => {
         { daysAgo: 0, weight: 76.2 },
       ];
       const targetWeightValue = 75;
-      console.log('Starting to seed', weightDataPoints.length, 'weight entries...');
       for (let i = 0; i < weightDataPoints.length; i++) {
         const dataPoint = weightDataPoints[i];
         const entryDate = new Date(todayDate.getTime() - dataPoint.daysAgo * 24 * 60 * 60 * 1000);
         const dateStr = entryDate.toISOString().split('T')[0];
-        console.log('Seeding entry', i + 1, 'of', weightDataPoints.length, ':', dateStr, dataPoint.weight, 'kg');
         await addWeightEntry(dateStr, dataPoint.weight, targetWeightValue);
       }
-      console.log('✓ Weight tracking data added:', weightDataPoints.length, 'entries');
       return;
     }
 
-    console.log('Starting to seed dummy data...');
-
     // Seed default macro goals with today's date (will apply to today and all future dates)
     const today = new Date().toISOString().split('T')[0];
-    console.log('Seeding default macro goals for today (' + today + ')...');
     await setMacroGoals(today, 2500, 120, 300, 80);
-    console.log('✅ Default macro goals seeded for', today);
 
     // Add dummy plans and wait for each to complete
-    console.log('Adding Chest Day plan...');
     const plan1Id = await addPlan('Chest Day', 'Focus on chest and triceps');
-    console.log('✓ Chest Day plan ID:', plan1Id);
 
-    console.log('Adding Leg Day plan...');
     const plan2Id = await addPlan('Leg Day', 'Focus on quads, hamstrings, and glutes');
-    console.log('✓ Leg Day plan ID:', plan2Id);
 
-    console.log('Adding Back & Biceps plan...');
     const plan3Id = await addPlan('Back & Biceps', 'Focus on back and biceps');
-    console.log('✓ Back & Biceps plan ID:', plan3Id);
 
     // Add exercises for Chest Day
-    console.log('Adding exercises for Chest Day...');
     await addExercise(plan1Id, 'Bench Press', 4, 8, 185, 'Explosive');
     await addExercise(plan1Id, 'Incline Dumbbell Press', 3, 10, 60, '');
     await addExercise(plan1Id, 'Tricep Dips', 3, 12, 0, 'Bodyweight');
     await addExercise(plan1Id, 'Chest Fly', 3, 12, 50, '');
-    console.log('✓ Chest Day exercises added');
 
     // Add exercises for Leg Day
-    console.log('Adding exercises for Leg Day...');
     await addExercise(plan2Id, 'Squats', 4, 6, 225, 'Heavy');
     await addExercise(plan2Id, 'Leg Press', 3, 10, 450, '');
     await addExercise(plan2Id, 'Leg Curl', 3, 12, 150, '');
     await addExercise(plan2Id, 'Leg Extension', 3, 12, 160, '');
     await addExercise(plan2Id, 'Calf Raises', 3, 15, 200, '');
-    console.log('✓ Leg Day exercises added');
 
     // Add exercises for Back & Biceps
-    console.log('Adding exercises for Back & Biceps...');
     await addExercise(plan3Id, 'Deadlift', 3, 5, 315, 'Heavy');
     await addExercise(plan3Id, 'Barbell Row', 4, 8, 225, '');
     await addExercise(plan3Id, 'Barbell Curl', 3, 8, 85, '');
     await addExercise(plan3Id, 'Lat Pulldown', 3, 12, 180, '');
-    console.log('✓ Back & Biceps exercises added');
 
     // Seed dummy weight tracking data for the last 2 months
-    console.log('Adding dummy weight tracking data...');
     const todayDate = new Date();
     const twoMonthsAgo = new Date(todayDate.getTime() - 60 * 24 * 60 * 60 * 1000);
 
@@ -495,9 +466,7 @@ export const seedDummyData = async () => {
       await addWeightEntry(dateStr, dataPoint.weight, targetWeightValue);
     }
 
-    console.log('✓ Weight tracking data added:', weightDataPoints.length, 'entries');
 
-    console.log('✅ Dummy data seeded successfully!');
   } catch (error) {
     console.error('❌ Error seeding dummy data:', error);
     throw error;
@@ -733,7 +702,6 @@ export const getMacroGoals = async (goalDate) => {
 export const debugGetAllMacroGoals = async () => {
   try {
     const allGoals = await db.getAllAsync('SELECT * FROM macro_goals ORDER BY goalDate DESC');
-    console.log('DEBUG: All macro goals in database:', allGoals);
     return allGoals;
   } catch (error) {
     console.error('Error getting all macro goals:', error);
@@ -747,7 +715,6 @@ export const debugGetAllMacroGoals = async () => {
 export const debugClearAllMacroGoals = async () => {
   try {
     await db.runAsync('DELETE FROM macro_goals');
-    console.log('DEBUG: Cleared all macro goals from database');
   } catch (error) {
     console.error('Error clearing macro goals:', error);
   }
@@ -766,7 +733,6 @@ export const addWeightEntry = async (weightDate, currentWeight, targetWeight) =>
       'INSERT OR REPLACE INTO weight_tracking (weightDate, currentWeight, targetWeight) VALUES (?, ?, ?)',
       [weightDate, currentWeight, targetWeight]
     );
-    console.log('Weight entry saved for', weightDate);
   } catch (error) {
     console.error('Error adding weight entry:', error);
     throw error;

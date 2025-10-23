@@ -76,26 +76,12 @@ export default function HomeScreen({ navigation }) {
 
         // Load weight data (last 60 days for 2-month view)
         const allWeightEntries = await getAllWeightEntries();
-        console.log(
-          "HomeScreen - getAllWeightEntries returned:",
-          allWeightEntries.length,
-          "entries"
-        );
-        if (allWeightEntries.length > 0) {
-          console.log("First entry:", allWeightEntries[0]);
-          console.log(
-            "Last entry:",
-            allWeightEntries[allWeightEntries.length - 1]
-          );
-        }
         const sixtyDaysAgo = new Date();
         sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
         const startDate = sixtyDaysAgo.toISOString().split("T")[0];
-        console.log("Filter start date:", startDate);
         const recentWeightData = allWeightEntries.filter(
           (entry) => entry.weightDate >= startDate
         );
-        console.log("After filter:", recentWeightData.length, "entries");
         setWeightData(recentWeightData);
 
         // Set target weight from latest entry if available
@@ -149,21 +135,11 @@ export default function HomeScreen({ navigation }) {
 
           // Reload weight data (last 60 days for 2-month view)
           const allWeightEntries = await getAllWeightEntries();
-          console.log(
-            "useFocusEffect - getAllWeightEntries returned:",
-            allWeightEntries.length,
-            "entries"
-          );
           const sixtyDaysAgo = new Date();
           sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
           const startDate = sixtyDaysAgo.toISOString().split("T")[0];
           const recentWeightData = allWeightEntries.filter(
             (entry) => entry.weightDate >= startDate
-          );
-          console.log(
-            "useFocusEffect - After filter:",
-            recentWeightData.length,
-            "entries"
           );
           if (isMounted) {
             setWeightData(recentWeightData);
@@ -244,13 +220,18 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   weightCard: {
-    backgroundColor: "#fff",
+    backgroundColor: "#fafafa",
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 16,
     marginVertical: 12,
     borderWidth: 1,
-    borderColor: "#f0f0f0",
+    borderColor: "#e8e8e8",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
   weightCardHeader: {
     flexDirection: "row",

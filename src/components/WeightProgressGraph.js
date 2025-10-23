@@ -48,20 +48,6 @@ export const WeightProgressGraph = ({ data = [], targetWeight }) => {
     return new Date(a.weightDate) - new Date(b.weightDate);
   });
 
-  console.log("WeightProgressGraph - data received:", data.length, "entries");
-  console.log(
-    "WeightProgressGraph - filteredData:",
-    filteredData.length,
-    "entries"
-  );
-  console.log(
-    "WeightProgressGraph - displayData after sort:",
-    displayData.length,
-    "entries"
-  );
-  console.log("First entry:", displayData[0]);
-  console.log("Last entry:", displayData[displayData.length - 1]);
-
   // Set fixed weight range 50-100 with 5kg gap
   const minWeight = 50;
   const maxWeight = 100;
