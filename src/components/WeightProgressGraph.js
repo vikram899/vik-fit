@@ -1,17 +1,11 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  ScrollView,
-} from "react-native";
+import { View, Text, StyleSheet, Dimensions, ScrollView } from "react-native";
 import { COLORS } from "../styles";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const VISIBLE_GRAPH_WIDTH = SCREEN_WIDTH - 32; // padding 16 on each side
 const GRAPH_HEIGHT = 280;
-const PADDING = 45;
+const PADDING = 28;
 const POINTS_SPACING = 40; // pixels between each data point (for 7-day spacing)
 
 /**
@@ -54,11 +48,19 @@ export const WeightProgressGraph = ({ data = [], targetWeight }) => {
     return new Date(a.weightDate) - new Date(b.weightDate);
   });
 
-  console.log('WeightProgressGraph - data received:', data.length, 'entries');
-  console.log('WeightProgressGraph - filteredData:', filteredData.length, 'entries');
-  console.log('WeightProgressGraph - displayData after sort:', displayData.length, 'entries');
-  console.log('First entry:', displayData[0]);
-  console.log('Last entry:', displayData[displayData.length - 1]);
+  console.log("WeightProgressGraph - data received:", data.length, "entries");
+  console.log(
+    "WeightProgressGraph - filteredData:",
+    filteredData.length,
+    "entries"
+  );
+  console.log(
+    "WeightProgressGraph - displayData after sort:",
+    displayData.length,
+    "entries"
+  );
+  console.log("First entry:", displayData[0]);
+  console.log("Last entry:", displayData[displayData.length - 1]);
 
   // Set fixed weight range 50-100 with 5kg gap
   const minWeight = 50;
@@ -67,16 +69,15 @@ export const WeightProgressGraph = ({ data = [], targetWeight }) => {
 
   // Calculate positions for graph with fixed spacing
   const graphHeight = GRAPH_HEIGHT - PADDING * 2;
-  const scrollableGraphWidth = PADDING + (displayData.length - 1) * POINTS_SPACING + PADDING;
+  const scrollableGraphWidth =
+    PADDING + (displayData.length - 1) * POINTS_SPACING + PADDING;
   const yScale = graphHeight / weightRange;
 
   // Create SVG-like path for the line with fixed spacing between points
   const points = displayData.map((entry, index) => {
     const x = PADDING + index * POINTS_SPACING;
     const y =
-      PADDING +
-      graphHeight -
-      (entry.currentWeight - minWeight) * yScale;
+      PADDING + graphHeight - (entry.currentWeight - minWeight) * yScale;
     return { x, y, weight: entry.currentWeight, date: entry.weightDate };
   });
 
@@ -89,23 +90,25 @@ export const WeightProgressGraph = ({ data = [], targetWeight }) => {
       <View style={styles.graphContainer}>
         {/* Y-axis Labels - Fixed on left side */}
         <View style={styles.yAxisContainer}>
-          {[50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100].map((weight, index) => {
-            const ratio = (weight - minWeight) / weightRange;
-            const y = PADDING + graphHeight * (1 - ratio);
-            return (
-              <Text
-                key={`y-label-${index}`}
-                style={[
-                  styles.yLabel,
-                  {
-                    top: y - 10,
-                  },
-                ]}
-              >
-                {weight}
-              </Text>
-            );
-          })}
+          {[50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100].map(
+            (weight, index) => {
+              const ratio = (weight - minWeight) / weightRange;
+              const y = PADDING + graphHeight * (1 - ratio);
+              return (
+                <Text
+                  key={`y-label-${index}`}
+                  style={[
+                    styles.yLabel,
+                    {
+                      top: y - 10,
+                    },
+                  ]}
+                >
+                  {weight}
+                </Text>
+              );
+            }
+          )}
         </View>
 
         {/* Horizontal Scrollable Graph */}
@@ -126,120 +129,123 @@ export const WeightProgressGraph = ({ data = [], targetWeight }) => {
               },
             ]}
           >
-          {/* Target Weight Line */}
-          <View
-            style={[
-              styles.targetLine,
-              {
-                top: targetY,
-                width: scrollableGraphWidth - PADDING * 2,
-                left: PADDING,
-              },
-            ]}
-          />
+            {/* Target Weight Line */}
+            <View
+              style={[
+                styles.targetLine,
+                {
+                  top: targetY,
+                  width: scrollableGraphWidth - PADDING * 2,
+                  left: PADDING,
+                },
+              ]}
+            />
 
-          {/* Grid Lines - Every 5kg */}
-          {[50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100].map((weight, index) => {
-            const ratio = (weight - minWeight) / weightRange;
-            const y = PADDING + graphHeight * (1 - ratio);
-            return (
-              <View
-                key={`grid-${index}`}
-                style={[
-                  styles.gridLine,
-                  {
-                    top: y,
-                    width: scrollableGraphWidth - PADDING * 2,
-                    left: PADDING,
-                  },
-                ]}
-              />
-            );
-          })}
-
-          {/* Weight Points and Line */}
-          {points.map((point, index) => {
-            const nextPoint = points[index + 1];
-            return (
-              <View key={`point-${index}`}>
-                {/* Line to next point */}
-                {nextPoint && (
+            {/* Grid Lines - Every 5kg */}
+            {[50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100].map(
+              (weight, index) => {
+                const ratio = (weight - minWeight) / weightRange;
+                const y = PADDING + graphHeight * (1 - ratio);
+                return (
                   <View
+                    key={`grid-${index}`}
                     style={[
-                      styles.line,
+                      styles.gridLine,
                       {
-                        left: point.x,
-                        top: point.y,
-                        width: Math.sqrt(
-                          Math.pow(nextPoint.x - point.x, 2) +
-                            Math.pow(nextPoint.y - point.y, 2)
-                        ),
-                        transform: [
-                          {
-                            rotate: `${Math.atan2(
-                              nextPoint.y - point.y,
-                              nextPoint.x - point.x
-                            )}rad`,
-                          },
-                        ],
+                        top: y,
+                        width: scrollableGraphWidth - PADDING * 2,
+                        left: PADDING,
                       },
                     ]}
                   />
-                )}
+                );
+              }
+            )}
 
-                {/* Data Point Circle */}
-                <View
+            {/* Weight Points and Line */}
+            {points.map((point, index) => {
+              const nextPoint = points[index + 1];
+              return (
+                <View key={`point-${index}`}>
+                  {/* Line to next point */}
+                  {nextPoint && (
+                    <View
+                      style={[
+                        styles.line,
+                        {
+                          left: point.x,
+                          top: point.y,
+                          width: Math.sqrt(
+                            Math.pow(nextPoint.x - point.x, 2) +
+                              Math.pow(nextPoint.y - point.y, 2)
+                          ),
+                          transform: [
+                            {
+                              rotate: `${Math.atan2(
+                                nextPoint.y - point.y,
+                                nextPoint.x - point.x
+                              )}rad`,
+                            },
+                          ],
+                        },
+                      ]}
+                    />
+                  )}
+
+                  {/* Data Point Circle */}
+                  <View
+                    style={[
+                      styles.dataPoint,
+                      {
+                        left: point.x - 6,
+                        top: point.y - 6,
+                      },
+                    ]}
+                  />
+                </View>
+              );
+            })}
+
+            {/* X-axis Labels - Weekly gaps */}
+            {points.map((point, index) => {
+              // Show first point, last point, and every point that is approximately 7 days apart
+              const isFirstPoint = index === 0;
+              const isLastPoint = index === points.length - 1;
+
+              // Calculate days from first data point
+              const firstDate = new Date(points[0].date);
+              const currentDate = new Date(point.date);
+              const daysSinceStart = Math.round(
+                (currentDate - firstDate) / (1000 * 60 * 60 * 24)
+              );
+
+              // Show label every 7 days approximately, but at minimum every 4 points if data is sparse
+              const pointsPerLabel = Math.max(4, Math.ceil(points.length / 8));
+              const shouldShow =
+                isFirstPoint || isLastPoint || index % pointsPerLabel === 0;
+
+              if (!shouldShow) return null;
+
+              const dateObj = new Date(point.date);
+              const day = String(dateObj.getDate()).padStart(2, "0");
+              const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+              const label = `${day}/${month}`;
+
+              return (
+                <Text
+                  key={`x-label-${index}`}
                   style={[
-                    styles.dataPoint,
+                    styles.xLabel,
                     {
-                      left: point.x - 6,
-                      top: point.y - 6,
+                      left: point.x - 20,
                     },
                   ]}
-                />
-              </View>
-            );
-          })}
-
-          {/* X-axis Labels - Weekly gaps */}
-          {points.map((point, index) => {
-            // Show first point, last point, and every point that is approximately 7 days apart
-            const isFirstPoint = index === 0;
-            const isLastPoint = index === points.length - 1;
-
-            // Calculate days from first data point
-            const firstDate = new Date(points[0].date);
-            const currentDate = new Date(point.date);
-            const daysSinceStart = Math.round(
-              (currentDate - firstDate) / (1000 * 60 * 60 * 24)
-            );
-
-            // Show label every 7 days approximately, but at minimum every 4 points if data is sparse
-            const pointsPerLabel = Math.max(4, Math.ceil(points.length / 8));
-            const shouldShow = isFirstPoint || isLastPoint || (index % pointsPerLabel === 0);
-
-            if (!shouldShow) return null;
-
-            const dateObj = new Date(point.date);
-            const day = String(dateObj.getDate()).padStart(2, '0');
-            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const label = `${day}/${month}`;
-
-            return (
-              <Text
-                key={`x-label-${index}`}
-                style={[
-                  styles.xLabel,
-                  {
-                    left: point.x - 20,
-                  },
-                ]}
-              >
-                {label}
-              </Text>
-            );
-          })}
-        </View>
+                >
+                  {label}
+                </Text>
+              );
+            })}
+          </View>
         </ScrollView>
       </View>
     </View>
@@ -248,7 +254,6 @@ export const WeightProgressGraph = ({ data = [], targetWeight }) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
     marginBottom: 20,
   },
   emptyContainer: {
@@ -264,18 +269,14 @@ const styles = StyleSheet.create({
     color: "#999",
   },
   graphContainer: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#f0f0f0",
     flexDirection: "row",
+    width: "100%",
+    marginBottom: 12,
   },
   yAxisContainer: {
-    width: 45,
+    width: 35,
     height: GRAPH_HEIGHT,
     position: "relative",
-    backgroundColor: "#fff",
   },
   scrollViewContainer: {
     flex: 1,
