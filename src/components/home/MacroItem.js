@@ -17,21 +17,19 @@ export default function MacroItem({
   const displayProgress = Math.min(progress, 100);
 
   return (
-    <View
-      style={[
-        appStyles.summaryItem,
-        { flexDirection: "column" },
-      ]}
-    >
+    <View style={[appStyles.summaryItem, { overflow: "visible" }]}>
+      {/* Progress background - fills from left proportionally */}
       <View
         style={[
-          styles.progressBar,
+          styles.progressBackground,
           {
             width: `${displayProgress}%`,
             backgroundColor: progressColor,
           },
         ]}
       />
+
+      {/* Content overlay */}
       <View style={styles.content}>
         <View style={styles.iconContainer}>
           <MaterialCommunityIcons
@@ -56,15 +54,21 @@ export default function MacroItem({
 }
 
 const styles = {
-  progressBar: {
-    height: 4,
-    borderRadius: 2,
-    marginBottom: 8,
+  progressBackground: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    opacity: 0.2,
+    zIndex: 0,
+    borderRadius: 8,
   },
   content: {
     flexDirection: "row",
     alignItems: "flex-start",
     flex: 1,
+    zIndex: 1,
+    padding: 10,
   },
   iconContainer: {
     marginRight: 8,
