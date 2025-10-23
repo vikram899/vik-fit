@@ -20,6 +20,8 @@ import AddWorkoutScreen from "./src/screens/AddWorkoutScreen";
 import AddMealScreen from "./src/screens/AddMealScreen";
 import StartWorkoutScreen from "./src/screens/StartWorkoutScreen";
 import WorkoutSummaryScreen from "./src/screens/WorkoutSummaryScreen";
+import MenuScreen from "./src/screens/MenuScreen";
+import MacroGoalsScreen from "./src/screens/MacroGoalsScreen";
 
 // Services
 import { initializeDatabase, seedDummyData } from "./src/services/database";
@@ -44,6 +46,7 @@ function HomeStackNavigator({ navigation }) {
         headerShown: true,
         headerBackTitleVisible: false,
         headerTintColor: "#007AFF",
+        animationEnabled: false,
       }}
     >
       <Stack.Screen
@@ -55,8 +58,9 @@ function HomeStackNavigator({ navigation }) {
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => {
-                // Placeholder for menu action
-                console.log("Menu pressed");
+                // Navigate to menu screen
+                const navState = navigation.getState();
+                navigation.navigate("Menu");
               }}
               style={{ paddingLeft: 16 }}
             >
@@ -121,6 +125,22 @@ function HomeStackNavigator({ navigation }) {
         name="LogMeals"
         component={LogMealsScreen}
         options={{ title: "Log Meals" }}
+      />
+      <Stack.Screen
+        name="Menu"
+        component={MenuScreen}
+        options={{
+          title: "Menu",
+          headerBackTitleVisible: false,
+        }}
+      />
+      <Stack.Screen
+        name="MacroGoals"
+        component={MacroGoalsScreen}
+        options={{
+          title: "Macro Goals",
+          headerBackTitleVisible: false,
+        }}
       />
     </Stack.Navigator>
   );
@@ -272,7 +292,7 @@ function MainTabNavigator({ onAddPress }) {
         name="Add"
         component={() => null}
         options={{
-          tabBarLabel: "Add",
+          tabBarLabel: "",
           tabBarButton: (props) => (
             <TouchableOpacity
               {...props}
@@ -339,12 +359,12 @@ export default function App() {
 
   const handleLogWorkout = () => {
     setShowAddModal(false);
-    // Just close the modal, don't navigate
+    navigationRef.current?.navigate("Home", { screen: "LogWorkout" });
   };
 
   const handleLogMeal = () => {
     setShowAddModal(false);
-    // Just close the modal, don't navigate
+    navigationRef.current?.navigate("Home", { screen: "LogMeals" });
   };
 
   const handleCloseModal = () => {
