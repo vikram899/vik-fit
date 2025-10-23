@@ -70,13 +70,19 @@ export default function HomeScreen({ navigation }) {
 
         // Load weight data (last 60 days for 2-month view)
         const allWeightEntries = await getAllWeightEntries();
+        console.log('HomeScreen - getAllWeightEntries returned:', allWeightEntries.length, 'entries');
+        if (allWeightEntries.length > 0) {
+          console.log('First entry:', allWeightEntries[0]);
+          console.log('Last entry:', allWeightEntries[allWeightEntries.length - 1]);
+        }
         const sixtyDaysAgo = new Date();
         sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
         const startDate = sixtyDaysAgo.toISOString().split("T")[0];
+        console.log('Filter start date:', startDate);
         const recentWeightData = allWeightEntries.filter(
           (entry) => entry.weightDate >= startDate
         );
-        console.log('Initial useEffect - setting weight data:', recentWeightData.length, 'entries');
+        console.log('After filter:', recentWeightData.length, 'entries');
         setWeightData(recentWeightData);
 
         // Set target weight from latest entry if available
@@ -130,14 +136,15 @@ export default function HomeScreen({ navigation }) {
 
           // Reload weight data (last 60 days for 2-month view)
           const allWeightEntries = await getAllWeightEntries();
+          console.log('useFocusEffect - getAllWeightEntries returned:', allWeightEntries.length, 'entries');
           const sixtyDaysAgo = new Date();
           sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
           const startDate = sixtyDaysAgo.toISOString().split("T")[0];
           const recentWeightData = allWeightEntries.filter(
             (entry) => entry.weightDate >= startDate
           );
+          console.log('useFocusEffect - After filter:', recentWeightData.length, 'entries');
           if (isMounted) {
-            console.log('useFocusEffect - setting weight data:', recentWeightData.length, 'entries');
             setWeightData(recentWeightData);
             // Set target weight from latest entry if available
             if (recentWeightData.length > 0) {

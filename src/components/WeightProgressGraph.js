@@ -21,8 +21,6 @@ const POINTS_SPACING = 40; // pixels between each data point (for 7-day spacing)
 export const WeightProgressGraph = ({ data = [], targetWeight }) => {
   const scrollViewRef = React.useRef(null);
 
-  console.log('WeightProgressGraph received:', data.length, 'data points');
-
   // Scroll to end to show today's date on the right
   React.useEffect(() => {
     if (scrollViewRef.current && data && data.length > 0) {
@@ -49,7 +47,18 @@ export const WeightProgressGraph = ({ data = [], targetWeight }) => {
   });
 
   // If no data in 2 months, show what we have
-  const displayData = filteredData.length > 0 ? filteredData : data.slice(-15);
+  let displayData = filteredData.length > 0 ? filteredData : data.slice(-15);
+
+  // Sort data in ascending order (oldest first) so graph displays left to right chronologically
+  displayData = displayData.sort((a, b) => {
+    return new Date(a.weightDate) - new Date(b.weightDate);
+  });
+
+  console.log('WeightProgressGraph - data received:', data.length, 'entries');
+  console.log('WeightProgressGraph - filteredData:', filteredData.length, 'entries');
+  console.log('WeightProgressGraph - displayData after sort:', displayData.length, 'entries');
+  console.log('First entry:', displayData[0]);
+  console.log('Last entry:', displayData[displayData.length - 1]);
 
   // Set fixed weight range 50-100 with 5kg gap
   const minWeight = 50;
@@ -78,12 +87,34 @@ export const WeightProgressGraph = ({ data = [], targetWeight }) => {
   return (
     <View style={styles.container}>
       <View style={styles.graphContainer}>
+        {/* Y-axis Labels - Fixed on left side */}
+        <View style={styles.yAxisContainer}>
+          {[50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100].map((weight, index) => {
+            const ratio = (weight - minWeight) / weightRange;
+            const y = PADDING + graphHeight * (1 - ratio);
+            return (
+              <Text
+                key={`y-label-${index}`}
+                style={[
+                  styles.yLabel,
+                  {
+                    top: y - 10,
+                  },
+                ]}
+              >
+                {weight}
+              </Text>
+            );
+          })}
+        </View>
+
         {/* Horizontal Scrollable Graph */}
         <ScrollView
           ref={scrollViewRef}
           horizontal
           showsHorizontalScrollIndicator={true}
           scrollEventThrottle={16}
+          style={styles.scrollViewContainer}
         >
           {/* Graph Background */}
           <View
@@ -170,25 +201,6 @@ export const WeightProgressGraph = ({ data = [], targetWeight }) => {
             );
           })}
 
-          {/* Y-axis Labels - Every 5kg */}
-          {[50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100].map((weight, index) => {
-            const ratio = (weight - minWeight) / weightRange;
-            const y = PADDING + graphHeight * (1 - ratio);
-            return (
-              <Text
-                key={`y-label-${index}`}
-                style={[
-                  styles.yLabel,
-                  {
-                    top: y - 10,
-                  },
-                ]}
-              >
-                {weight}
-              </Text>
-            );
-          })}
-
           {/* X-axis Labels - Weekly gaps */}
           {points.map((point, index) => {
             // Show first point, last point, and every point that is approximately 7 days apart
@@ -202,8 +214,9 @@ export const WeightProgressGraph = ({ data = [], targetWeight }) => {
               (currentDate - firstDate) / (1000 * 60 * 60 * 24)
             );
 
-            // Show label every 7 days approximately
-            const shouldShow = isFirstPoint || isLastPoint || daysSinceStart % 7 < 1.5;
+            // Show label every 7 days approximately, but at minimum every 4 points if data is sparse
+            const pointsPerLabel = Math.max(4, Math.ceil(points.length / 8));
+            const shouldShow = isFirstPoint || isLastPoint || (index % pointsPerLabel === 0);
 
             if (!shouldShow) return null;
 
@@ -256,6 +269,16 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     borderColor: "#f0f0f0",
+    flexDirection: "row",
+  },
+  yAxisContainer: {
+    width: 45,
+    height: GRAPH_HEIGHT,
+    position: "relative",
+    backgroundColor: "#fff",
+  },
+  scrollViewContainer: {
+    flex: 1,
   },
   graph: {
     backgroundColor: "#fafafa",

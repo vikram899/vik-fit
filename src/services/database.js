@@ -387,9 +387,12 @@ export const seedDummyData = async () => {
         { daysAgo: 0, weight: 76.2 },
       ];
       const targetWeightValue = 75;
-      for (const dataPoint of weightDataPoints) {
+      console.log('Starting to seed', weightDataPoints.length, 'weight entries...');
+      for (let i = 0; i < weightDataPoints.length; i++) {
+        const dataPoint = weightDataPoints[i];
         const entryDate = new Date(todayDate.getTime() - dataPoint.daysAgo * 24 * 60 * 60 * 1000);
         const dateStr = entryDate.toISOString().split('T')[0];
+        console.log('Seeding entry', i + 1, 'of', weightDataPoints.length, ':', dateStr, dataPoint.weight, 'kg');
         await addWeightEntry(dateStr, dataPoint.weight, targetWeightValue);
       }
       console.log('✓ Weight tracking data added:', weightDataPoints.length, 'entries');
