@@ -20,6 +20,7 @@ import AddWorkoutScreen from "./src/screens/AddWorkoutScreen";
 import AddMealScreen from "./src/screens/AddMealScreen";
 import StartWorkoutScreen from "./src/screens/StartWorkoutScreen";
 import WorkoutSummaryScreen from "./src/screens/WorkoutSummaryScreen";
+import AddScreen from "./src/screens/AddScreen";
 
 // Services
 import { initializeDatabase, seedDummyData } from "./src/services/database";
@@ -209,6 +210,8 @@ function MainTabNavigator() {
             iconName = focused ? "home" : "home-outline";
           } else if (route.name === "Workouts") {
             iconName = focused ? "dumbbell" : "dumbbell";
+          } else if (route.name === "Add") {
+            iconName = "plus";
           } else if (route.name === "Meals") {
             iconName = focused
               ? "silverware-fork-knife"
@@ -262,6 +265,15 @@ function MainTabNavigator() {
             </TouchableOpacity>
           ),
         })}
+      />
+      <Tab.Screen
+        name="Add"
+        component={AddScreen}
+        options={{
+          tabBarLabel: "",
+          headerShown: true,
+          title: "Add",
+        }}
       />
       <Tab.Screen
         name="Meals"
