@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import AssignDaysModal from '../components/AssignDaysModal';
+import { AssignDaysModal } from '../components/modals';
 import { COLORS } from '../styles';
 import {
   getAllPlans,

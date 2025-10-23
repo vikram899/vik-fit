@@ -19,8 +19,7 @@ import {
   getMacroGoals,
   deleteMeal,
 } from '../services/database';
-import AddMealModal from '../components/AddMealModal';
-import EditMealDetailsModal from '../components/EditMealDetailsModal';
+import { AddMealModal, EditMealDetailsModal } from '../components/meals';
 
 /**
  * AddMealScreen

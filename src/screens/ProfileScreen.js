@@ -5,7 +5,7 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
-import Card from '../components/Card';
+import { Card } from '../components/common';
 import { COLORS } from '../constants/colors';
 import { SPACING, TYPOGRAPHY } from '../constants/spacing';
 import { STRINGS } from '../constants/strings';

@@ -10,11 +10,7 @@ import {
   getAllMeals,
   deleteMealLog,
 } from "../services/database";
-import AddMealModal from "../components/AddMealModal";
-import ExistingMealsModal from "../components/ExistingMealsModal";
-import EditMealModal from "../components/EditMealModal";
-import MealMacroCards from "../components/MealMacroCards";
-import TodaysMealsList from "../components/TodaysMealsList";
+import { AddMealModal, ExistingMealsModal, EditMealModal, MealMacroCards, TodaysMealsList } from "../components/meals";
 
 const LogMealsScreen = ({ navigation }) => {
   const today = new Date().toISOString().split("T")[0];

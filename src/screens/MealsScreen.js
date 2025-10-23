@@ -12,9 +12,8 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import WeeklySummaryCards from '../components/WeeklySummaryCards';
-import WeeklyCalendarView from '../components/WeeklyCalendarView';
-import Toast from '../components/Toast';
+import { WeeklySummaryCards, WeeklyCalendarView } from '../components/layouts';
+import { Toast } from '../components/common';
 import { COLORS } from '../styles';
 import {
   getWeeklyMealData,

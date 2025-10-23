@@ -10,8 +10,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import WeeklyWorkoutSummaryCards from '../components/WeeklyWorkoutSummaryCards';
-import WeeklyWorkoutCalendar from '../components/WeeklyWorkoutCalendar';
+import { WeeklyWorkoutSummaryCards, WeeklyWorkoutCalendar } from '../components/layouts';
 import { COLORS } from '../styles';
 import {
   getWeeklyWorkoutStats,

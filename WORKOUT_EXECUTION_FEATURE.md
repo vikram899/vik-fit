@@ -1,17 +1,20 @@
 # Workout Execution Feature - Implementation Guide
 
 ## Overview
+
 This document describes the complete workout execution feature that allows users to perform exercises turn-by-turn, log their performance (sets, reps, weight), and automatically start rest timers between sets.
 
 ## Feature Highlights
 
 ### 1. **Real-Time Set Logging**
+
 - **Minimal Input UI**: Users log reps, weight, and RPE (Rate of Perceived Exertion) for each set
 - **Auto-Focus**: Primary input field (reps) is auto-focused to reduce tapping
 - **Pre-Filled Values**: Fields pre-fill with exercise target values and previous set data
 - **Quick Logging**: Large, tap-friendly buttons for fast logging during workouts
 
 ### 2. **Intelligent Timer System**
+
 - **Automatic Set Timer**: Timer starts after logging first set, displays remaining time
 - **Rest Timer**: Automatically begins after set completes (default 90 seconds, customizable)
 - **Auto-Advance**: Moves to next set automatically when rest timer finishes
@@ -19,12 +22,14 @@ This document describes the complete workout execution feature that allows users
 - **Manual Controls**: Skip, Pause/Resume buttons for flexibility
 
 ### 3. **Progress Tracking**
+
 - **Live Progress**: Shows current exercise/set progress (e.g., "Exercise 3/5, Set 1/3")
 - **Visual Indicators**: Progress bar showing workout completion percentage
 - **Activity Log**: Tab showing all logged sets with timestamps and details
 - **Undo Capability**: Can edit sets before advancing to next exercise (in future versions)
 
 ### 4. **Workout Completion Screen**
+
 - **Success Feedback**: Celebratory completion screen with achievements
 - **Workout Summary**: Shows:
   - Total duration in human-readable format (e.g., "23m 45s")
@@ -75,6 +80,7 @@ WorkoutCompletionScreen
 ### Database Schema
 
 #### New Tables
+
 ```sql
 -- Track individual workout sessions
 workout_logs:
@@ -105,9 +111,11 @@ set_logs:
 ### Key Components
 
 #### 1. **WorkoutTimer.js** (`src/components/WorkoutTimer.js`)
+
 **Purpose**: Displays and manages workout timers
 
 **Props**:
+
 - `exerciseName`: Current exercise name
 - `currentSet`: Current set number
 - `totalSets`: Total sets for exercise
@@ -119,6 +127,7 @@ set_logs:
 - `onStatusChange`: Callback for pause/resume
 
 **Features**:
+
 - Large, easy-to-read timer display (MM:SS format)
 - Circular progress indicator with color-coded states
 - Set progress label showing "Set X of Y"
@@ -127,9 +136,11 @@ set_logs:
 - Progress bar showing timer progress
 
 #### 2. **ExerciseSetLogger.js** (`src/components/ExerciseSetLogger.js`)
+
 **Purpose**: Minimal UI for logging individual set data
 
 **Props**:
+
 - `exercise`: Exercise object with target sets/reps/weight
 - `currentSet`: Current set number
 - `totalSets`: Total sets for exercise
@@ -138,6 +149,7 @@ set_logs:
 - `autoFocusFirstInput`: Auto-focus reps input field
 
 **Logged Data**:
+
 ```javascript
 {
   repsCompleted: number,
@@ -148,6 +160,7 @@ set_logs:
 ```
 
 **UX Features**:
+
 - Three input fields: Reps (primary), Weight, RPE
 - Optional notes field (max 100 chars)
 - Target values shown in header
@@ -156,9 +169,11 @@ set_logs:
 - Keyboard navigation with return keys
 
 #### 3. **WorkoutExecutionScreen.js** (`src/screens/WorkoutExecutionScreen.js`)
+
 **Purpose**: Main workout interface managing the entire session
 
 **Key State**:
+
 - `workoutLogId`: Current workout session ID
 - `currentExerciseIndex`: Index of current exercise
 - `currentSetNumber`: Current set number
@@ -167,11 +182,13 @@ set_logs:
 - `activeTab`: 'exercise' or 'history'
 
 **Navigation to this screen**:
+
 ```javascript
-navigation.navigate('WorkoutExecution', { planId: plan.id })
+navigation.navigate("WorkoutExecution", { planId: plan.id });
 ```
 
 **Core Flow**:
+
 1. On mount: Check for existing active workout or create new one
 2. Display current exercise with timer and logger
 3. On set logged: Save to DB and start timer
@@ -179,6 +196,7 @@ navigation.navigate('WorkoutExecution', { planId: plan.id })
 5. On final exercise complete: Navigate to completion screen
 
 **Key Features**:
+
 - Real-time progress tracking
 - Two tabs: Exercise (logging) and Activity Log
 - Exit confirmation dialog
@@ -186,19 +204,22 @@ navigation.navigate('WorkoutExecution', { planId: plan.id })
 - Dynamic header with progress bar
 
 #### 4. **WorkoutCompletionScreen.js** (`src/screens/WorkoutCompletionScreen.js`)
+
 **Purpose**: Display workout summary and achievements
 
 **Navigation from WorkoutExecutionScreen**:
+
 ```javascript
-navigation.replace('WorkoutCompletionScreen', {
+navigation.replace("WorkoutCompletionScreen", {
   planId,
   workoutLogId,
   totalDurationSeconds,
-  exercisesCompleted
-})
+  exercisesCompleted,
+});
 ```
 
 **Displays**:
+
 - Success animation with checkmark
 - Quick stats grid: Duration, Calories, Exercises, Sets
 - Exercise breakdown: reps, max weight, avg RPE per exercise
@@ -206,6 +227,7 @@ navigation.replace('WorkoutCompletionScreen', {
 - Navigation buttons: Details (future), Home
 
 **Calculations**:
+
 - **Duration**: Formatted from seconds to human-readable (e.g., "23m 45s")
 - **Calories**: Rough estimate of 6 cal/min for weight training
 - **Exercise Summary**: Aggregates all set data per exercise
@@ -213,18 +235,22 @@ navigation.replace('WorkoutCompletionScreen', {
 ### Navigation Integration
 
 #### LogWorkoutScreen Updates
+
 Added new `handleStartWorkout` function:
+
 ```javascript
 const handleStartWorkout = (workout) => {
-  navigation.navigate('WorkoutExecution', { planId: workout.id });
+  navigation.navigate("WorkoutExecution", { planId: workout.id });
 };
 ```
 
 Updated action buttons in workout cards:
+
 - **View Button**: Shows exercise details (original functionality)
 - **Start Button**: Launches WorkoutExecutionScreen (new)
 
 #### App.js Additions
+
 ```javascript
 // Import new screens
 import WorkoutExecutionScreen from "./src/screens/WorkoutExecutionScreen";
@@ -248,6 +274,7 @@ import WorkoutCompletionScreen from "./src/screens/WorkoutCompletionScreen";
 All located in `src/services/database.js`:
 
 ### Workout Management
+
 - `startWorkoutLog(planId, logDate)`: Create new workout session
 - `getActiveWorkoutLog(planId)`: Get in-progress workout for today
 - `completeWorkoutLog(workoutLogId, totalDurationSeconds)`: Mark workout complete
@@ -255,6 +282,7 @@ All located in `src/services/database.js`:
 - `getWorkoutHistory(planId, limit)`: Get past workouts
 
 ### Set Logging
+
 - `logExerciseSet(workoutLogId, exerciseId, setNumber, repsCompleted, weightUsed, rpe, notes)`: Log a single set
 - `updateSetLog(setLogId, durationSeconds, restTimeUsedSeconds)`: Update set with timing data
 - `getExerciseSetLogs(workoutLogId, exerciseId)`: Get all sets for an exercise in workout
@@ -263,18 +291,21 @@ All located in `src/services/database.js`:
 ## UX/UI Design Principles
 
 ### 1. **Minimize Distractions**
+
 - Large, clear typography (56px+ button targets)
 - Reduced visual clutter in exercise view
 - Less critical info in collapsible sections
 - Portrait lock to prevent accidental rotation
 
 ### 2. **One-Handed Operation**
+
 - All controls reachable from thumb position
 - Primary action button at bottom
 - Timer and logging form vertically stacked
 - Minimal horizontal scrolling
 
 ### 3. **Continuous Feedback**
+
 - Real-time progress display
 - Haptic feedback on button presses (future)
 - Visual progress bars
@@ -282,12 +313,14 @@ All located in `src/services/database.js`:
 - Color-coded status (red=timer running, green=resting)
 
 ### 4. **Workflow Optimization**
+
 - Auto-focus primary input field
 - Pre-filled values from exercise template
 - Tab navigation between inputs
 - Single button to complete logging and start timer
 
 ### 5. **Undo & Edit Capability**
+
 - View previous set data in activity log
 - Edit capability before advancing (future)
 - Notes field for observations
@@ -295,6 +328,7 @@ All located in `src/services/database.js`:
 ## Future Enhancements
 
 ### Tier 1 (High Priority)
+
 - [ ] Audio cues and voice guidance integration (expo-av)
 - [ ] Haptic feedback on timer milestones
 - [ ] Configurable rest timer per exercise
@@ -302,6 +336,7 @@ All located in `src/services/database.js`:
 - [ ] Personal Records (PR) tracking
 
 ### Tier 2 (Medium Priority)
+
 - [ ] Workout history analytics dashboard
 - [ ] Export workout data (CSV, PDF)
 - [ ] Share workout achievements
@@ -309,6 +344,7 @@ All located in `src/services/database.js`:
 - [ ] Workout notes and observations
 
 ### Tier 3 (Nice to Have)
+
 - [ ] Interval training with multiple timer phases
 - [ ] RPE-based auto-weight adjustment
 - [ ] Voice-activated logging
@@ -343,12 +379,14 @@ All located in `src/services/database.js`:
 ## File Manifest
 
 **New Files Created**:
+
 1. `src/components/WorkoutTimer.js` - 249 lines
 2. `src/components/ExerciseSetLogger.js` - 318 lines
 3. `src/screens/WorkoutExecutionScreen.js` - 424 lines
 4. `src/screens/WorkoutCompletionScreen.js` - 429 lines
 
 **Modified Files**:
+
 1. `src/services/database.js` - Added 163 lines (tables + functions)
 2. `src/screens/LogWorkoutScreen.js` - Updated action buttons
 3. `App.js` - Added imports and navigation routes

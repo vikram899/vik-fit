@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import WeekCalendar from '../components/WeekCalendar';
-import AssignDaysModal from '../components/AssignDaysModal';
+import { WeekCalendar } from '../components/layouts';
+import { AssignDaysModal } from '../components/modals';
 import { COLORS } from '../constants/colors';
 import { SPACING } from '../constants/spacing';
 import { STRINGS } from '../constants/strings';
