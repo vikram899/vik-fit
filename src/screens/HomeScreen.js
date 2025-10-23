@@ -68,14 +68,15 @@ export default function HomeScreen({ navigation }) {
         }
         setTodayWorkoutLogs(workoutLogsMap);
 
-        // Load weight data (last 30 days)
+        // Load weight data (last 60 days for 2-month view)
         const allWeightEntries = await getAllWeightEntries();
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const startDate = thirtyDaysAgo.toISOString().split("T")[0];
+        const sixtyDaysAgo = new Date();
+        sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+        const startDate = sixtyDaysAgo.toISOString().split("T")[0];
         const recentWeightData = allWeightEntries.filter(
           (entry) => entry.weightDate >= startDate
         );
+        console.log('Initial useEffect - setting weight data:', recentWeightData.length, 'entries');
         setWeightData(recentWeightData);
 
         // Set target weight from latest entry if available
@@ -127,15 +128,16 @@ export default function HomeScreen({ navigation }) {
           }
           if (isMounted) setTodayWorkoutLogs(workoutLogsMap);
 
-          // Reload weight data (last 30 days)
+          // Reload weight data (last 60 days for 2-month view)
           const allWeightEntries = await getAllWeightEntries();
-          const thirtyDaysAgo = new Date();
-          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-          const startDate = thirtyDaysAgo.toISOString().split("T")[0];
+          const sixtyDaysAgo = new Date();
+          sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+          const startDate = sixtyDaysAgo.toISOString().split("T")[0];
           const recentWeightData = allWeightEntries.filter(
             (entry) => entry.weightDate >= startDate
           );
           if (isMounted) {
+            console.log('useFocusEffect - setting weight data:', recentWeightData.length, 'entries');
             setWeightData(recentWeightData);
             // Set target weight from latest entry if available
             if (recentWeightData.length > 0) {

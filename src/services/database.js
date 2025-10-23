@@ -345,6 +345,54 @@ export const seedDummyData = async () => {
         await setMacroGoals(today, 2500, 120, 300, 80);
         console.log('✅ Default macro goals seeded for', today);
       }
+
+      // Always reseed weight data with dummy data
+      console.log('Clearing old weight data and seeding fresh dummy data...');
+      await db.runAsync('DELETE FROM weight_tracking');
+      console.log('Seeding dummy weight tracking data...');
+
+      // Seed dummy weight data for the last 2 months
+      const todayDate = new Date();
+      const weightDataPoints = [
+        { daysAgo: 60, weight: 82.0 },
+        { daysAgo: 58, weight: 81.8 },
+        { daysAgo: 56, weight: 81.6 },
+        { daysAgo: 54, weight: 81.4 },
+        { daysAgo: 52, weight: 81.2 },
+        { daysAgo: 50, weight: 81.0 },
+        { daysAgo: 48, weight: 80.7 },
+        { daysAgo: 46, weight: 80.5 },
+        { daysAgo: 44, weight: 80.2 },
+        { daysAgo: 42, weight: 80.0 },
+        { daysAgo: 40, weight: 79.7 },
+        { daysAgo: 38, weight: 79.5 },
+        { daysAgo: 36, weight: 79.2 },
+        { daysAgo: 34, weight: 79.0 },
+        { daysAgo: 32, weight: 78.7 },
+        { daysAgo: 30, weight: 78.5 },
+        { daysAgo: 28, weight: 78.2 },
+        { daysAgo: 26, weight: 78.0 },
+        { daysAgo: 24, weight: 77.7 },
+        { daysAgo: 22, weight: 77.5 },
+        { daysAgo: 20, weight: 77.2 },
+        { daysAgo: 18, weight: 77.0 },
+        { daysAgo: 16, weight: 76.7 },
+        { daysAgo: 14, weight: 76.5 },
+        { daysAgo: 12, weight: 76.2 },
+        { daysAgo: 10, weight: 76.0 },
+        { daysAgo: 8, weight: 75.7 },
+        { daysAgo: 6, weight: 75.5 },
+        { daysAgo: 4, weight: 75.2 },
+        { daysAgo: 2, weight: 75.0 },
+        { daysAgo: 0, weight: 76.2 },
+      ];
+      const targetWeightValue = 75;
+      for (const dataPoint of weightDataPoints) {
+        const entryDate = new Date(todayDate.getTime() - dataPoint.daysAgo * 24 * 60 * 60 * 1000);
+        const dateStr = entryDate.toISOString().split('T')[0];
+        await addWeightEntry(dateStr, dataPoint.weight, targetWeightValue);
+      }
+      console.log('✓ Weight tracking data added:', weightDataPoints.length, 'entries');
       return;
     }
 
@@ -393,6 +441,58 @@ export const seedDummyData = async () => {
     await addExercise(plan3Id, 'Barbell Curl', 3, 8, 85, '');
     await addExercise(plan3Id, 'Lat Pulldown', 3, 12, 180, '');
     console.log('✓ Back & Biceps exercises added');
+
+    // Seed dummy weight tracking data for the last 2 months
+    console.log('Adding dummy weight tracking data...');
+    const todayDate = new Date();
+    const twoMonthsAgo = new Date(todayDate.getTime() - 60 * 24 * 60 * 60 * 1000);
+
+    // Generate realistic weight data points with a gradual downward trend
+    // More frequent entries to show detailed progress
+    const weightDataPoints = [
+      { daysAgo: 60, weight: 82.0 },
+      { daysAgo: 58, weight: 81.8 },
+      { daysAgo: 56, weight: 81.6 },
+      { daysAgo: 54, weight: 81.4 },
+      { daysAgo: 52, weight: 81.2 },
+      { daysAgo: 50, weight: 81.0 },
+      { daysAgo: 48, weight: 80.7 },
+      { daysAgo: 46, weight: 80.5 },
+      { daysAgo: 44, weight: 80.2 },
+      { daysAgo: 42, weight: 80.0 },
+      { daysAgo: 40, weight: 79.7 },
+      { daysAgo: 38, weight: 79.5 },
+      { daysAgo: 36, weight: 79.2 },
+      { daysAgo: 34, weight: 79.0 },
+      { daysAgo: 32, weight: 78.7 },
+      { daysAgo: 30, weight: 78.5 },
+      { daysAgo: 28, weight: 78.2 },
+      { daysAgo: 26, weight: 78.0 },
+      { daysAgo: 24, weight: 77.7 },
+      { daysAgo: 22, weight: 77.5 },
+      { daysAgo: 20, weight: 77.2 },
+      { daysAgo: 18, weight: 77.0 },
+      { daysAgo: 16, weight: 76.7 },
+      { daysAgo: 14, weight: 76.5 },
+      { daysAgo: 12, weight: 76.2 },
+      { daysAgo: 10, weight: 76.0 },
+      { daysAgo: 8, weight: 75.7 },
+      { daysAgo: 6, weight: 75.5 },
+      { daysAgo: 4, weight: 75.2 },
+      { daysAgo: 2, weight: 75.0 },
+      { daysAgo: 0, weight: 76.2 },
+    ];
+
+    const targetWeightValue = 75;
+
+    // Add all weight data points
+    for (const dataPoint of weightDataPoints) {
+      const entryDate = new Date(todayDate.getTime() - dataPoint.daysAgo * 24 * 60 * 60 * 1000);
+      const dateStr = entryDate.toISOString().split('T')[0];
+      await addWeightEntry(dateStr, dataPoint.weight, targetWeightValue);
+    }
+
+    console.log('✓ Weight tracking data added:', weightDataPoints.length, 'entries');
 
     console.log('✅ Dummy data seeded successfully!');
   } catch (error) {

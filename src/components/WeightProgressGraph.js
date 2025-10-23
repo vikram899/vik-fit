@@ -9,15 +9,29 @@ import {
 import { COLORS } from "../styles";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const GRAPH_WIDTH = SCREEN_WIDTH - 32; // padding 16 on each side
+const VISIBLE_GRAPH_WIDTH = SCREEN_WIDTH - 32; // padding 16 on each side
 const GRAPH_HEIGHT = 280;
 const PADDING = 45;
+const POINTS_SPACING = 40; // pixels between each data point (for 7-day spacing)
 
 /**
  * WeightProgressGraph
  * Simple line graph component for visualizing weight progress
  */
 export const WeightProgressGraph = ({ data = [], targetWeight }) => {
+  const scrollViewRef = React.useRef(null);
+
+  console.log('WeightProgressGraph received:', data.length, 'data points');
+
+  // Scroll to end to show today's date on the right
+  React.useEffect(() => {
+    if (scrollViewRef.current && data && data.length > 0) {
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: false });
+      }, 100);
+    }
+  }, [data]);
+
   if (!data || data.length === 0) {
     return (
       <View style={styles.emptyContainer}>
@@ -42,15 +56,14 @@ export const WeightProgressGraph = ({ data = [], targetWeight }) => {
   const maxWeight = 100;
   const weightRange = maxWeight - minWeight;
 
-  // Calculate positions for graph
-  const graphWidth = GRAPH_WIDTH - PADDING * 2;
+  // Calculate positions for graph with fixed spacing
   const graphHeight = GRAPH_HEIGHT - PADDING * 2;
-  const xStep = graphWidth / Math.max(displayData.length - 1, 1);
+  const scrollableGraphWidth = PADDING + (displayData.length - 1) * POINTS_SPACING + PADDING;
   const yScale = graphHeight / weightRange;
 
-  // Create SVG-like path for the line
+  // Create SVG-like path for the line with fixed spacing between points
   const points = displayData.map((entry, index) => {
-    const x = PADDING + index * xStep;
+    const x = PADDING + index * POINTS_SPACING;
     const y =
       PADDING +
       graphHeight -
@@ -65,23 +78,30 @@ export const WeightProgressGraph = ({ data = [], targetWeight }) => {
   return (
     <View style={styles.container}>
       <View style={styles.graphContainer}>
-        {/* Graph Background */}
-        <View
-          style={[
-            styles.graph,
-            {
-              width: GRAPH_WIDTH,
-              height: GRAPH_HEIGHT,
-            },
-          ]}
+        {/* Horizontal Scrollable Graph */}
+        <ScrollView
+          ref={scrollViewRef}
+          horizontal
+          showsHorizontalScrollIndicator={true}
+          scrollEventThrottle={16}
         >
+          {/* Graph Background */}
+          <View
+            style={[
+              styles.graph,
+              {
+                width: scrollableGraphWidth,
+                height: GRAPH_HEIGHT,
+              },
+            ]}
+          >
           {/* Target Weight Line */}
           <View
             style={[
               styles.targetLine,
               {
                 top: targetY,
-                width: graphWidth,
+                width: scrollableGraphWidth - PADDING * 2,
                 left: PADDING,
               },
             ]}
@@ -98,7 +118,7 @@ export const WeightProgressGraph = ({ data = [], targetWeight }) => {
                   styles.gridLine,
                   {
                     top: y,
-                    width: graphWidth,
+                    width: scrollableGraphWidth - PADDING * 2,
                     left: PADDING,
                   },
                 ]}
@@ -171,23 +191,26 @@ export const WeightProgressGraph = ({ data = [], targetWeight }) => {
 
           {/* X-axis Labels - Weekly gaps */}
           {points.map((point, index) => {
-            // Calculate if this point is 7 days apart from the previous shown label
+            // Show first point, last point, and every point that is approximately 7 days apart
             const isFirstPoint = index === 0;
             const isLastPoint = index === points.length - 1;
-            const daysSincePrevious =
-              index > 0
-                ? Math.floor(
-                    (new Date(point.date) - new Date(points[0].date)) /
-                      (1000 * 60 * 60 * 24)
-                  )
-                : 0;
 
-            const shouldShow = isFirstPoint || isLastPoint || daysSincePrevious % 7 === 0;
+            // Calculate days from first data point
+            const firstDate = new Date(points[0].date);
+            const currentDate = new Date(point.date);
+            const daysSinceStart = Math.round(
+              (currentDate - firstDate) / (1000 * 60 * 60 * 24)
+            );
+
+            // Show label every 7 days approximately
+            const shouldShow = isFirstPoint || isLastPoint || daysSinceStart % 7 < 1.5;
 
             if (!shouldShow) return null;
 
             const dateObj = new Date(point.date);
-            const label = `${dateObj.getMonth() + 1}/${dateObj.getDate()}`;
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const label = `${day}/${month}`;
 
             return (
               <Text
@@ -204,6 +227,7 @@ export const WeightProgressGraph = ({ data = [], targetWeight }) => {
             );
           })}
         </View>
+        </ScrollView>
       </View>
     </View>
   );
