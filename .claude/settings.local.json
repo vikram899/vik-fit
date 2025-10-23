@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(__NEW_LINE__ echo \"✅ SYNTAX VERIFICATION COMPLETE\")",
-      "Bash(npx expo:*)"
+      "Bash(npx expo:*)",
+      "Bash(npm start)",
+      "Bash(npm run android:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node -c:*)"
     ],
     "deny": [],
     "ask": []

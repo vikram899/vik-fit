@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { StatusBar, TouchableOpacity } from "react-native";
+import { StatusBar, TouchableOpacity, Text } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -22,6 +22,7 @@ import StartWorkoutScreen from "./src/screens/StartWorkoutScreen";
 import WorkoutSummaryScreen from "./src/screens/WorkoutSummaryScreen";
 import MenuScreen from "./src/screens/MenuScreen";
 import MacroGoalsScreen from "./src/screens/MacroGoalsScreen";
+import WeightTrackingScreen from "./src/screens/WeightTrackingScreen";
 
 // Services
 import { initializeDatabase, seedDummyData } from "./src/services/database";
@@ -139,6 +140,14 @@ function HomeStackNavigator({ navigation }) {
         component={MacroGoalsScreen}
         options={{
           title: "Macro Goals",
+          headerBackTitleVisible: false,
+        }}
+      />
+      <Stack.Screen
+        name="WeightTracking"
+        component={WeightTrackingScreen}
+        options={{
+          title: "Weight Tracking",
           headerBackTitleVisible: false,
         }}
       />
@@ -265,6 +274,16 @@ function MainTabNavigator({ onAddPress }) {
       <Tab.Screen
         name="Home"
         component={HomeStackNavigator}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            // Reset the stack to show HomeScreen when Home tab is pressed
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "Home" }],
+            });
+          },
+        })}
         options={{ tabBarLabel: "Home" }}
       />
       <Tab.Screen

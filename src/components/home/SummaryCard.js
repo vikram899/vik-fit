@@ -4,17 +4,21 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import MacroItem from "./MacroItem";
 import { appStyles } from "../../styles/app.styles";
 
-export default function SummaryCard({ dailyTotals, macroGoals, onLogPress }) {
+export default function SummaryCard({
+  dailyTotals,
+  macroGoals,
+  onLogPress,
+  onEditMacrosPress,
+}) {
   return (
     <View style={appStyles.summaryCard}>
       <View style={styles.header}>
         <Text style={appStyles.summaryTitle}>Today's Summary</Text>
-        <TouchableOpacity
-          style={styles.logButton}
-          onPress={onLogPress}
-        >
-          <Text style={styles.logButtonText}>+ Log</Text>
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity style={styles.logButton} onPress={onLogPress}>
+            <Text style={styles.logButtonText}>+ Log</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={appStyles.summaryContent}>
@@ -71,6 +75,21 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 16,
+  },
+  headerButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  editButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    backgroundColor: "#FF9800",
+    borderRadius: 6,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 28,
+    width: 28,
   },
   logButton: {
     paddingVertical: 6,

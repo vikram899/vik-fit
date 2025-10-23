@@ -9,6 +9,7 @@ import {
   getDailyTotals,
   getAllMeals,
   deleteMealLog,
+  getMacroGoals,
 } from "../services/database";
 import { AddMealModal, ExistingMealsModal, EditMealModal, MealMacroCards, TodaysMealsList } from "../components/meals";
 
@@ -31,25 +32,36 @@ const LogMealsScreen = ({ navigation }) => {
     totalCarbs: 0,
     totalFats: 0,
   });
+  const [macroGoals, setMacroGoals] = React.useState({
+    calorieGoal: 2500,
+    proteinGoal: 150,
+    carbsGoal: 300,
+    fatsGoal: 85,
+  });
   const [selectedMealForEdit, setSelectedMealForEdit] = React.useState(null);
 
-  // Fetch today's meals and totals when screen is focused
+  // Fetch today's meals, totals, and macro goals when screen is focused
   useFocusEffect(
     React.useCallback(() => {
       const fetchData = async () => {
         try {
-          const meals = await getMealLogsForDate(today);
+          const todayDate = new Date().toISOString().split("T")[0];
+          const meals = await getMealLogsForDate(todayDate);
           setTodaysMeals(meals || []);
 
-          const totals = await getDailyTotals(today);
+          const totals = await getDailyTotals(todayDate);
           setDailyTotals(totals);
+
+          // Load macro goals to ensure they're always up-to-date
+          const goals = await getMacroGoals(todayDate);
+          setMacroGoals(goals);
         } catch (error) {
           console.error("Error fetching meals:", error);
         }
       };
 
       fetchData();
-    }, [today])
+    }, [])
   );
 
   const handleAddMealModalClose = () => {
@@ -139,7 +151,7 @@ const LogMealsScreen = ({ navigation }) => {
       </View>
 
       {/* Macro Cards Grid */}
-      <MealMacroCards dailyTotals={dailyTotals} />
+      <MealMacroCards dailyTotals={dailyTotals} macroGoals={macroGoals} />
 
       {/* Meals List with fixed title */}
       <TodaysMealsList

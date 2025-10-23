@@ -35,6 +35,12 @@ export default function DrawerContent({ navigation }) {
       screen: "Meals",
     },
     {
+      id: "macroGoals",
+      label: "Macro Goals",
+      icon: "nutrition",
+      screen: "MacroGoals",
+    },
+    {
       id: "progress",
       label: "Progress",
       icon: "chart-line",

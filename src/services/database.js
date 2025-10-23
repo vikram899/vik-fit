@@ -89,6 +89,18 @@ export const initializeDatabase = async () => {
       );
     `);
 
+    // Create weight_tracking table if it doesn't exist
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS weight_tracking (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        weightDate TEXT NOT NULL,
+        currentWeight REAL NOT NULL,
+        targetWeight REAL NOT NULL,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(weightDate)
+      );
+    `);
+
     // Create plan_schedule table for assigning plans to days of week
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS plan_schedule (
@@ -325,10 +337,24 @@ export const seedDummyData = async () => {
     const existingPlans = await getAllPlans();
     if (existingPlans.length > 0) {
       console.log('✅ Database already has plans, skipping seed');
+      // Seed macro goals with today's date (will apply to today and all future dates)
+      const today = new Date().toISOString().split('T')[0];
+      const existingMacros = await db.getFirstAsync('SELECT * FROM macro_goals WHERE goalDate = ?', [today]);
+      if (!existingMacros) {
+        console.log('Seeding default macro goals for today...');
+        await setMacroGoals(today, 2500, 120, 300, 80);
+        console.log('✅ Default macro goals seeded for', today);
+      }
       return;
     }
 
     console.log('Starting to seed dummy data...');
+
+    // Seed default macro goals with today's date (will apply to today and all future dates)
+    const today = new Date().toISOString().split('T')[0];
+    console.log('Seeding default macro goals for today (' + today + ')...');
+    await setMacroGoals(today, 2500, 120, 300, 80);
+    console.log('✅ Default macro goals seeded for', today);
 
     // Add dummy plans and wait for each to complete
     console.log('Adding Chest Day plan...');
@@ -543,6 +569,14 @@ export const deleteMealLog = async (mealLogId) => {
  */
 export const setMacroGoals = async (goalDate, calorieGoal, proteinGoal, carbsGoal, fatsGoal) => {
   try {
+    // Delete all future macro goal entries (after goalDate)
+    // This ensures the new macros apply to all future dates
+    await db.runAsync(
+      'DELETE FROM macro_goals WHERE goalDate > ?',
+      [goalDate]
+    );
+
+    // Insert or replace the macros for the given date
     await db.runAsync(
       'INSERT OR REPLACE INTO macro_goals (goalDate, calorieGoal, proteinGoal, carbsGoal, fatsGoal) VALUES (?, ?, ?, ?, ?)',
       [goalDate, calorieGoal, proteinGoal, carbsGoal, fatsGoal]
@@ -555,22 +589,17 @@ export const setMacroGoals = async (goalDate, calorieGoal, proteinGoal, carbsGoa
 
 /**
  * Get macro goals for a date
+ * Retrieves the most recent macro goals saved on or before the given date
+ * This means macros apply to the date they're saved and all future dates
  */
 export const getMacroGoals = async (goalDate) => {
   try {
-    // First try to get goals for the specific date
+    // Get the most recent macro goals saved on or before goalDate
+    // This way, if you save on 2025-10-23, those macros apply to 2025-10-23 and beyond
     let result = await db.getFirstAsync(
-      'SELECT * FROM macro_goals WHERE goalDate = ?',
+      'SELECT * FROM macro_goals WHERE goalDate <= ? ORDER BY goalDate DESC LIMIT 1',
       [goalDate]
     );
-
-    // If no goals for this specific date, get the default goals
-    if (!result) {
-      result = await db.getFirstAsync(
-        'SELECT * FROM macro_goals WHERE goalDate = ?',
-        ['0000-01-01']
-      );
-    }
 
     // Return the result or hardcoded defaults as fallback
     if (result) {
@@ -592,6 +621,129 @@ export const getMacroGoals = async (goalDate) => {
       carbsGoal: 300,
       fatsGoal: 80,
     };
+  }
+};
+
+/**
+ * DEBUG: Get all macro goals from database
+ */
+export const debugGetAllMacroGoals = async () => {
+  try {
+    const allGoals = await db.getAllAsync('SELECT * FROM macro_goals ORDER BY goalDate DESC');
+    console.log('DEBUG: All macro goals in database:', allGoals);
+    return allGoals;
+  } catch (error) {
+    console.error('Error getting all macro goals:', error);
+    return [];
+  }
+};
+
+/**
+ * DEBUG: Clear all macro goals from database (for testing)
+ */
+export const debugClearAllMacroGoals = async () => {
+  try {
+    await db.runAsync('DELETE FROM macro_goals');
+    console.log('DEBUG: Cleared all macro goals from database');
+  } catch (error) {
+    console.error('Error clearing macro goals:', error);
+  }
+};
+
+// ============================================================================
+// WEIGHT TRACKING FUNCTIONS
+// ============================================================================
+
+/**
+ * Add or update a weight entry for a specific date
+ */
+export const addWeightEntry = async (weightDate, currentWeight, targetWeight) => {
+  try {
+    await db.runAsync(
+      'INSERT OR REPLACE INTO weight_tracking (weightDate, currentWeight, targetWeight) VALUES (?, ?, ?)',
+      [weightDate, currentWeight, targetWeight]
+    );
+    console.log('Weight entry saved for', weightDate);
+  } catch (error) {
+    console.error('Error adding weight entry:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get weight entries within a date range
+ */
+export const getWeightEntries = async (startDate, endDate) => {
+  try {
+    const result = await db.getAllAsync(
+      'SELECT * FROM weight_tracking WHERE weightDate BETWEEN ? AND ? ORDER BY weightDate ASC',
+      [startDate, endDate]
+    );
+    return result || [];
+  } catch (error) {
+    console.error('Error getting weight entries:', error);
+    return [];
+  }
+};
+
+/**
+ * Get all weight entries (for debugging)
+ */
+export const getAllWeightEntries = async () => {
+  try {
+    const result = await db.getAllAsync(
+      'SELECT * FROM weight_tracking ORDER BY weightDate DESC'
+    );
+    return result || [];
+  } catch (error) {
+    console.error('Error getting all weight entries:', error);
+    return [];
+  }
+};
+
+/**
+ * Get the latest weight entry
+ */
+export const getLatestWeightEntry = async () => {
+  try {
+    const result = await db.getFirstAsync(
+      'SELECT * FROM weight_tracking ORDER BY weightDate DESC LIMIT 1'
+    );
+    return result || null;
+  } catch (error) {
+    console.error('Error getting latest weight entry:', error);
+    return null;
+  }
+};
+
+/**
+ * Get weight entry for a specific date
+ */
+export const getWeightEntryForDate = async (weightDate) => {
+  try {
+    const result = await db.getFirstAsync(
+      'SELECT * FROM weight_tracking WHERE weightDate = ?',
+      [weightDate]
+    );
+    return result || null;
+  } catch (error) {
+    console.error('Error getting weight entry for date:', error);
+    return null;
+  }
+};
+
+/**
+ * Delete a weight entry
+ */
+export const deleteWeightEntry = async (weightDate) => {
+  try {
+    await db.runAsync(
+      'DELETE FROM weight_tracking WHERE weightDate = ?',
+      [weightDate]
+    );
+  } catch (error) {
+    console.error('Error deleting weight entry:', error);
+    throw error;
   }
 };
 

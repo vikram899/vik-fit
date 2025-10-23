@@ -20,6 +20,14 @@ export default function MenuScreen({ navigation }) {
       },
     },
     {
+      id: "weight_tracking",
+      label: "Weight Tracking",
+      icon: "scale-bathroom",
+      onPress: () => {
+        navigation.navigate("WeightTracking");
+      },
+    },
+    {
       id: "macro_goals",
       label: "Macro Goals",
       icon: "target",

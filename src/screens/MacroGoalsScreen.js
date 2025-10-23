@@ -21,7 +21,8 @@ import { calculateMacroGoals, getActivityLevels, getFitnessGoals } from "../serv
  * Screen to set default macro goals for all days
  */
 export default function MacroGoalsScreen({ navigation }) {
-  const defaultGoalDate = "0000-01-01"; // Special date for default goals
+  // Save macros for today - they will apply to today and all future dates
+  const defaultGoalDate = new Date().toISOString().split("T")[0];
   const [tab, setTab] = useState("manual"); // "manual" or "calculate"
   const [calorieGoal, setCalorieGoal] = useState("2500");
   const [proteinGoal, setProteinGoal] = useState("120");
@@ -62,7 +63,7 @@ export default function MacroGoalsScreen({ navigation }) {
     };
 
     loadMacroGoals();
-  }, []);
+  }, [defaultGoalDate]);
 
   const handleCalculateMacros = async () => {
     try {
@@ -149,7 +150,7 @@ export default function MacroGoalsScreen({ navigation }) {
       >
         <Text style={styles.title}>Daily Macro Goals</Text>
         <Text style={styles.subtitle}>
-          Set your default daily macro nutrient targets
+          Update your macro targets - changes apply from today onwards
         </Text>
 
         {/* Tabs */}
