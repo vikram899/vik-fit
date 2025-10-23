@@ -558,21 +558,31 @@ export const setMacroGoals = async (goalDate, calorieGoal, proteinGoal, carbsGoa
  */
 export const getMacroGoals = async (goalDate) => {
   try {
-    const result = await db.getFirstAsync(
+    // First try to get goals for the specific date
+    let result = await db.getFirstAsync(
       'SELECT * FROM macro_goals WHERE goalDate = ?',
       [goalDate]
     );
 
-    // Return default goals if none are set for this date
+    // If no goals for this specific date, get the default goals
     if (!result) {
-      return {
-        calorieGoal: 2500,
-        proteinGoal: 120,
-        carbsGoal: 300,
-        fatsGoal: 80,
-      };
+      result = await db.getFirstAsync(
+        'SELECT * FROM macro_goals WHERE goalDate = ?',
+        ['0000-01-01']
+      );
     }
-    return result;
+
+    // Return the result or hardcoded defaults as fallback
+    if (result) {
+      return result;
+    }
+
+    return {
+      calorieGoal: 2500,
+      proteinGoal: 120,
+      carbsGoal: 300,
+      fatsGoal: 80,
+    };
   } catch (error) {
     console.error('Error getting macro goals:', error);
     // Return default goals on error

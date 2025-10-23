@@ -13,15 +13,21 @@ export default function MacroItem({
   progress,
   progressColor,
 }) {
-  const clampedProgress = Math.min(progress, 100);
+  // Allow progress to exceed 100% to show full fill when goal is exceeded
+  const displayProgress = Math.min(progress, 100);
 
   return (
-    <View style={appStyles.summaryItem}>
+    <View
+      style={[
+        appStyles.summaryItem,
+        { flexDirection: "column" },
+      ]}
+    >
       <View
         style={[
-          styles.progressOverlay,
+          styles.progressBar,
           {
-            width: `${clampedProgress}%`,
+            width: `${displayProgress}%`,
             backgroundColor: progressColor,
           },
         ]}
@@ -50,20 +56,15 @@ export default function MacroItem({
 }
 
 const styles = {
-  progressOverlay: {
-    position: "absolute",
-    left: -10,
-    top: -10,
-    right: -10,
-    bottom: -10,
-    opacity: 0.15,
-    borderRadius: 8,
+  progressBar: {
+    height: 4,
+    borderRadius: 2,
+    marginBottom: 8,
   },
   content: {
     flexDirection: "row",
     alignItems: "flex-start",
     flex: 1,
-    zIndex: 1,
   },
   iconContainer: {
     marginRight: 8,
