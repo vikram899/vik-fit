@@ -284,13 +284,21 @@ function MainTabNavigator({ onAddPress }) {
             });
           },
         })}
-        options={{ tabBarLabel: "Home" }}
+        options={{
+          tabBarLabel: "Home",
+          tabBarItemStyle: {
+            marginHorizontal: 8,
+          },
+        }}
       />
       <Tab.Screen
         name="Workouts"
         component={AddWorkoutScreen}
         options={({ navigation }) => ({
           tabBarLabel: "Workouts",
+          tabBarItemStyle: {
+            marginHorizontal: 8,
+          },
           headerShown: true,
           title: "Workouts",
           headerRight: () => (
@@ -347,6 +355,9 @@ function MainTabNavigator({ onAddPress }) {
         component={AddMealScreen}
         options={({ navigation }) => ({
           tabBarLabel: "Meals",
+          tabBarItemStyle: {
+            marginHorizontal: 6,
+          },
           headerShown: true,
           title: "Meals",
           headerRight: () => (
@@ -368,7 +379,12 @@ function MainTabNavigator({ onAddPress }) {
       <Tab.Screen
         name="Progress"
         component={ProgressStackNavigator}
-        options={{ tabBarLabel: "Progress" }}
+        options={{
+          tabBarLabel: "Progress",
+          tabBarItemStyle: {
+            marginHorizontal: 8,
+          },
+        }}
       />
     </Tab.Navigator>
   );
