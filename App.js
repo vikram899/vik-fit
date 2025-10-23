@@ -20,13 +20,15 @@ import AddWorkoutScreen from "./src/screens/AddWorkoutScreen";
 import AddMealScreen from "./src/screens/AddMealScreen";
 import StartWorkoutScreen from "./src/screens/StartWorkoutScreen";
 import WorkoutSummaryScreen from "./src/screens/WorkoutSummaryScreen";
-import AddScreen from "./src/screens/AddScreen";
 
 // Services
 import { initializeDatabase, seedDummyData } from "./src/services/database";
 
 // Styles
 import { COLORS } from "./src/styles";
+
+// Components
+import { AddOptionsModal } from "./src/components/modals";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -200,7 +202,7 @@ function ProgressStackNavigator() {
  * MainTabNavigator
  * Bottom tab navigation with all main screens
  */
-function MainTabNavigator() {
+function MainTabNavigator({ onAddPress }) {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -210,14 +212,14 @@ function MainTabNavigator() {
             iconName = focused ? "home" : "home-outline";
           } else if (route.name === "Workouts") {
             iconName = focused ? "dumbbell" : "dumbbell";
-          } else if (route.name === "Add") {
-            iconName = "plus";
           } else if (route.name === "Meals") {
             iconName = focused
               ? "silverware-fork-knife"
               : "silverware-fork-knife";
           } else if (route.name === "Progress") {
             iconName = focused ? "chart-line" : "chart-line";
+          } else if (route.name === "Add") {
+            iconName = "plus";
           }
           return (
             <MaterialCommunityIcons name={iconName} size={size} color={color} />
@@ -268,11 +270,18 @@ function MainTabNavigator() {
       />
       <Tab.Screen
         name="Add"
-        component={AddScreen}
+        component={() => null}
         options={{
-          tabBarLabel: "",
-          headerShown: true,
-          title: "Add",
+          tabBarLabel: "Add",
+          tabBarButton: (props) => (
+            <TouchableOpacity
+              {...props}
+              onPress={(e) => {
+                e.preventDefault?.();
+                onAddPress?.();
+              }}
+            />
+          ),
         }}
       />
       <Tab.Screen
@@ -312,6 +321,9 @@ function MainTabNavigator() {
  * Main entry point with Drawer Navigation
  */
 export default function App() {
+  const navigationRef = React.useRef(null);
+  const [showAddModal, setShowAddModal] = React.useState(false);
+
   // Initialize database on app start
   React.useEffect(() => {
     const initDB = async () => {
@@ -321,6 +333,24 @@ export default function App() {
     initDB();
   }, []);
 
+  const handleAddPress = () => {
+    setShowAddModal(true);
+  };
+
+  const handleLogWorkout = () => {
+    setShowAddModal(false);
+    // Just close the modal, don't navigate
+  };
+
+  const handleLogMeal = () => {
+    setShowAddModal(false);
+    // Just close the modal, don't navigate
+  };
+
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+  };
+
   return (
     <SafeAreaProvider>
       <StatusBar
@@ -328,9 +358,15 @@ export default function App() {
         backgroundColor="#fff"
         translucent={false}
       />
-      <NavigationContainer>
-        <MainTabNavigator />
+      <NavigationContainer ref={navigationRef}>
+        <MainTabNavigator onAddPress={handleAddPress} />
       </NavigationContainer>
+      <AddOptionsModal
+        visible={showAddModal}
+        onLogWorkout={handleLogWorkout}
+        onLogMeal={handleLogMeal}
+        onClose={handleCloseModal}
+      />
     </SafeAreaProvider>
   );
 }
