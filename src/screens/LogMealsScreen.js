@@ -68,9 +68,14 @@ const LogMealsScreen = ({ navigation }) => {
     setAddMealModalVisible(false);
   };
 
-  const handleMealAdded = async ({ meals, totals }) => {
-    setTodaysMeals(meals || []);
-    setDailyTotals(totals);
+  const handleMealAdded = async ({ mealId }) => {
+    // Meal was created but not logged - refresh existing meals list for logging
+    try {
+      const meals = await getAllMeals();
+      setExistingMeals(meals);
+    } catch (error) {
+      console.error("Error refreshing meals list:", error);
+    }
   };
 
   const handleOpenAddExistingModal = async () => {

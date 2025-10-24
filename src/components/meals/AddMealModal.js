@@ -13,24 +13,17 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   addMeal,
-  logMeal,
-  getMealLogsForDate,
-  getDailyTotals,
 } from "../../services/database";
 import { modalStyles, formStyles, buttonStyles, COLORS } from "../../styles";
 import { STRINGS } from "../../constants/strings";
 
 const AddMealModal = ({ visible, onClose, onMealAdded }) => {
-  const today = new Date().toISOString().split("T")[0];
-  const MEAL_TYPES = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];
-
   const [form, setForm] = React.useState({
     name: "",
     calories: "",
     protein: "",
     carbs: "",
     fats: "",
-    mealType: "Breakfast",
   });
 
   const handleAddMeal = async () => {
@@ -61,7 +54,7 @@ const AddMealModal = ({ visible, onClose, onMealAdded }) => {
     try {
       const mealName = form.name.trim();
 
-      // Add meal to existing meals table
+      // Add meal to existing meals table (without logging to today)
       const mealId = await addMeal(
         mealName,
         "General",
@@ -71,17 +64,6 @@ const AddMealModal = ({ visible, onClose, onMealAdded }) => {
         parseFloat(form.fats) || 0
       );
 
-      // Log it to today's meals
-      await logMeal(
-        mealId,
-        today,
-        parseFloat(form.calories) || 0,
-        parseFloat(form.protein) || 0,
-        parseFloat(form.carbs) || 0,
-        parseFloat(form.fats) || 0,
-        form.mealType
-      );
-
       // Reset form and close modal
       setForm({
         name: "",
@@ -89,14 +71,10 @@ const AddMealModal = ({ visible, onClose, onMealAdded }) => {
         protein: "",
         carbs: "",
         fats: "",
-        mealType: "Breakfast",
       });
 
-      // Refresh meals list and call callback
-      const meals = await getMealLogsForDate(today);
-      const totals = await getDailyTotals(today);
-
-      onMealAdded?.({ meals, totals });
+      // Notify parent to refresh meals list
+      onMealAdded?.({ mealId });
       onClose();
 
       Alert.alert(
@@ -119,7 +97,6 @@ const AddMealModal = ({ visible, onClose, onMealAdded }) => {
       protein: "",
       carbs: "",
       fats: "",
-      mealType: "Breakfast",
     });
     onClose();
   };
@@ -212,40 +189,6 @@ const AddMealModal = ({ visible, onClose, onMealAdded }) => {
                       }
                       keyboardType="decimal-pad"
                     />
-                  </View>
-                </View>
-
-                {/* Meal Type Selection */}
-                <View style={formStyles.formGroup}>
-                  <Text style={formStyles.label}>Meal Type</Text>
-                  <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-                    {MEAL_TYPES.map((type) => (
-                      <TouchableOpacity
-                        key={type}
-                        style={{
-                          flex: 1,
-                          minWidth: '48%',
-                          paddingVertical: 10,
-                          paddingHorizontal: 12,
-                          borderRadius: 8,
-                          borderWidth: 2,
-                          borderColor: form.mealType === type ? COLORS.primary : '#ddd',
-                          backgroundColor: form.mealType === type ? COLORS.primary : '#f5f5f5',
-                          alignItems: 'center',
-                        }}
-                        onPress={() => setForm({ ...form, mealType: type })}
-                      >
-                        <Text
-                          style={{
-                            fontSize: 12,
-                            fontWeight: '600',
-                            color: form.mealType === type ? '#fff' : '#333',
-                          }}
-                        >
-                          {type}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
                   </View>
                 </View>
 
