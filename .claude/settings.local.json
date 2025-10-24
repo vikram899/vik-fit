@@ -6,7 +6,8 @@
       "Bash(npm start)",
       "Bash(npm run android:*)",
       "Bash(npx tsc:*)",
-      "Bash(node -c:*)"
+      "Bash(node -c:*)",
+      "Read(//d/**)"
     ],
     "deny": [],
     "ask": []

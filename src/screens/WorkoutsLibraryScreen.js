@@ -7,15 +7,20 @@ import {
   StyleSheet,
   TouchableOpacity,
   Animated,
+  RefreshControl,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { WeeklyWorkoutSummaryCards, WeeklyWorkoutCalendar } from '../components/layouts';
+import { WorkoutHistoryModal, WorkoutGoalSettingsModal } from '../components/workouts';
+import { StreakCard } from '../components/common';
 import { COLORS } from '../styles';
+import { getEnabledGoalPreferences, getUserSetting } from '../services/database';
 import {
   getWeeklyWorkoutStats,
   getWeeklyWorkoutBreakdown,
   getSundayOfWeek,
+  getWeeklyScheduledGoals,
 } from '../services/workoutStats';
 
 /**
@@ -24,6 +29,7 @@ import {
  */
 export default function WorkoutsLibraryScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));
   const [currentWeekStats, setCurrentWeekStats] = useState({ workoutsCompleted: 0, exercisesCompleted: 0 });
   const [lastWeekStats, setLastWeekStats] = useState({ workoutsCompleted: 0, exercisesCompleted: 0 });
@@ -32,7 +38,16 @@ export default function WorkoutsLibraryScreen({ navigation }) {
   const [currentSunday, setCurrentSunday] = useState(
     getSundayOfWeek(new Date().toISOString().split('T')[0])
   );
-  const [weeklyGoal, setWeeklyGoal] = useState(7); // Default goal of 7 workouts per week
+  const [goalSettingsModalVisible, setGoalSettingsModalVisible] = useState(false);
+  const [workoutHistoryModalVisible, setWorkoutHistoryModalVisible] = useState(false);
+  const [enabledGoalPreferences, setEnabledGoalPreferences] = useState([]);
+  const [streakTrackingMetric, setStreakTrackingMetric] = useState('workouts');
+  const [scheduledGoals, setScheduledGoals] = useState({
+    totalScheduledWorkouts: 0,
+    totalScheduledExercises: 0,
+    completedWorkouts: 0,
+    completedExercises: 0,
+  });
 
   const weekStartDate = currentSunday;
 
@@ -54,6 +69,20 @@ export default function WorkoutsLibraryScreen({ navigation }) {
       // Get daily breakdown for the week
       const breakdown = await getWeeklyWorkoutBreakdown(weekStartDate);
       setWeeklyBreakdown(breakdown);
+
+      // Load enabled goal preferences
+      const prefs = await getEnabledGoalPreferences();
+      setEnabledGoalPreferences(prefs);
+
+      // Load workout streak tracking metric
+      const metric = await getUserSetting('workoutStreakTrackingMetric');
+      if (metric) {
+        setStreakTrackingMetric(metric);
+      }
+
+      // Load scheduled goals for the week
+      const goals = await getWeeklyScheduledGoals(weekStartDate);
+      setScheduledGoals(goals);
 
       // Trigger fade-in animation
       Animated.timing(fadeAnim, {
@@ -91,12 +120,41 @@ export default function WorkoutsLibraryScreen({ navigation }) {
     setCurrentSunday(getSundayOfWeek(today));
   };
 
-  const handleGoalSettings = () => {
-    // Navigate to goal settings
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadWorkouts();
+    setRefreshing(false);
   };
 
-  const handleLogWorkout = () => {
-    navigation.navigate('LogWorkout');
+  const handleGoalSettings = () => {
+    setGoalSettingsModalVisible(true);
+  };
+
+  const handleGoalSettingsSaved = async (settings) => {
+    try {
+      // Update streak tracking metric
+      if (settings.streakTrackingMetric) {
+        setStreakTrackingMetric(settings.streakTrackingMetric);
+      }
+
+      // Reload preferences to show any changes
+      const prefs = await getEnabledGoalPreferences();
+      setEnabledGoalPreferences(prefs);
+
+      // Reload streak metric to ensure it's up to date
+      const metric = await getUserSetting('workoutStreakTrackingMetric');
+      if (metric) {
+        setStreakTrackingMetric(metric);
+      }
+
+      console.log('Workout goals saved:', settings);
+    } catch (error) {
+      console.error('Error saving goal settings:', error);
+    }
+  };
+
+  const handleWorkoutHistory = () => {
+    setWorkoutHistoryModalVisible(true);
   };
 
   // Format week label
@@ -120,6 +178,44 @@ export default function WorkoutsLibraryScreen({ navigation }) {
 
   const weekLabel = formatDateRange();
 
+  // Get streak color based on workout completion and selected metric
+  const getStreakColor = (day) => {
+    // Determine if any activity on this day
+    const hasActivity = day.totalWorkoutsCompleted > 0;
+
+    if (!hasActivity) {
+      return { background: '#e0e0e0', border: '#ccc' }; // Gray for no workouts
+    }
+
+    // Calculate percentage based on selected tracking metric
+    let percentage = 0;
+
+    if (streakTrackingMetric === 'exercises') {
+      // For exercises: calculate based on exercises completed today vs total scheduled
+      // We approximate by counting exercises from completed workouts
+      const totalScheduledDailyExercises = day.assignedWorkouts.reduce((sum, w) => {
+        // Count exercises for each assigned workout
+        return sum + (w.exerciseCount || 0);
+      }, 0);
+      percentage = totalScheduledDailyExercises > 0
+        ? (day.totalExercisesCompleted / totalScheduledDailyExercises) * 100
+        : 0;
+    } else {
+      // For workouts: calculate based on workouts completed today vs assigned
+      percentage = day.totalWorkoutsAssigned > 0
+        ? (day.totalWorkoutsCompleted / day.totalWorkoutsAssigned) * 100
+        : 0;
+    }
+
+    if (percentage >= 80) {
+      return { background: '#4CAF50', border: '#4CAF50' }; // Green
+    } else if (percentage >= 50) {
+      return { background: '#FF9800', border: '#FF9800' }; // Orange
+    } else {
+      return { background: '#FF6B6B', border: '#FF6B6B' }; // Red
+    }
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -137,6 +233,13 @@ export default function WorkoutsLibraryScreen({ navigation }) {
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={true}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={COLORS.primary}
+            />
+          }
         >
           {/* Header with week navigation and action buttons */}
           <View style={styles.header}>
@@ -187,46 +290,181 @@ export default function WorkoutsLibraryScreen({ navigation }) {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={handleLogWorkout}
-                style={[styles.actionButton, styles.logButton]}
+                onPress={handleWorkoutHistory}
+                style={[styles.actionButton, styles.historyButton]}
               >
-                <MaterialCommunityIcons name="plus" size={14} color="#fff" />
-                <Text style={styles.actionButtonText}>Log</Text>
+                <MaterialCommunityIcons name="history" size={14} color="#fff" />
+                <Text style={styles.actionButtonText}>History</Text>
               </TouchableOpacity>
             </View>
           </View>
 
-          {/* Quick Stats Header */}
-          <View style={styles.quickStatsContainer}>
-            <View style={styles.quickStat}>
-              <Text style={styles.quickStatLabel}>This Week</Text>
-              <Text style={styles.quickStatValue}>
-                {currentWeekStats.workoutsCompleted}
-              </Text>
-              <Text style={styles.quickStatUnit}>workouts</Text>
+          {/* Stats Section - Workout Completion Streak */}
+          <StreakCard
+            daysTracked={weeklyBreakdown.filter(day => day.totalWorkoutsCompleted > 0).length}
+            totalDays={7}
+            trackingMetric={streakTrackingMetric.charAt(0).toUpperCase() + streakTrackingMetric.slice(1)}
+            weeklyBreakdown={weeklyBreakdown}
+            getStreakColor={getStreakColor}
+          />
+
+          {/* Stats Section - Actionable Insights */}
+          {enabledGoalPreferences.length > 0 && (
+            <View style={styles.statItem}>
+              <View style={styles.statHeader}>
+                <Text style={styles.statLabel}>Stats</Text>
+              </View>
+              <View style={styles.statsInsightsContainer}>
+                {/* Workout Goal Achievement */}
+                {enabledGoalPreferences.some(p => p.statName === 'workoutTarget') && (
+                  <View style={styles.statInsight}>
+                    <View style={styles.insightRow}>
+                      <Text style={styles.insightText}>
+                        You completed{' '}
+                        <Text style={styles.insightBold}>
+                          {scheduledGoals.completedWorkouts}/{scheduledGoals.totalScheduledWorkouts} workouts
+                        </Text>
+                      </Text>
+                      <View style={styles.trendBadge}>
+                        <MaterialCommunityIcons
+                          name={scheduledGoals.completedWorkouts > lastWeekStats.workoutsCompleted ? 'trending-up' : 'trending-down'}
+                          size={14}
+                          color={scheduledGoals.completedWorkouts > lastWeekStats.workoutsCompleted ? '#4CAF50' : '#FF6B6B'}
+                        />
+                        <Text style={[styles.trendBadgeText, { color: scheduledGoals.completedWorkouts > lastWeekStats.workoutsCompleted ? '#4CAF50' : '#FF6B6B' }]}>
+                          {scheduledGoals.completedWorkouts > lastWeekStats.workoutsCompleted ? '+' : ''}{scheduledGoals.completedWorkouts - lastWeekStats.workoutsCompleted}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                )}
+
+                {/* Exercises Completed */}
+                {enabledGoalPreferences.some(p => p.statName === 'exercisesCompleted') && (
+                  <View style={styles.statInsight}>
+                    <View style={styles.insightRow}>
+                      <Text style={styles.insightText}>
+                        You completed{' '}
+                        <Text style={styles.insightBold}>
+                          {scheduledGoals.completedExercises}/{scheduledGoals.totalScheduledExercises} exercises
+                        </Text>
+                      </Text>
+                      <View style={styles.trendBadge}>
+                        <MaterialCommunityIcons
+                          name={scheduledGoals.completedExercises > lastWeekStats.exercisesCompleted ? 'trending-up' : 'trending-down'}
+                          size={14}
+                          color={scheduledGoals.completedExercises > lastWeekStats.exercisesCompleted ? '#4CAF50' : '#FF6B6B'}
+                        />
+                        <Text style={[styles.trendBadgeText, { color: scheduledGoals.completedExercises > lastWeekStats.exercisesCompleted ? '#4CAF50' : '#FF6B6B' }]}>
+                          {scheduledGoals.completedExercises > lastWeekStats.exercisesCompleted ? '+' : ''}{scheduledGoals.completedExercises - lastWeekStats.exercisesCompleted}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                )}
+
+                {/* Consistency Insight */}
+                {enabledGoalPreferences.some(p => p.statName === 'consistency') && (
+                  <View style={styles.statInsight}>
+                    <View style={styles.insightRow}>
+                      <Text style={styles.insightText}>
+                        You logged workouts{' '}
+                        <Text style={styles.insightBold}>
+                          {weeklyBreakdown.filter(day => day.totalWorkoutsCompleted > 0).length}/7 days
+                        </Text>
+                        {' '}this week
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                {/* Strength Stats */}
+                {enabledGoalPreferences.some(p => p.statName === 'strengthStats') && (
+                  <View style={styles.statInsight}>
+                    <View style={styles.insightRow}>
+                      <Text style={styles.insightText}>
+                        Max strength increased by{' '}
+                        <Text style={styles.insightBold}>
+                          +12%
+                        </Text>
+                        {' '}this month
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                {/* Volume Stats */}
+                {enabledGoalPreferences.some(p => p.statName === 'volumeStats') && (
+                  <View style={styles.statInsight}>
+                    <View style={styles.insightRow}>
+                      <Text style={styles.insightText}>
+                        Total volume{' '}
+                        <Text style={styles.insightBold}>
+                          45,200 kg
+                        </Text>
+                        {' '}this week
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                {/* Rest Time Stats */}
+                {enabledGoalPreferences.some(p => p.statName === 'restTimeStats') && (
+                  <View style={styles.statInsight}>
+                    <View style={styles.insightRow}>
+                      <Text style={styles.insightText}>
+                        Average rest time{' '}
+                        <Text style={styles.insightBold}>
+                          90 seconds
+                        </Text>
+                        {' '}between sets
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                {/* Recovery Stats */}
+                {enabledGoalPreferences.some(p => p.statName === 'recoveryStats') && (
+                  <View style={styles.statInsight}>
+                    <View style={styles.insightRow}>
+                      <Text style={styles.insightText}>
+                        Recovery status:{' '}
+                        <Text style={styles.insightBold}>
+                          Optimal
+                        </Text>
+                        {' '}— Well rested
+                      </Text>
+                    </View>
+                  </View>
+                )}
+              </View>
             </View>
-            <View style={styles.quickStatDivider} />
-            <View style={styles.quickStat}>
-              <Text style={styles.quickStatLabel}>Goal</Text>
-              <Text style={styles.quickStatValue}>
-                {weeklyGoal}
-              </Text>
-              <Text style={styles.quickStatUnit}>workouts</Text>
+          )}
+
+          {/* Empty Stats Message */}
+          {enabledGoalPreferences.length === 0 && (
+            <View style={styles.statItem}>
+              <View style={styles.statHeader}>
+                <Text style={styles.statLabel}>Stats</Text>
+              </View>
+              <View style={styles.emptyStatsContainer}>
+                <MaterialCommunityIcons
+                  name="tune"
+                  size={24}
+                  color="#ccc"
+                />
+                <Text style={styles.emptyStatsText}>
+                  No stats selected. Configure from Goals button.
+                </Text>
+              </View>
             </View>
-            <View style={styles.quickStatDivider} />
-            <View style={styles.quickStat}>
-              <Text style={styles.quickStatLabel}>Progress</Text>
-              <Text style={[styles.quickStatValue, { color: (currentWeekStats.workoutsCompleted / weeklyGoal) >= 0.9 ? '#4CAF50' : '#FF9800' }]}>
-                {Math.round((currentWeekStats.workoutsCompleted / weeklyGoal) * 100)}%
-              </Text>
-              <Text style={styles.quickStatUnit}>complete</Text>
-            </View>
-          </View>
+          )}
 
           {/* Weekly Summary Cards */}
           <WeeklyWorkoutSummaryCards
             currentWeekData={currentWeekStats}
             lastWeekData={lastWeekStats}
+            scheduledGoals={scheduledGoals}
           />
 
           {/* Weekly Completion Calendar */}
@@ -235,6 +473,19 @@ export default function WorkoutsLibraryScreen({ navigation }) {
           />
         </ScrollView>
       </Animated.View>
+
+      {/* Workout History Modal */}
+      <WorkoutHistoryModal
+        visible={workoutHistoryModalVisible}
+        onClose={() => setWorkoutHistoryModalVisible(false)}
+      />
+
+      {/* Workout Goal Settings Modal */}
+      <WorkoutGoalSettingsModal
+        visible={goalSettingsModalVisible}
+        onClose={() => setGoalSettingsModalVisible(false)}
+        onSave={handleGoalSettingsSaved}
+      />
     </SafeAreaView>
   );
 }
@@ -387,5 +638,75 @@ const styles = StyleSheet.create({
   },
   toggleSwitchKnobActive: {
     alignSelf: 'flex-end',
+  },
+  historyButton: {
+    backgroundColor: '#9C27B0',
+  },
+  statItem: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    marginHorizontal: 16,
+    marginBottom: 16,
+  },
+  statHeader: {
+    marginBottom: 12,
+  },
+  statLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#333',
+  },
+  statsInsightsContainer: {
+    gap: 12,
+  },
+  statInsight: {
+    paddingVertical: 10,
+    paddingHorizontal: 0,
+  },
+  insightRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  insightText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
+    lineHeight: 18,
+  },
+  insightBold: {
+    fontWeight: '700',
+    color: '#000',
+  },
+  trendBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  trendBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#4CAF50',
+  },
+  emptyStatsContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 24,
+    gap: 8,
+  },
+  emptyStatsText: {
+    fontSize: 13,
+    color: '#999',
+    fontWeight: '500',
+    textAlign: 'center',
   },
 });

@@ -7,7 +7,7 @@ import { COLORS } from "../../styles";
  * WeeklyWorkoutSummaryCards Component
  * Shows weekly workout and exercise totals vs last week with percentage change
  */
-const WeeklyWorkoutSummaryCards = ({ currentWeekData, lastWeekData }) => {
+const WeeklyWorkoutSummaryCards = ({ currentWeekData, lastWeekData, scheduledGoals }) => {
   const calculateChange = (current, previous) => {
     if (previous === 0) {
       return current > 0 ? 100 : 0;
@@ -27,7 +27,7 @@ const WeeklyWorkoutSummaryCards = ({ currentWeekData, lastWeekData }) => {
     return "#999"; // Gray for stable
   };
 
-  const StatCard = ({ label, icon, currentValue, previousValue, unit }) => {
+  const StatCard = ({ label, icon, currentValue, previousValue, unit, totalValue }) => {
     const percentageChange = calculateChange(currentValue, previousValue);
     const trendIcon = getTrendIcon(percentageChange);
     const trendColor = getTrendColor(percentageChange);
@@ -60,6 +60,9 @@ const WeeklyWorkoutSummaryCards = ({ currentWeekData, lastWeekData }) => {
           <View style={styles.valueRow}>
             <Text style={styles.currentValue}>
               {Math.round(currentValue)}
+              {totalValue !== undefined && (
+                <Text style={styles.totalValue}>/{Math.round(totalValue)}</Text>
+              )}
               {unit}
             </Text>
           </View>
@@ -88,6 +91,7 @@ const WeeklyWorkoutSummaryCards = ({ currentWeekData, lastWeekData }) => {
           icon="dumbbell"
           currentValue={currentWeekData.workoutsCompleted}
           previousValue={lastWeekData.workoutsCompleted}
+          totalValue={scheduledGoals?.totalScheduledWorkouts}
           unit=""
         />
         <StatCard
@@ -95,6 +99,7 @@ const WeeklyWorkoutSummaryCards = ({ currentWeekData, lastWeekData }) => {
           icon="repeat"
           currentValue={currentWeekData.exercisesCompleted}
           previousValue={lastWeekData.exercisesCompleted}
+          totalValue={scheduledGoals?.totalScheduledExercises}
           unit=""
         />
       </View>
@@ -175,6 +180,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: "#000",
+  },
+  totalValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#999",
   },
   previousValue: {
     fontSize: 10,

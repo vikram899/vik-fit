@@ -176,10 +176,6 @@ export default function MealsScreen({ navigation }) {
     }
   };
 
-  const handleLogMeal = () => {
-    navigation.navigate('LogMeals');
-  };
-
   // Calculate consistency badge (days with logged meals)
   const daysWithMeals = weeklyBreakdown.filter(
     day => day.totalCalories > 0
@@ -339,14 +335,6 @@ export default function MealsScreen({ navigation }) {
               >
                 <MaterialCommunityIcons name="history" size={14} color="#fff" />
                 <Text style={styles.actionButtonText}>History</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={handleLogMeal}
-                style={[styles.actionButton, styles.logButton]}
-              >
-                <MaterialCommunityIcons name="plus" size={14} color="#fff" />
-                <Text style={styles.actionButtonText}>Log</Text>
               </TouchableOpacity>
             </View>
           </View>

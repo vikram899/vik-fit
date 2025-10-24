@@ -212,3 +212,64 @@ export const getWeeklyWorkoutBreakdown = async (startDate) => {
     return [];
   }
 };
+
+/**
+ * Calculate weekly workout and exercise goals based on scheduled workouts
+ * Counts how many workouts are scheduled for the week and total exercises
+ */
+export const getWeeklyScheduledGoals = async (startDate) => {
+  try {
+    const endDate = getEndDate(startDate);
+
+    // Get all scheduled workouts for this week
+    const scheduledWorkouts = await db.getAllAsync(
+      `SELECT DISTINCT p.id, p.name,
+              (SELECT COUNT(*) FROM exercises WHERE planId = p.id) as exerciseCount
+       FROM plans p
+       JOIN plan_schedule ps ON p.id = ps.planId
+       WHERE ps.dayOfWeek >= 0 AND ps.dayOfWeek <= 6`
+    );
+
+    // Count total scheduled workout instances for the week
+    const scheduleData = await db.getAllAsync(
+      `SELECT p.id, ps.dayOfWeek,
+              (SELECT COUNT(*) FROM exercises WHERE planId = p.id) as exerciseCount
+       FROM plans p
+       JOIN plan_schedule ps ON p.id = ps.planId
+       WHERE ps.dayOfWeek >= 0 AND ps.dayOfWeek <= 6`
+    );
+
+    // Calculate totals
+    const totalScheduledWorkouts = scheduleData.length;
+    const totalScheduledExercises = scheduleData.reduce((sum, item) => sum + (item.exerciseCount || 0), 0);
+
+    // Get completed workouts for this week
+    const completedData = await db.getFirstAsync(
+      `SELECT
+        COUNT(DISTINCT planId) as completedWorkouts,
+        COALESCE(SUM(exerciseCount), 0) as completedExercises
+       FROM (
+        SELECT DISTINCT planId,
+          (SELECT COUNT(*) FROM exercises WHERE planId = workout_logs.planId) as exerciseCount
+        FROM workout_logs
+        WHERE logDate >= ? AND logDate <= ? AND status = 'completed'
+       )`,
+      [startDate, endDate]
+    );
+
+    return {
+      totalScheduledWorkouts: totalScheduledWorkouts || 0,
+      totalScheduledExercises: totalScheduledExercises || 0,
+      completedWorkouts: completedData?.completedWorkouts || 0,
+      completedExercises: completedData?.completedExercises || 0,
+    };
+  } catch (error) {
+    console.error('Error calculating weekly scheduled goals:', error);
+    return {
+      totalScheduledWorkouts: 0,
+      totalScheduledExercises: 0,
+      completedWorkouts: 0,
+      completedExercises: 0,
+    };
+  }
+};
