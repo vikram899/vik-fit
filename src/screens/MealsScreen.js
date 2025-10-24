@@ -12,8 +12,8 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { WeeklySummaryCards, WeeklyCalendarView } from '../components/layouts';
-import { GoalSettingsModal } from '../components/meals';
+import { WeeklySummaryCards } from '../components/layouts';
+import { GoalSettingsModal, MealsHistoryModal } from '../components/meals';
 import { Toast } from '../components/common';
 import { COLORS } from '../styles';
 import {
@@ -62,6 +62,7 @@ export default function MealsScreen({ navigation }) {
     getSundayOfWeek(new Date().toISOString().split('T')[0])
   );
   const [goalSettingsModalVisible, setGoalSettingsModalVisible] = useState(false);
+  const [mealsHistoryModalVisible, setMealsHistoryModalVisible] = useState(false);
   const [enabledGoalPreferences, setEnabledGoalPreferences] = useState([]);
   const [streakTrackingMetric, setStreakTrackingMetric] = useState('calories');
 
@@ -153,6 +154,10 @@ export default function MealsScreen({ navigation }) {
 
   const handleGoalSettings = () => {
     setGoalSettingsModalVisible(true);
+  };
+
+  const handleMealsHistory = () => {
+    setMealsHistoryModalVisible(true);
   };
 
   const handleGoalSettingsSaved = async () => {
@@ -326,6 +331,14 @@ export default function MealsScreen({ navigation }) {
               >
                 <MaterialCommunityIcons name="target" size={14} color="#fff" />
                 <Text style={styles.actionButtonText}>Goals</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleMealsHistory}
+                style={[styles.actionButton, styles.historyButton]}
+              >
+                <MaterialCommunityIcons name="history" size={14} color="#fff" />
+                <Text style={styles.actionButtonText}>History</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -514,14 +527,6 @@ export default function MealsScreen({ navigation }) {
                 weeklyGoals={weeklyGoals}
               />
 
-              {/* Weekly Calendar View */}
-              <WeeklyCalendarView
-                weeklyData={weeklyBreakdown}
-                dailyGoal={dailyGoals.calorieGoal}
-                selectedDate={null}
-                onDateSelect={() => {}}
-              />
-
             </>
           )}
         </ScrollView>
@@ -532,6 +537,12 @@ export default function MealsScreen({ navigation }) {
         visible={goalSettingsModalVisible}
         onClose={() => setGoalSettingsModalVisible(false)}
         onSettingsSaved={handleGoalSettingsSaved}
+      />
+
+      {/* Meals History Modal */}
+      <MealsHistoryModal
+        visible={mealsHistoryModalVisible}
+        onClose={() => setMealsHistoryModalVisible(false)}
       />
     </SafeAreaView>
   );
@@ -616,6 +627,9 @@ const styles = StyleSheet.create({
   },
   goalButton: {
     backgroundColor: '#FF9800',
+  },
+  historyButton: {
+    backgroundColor: '#9C27B0',
   },
   logButton: {
     backgroundColor: '#4CAF50',
