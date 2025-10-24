@@ -11,7 +11,13 @@ import {
   deleteMealLog,
   getMacroGoals,
 } from "../services/database";
-import { AddMealModal, ExistingMealsModal, EditMealModal, MealMacroCards, TodaysMealsList } from "../components/meals";
+import {
+  AddMealModal,
+  ExistingMealsModal,
+  EditMealModal,
+  TodaysMealsList,
+} from "../components/meals";
+import { SummaryCard } from "../components/home";
 
 const LogMealsScreen = ({ navigation }) => {
   const today = new Date().toISOString().split("T")[0];
@@ -159,13 +165,13 @@ const LogMealsScreen = ({ navigation }) => {
 
   return (
     <View style={logMealsScreenStyles.container}>
-      {/* Date Header - Minimal */}
-      <View style={logMealsScreenStyles.dateHeader}>
-        <Text style={logMealsScreenStyles.dateText}>{today}</Text>
-      </View>
-
       {/* Macro Cards Grid */}
-      <MealMacroCards dailyTotals={dailyTotals} macroGoals={macroGoals} />
+      <SummaryCard
+        dailyTotals={dailyTotals}
+        macroGoals={macroGoals}
+        hideHeader={false}
+        showDate={true}
+      />
 
       {/* Meals List with fixed title */}
       <TodaysMealsList
@@ -201,14 +207,18 @@ const LogMealsScreen = ({ navigation }) => {
           onPress={() => setAddMealModalVisible(true)}
         >
           <MaterialCommunityIcons name="plus" size={24} color={COLORS.white} />
-          <Text style={logMealsScreenStyles.buttonText}>{STRINGS.logMealsScreen.buttons.addNewMeal}</Text>
+          <Text style={logMealsScreenStyles.buttonText}>
+            {STRINGS.logMealsScreen.buttons.addNewMeal}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={logMealsScreenStyles.buttonSecondary}
           onPress={handleOpenAddExistingModal}
         >
           <MaterialCommunityIcons name="check" size={24} color={COLORS.white} />
-          <Text style={logMealsScreenStyles.buttonText}>{STRINGS.logMealsScreen.buttons.addExistingMeal}</Text>
+          <Text style={logMealsScreenStyles.buttonText}>
+            {STRINGS.logMealsScreen.buttons.addExistingMeal}
+          </Text>
         </TouchableOpacity>
       </View>
 

@@ -9,17 +9,25 @@ export default function SummaryCard({
   macroGoals,
   onLogPress,
   onEditMacrosPress,
+  hideHeader = false,
+  showDate = false,
 }) {
+  const today = new Date().toISOString().split('T')[0];
+
   return (
     <View style={appStyles.summaryCard}>
-      <View style={styles.header}>
-        <Text style={appStyles.summaryTitle}>Today's Summary</Text>
-        <View style={styles.headerButtons}>
-          <TouchableOpacity style={styles.logButton} onPress={onLogPress}>
-            <Text style={styles.logButtonText}>+ Log</Text>
-          </TouchableOpacity>
+      {!hideHeader && (
+        <View style={styles.header}>
+          <Text style={appStyles.summaryTitle}>
+            {showDate ? today : "Today's Summary"}
+          </Text>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity style={styles.logButton} onPress={onLogPress}>
+              <Text style={styles.logButtonText}>+ Log</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      )}
 
       <View style={appStyles.summaryContent}>
         <MacroItem
