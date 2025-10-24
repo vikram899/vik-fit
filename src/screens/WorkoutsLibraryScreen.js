@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { WeeklyWorkoutSummaryCards, WeeklyWorkoutCalendar } from '../components/layouts';
+import { WeeklyWorkoutSummaryCards } from '../components/layouts';
 import { WorkoutHistoryModal, WorkoutGoalSettingsModal } from '../components/workouts';
 import { StreakCard } from '../components/common';
 import { COLORS } from '../styles';
@@ -465,11 +465,6 @@ export default function WorkoutsLibraryScreen({ navigation }) {
             currentWeekData={currentWeekStats}
             lastWeekData={lastWeekStats}
             scheduledGoals={scheduledGoals}
-          />
-
-          {/* Weekly Completion Calendar */}
-          <WeeklyWorkoutCalendar
-            weeklyData={weeklyBreakdown}
           />
         </ScrollView>
       </Animated.View>

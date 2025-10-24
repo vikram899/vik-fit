@@ -5,15 +5,14 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  TouchableWithoutFeedback,
-  Platform,
   RefreshControl,
   StyleSheet,
+  SafeAreaView,
+  Alert,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getWeeklyWorkoutBreakdown, getSundayOfWeek } from '../../services/workoutStats';
-import { modalStyles, COLORS } from '../../styles';
+import { COLORS } from '../../styles';
 
 const WorkoutHistoryModal = ({ visible, onClose }) => {
   const [currentSunday, setCurrentSunday] = useState(
@@ -31,8 +30,10 @@ const WorkoutHistoryModal = ({ visible, onClose }) => {
       setWeeklyBreakdown(breakdown);
     } catch (error) {
       console.error('Error loading workout history:', error);
+      Alert.alert('Error', 'Failed to load workout history');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -45,7 +46,6 @@ const WorkoutHistoryModal = ({ visible, onClose }) => {
   const handleRefresh = async () => {
     setRefreshing(true);
     await loadWorkoutHistory();
-    setRefreshing(false);
   };
 
   const handlePreviousWeek = () => {
@@ -60,7 +60,7 @@ const WorkoutHistoryModal = ({ visible, onClose }) => {
     setCurrentSunday(nextSunday.toISOString().split('T')[0]);
   };
 
-  const handleToday = () => {
+  const handleTodayWeek = () => {
     const today = new Date().toISOString().split('T')[0];
     setCurrentSunday(getSundayOfWeek(today));
   };
@@ -89,178 +89,222 @@ const WorkoutHistoryModal = ({ visible, onClose }) => {
   return (
     <Modal
       visible={visible}
-      transparent={true}
-      animationType="fade"
+      animationType="slide"
+      transparent={false}
       onRequestClose={onClose}
     >
-      <KeyboardAvoidingView
-        style={modalStyles.overlay}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <TouchableWithoutFeedback onPress={onClose}>
-          <View style={modalStyles.overlay}>
-            <TouchableWithoutFeedback onPress={() => {}}>
-              <View style={[modalStyles.content, { maxHeight: '90%' }]}>
-                {/* Header */}
-                <View style={styles.header}>
-                  <Text style={modalStyles.title}>Workout History</Text>
+      <SafeAreaView style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <MaterialCommunityIcons
+              name="close"
+              size={24}
+              color={COLORS.primary}
+            />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Workout History</Text>
+          <View style={{ width: 40 }} />
+        </View>
+
+        {/* Week Navigation */}
+        <View style={styles.weekNavigation}>
+          <TouchableOpacity
+            onPress={handlePreviousWeek}
+            style={styles.navButton}
+          >
+            <MaterialCommunityIcons
+              name="chevron-left"
+              size={24}
+              color={COLORS.primary}
+            />
+          </TouchableOpacity>
+
+          <View style={styles.weekLabelContainer}>
+            <Text style={styles.weekLabelText}>{weekLabel}</Text>
+          </View>
+
+          <TouchableOpacity
+            onPress={handleNextWeek}
+            style={styles.navButton}
+          >
+            <MaterialCommunityIcons
+              name="chevron-right"
+              size={24}
+              color={COLORS.primary}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Today Button */}
+        <View style={styles.todayButtonContainer}>
+          <TouchableOpacity
+            onPress={handleTodayWeek}
+            style={styles.todayButton}
+          >
+            <MaterialCommunityIcons name="calendar-today" size={14} color="#fff" />
+            <Text style={styles.todayButtonText}>Today</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Daily Breakdown List */}
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={COLORS.primary}
+            />
+          }
+        >
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>Loading...</Text>
+            </View>
+          ) : weeklyBreakdown.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <MaterialCommunityIcons
+                name="dumbbell"
+                size={48}
+                color="#ccc"
+              />
+              <Text style={styles.emptyText}>No workouts logged this week</Text>
+            </View>
+          ) : (
+            weeklyBreakdown.map((day) => (
+              <View key={day.date} style={styles.dayCard}>
+                <View style={styles.dayHeader}>
+                  <View>
+                    <Text style={styles.dayName}>{day.day}</Text>
+                    <Text style={styles.dayDate}>{day.date}</Text>
+                  </View>
+                  <Text style={styles.dayWorkouts}>
+                    {day.totalWorkoutsCompleted}/{day.totalWorkoutsAssigned}
+                  </Text>
                 </View>
 
-                {/* Week Navigation */}
-                <View style={styles.weekNavigation}>
-                  <TouchableOpacity onPress={handlePreviousWeek} style={styles.navButton}>
-                    <MaterialCommunityIcons name="chevron-left" size={24} color={COLORS.primary} />
-                  </TouchableOpacity>
-
-                  <View style={styles.weekLabel}>
-                    <Text style={styles.weekLabelText}>{weekLabel}</Text>
+                <View style={styles.statsContainer}>
+                  <View style={styles.statItem}>
+                    <MaterialCommunityIcons
+                      name="dumbbell"
+                      size={16}
+                      color="#2196F3"
+                    />
+                    <Text style={styles.statLabel}>Workouts</Text>
+                    <Text style={styles.statValue}>{day.totalWorkoutsCompleted}</Text>
                   </View>
 
-                  <TouchableOpacity onPress={handleNextWeek} style={styles.navButton}>
-                    <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.primary} />
-                  </TouchableOpacity>
+                  <View style={styles.statItem}>
+                    <MaterialCommunityIcons
+                      name="lightning-bolt"
+                      size={16}
+                      color="#FF9800"
+                    />
+                    <Text style={styles.statLabel}>Exercises</Text>
+                    <Text style={styles.statValue}>{day.totalExercisesCompleted}</Text>
+                  </View>
                 </View>
 
-                {/* Today Button */}
-                <TouchableOpacity onPress={handleToday} style={styles.todayButton}>
-                  <MaterialCommunityIcons name="calendar-today" size={16} color="#fff" />
-                  <Text style={styles.todayButtonText}>Today</Text>
-                </TouchableOpacity>
-
-                {/* Daily Breakdown */}
-                <ScrollView
-                  style={styles.scrollView}
-                  showsVerticalScrollIndicator={false}
-                  refreshControl={
-                    <RefreshControl
-                      refreshing={refreshing}
-                      onRefresh={handleRefresh}
-                      tintColor={COLORS.primary}
-                    />
-                  }
-                >
-                  {loading ? (
-                    <View style={styles.loadingContainer}>
-                      <Text style={styles.loadingText}>Loading...</Text>
-                    </View>
-                  ) : weeklyBreakdown.length === 0 ? (
-                    <View style={styles.emptyContainer}>
-                      <Text style={styles.emptyText}>No data available</Text>
-                    </View>
-                  ) : (
-                    weeklyBreakdown.map((day) => (
-                      <View key={day.date} style={styles.dayCard}>
-                        <View style={styles.dayHeader}>
-                          <Text style={styles.dayTitle}>
-                            {day.day} - {day.date}
+                {/* Completed Workouts List */}
+                {day.completedWorkouts.length > 0 && (
+                  <View style={styles.workoutsList}>
+                    <Text style={styles.workoutsLabel}>Completed:</Text>
+                    {day.completedWorkouts.map((workout, idx) => (
+                      <View key={idx} style={styles.workoutItem}>
+                        <MaterialCommunityIcons
+                          name="check-circle"
+                          size={16}
+                          color="#4CAF50"
+                        />
+                        <View style={styles.workoutInfo}>
+                          <Text style={styles.workoutName}>{workout.name}</Text>
+                          <Text style={styles.workoutExercises}>
+                            {workout.exerciseCount} exercise{workout.exerciseCount !== 1 ? 's' : ''}
                           </Text>
                         </View>
-
-                        <View style={styles.dayDetails}>
-                          <View style={styles.detailRow}>
-                            <View style={styles.detailItem}>
-                              <Text style={styles.detailLabel}>Workouts</Text>
-                              <Text style={styles.detailValue}>
-                                {day.totalWorkoutsCompleted}/{day.totalWorkoutsAssigned}
-                              </Text>
-                            </View>
-                            <View style={styles.detailItem}>
-                              <Text style={styles.detailLabel}>Exercises</Text>
-                              <Text style={styles.detailValue}>
-                                {day.completedWorkouts.reduce((sum, w) => sum + (w.exerciseCount || 0), 0)}
-                              </Text>
-                            </View>
-                          </View>
-
-                          {/* Workouts List */}
-                          {day.completedWorkouts.length > 0 && (
-                            <View style={styles.workoutsList}>
-                              <Text style={styles.workoutsLabel}>Completed Workouts:</Text>
-                              {day.completedWorkouts.map((workout, idx) => (
-                                <View key={idx} style={styles.workoutItem}>
-                                  <MaterialCommunityIcons
-                                    name="check-circle"
-                                    size={16}
-                                    color={COLORS.success}
-                                    style={styles.workoutIcon}
-                                  />
-                                  <View style={styles.workoutInfo}>
-                                    <Text style={styles.workoutName}>{workout.name}</Text>
-                                    <Text style={styles.workoutExercises}>
-                                      {workout.exerciseCount || 0} exercises
-                                    </Text>
-                                  </View>
-                                </View>
-                              ))}
-                            </View>
-                          )}
-
-                          {/* Assigned but not completed */}
-                          {day.assignedWorkouts.length > day.completedWorkouts.length && (
-                            <View style={styles.missedList}>
-                              <Text style={styles.missedLabel}>Scheduled (Not Done):</Text>
-                              {day.assignedWorkouts
-                                .filter(
-                                  (assigned) =>
-                                    !day.completedWorkouts.some((completed) => completed.id === assigned.id)
-                                )
-                                .map((workout, idx) => (
-                                  <View key={idx} style={styles.missedItem}>
-                                    <MaterialCommunityIcons
-                                      name="circle-outline"
-                                      size={16}
-                                      color="#ccc"
-                                      style={styles.missedIcon}
-                                    />
-                                    <View style={styles.missedInfo}>
-                                      <Text style={styles.missedName}>{workout.name}</Text>
-                                    </View>
-                                  </View>
-                                ))}
-                            </View>
-                          )}
-                        </View>
                       </View>
-                    ))
-                  )}
-                </ScrollView>
+                    ))}
+                  </View>
+                )}
 
-                {/* Close Button */}
-                <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                  <MaterialCommunityIcons name="check" size={20} color="#fff" />
-                  <Text style={styles.closeButtonText}>Done</Text>
-                </TouchableOpacity>
+                {/* Scheduled but not completed */}
+                {day.assignedWorkouts.length > day.completedWorkouts.length && (
+                  <View style={styles.missedList}>
+                    <Text style={styles.missedLabel}>Scheduled (Not Done):</Text>
+                    {day.assignedWorkouts
+                      .filter(
+                        (assigned) =>
+                          !day.completedWorkouts.some((completed) => completed.id === assigned.id)
+                      )
+                      .map((workout, idx) => (
+                        <View key={idx} style={styles.missedItem}>
+                          <MaterialCommunityIcons
+                            name="circle-outline"
+                            size={16}
+                            color="#ccc"
+                          />
+                          <Text style={styles.missedName}>{workout.name}</Text>
+                        </View>
+                      ))}
+                  </View>
+                )}
               </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
+            ))
+          )}
+        </ScrollView>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={styles.doneButton}
+            onPress={onClose}
+          >
+            <Text style={styles.doneButtonText}>Done</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
   header: {
-    paddingBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
+  },
+  closeButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#000',
   },
   weekNavigation: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 16,
     paddingVertical: 12,
-    paddingHorizontal: 12,
     backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
   navButton: {
     padding: 8,
   },
-  weekLabel: {
+  weekLabelContainer: {
     flex: 1,
     alignItems: 'center',
   },
@@ -269,16 +313,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
+  todayButtonContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
   todayButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: '#2196F3',
     paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    marginBottom: 12,
+    paddingHorizontal: 16,
+    backgroundColor: '#2196F3',
+    borderRadius: 8,
   },
   todayButtonText: {
     fontSize: 12,
@@ -287,7 +334,9 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    marginBottom: 12,
+  },
+  scrollContent: {
+    paddingVertical: 0,
   },
   loadingContainer: {
     justifyContent: 'center',
@@ -301,68 +350,81 @@ const styles = StyleSheet.create({
   emptyContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 40,
+    paddingVertical: 60,
   },
   emptyText: {
     fontSize: 14,
     color: '#999',
+    marginTop: 12,
   },
   dayCard: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
   dayHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 12,
   },
-  dayTitle: {
-    fontSize: 13,
+  dayName: {
+    fontSize: 14,
     fontWeight: '700',
-    color: '#333',
+    color: '#000',
   },
-  dayDetails: {
-    gap: 12,
+  dayDate: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 2,
   },
-  detailRow: {
+  dayWorkouts: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#2196F3',
+  },
+  statsContainer: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 12,
+    marginBottom: 12,
   },
-  detailItem: {
+  statItem: {
     flex: 1,
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
   },
-  detailLabel: {
+  statLabel: {
     fontSize: 11,
     fontWeight: '600',
     color: '#999',
-    marginBottom: 4,
+    marginTop: 4,
   },
-  detailValue: {
-    fontSize: 16,
+  statValue: {
+    fontSize: 14,
     fontWeight: '700',
     color: '#333',
+    marginTop: 2,
   },
   workoutsList: {
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#ddd',
+    borderTopColor: '#e0e0e0',
   },
   workoutsLabel: {
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#4CAF50',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   workoutItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 6,
     gap: 8,
-  },
-  workoutIcon: {
-    width: 20,
   },
   workoutInfo: {
     flex: 1,
@@ -380,13 +442,13 @@ const styles = StyleSheet.create({
   missedList: {
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#ddd',
+    borderTopColor: '#e0e0e0',
   },
   missedLabel: {
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#FF6B6B',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   missedItem: {
     flexDirection: 'row',
@@ -394,30 +456,29 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     gap: 8,
   },
-  missedIcon: {
-    width: 20,
-  },
-  missedInfo: {
-    flex: 1,
-  },
   missedName: {
     fontSize: 12,
     fontWeight: '500',
     color: '#999',
+    flex: 1,
   },
-  closeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    backgroundColor: '#4CAF50',
+  footer: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+  },
+  doneButton: {
+    backgroundColor: '#2196F3',
     paddingVertical: 12,
     paddingHorizontal: 16,
-    borderRadius: 6,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  closeButtonText: {
+  doneButtonText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#fff',
   },
 });
