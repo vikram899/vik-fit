@@ -45,6 +45,13 @@ export const initializeDatabase = async () => {
       // Column already exists, no need to add it
     }
 
+    // Migration: Add mealType column to meal_logs if it doesn't exist
+    try {
+      await db.execAsync('ALTER TABLE meal_logs ADD COLUMN mealType TEXT DEFAULT "Breakfast";');
+    } catch (error) {
+      // Column already exists, no need to add it
+    }
+
     // Create meals table if it doesn't exist
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS meals (
@@ -604,12 +611,19 @@ export const deleteMeal = async (mealId) => {
 
 /**
  * Log a meal for a specific date
+ * @param {number} mealId - ID of the meal
+ * @param {string} mealDate - Date of the meal (YYYY-MM-DD)
+ * @param {number} calories - Total calories
+ * @param {number} protein - Total protein
+ * @param {number} carbs - Total carbs
+ * @param {number} fats - Total fats
+ * @param {string} mealType - Type of meal (Breakfast, Lunch, Snacks, Dinner) - defaults to 'Breakfast'
  */
-export const logMeal = async (mealId, mealDate, calories, protein, carbs, fats) => {
+export const logMeal = async (mealId, mealDate, calories, protein, carbs, fats, mealType = 'Breakfast') => {
   try {
     await db.runAsync(
-      'INSERT INTO meal_logs (mealId, mealDate, calories, protein, carbs, fats) VALUES (?, ?, ?, ?, ?, ?)',
-      [mealId, mealDate, calories, protein, carbs, fats]
+      'INSERT INTO meal_logs (mealId, mealDate, calories, protein, carbs, fats, mealType) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [mealId, mealDate, calories, protein, carbs, fats, mealType]
     );
 
     const lastLog = await db.getFirstAsync(
@@ -662,13 +676,26 @@ export const getDailyTotals = async (mealDate) => {
 
 /**
  * Update a meal log
+ * @param {number} mealLogId - ID of the meal log to update
+ * @param {number} calories - Total calories
+ * @param {number} protein - Total protein
+ * @param {number} carbs - Total carbs
+ * @param {number} fats - Total fats
+ * @param {string} mealType - Type of meal (Breakfast, Lunch, Snacks, Dinner) - optional
  */
-export const updateMealLog = async (mealLogId, calories, protein, carbs, fats) => {
+export const updateMealLog = async (mealLogId, calories, protein, carbs, fats, mealType = null) => {
   try {
-    await db.runAsync(
-      'UPDATE meal_logs SET calories = ?, protein = ?, carbs = ?, fats = ? WHERE id = ?',
-      [calories, protein, carbs, fats, mealLogId]
-    );
+    if (mealType) {
+      await db.runAsync(
+        'UPDATE meal_logs SET calories = ?, protein = ?, carbs = ?, fats = ?, mealType = ? WHERE id = ?',
+        [calories, protein, carbs, fats, mealType, mealLogId]
+      );
+    } else {
+      await db.runAsync(
+        'UPDATE meal_logs SET calories = ?, protein = ?, carbs = ?, fats = ? WHERE id = ?',
+        [calories, protein, carbs, fats, mealLogId]
+      );
+    }
   } catch (error) {
     console.error('Error updating meal log:', error);
     throw error;

@@ -26,6 +26,7 @@ import { STRINGS } from "../../constants/strings";
 
 const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
   const today = new Date().toISOString().split("T")[0];
+  const MEAL_TYPES = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];
   const [editMode, setEditMode] = React.useState(false);
   const [editingMealId, setEditingMealId] = React.useState(null);
   const [form, setForm] = React.useState({
@@ -37,12 +38,21 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
   });
   const [localMeals, setLocalMeals] = React.useState(meals);
   const [addedMealIds, setAddedMealIds] = React.useState(new Set());
+  const [mealTypeSelectVisible, setMealTypeSelectVisible] = React.useState(false);
+  const [mealTypeSelectMeal, setMealTypeSelectMeal] = React.useState(null);
+  const [selectedMealType, setSelectedMealType] = React.useState("Breakfast");
 
   React.useEffect(() => {
     setLocalMeals(meals);
   }, [meals]);
 
-  const handleAddMealToday = async (meal) => {
+  const handleShowMealTypeSelector = (meal) => {
+    setMealTypeSelectMeal(meal);
+    setSelectedMealType("Breakfast");
+    setMealTypeSelectVisible(true);
+  };
+
+  const handleAddMealToday = async (meal, mealType) => {
     try {
       await logMeal(
         meal.id,
@@ -50,7 +60,8 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
         meal.calories || 0,
         meal.protein || 0,
         meal.carbs || 0,
-        meal.fats || 0
+        meal.fats || 0,
+        mealType
       );
 
       const updatedMeals = await getMealLogsForDate(today);
@@ -60,6 +71,11 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
       setAddedMealIds(new Set([...addedMealIds, meal.id]));
 
       onMealAdded?.({ meals: updatedMeals, totals });
+
+      // Close meal type selector
+      setMealTypeSelectVisible(false);
+      setMealTypeSelectMeal(null);
+
       Alert.alert(
         STRINGS.existingMealsModal.alerts.addSuccess.title,
         STRINGS.existingMealsModal.alerts.addSuccess.message(meal.name)
@@ -342,7 +358,7 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
                               ) : (
                                 <TouchableOpacity
                                   activeOpacity={0.7}
-                                  onPress={() => handleAddMealToday(meal)}
+                                  onPress={() => handleShowMealTypeSelector(meal)}
                                 >
                                   <MaterialCommunityIcons
                                     name="plus"
@@ -388,6 +404,96 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
+
+      {/* Meal Type Selection Modal */}
+      <Modal
+        visible={mealTypeSelectVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => {
+          setMealTypeSelectVisible(false);
+          setMealTypeSelectMeal(null);
+        }}
+      >
+        <KeyboardAvoidingView
+          style={modalStyles.overlay}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <TouchableWithoutFeedback
+            onPress={() => {
+              setMealTypeSelectVisible(false);
+              setMealTypeSelectMeal(null);
+            }}
+          >
+            <View style={modalStyles.overlay}>
+              <TouchableWithoutFeedback onPress={() => {}}>
+                <View style={modalStyles.content}>
+                  <Text style={modalStyles.title}>Select Meal Type</Text>
+                  {mealTypeSelectMeal && (
+                    <Text style={modalStyles.mealNameLabel}>{mealTypeSelectMeal.name}</Text>
+                  )}
+
+                  {/* Meal Type Selection */}
+                  <View style={formStyles.formGroup}>
+                    <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+                      {MEAL_TYPES.map((type) => (
+                        <TouchableOpacity
+                          key={type}
+                          style={{
+                            flex: 1,
+                            minWidth: '48%',
+                            paddingVertical: 10,
+                            paddingHorizontal: 12,
+                            borderRadius: 8,
+                            borderWidth: 2,
+                            borderColor: selectedMealType === type ? COLORS.primary : '#ddd',
+                            backgroundColor: selectedMealType === type ? COLORS.primary : '#f5f5f5',
+                            alignItems: 'center',
+                          }}
+                          onPress={() => setSelectedMealType(type)}
+                        >
+                          <Text
+                            style={{
+                              fontSize: 12,
+                              fontWeight: '600',
+                              color: selectedMealType === type ? '#fff' : '#333',
+                            }}
+                          >
+                            {type}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  {/* Buttons */}
+                  <View style={buttonStyles.buttonGroup}>
+                    <TouchableOpacity
+                      style={[buttonStyles.button, buttonStyles.buttonHalf, buttonStyles.buttonPrimary]}
+                      onPress={() => {
+                        handleAddMealToday(mealTypeSelectMeal, selectedMealType);
+                      }}
+                    >
+                      <MaterialCommunityIcons name="check" size={20} color={COLORS.white} />
+                      <Text style={buttonStyles.buttonText}>Add</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[buttonStyles.button, buttonStyles.buttonHalf, buttonStyles.cancelButton]}
+                      onPress={() => {
+                        setMealTypeSelectVisible(false);
+                        setMealTypeSelectMeal(null);
+                      }}
+                    >
+                      <Text style={buttonStyles.buttonText}>Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </Modal>
     </Modal>
   );
 };
