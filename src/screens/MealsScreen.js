@@ -176,6 +176,10 @@ export default function MealsScreen({ navigation }) {
     }
   };
 
+  const handleLogMeal = () => {
+    navigation.navigate('LogMeals');
+  };
+
   // Calculate consistency badge (days with logged meals)
   const daysWithMeals = weeklyBreakdown.filter(
     day => day.totalCalories > 0

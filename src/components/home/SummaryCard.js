@@ -23,7 +23,7 @@ export default function SummaryCard({
 
       <View style={appStyles.summaryContent}>
         <MacroItem
-          icon="silverware-fork-knife"
+          icon="fire"
           iconColor="#007AFF"
           label="Calories"
           value={Math.round(dailyTotals.totalCalories)}

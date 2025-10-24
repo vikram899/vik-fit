@@ -263,7 +263,11 @@ export default function AddMealScreen({ navigation, route }) {
                         </Text>
                         {meal.calories && (
                           <Text style={styles.caloriesText}>
-                            🔥{" "}
+                            <MaterialCommunityIcons
+                              name="fire"
+                              size={14}
+                              color="#007AFF"
+                            />
                             <Text style={styles.caloriesValue}>
                               {Math.round(meal.calories)}
                             </Text>{" "}
@@ -498,7 +502,7 @@ const styles = StyleSheet.create({
   caloriesValue: {
     fontSize: 14,
     fontWeight: "700",
-    color: COLORS.primary,
+    color: "#000",
   },
   kebabButton: { padding: 6, marginRight: -6 },
 
