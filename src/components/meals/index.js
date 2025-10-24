@@ -6,3 +6,4 @@ export { default as AddMealModal } from "./AddMealModal";
 export { default as EditMealModal } from "./EditMealModal";
 export { default as EditMealDetailsModal } from "./EditMealDetailsModal";
 export { default as ExistingMealsModal } from "./ExistingMealsModal";
+export { default as GoalSettingsModal } from "./GoalSettingsModal";

@@ -159,6 +159,57 @@ export const initializeDatabase = async () => {
         FOREIGN KEY (exerciseId) REFERENCES exercises(id) ON DELETE CASCADE
       );
     `);
+
+    // Create goal_preferences table for meal stats visibility settings
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS goal_preferences (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        statName TEXT UNIQUE NOT NULL,
+        isEnabled INTEGER DEFAULT 1,
+        displayOrder INTEGER DEFAULT 0,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Insert default goal preferences if they don't exist
+    const existingPrefs = await db.getAllAsync('SELECT * FROM goal_preferences');
+    if (existingPrefs.length === 0) {
+      const defaultPrefs = [
+        { statName: 'calorieTarget', isEnabled: 1, displayOrder: 0 },
+        { statName: 'proteinIntake', isEnabled: 1, displayOrder: 1 },
+        { statName: 'carbsIntake', isEnabled: 0, displayOrder: 2 },
+        { statName: 'fatsIntake', isEnabled: 0, displayOrder: 3 },
+        { statName: 'mealPrepTips', isEnabled: 1, displayOrder: 4 },
+      ];
+
+      for (const pref of defaultPrefs) {
+        await db.runAsync(
+          'INSERT INTO goal_preferences (statName, isEnabled, displayOrder) VALUES (?, ?, ?)',
+          [pref.statName, pref.isEnabled, pref.displayOrder]
+        );
+      }
+    }
+
+    // Create user_settings table for general preferences
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS user_settings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        settingKey TEXT UNIQUE NOT NULL,
+        settingValue TEXT NOT NULL,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Insert default user settings if they don't exist
+    const existingSettings = await db.getAllAsync('SELECT * FROM user_settings WHERE settingKey = ?', ['streakTrackingMetric']);
+    if (existingSettings.length === 0) {
+      await db.runAsync(
+        'INSERT INTO user_settings (settingKey, settingValue) VALUES (?, ?)',
+        ['streakTrackingMetric', 'calories']
+      );
+    }
   } catch (error) {
     console.error('❌ Error initializing database:', error);
     throw error;
@@ -668,8 +719,9 @@ export const getMacroGoals = async (goalDate) => {
   try {
     // Get the most recent macro goals saved on or before goalDate
     // This way, if you save on 2025-10-23, those macros apply to 2025-10-23 and beyond
+    // Exclude invalid dates like "0000-01-01"
     let result = await db.getFirstAsync(
-      'SELECT * FROM macro_goals WHERE goalDate <= ? ORDER BY goalDate DESC LIMIT 1',
+      'SELECT * FROM macro_goals WHERE goalDate <= ? AND goalDate != "0000-01-01" ORDER BY goalDate DESC LIMIT 1',
       [goalDate]
     );
 
@@ -1248,5 +1300,81 @@ export const getWorkoutHistory = async (planId, limit = 10) => {
   } catch (error) {
     console.error('Error getting workout history:', error);
     return [];
+  }
+};
+
+/**
+ * Get all goal preferences
+ */
+export const getGoalPreferences = async () => {
+  try {
+    const result = await db.getAllAsync(
+      'SELECT * FROM goal_preferences ORDER BY displayOrder ASC'
+    );
+    return result || [];
+  } catch (error) {
+    console.error('Error getting goal preferences:', error);
+    return [];
+  }
+};
+
+/**
+ * Update goal preference (enable/disable a stat)
+ */
+export const updateGoalPreference = async (statName, isEnabled) => {
+  try {
+    await db.runAsync(
+      'UPDATE goal_preferences SET isEnabled = ?, updatedAt = CURRENT_TIMESTAMP WHERE statName = ?',
+      [isEnabled ? 1 : 0, statName]
+    );
+  } catch (error) {
+    console.error('Error updating goal preference:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get only enabled goal preferences
+ */
+export const getEnabledGoalPreferences = async () => {
+  try {
+    const result = await db.getAllAsync(
+      'SELECT * FROM goal_preferences WHERE isEnabled = 1 ORDER BY displayOrder ASC'
+    );
+    return result || [];
+  } catch (error) {
+    console.error('Error getting enabled goal preferences:', error);
+    return [];
+  }
+};
+
+/**
+ * Get user setting by key
+ */
+export const getUserSetting = async (settingKey) => {
+  try {
+    const result = await db.getFirstAsync(
+      'SELECT settingValue FROM user_settings WHERE settingKey = ?',
+      [settingKey]
+    );
+    return result?.settingValue || null;
+  } catch (error) {
+    console.error('Error getting user setting:', error);
+    return null;
+  }
+};
+
+/**
+ * Update user setting
+ */
+export const updateUserSetting = async (settingKey, settingValue) => {
+  try {
+    await db.runAsync(
+      'INSERT OR REPLACE INTO user_settings (settingKey, settingValue, updatedAt) VALUES (?, ?, CURRENT_TIMESTAMP)',
+      [settingKey, settingValue]
+    );
+  } catch (error) {
+    console.error('Error updating user setting:', error);
+    throw error;
   }
 };

@@ -13,6 +13,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { WeeklySummaryCards, WeeklyCalendarView } from '../components/layouts';
+import { GoalSettingsModal } from '../components/meals';
 import { Toast } from '../components/common';
 import { COLORS } from '../styles';
 import {
@@ -21,11 +22,11 @@ import {
   getWeeklyGoals,
   getSundayOfWeek,
 } from '../services/mealStats';
-import { getMacroGoals } from '../services/database';
+import { getMacroGoals, getEnabledGoalPreferences, getUserSetting } from '../services/database';
 
 /**
  * MealsScreen
- * Weekly meal summary dashboard showing totals, goals, and daily breakdown
+ * Weekly meal analytics dashboard showing totals, goals, trends, and insights
  */
 export default function MealsScreen({ navigation }) {
   const [currentWeekData, setCurrentWeekData] = useState({
@@ -60,6 +61,9 @@ export default function MealsScreen({ navigation }) {
   const [currentSunday, setCurrentSunday] = useState(
     getSundayOfWeek(new Date().toISOString().split('T')[0])
   );
+  const [goalSettingsModalVisible, setGoalSettingsModalVisible] = useState(false);
+  const [enabledGoalPreferences, setEnabledGoalPreferences] = useState([]);
+  const [streakTrackingMetric, setStreakTrackingMetric] = useState('calories');
 
   // Load weekly data
   const loadWeeklyData = useCallback(async () => {
@@ -78,8 +82,9 @@ export default function MealsScreen({ navigation }) {
       const lastWeek = await getWeeklyMealData(lastSundayStr);
       setLastWeekData(lastWeek);
 
-      // Get weekly goals
-      const goals = await getWeeklyGoals(currentSunday);
+      // Get weekly goals - query with today's date to find the most recent goals
+      const today = new Date().toISOString().split('T')[0];
+      const goals = await getWeeklyGoals(today);
       setWeeklyGoals(goals);
 
       // Get daily goals for breakdown cards
@@ -91,6 +96,16 @@ export default function MealsScreen({ navigation }) {
       // Get daily breakdown
       const breakdown = await getWeeklyDailyBreakdown(currentSunday);
       setWeeklyBreakdown(breakdown);
+
+      // Get enabled goal preferences
+      const prefs = await getEnabledGoalPreferences();
+      setEnabledGoalPreferences(prefs);
+
+      // Get streak tracking metric
+      const metric = await getUserSetting('streakTrackingMetric');
+      if (metric) {
+        setStreakTrackingMetric(metric);
+      }
 
       // Trigger fade-in animation
       Animated.timing(fadeAnim, {
@@ -137,13 +152,23 @@ export default function MealsScreen({ navigation }) {
   };
 
   const handleGoalSettings = () => {
-    // Navigate to settings or goal settings screen
-    // For now, show an alert
-    Alert.alert(
-      'Macro Goals',
-      'Daily Goals:\n\nCalories: ' + Math.round(dailyGoals.calorieGoal) + '\nProtein: ' + Math.round(dailyGoals.proteinGoal) + 'g\nCarbs: ' + Math.round(dailyGoals.carbsGoal) + 'g\nFats: ' + Math.round(dailyGoals.fatsGoal) + 'g',
-      [{ text: 'OK' }]
-    );
+    setGoalSettingsModalVisible(true);
+  };
+
+  const handleGoalSettingsSaved = async () => {
+    // Reload preferences and metric when settings are changed
+    try {
+      const prefs = await getEnabledGoalPreferences();
+      setEnabledGoalPreferences(prefs);
+
+      // Reload streak tracking metric
+      const metric = await getUserSetting('streakTrackingMetric');
+      if (metric) {
+        setStreakTrackingMetric(metric);
+      }
+    } catch (error) {
+      console.error('Error loading goal preferences:', error);
+    }
   };
 
   const handleLogMeal = () => {
@@ -158,6 +183,38 @@ export default function MealsScreen({ navigation }) {
 
   // Check if week has any data
   const hasData = weeklyBreakdown.some(day => day.totalCalories > 0);
+
+  // Helper function to get streak color based on metric and daily goals
+  const getStreakColor = (day) => {
+    if (day.totalCalories === 0) {
+      return { background: '#f5f5f5', border: '#ddd' }; // Gray for no meals
+    }
+
+    let percentage = 0;
+    let goal = 0;
+
+    if (streakTrackingMetric === 'calories') {
+      percentage = (day.totalCalories / dailyGoals.calorieGoal) * 100;
+      goal = dailyGoals.calorieGoal;
+    } else if (streakTrackingMetric === 'protein') {
+      goal = dailyGoals.proteinGoal;
+      percentage = goal > 0 ? (day.totalProtein / goal) * 100 : 0;
+    } else if (streakTrackingMetric === 'carbs') {
+      goal = dailyGoals.carbsGoal;
+      percentage = goal > 0 ? (day.totalCarbs / goal) * 100 : 0;
+    } else if (streakTrackingMetric === 'fats') {
+      goal = dailyGoals.fatsGoal;
+      percentage = goal > 0 ? (day.totalFats / goal) * 100 : 0;
+    }
+
+    if (percentage >= 80) {
+      return { background: '#4CAF50', border: '#4CAF50' }; // Green
+    } else if (percentage >= 50) {
+      return { background: '#FF9800', border: '#FF9800' }; // Orange
+    } else {
+      return { background: '#FF6B6B', border: '#FF6B6B' }; // Red
+    }
+  };
 
   if (loading) {
     return (
@@ -281,34 +338,6 @@ export default function MealsScreen({ navigation }) {
             </View>
           </View>
 
-          {/* Quick Stats Header */}
-          {hasData && (
-            <View style={styles.quickStatsContainer}>
-              <View style={styles.quickStat}>
-                <Text style={styles.quickStatLabel}>This Week</Text>
-                <Text style={styles.quickStatValue}>
-                  {Math.round(currentWeekData.totalCalories)}
-                </Text>
-                <Text style={styles.quickStatUnit}>kcal</Text>
-              </View>
-              <View style={styles.quickStatDivider} />
-              <View style={styles.quickStat}>
-                <Text style={styles.quickStatLabel}>Goal</Text>
-                <Text style={styles.quickStatValue}>
-                  {Math.round(weeklyGoals.calorieGoal)}
-                </Text>
-                <Text style={styles.quickStatUnit}>kcal</Text>
-              </View>
-              <View style={styles.quickStatDivider} />
-              <View style={styles.quickStat}>
-                <Text style={styles.quickStatLabel}>Progress</Text>
-                <Text style={[styles.quickStatValue, { color: weeklyGoals.calorieGoal > 0 && (currentWeekData.totalCalories / weeklyGoals.calorieGoal) >= 0.9 ? '#4CAF50' : '#FF9800' }]}>
-                  {weeklyGoals.calorieGoal > 0 ? Math.round((currentWeekData.totalCalories / weeklyGoals.calorieGoal) * 100) : 0}%
-                </Text>
-                <Text style={styles.quickStatUnit}>complete</Text>
-              </View>
-            </View>
-          )}
 
           {/* Empty State */}
           {!hasData ? (
@@ -332,6 +361,152 @@ export default function MealsScreen({ navigation }) {
             </View>
           ) : (
             <>
+              {/* Stats Section - Meal Logging Streak & Calorie Target */}
+              <View style={styles.statsSection}>
+                {/* Meal Logging Streak - Minimalistic */}
+                <View style={styles.streakCard}>
+                  <View style={styles.streakMinimalRow}>
+                    <View>
+                      <Text style={styles.streakMinimalText}>
+                        <Text style={styles.streakBold}>{daysWithMeals}/7</Text> logged
+                      </Text>
+                      <Text style={styles.streakMetricLabel}>
+                        Tracked by {streakTrackingMetric.charAt(0).toUpperCase() + streakTrackingMetric.slice(1)}
+                      </Text>
+                    </View>
+                    <View style={styles.checkmarkRowMinimal}>
+                      {weeklyBreakdown.map((day, index) => {
+                        const color = getStreakColor(day);
+                        return (
+                          <View
+                            key={day.date}
+                            style={[
+                              styles.checkmarkMinimal,
+                              {
+                                backgroundColor: color.background,
+                                borderColor: color.border,
+                              },
+                            ]}
+                          />
+                        );
+                      })}
+                    </View>
+                  </View>
+                </View>
+
+                {/* Stats - Actionable Insights (Dynamic based on preferences) */}
+                {enabledGoalPreferences.length > 0 && (
+                  <View style={styles.statItem}>
+                    <View style={styles.statHeader}>
+                      <Text style={styles.statLabel}>Stats</Text>
+                    </View>
+                    <View style={styles.statsInsightsContainer}>
+                      {/* Calorie Target Achievement */}
+                      {enabledGoalPreferences.some(p => p.statName === 'calorieTarget') && (
+                        <View style={styles.statInsight}>
+                          <View style={styles.insightRow}>
+                            <Text style={styles.insightText}>
+                              You hit calorie target{' '}
+                              <Text style={styles.insightBold}>
+                                {weeklyBreakdown.filter(day => day.totalCalories >= dailyGoals.calorieGoal).length} days
+                              </Text>
+                            </Text>
+                            <View style={styles.trendBadge}>
+                              <MaterialCommunityIcons
+                                name="trending-up"
+                                size={14}
+                                color="#4CAF50"
+                              />
+                              <Text style={styles.trendBadgeText}>+1</Text>
+                            </View>
+                          </View>
+                        </View>
+                      )}
+
+                      {/* Protein Change */}
+                      {enabledGoalPreferences.some(p => p.statName === 'proteinIntake') && (
+                        <View style={styles.statInsight}>
+                          <View style={styles.insightRow}>
+                            <Text style={styles.insightText}>
+                              Protein intake{' '}
+                              <Text style={styles.insightBold}>
+                                +{Math.round(((currentWeekData.totalProtein - lastWeekData.totalProtein) / (lastWeekData.totalProtein || 1)) * 100)}%
+                              </Text>
+                              {' '}vs last week
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+
+                      {/* Carbs Change */}
+                      {enabledGoalPreferences.some(p => p.statName === 'carbsIntake') && (
+                        <View style={styles.statInsight}>
+                          <View style={styles.insightRow}>
+                            <Text style={styles.insightText}>
+                              Carbs intake{' '}
+                              <Text style={styles.insightBold}>
+                                +{Math.round(((currentWeekData.totalCarbs - lastWeekData.totalCarbs) / (lastWeekData.totalCarbs || 1)) * 100)}%
+                              </Text>
+                              {' '}vs last week
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+
+                      {/* Fats Change */}
+                      {enabledGoalPreferences.some(p => p.statName === 'fatsIntake') && (
+                        <View style={styles.statInsight}>
+                          <View style={styles.insightRow}>
+                            <Text style={styles.insightText}>
+                              Fats intake{' '}
+                              <Text style={styles.insightBold}>
+                                +{Math.round(((currentWeekData.totalFats - lastWeekData.totalFats) / (lastWeekData.totalFats || 1)) * 100)}%
+                              </Text>
+                              {' '}vs last week
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+
+                      {/* Smart Insight - Meal Prep Suggestion */}
+                      {enabledGoalPreferences.some(p => p.statName === 'mealPrepTips') && (
+                        <View style={[styles.statInsight, styles.insightWarning]}>
+                          <View style={styles.insightRow}>
+                            <MaterialCommunityIcons
+                              name="lightbulb-on"
+                              size={16}
+                              color="#FF9800"
+                            />
+                            <Text style={[styles.insightText, styles.warningText]}>
+                              You skipped <Text style={styles.insightBold}>lunch twice</Text> — consider prepping meals
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                )}
+
+                {/* Empty Stats Message */}
+                {enabledGoalPreferences.length === 0 && (
+                  <View style={styles.statItem}>
+                    <View style={styles.statHeader}>
+                      <Text style={styles.statLabel}>Stats</Text>
+                    </View>
+                    <View style={styles.emptyStatsContainer}>
+                      <MaterialCommunityIcons
+                        name="tune"
+                        size={24}
+                        color="#ccc"
+                      />
+                      <Text style={styles.emptyStatsText}>
+                        No stats selected. Configure from Goals button.
+                      </Text>
+                    </View>
+                  </View>
+                )}
+              </View>
+
               {/* Weekly Summary Cards */}
               <WeeklySummaryCards
                 currentWeekData={currentWeekData}
@@ -351,6 +526,13 @@ export default function MealsScreen({ navigation }) {
           )}
         </ScrollView>
       </Animated.View>
+
+      {/* Goal Settings Modal */}
+      <GoalSettingsModal
+        visible={goalSettingsModalVisible}
+        onClose={() => setGoalSettingsModalVisible(false)}
+        onSettingsSaved={handleGoalSettingsSaved}
+      />
     </SafeAreaView>
   );
 }
@@ -443,43 +625,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
   },
-  quickStatsContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#f5f5f5',
-    marginHorizontal: 16,
-    marginVertical: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  quickStat: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  quickStatLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#999',
-    marginBottom: 4,
-  },
-  quickStatValue: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 2,
-  },
-  quickStatUnit: {
-    fontSize: 9,
-    fontWeight: '500',
-    color: '#999',
-  },
-  quickStatDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: '#e0e0e0',
-    marginHorizontal: 8,
-  },
   emptyStateContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -534,5 +679,121 @@ const styles = StyleSheet.create({
   },
   toggleSwitchKnobActive: {
     alignSelf: 'flex-end',
+  },
+  statsSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 20,
+    gap: 16,
+  },
+  statItem: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  statHeader: {
+    marginBottom: 12,
+  },
+  statLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#333',
+  },
+  streakCard: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginBottom: 12,
+  },
+  streakMinimalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  streakMinimalText: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
+  },
+  streakBold: {
+    fontWeight: '700',
+    color: '#000',
+  },
+  streakMetricLabel: {
+    fontSize: 10,
+    color: '#999',
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  checkmarkRowMinimal: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  checkmarkMinimal: {
+    width: 18,
+    height: 18,
+    borderRadius: 3,
+    borderWidth: 1,
+  },
+  statsInsightsContainer: {
+    gap: 12,
+  },
+  statInsight: {
+    paddingVertical: 10,
+    paddingHorizontal: 0,
+  },
+  insightRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  insightText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
+    lineHeight: 18,
+  },
+  insightBold: {
+    fontWeight: '700',
+    color: '#000',
+  },
+  trendBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  trendBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#4CAF50',
+  },
+  insightWarning: {
+    backgroundColor: '#FFF3E0',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    marginTop: 4,
+  },
+  warningText: {
+    color: '#E65100',
+  },
+  emptyStatsContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 24,
+    gap: 8,
+  },
+  emptyStatsText: {
+    fontSize: 13,
+    color: '#999',
+    fontWeight: '500',
+    textAlign: 'center',
   },
 });

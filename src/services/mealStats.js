@@ -96,15 +96,18 @@ export const getWeeklyDailyBreakdown = async (startDate) => {
  */
 export const getWeeklyGoals = async (startDate) => {
   try {
+    // Get the most recent macro goals saved on or before startDate
+    // Exclude invalid dates like "0000-01-01"
     const result = await db.getFirstAsync(
       `SELECT
         calorieGoal,
         proteinGoal,
         carbsGoal,
-        fatsGoal
+        fatsGoal,
+        goalDate
        FROM macro_goals
-       WHERE goalDate >= ?
-       ORDER BY goalDate ASC
+       WHERE goalDate <= ? AND goalDate != "0000-01-01"
+       ORDER BY goalDate DESC
        LIMIT 1`,
       [startDate]
     );
