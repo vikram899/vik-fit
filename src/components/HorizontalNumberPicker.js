@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-} from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import HorizontalPicker from "@vseslav/react-native-horizontal-picker";
 import { COLORS } from "../styles";
@@ -14,12 +10,12 @@ import { COLORS } from "../styles";
  */
 function NumberItem({ item, isActive }) {
   return (
-    <View style={[styles.item, { width: 80 }]}>
+    <View style={[styles.item, { width: 50 }]}>
       <Text
         style={[
           styles.itemText,
           {
-            fontSize: isActive ? 36 : 16,
+            fontSize: 16,
             color: isActive ? COLORS.primary : "#999",
             fontWeight: isActive ? "700" : "600",
           },
@@ -89,28 +85,26 @@ export default function HorizontalNumberPicker({
 
       <HorizontalPicker
         data={VALUE_ARRAY}
-        itemWidth={80}
+        itemWidth={50}
         renderItem={(item, index) => {
           const isActive = Math.abs(parseFloat(currentValue) - item) < 0.01;
-          return (
-            <NumberItem
-              item={item}
-              isActive={isActive}
-            />
-          );
+          return <NumberItem item={item} isActive={isActive} />;
         }}
         defaultIndex={
           currentValue
             ? VALUE_ARRAY.findIndex(
                 (v) => Math.abs(v - parseFloat(currentValue)) < 0.01
               )
-            : VALUE_ARRAY.findIndex((v) => v === minValue + (maxValue - minValue) / 2)
+            : VALUE_ARRAY.findIndex(
+                (v) => v === minValue + (maxValue - minValue) / 2
+              )
         }
         onChange={(index) => {
           onValueChange(VALUE_ARRAY[index].toFixed(1));
         }}
-        snapTimeout={0}
-        animatedScrollToDefaultIndex={true}
+        //snapTimeout={5}
+        //animationDuration={10}
+        decelerationRate={100}
       />
     </View>
   );
