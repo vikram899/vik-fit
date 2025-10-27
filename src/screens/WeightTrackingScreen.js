@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
+import HorizontalPicker from "react-native-number-horizontal-picker";
 import { COLORS } from "../styles";
 import {
   addWeightEntry,
@@ -161,52 +162,50 @@ export default function WeightTrackingScreen({ navigation }) {
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        {/* Weight Cards Row */}
-        <View style={styles.cardsRow}>
-          {/* Today's Weight Card */}
-          <View style={styles.halfCard}>
-            <View style={styles.halfCardHeader}>
-              <MaterialCommunityIcons
-                name="scale-bathroom"
-                size={20}
-                color={COLORS.primary}
-              />
-              <Text style={styles.halfCardTitle}>Today's Weight</Text>
-            </View>
-            <View style={styles.weightInputField}>
-              <TextInput
-                style={styles.weightInput}
-                placeholder="0"
-                placeholderTextColor="#999"
-                keyboardType="decimal-pad"
-                value={currentWeight}
-                onChangeText={setCurrentWeight}
-              />
-              <Text style={styles.weightUnit}>kg</Text>
-            </View>
+        {/* Today's Weight Picker */}
+        <View style={styles.pickerSection}>
+          <View style={styles.pickerHeader}>
+            <MaterialCommunityIcons
+              name="scale-bathroom"
+              size={24}
+              color={COLORS.primary}
+            />
+            <Text style={styles.pickerTitle}>Today's Weight</Text>
           </View>
+          <View style={styles.horizontalPickerWrapper}>
+            <Text style={styles.weightDisplayValue}>
+              {parseFloat(currentWeight) || 70}
+            </Text>
+            <Text style={styles.weightDisplayUnit}>kg</Text>
+          </View>
+          <HorizontalPicker
+            minimumValue={30}
+            maximumValue={200}
+            focusValue={parseFloat(currentWeight) || 70}
+            onChangeValue={(value) => setCurrentWeight(Math.round(value * 10) / 10)}
+          />
+        </View>
 
-          {/* Goal Weight Card */}
-          <View style={styles.halfCard}>
-            <View style={styles.halfCardHeader}>
-              <MaterialCommunityIcons
-                name="target"
-                size={20}
-                color={COLORS.primary}
-              />
-              <Text style={styles.halfCardTitle}>Goal Weight</Text>
-            </View>
-            <View style={styles.weightInputField}>
-              <TextInput
-                style={styles.weightInput}
-                placeholder="0"
-                placeholderTextColor="#999"
-                keyboardType="decimal-pad"
-                value={targetWeight}
-                onChangeText={setTargetWeight}
-              />
-              <Text style={styles.weightUnit}>kg</Text>
-            </View>
+        {/* Goal Weight Card (keep as TextInput for now) */}
+        <View style={styles.halfCard}>
+          <View style={styles.halfCardHeader}>
+            <MaterialCommunityIcons
+              name="target"
+              size={20}
+              color={COLORS.primary}
+            />
+            <Text style={styles.halfCardTitle}>Goal Weight</Text>
+          </View>
+          <View style={styles.weightInputField}>
+            <TextInput
+              style={styles.weightInput}
+              placeholder="0"
+              placeholderTextColor="#999"
+              keyboardType="decimal-pad"
+              value={targetWeight}
+              onChangeText={setTargetWeight}
+            />
+            <Text style={styles.weightUnit}>kg</Text>
           </View>
         </View>
 
@@ -280,6 +279,48 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+  },
+  pickerSection: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
+  },
+  pickerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  pickerTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginLeft: 12,
+    color: "#333",
+  },
+  horizontalPickerWrapper: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  weightDisplayValue: {
+    fontSize: 48,
+    fontWeight: "bold",
+    color: COLORS.primary,
+  },
+  weightDisplayUnit: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#999",
+    marginLeft: 8,
+  },
+  pickerItemText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#666",
+    textAlign: "center",
   },
   cardsRow: {
     flexDirection: "row",
