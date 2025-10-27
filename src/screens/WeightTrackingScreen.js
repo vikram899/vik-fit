@@ -25,11 +25,22 @@ import {
 export default function WeightTrackingScreen({ navigation }) {
   const today = new Date().toISOString().split("T")[0];
 
+  // Generate array of weights with 0.1 kg increments
+  const generateWeightArray = () => {
+    const weights = [];
+    for (let i = 30; i <= 200; i += 0.1) {
+      weights.push(parseFloat(i.toFixed(1)));
+    }
+    return weights;
+  };
+  const WEIGHT_ARRAY = generateWeightArray();
+
   const [currentWeight, setCurrentWeight] = useState("");
   const [targetWeight, setTargetWeight] = useState("");
   const [todayEntry, setTodayEntry] = useState(null);
   const [weightHistory, setWeightHistory] = useState([]);
   const [weightChange, setWeightChange] = useState(null);
+  const [initialFocusSet, setInitialFocusSet] = useState(false);
 
   // Load today's weight entry and history when screen focuses
   useFocusEffect(
@@ -179,10 +190,39 @@ export default function WeightTrackingScreen({ navigation }) {
             <Text style={styles.weightDisplayUnit}>kg</Text>
           </View>
           <HorizontalPicker
-            minimumValue={30}
-            maximumValue={200}
-            focusValue={parseFloat(currentWeight) || 70}
-            onChangeValue={(value) => setCurrentWeight(Math.round(value * 10) / 10)}
+            minimumValue={0}
+            maximumValue={WEIGHT_ARRAY.length - 1}
+            focusValue={
+              !initialFocusSet && currentWeight
+                ? WEIGHT_ARRAY.findIndex(
+                    (w) => Math.abs(w - (parseFloat(currentWeight) || 70)) < 0.05
+                  )
+                : undefined
+            }
+            onChangeValue={(index) => {
+              const weight = WEIGHT_ARRAY[Math.round(index)];
+              if (weight !== undefined) {
+                setCurrentWeight(weight.toFixed(1));
+                if (!initialFocusSet) {
+                  setInitialFocusSet(true);
+                }
+              }
+            }}
+            customRenderItem={(element, style) => {
+              // Show only integer numbers on the scale
+              const intValue = Math.floor(element);
+              const isInteger = element === intValue;
+
+              return (
+                <View style={[style, styles.pickerItemContainer]}>
+                  {isInteger ? (
+                    <Text style={styles.pickerIntegerText}>{intValue}</Text>
+                  ) : (
+                    <View style={styles.pickerTickMark} />
+                  )}
+                </View>
+              );
+            }}
           />
         </View>
 
@@ -316,11 +356,21 @@ const styles = StyleSheet.create({
     color: "#999",
     marginLeft: 8,
   },
-  pickerItemText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#666",
+  pickerItemContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  pickerIntegerText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#333",
     textAlign: "center",
+  },
+  pickerTickMark: {
+    width: 1,
+    height: 8,
+    backgroundColor: "#ddd",
   },
   cardsRow: {
     flexDirection: "row",
