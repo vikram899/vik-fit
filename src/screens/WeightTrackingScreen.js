@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
-import HorizontalPicker from "react-native-number-horizontal-picker";
+import HorizontalPicker from "@vseslav/react-native-horizontal-picker";
 import { COLORS } from "../styles";
 import {
   addWeightEntry,
@@ -25,10 +25,10 @@ import {
 export default function WeightTrackingScreen({ navigation }) {
   const today = new Date().toISOString().split("T")[0];
 
-  // Generate array of weights with 0.1 kg increments
+  // Generate array of weights with 0.5 kg increments
   const generateWeightArray = () => {
     const weights = [];
-    for (let i = 30; i <= 200; i += 0.1) {
+    for (let i = 30; i <= 200; i += 0.5) {
       weights.push(parseFloat(i.toFixed(1)));
     }
     return weights;
@@ -40,7 +40,6 @@ export default function WeightTrackingScreen({ navigation }) {
   const [todayEntry, setTodayEntry] = useState(null);
   const [weightHistory, setWeightHistory] = useState([]);
   const [weightChange, setWeightChange] = useState(null);
-  const [initialFocusSet, setInitialFocusSet] = useState(false);
 
   // Load today's weight entry and history when screen focuses
   useFocusEffect(
@@ -190,39 +189,34 @@ export default function WeightTrackingScreen({ navigation }) {
             <Text style={styles.weightDisplayUnit}>kg</Text>
           </View>
           <HorizontalPicker
-            minimumValue={0}
-            maximumValue={WEIGHT_ARRAY.length - 1}
-            focusValue={
-              !initialFocusSet && currentWeight
-                ? WEIGHT_ARRAY.findIndex(
-                    (w) => Math.abs(w - (parseFloat(currentWeight) || 70)) < 0.05
-                  )
-                : undefined
-            }
-            onChangeValue={(index) => {
-              const weight = WEIGHT_ARRAY[Math.round(index)];
-              if (weight !== undefined) {
-                setCurrentWeight(weight.toFixed(1));
-                if (!initialFocusSet) {
-                  setInitialFocusSet(true);
-                }
-              }
-            }}
-            customRenderItem={(element, style) => {
-              // Show only integer numbers on the scale
-              const intValue = Math.floor(element);
-              const isInteger = element === intValue;
-
+            data={WEIGHT_ARRAY}
+            itemWidth={80}
+            renderItem={(item, index) => {
+              const isActive = Math.abs(parseFloat(currentWeight) - item) < 0.01;
               return (
-                <View style={[style, styles.pickerItemContainer]}>
-                  {isInteger ? (
-                    <Text style={styles.pickerIntegerText}>{intValue}</Text>
-                  ) : (
-                    <View style={styles.pickerTickMark} />
-                  )}
+                <View style={[styles.item, { width: 80 }]}>
+                  <Text
+                    style={[
+                      styles.itemText,
+                      isActive && styles.itemTextActive,
+                    ]}
+                  >
+                    {item}
+                  </Text>
                 </View>
               );
             }}
+            defaultIndex={
+              currentWeight
+                ? WEIGHT_ARRAY.findIndex(
+                    (w) => Math.abs(w - parseFloat(currentWeight)) < 0.01
+                  )
+                : WEIGHT_ARRAY.findIndex((w) => w === 70)
+            }
+            onChange={(index) => {
+              setCurrentWeight(WEIGHT_ARRAY[index].toFixed(1));
+            }}
+            animatedScrollToDefaultIndex={true}
           />
         </View>
 
@@ -356,21 +350,20 @@ const styles = StyleSheet.create({
     color: "#999",
     marginLeft: 8,
   },
-  pickerItemContainer: {
+  item: {
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: 12,
   },
-  pickerIntegerText: {
-    fontSize: 12,
+  itemText: {
+    fontSize: 18,
     fontWeight: "600",
-    color: "#333",
-    textAlign: "center",
+    color: "#999",
   },
-  pickerTickMark: {
-    width: 1,
-    height: 8,
-    backgroundColor: "#ddd",
+  itemTextActive: {
+    color: COLORS.primary,
+    fontWeight: "700",
+    fontSize: 20,
   },
   cardsRow: {
     flexDirection: "row",
