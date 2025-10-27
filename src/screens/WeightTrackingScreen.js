@@ -10,8 +10,8 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
-import HorizontalPicker from "@vseslav/react-native-horizontal-picker";
 import { COLORS } from "../styles";
+import HorizontalNumberPicker from "../components/HorizontalNumberPicker";
 import {
   addWeightEntry,
   getWeightEntryForDate,
@@ -24,16 +24,6 @@ import {
  */
 export default function WeightTrackingScreen({ navigation }) {
   const today = new Date().toISOString().split("T")[0];
-
-  // Generate array of weights with 0.5 kg increments
-  const generateWeightArray = () => {
-    const weights = [];
-    for (let i = 30; i <= 200; i += 0.5) {
-      weights.push(parseFloat(i.toFixed(1)));
-    }
-    return weights;
-  };
-  const WEIGHT_ARRAY = generateWeightArray();
 
   const [currentWeight, setCurrentWeight] = useState("");
   const [targetWeight, setTargetWeight] = useState("");
@@ -173,52 +163,16 @@ export default function WeightTrackingScreen({ navigation }) {
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Today's Weight Picker */}
-        <View style={styles.pickerSection}>
-          <View style={styles.pickerHeader}>
-            <MaterialCommunityIcons
-              name="scale-bathroom"
-              size={24}
-              color={COLORS.primary}
-            />
-            <Text style={styles.pickerTitle}>Today's Weight</Text>
-          </View>
-          <View style={styles.horizontalPickerWrapper}>
-            <Text style={styles.weightDisplayValue}>
-              {parseFloat(currentWeight) || 70}
-            </Text>
-            <Text style={styles.weightDisplayUnit}>kg</Text>
-          </View>
-          <HorizontalPicker
-            data={WEIGHT_ARRAY}
-            itemWidth={80}
-            renderItem={(item, index) => {
-              const isActive = Math.abs(parseFloat(currentWeight) - item) < 0.01;
-              return (
-                <View style={[styles.item, { width: 80 }]}>
-                  <Text
-                    style={[
-                      styles.itemText,
-                      isActive && styles.itemTextActive,
-                    ]}
-                  >
-                    {item}
-                  </Text>
-                </View>
-              );
-            }}
-            defaultIndex={
-              currentWeight
-                ? WEIGHT_ARRAY.findIndex(
-                    (w) => Math.abs(w - parseFloat(currentWeight)) < 0.01
-                  )
-                : WEIGHT_ARRAY.findIndex((w) => w === 70)
-            }
-            onChange={(index) => {
-              setCurrentWeight(WEIGHT_ARRAY[index].toFixed(1));
-            }}
-            animatedScrollToDefaultIndex={true}
-          />
-        </View>
+        <HorizontalNumberPicker
+          minValue={30}
+          maxValue={200}
+          increment={0.5}
+          currentValue={currentWeight}
+          onValueChange={setCurrentWeight}
+          title="Today's Weight"
+          icon="scale-bathroom"
+          showHeader={true}
+        />
 
         {/* Goal Weight Card (keep as TextInput for now) */}
         <View style={styles.halfCard}>
@@ -313,57 +267,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-  },
-  pickerSection: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: "#f0f0f0",
-  },
-  pickerHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  pickerTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginLeft: 12,
-    color: "#333",
-  },
-  horizontalPickerWrapper: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
-  weightDisplayValue: {
-    fontSize: 48,
-    fontWeight: "bold",
-    color: COLORS.primary,
-  },
-  weightDisplayUnit: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#999",
-    marginLeft: 8,
-  },
-  item: {
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 12,
-  },
-  itemText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#999",
-  },
-  itemTextActive: {
-    color: COLORS.primary,
-    fontWeight: "700",
-    fontSize: 20,
   },
   cardsRow: {
     flexDirection: "row",

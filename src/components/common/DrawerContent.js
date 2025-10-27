@@ -104,6 +104,17 @@ export default function DrawerContent({ navigation }) {
           />
           <Text style={styles.footerLabel}>Settings</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.footerItem}
+          onPress={() => handleNavigation("ComponentsShowcase")}
+        >
+          <MaterialCommunityIcons
+            name="puzzle-outline"
+            size={24}
+            color="#666"
+          />
+          <Text style={styles.footerLabel}>Components</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.footerItem}>
           <MaterialCommunityIcons
             name="information-outline"

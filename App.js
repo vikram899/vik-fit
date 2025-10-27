@@ -23,6 +23,7 @@ import WorkoutSummaryScreen from "./src/screens/WorkoutSummaryScreen";
 import MenuScreen from "./src/screens/MenuScreen";
 import MacroGoalsScreen from "./src/screens/MacroGoalsScreen";
 import WeightTrackingScreen from "./src/screens/WeightTrackingScreen";
+import ComponentsShowcaseScreen from "./src/screens/ComponentsShowcaseScreen";
 
 // Services
 import { initializeDatabase, seedDummyData } from "./src/services/database";
@@ -148,6 +149,14 @@ function HomeStackNavigator({ navigation }) {
         component={WeightTrackingScreen}
         options={{
           title: "Weight Tracking",
+          headerBackTitleVisible: false,
+        }}
+      />
+      <Stack.Screen
+        name="ComponentsShowcase"
+        component={ComponentsShowcaseScreen}
+        options={{
+          title: "Components Showcase",
           headerBackTitleVisible: false,
         }}
       />

@@ -45,6 +45,14 @@ export default function MenuScreen({ navigation }) {
       },
     },
     {
+      id: "components",
+      label: "Components",
+      icon: "puzzle-outline",
+      onPress: () => {
+        navigation.navigate("ComponentsShowcase");
+      },
+    },
+    {
       id: "about",
       label: "About",
       icon: "information",
