@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import { COLORS } from "../styles";
 import HorizontalNumberPicker from "../components/HorizontalNumberPicker";
+import MealCardItem from "../components/MealCardItem";
 
 /**
  * ComponentsShowcaseScreen
@@ -14,6 +15,17 @@ import HorizontalNumberPicker from "../components/HorizontalNumberPicker";
  */
 export default function ComponentsShowcaseScreen({ navigation }) {
   const [weight, setWeight] = useState("70.0");
+
+  // Demo meal for MealCard
+  const demoMeal = {
+    id: 1,
+    name: "Chicken Salad",
+    category: "Lunch",
+    calories: 450,
+    protein: 35,
+    carbs: 25,
+    fats: 15,
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -30,6 +42,15 @@ export default function ComponentsShowcaseScreen({ navigation }) {
             title="Demo Number Picker"
             icon="scale-bathroom"
             showHeader={true}
+          />
+        </View>
+
+        {/* Meal Card Item Component */}
+        <View style={styles.componentSection}>
+          <Text style={styles.componentTitle}>Meal Card</Text>
+          <MealCardItem
+            meal={demoMeal}
+            onMenuPress={() => console.log("Meal menu pressed")}
           />
         </View>
       </ScrollView>
