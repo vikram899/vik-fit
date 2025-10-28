@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import { COLORS } from "../styles";
 import HorizontalNumberPicker from "../components/HorizontalNumberPicker";
-import MealCardItem from "../components/MealCardItem";
+import MealCard from "../components/MealCard";
 
 /**
  * ComponentsShowcaseScreen
@@ -95,7 +95,7 @@ export default function ComponentsShowcaseScreen({ navigation }) {
             Color-coded meal type indicators (Veg, Non-Veg, Egg, Vegan) with complete macros (Calories, Protein, Carbs, Fats) and favorite star. Tap the star to mark as favorite.
           </Text>
           {demoMeals.map((meal) => (
-            <MealCardItem
+            <MealCard
               key={meal.id}
               meal={meal}
               onPress={() => console.log("Meal pressed:", meal.name)}

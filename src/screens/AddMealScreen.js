@@ -20,7 +20,7 @@ import {
   deleteMeal,
 } from "../services/database";
 import { AddMealModal, EditMealDetailsModal } from "../components/meals";
-import MealCardItem from "../components/MealCardItem";
+import MealCard from "../components/MealCard";
 
 /**
  * AddMealScreen
@@ -255,7 +255,7 @@ export default function AddMealScreen({ navigation, route }) {
             filteredMeals.map((meal) => {
               return (
                 <View key={meal.id} style={styles.mealCardWrapper}>
-                  <MealCardItem
+                  <MealCard
                     meal={meal}
                     onMenuPress={() => handleMealMenu(meal)}
                   />
