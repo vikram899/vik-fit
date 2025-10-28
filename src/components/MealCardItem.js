@@ -5,10 +5,10 @@ import { COLORS } from "../styles";
 
 /**
  * MealCardItem Component - Modern Trendy Design
- * Displays meal info: Name, Calories, Protein, and Weight with meal type indicator
+ * Displays meal info: Name, Calories, Protein, Carbs, and Fats with meal type indicator
  *
  * Props:
- * - meal: object (name, calories, protein, weight, isFavorite, mealType)
+ * - meal: object (name, calories, protein, carbs, fats, isFavorite, mealType)
  *   mealType: 'veg' | 'non-veg' | 'egg' | 'vegan'
  * - onPress: function (callback when card is tapped)
  * - onMenuPress: function (callback for menu button)
@@ -132,13 +132,24 @@ export default function MealCardItem({ meal, onPress, onMenuPress, onFavoritePre
           </View>
         </View>
 
-        {/* Weight Badge */}
-        <View style={[styles.statBadge, styles.weightBadge]}>
-          <MaterialCommunityIcons name="scale" size={13} color="#6366F1" />
+        {/* Carbs Badge */}
+        <View style={[styles.statBadge, styles.carbsBadge]}>
+          <MaterialCommunityIcons name="bread-slice" size={13} color="#D2691E" />
           <View style={styles.badgeContent}>
-            <Text style={styles.statBadgeLabel}>weight</Text>
+            <Text style={styles.statBadgeLabel}>carbs</Text>
             <Text style={styles.statBadgeValue}>
-              {meal.weight || "-"}g
+              {Math.round(meal.carbs || 0)}g
+            </Text>
+          </View>
+        </View>
+
+        {/* Fats Badge */}
+        <View style={[styles.statBadge, styles.fatsBadge]}>
+          <MaterialCommunityIcons name="water-percent" size={13} color="#8B4513" />
+          <View style={styles.badgeContent}>
+            <Text style={styles.statBadgeLabel}>fats</Text>
+            <Text style={styles.statBadgeValue}>
+              {Math.round(meal.fats || 0)}g
             </Text>
           </View>
         </View>
@@ -215,8 +226,11 @@ const styles = StyleSheet.create({
   proteinBadge: {
     backgroundColor: "#D4F4DD",
   },
-  weightBadge: {
-    backgroundColor: "#E0E7FF",
+  carbsBadge: {
+    backgroundColor: "#FFE4B5",
+  },
+  fatsBadge: {
+    backgroundColor: "#E8D4C0",
   },
   statBadgeLabel: {
     fontSize: 10,

@@ -52,6 +52,27 @@ export const initializeDatabase = async () => {
       // Column already exists, no need to add it
     }
 
+    // Migration: Add isFavorite column to meals table if it doesn't exist
+    try {
+      await db.execAsync('ALTER TABLE meals ADD COLUMN isFavorite INTEGER DEFAULT 0;');
+    } catch (error) {
+      // Column already exists, no need to add it
+    }
+
+    // Migration: Add mealType column to meals table if it doesn't exist
+    try {
+      await db.execAsync('ALTER TABLE meals ADD COLUMN mealType TEXT DEFAULT "veg";');
+    } catch (error) {
+      // Column already exists, no need to add it
+    }
+
+    // Migration: Add weight column to meals table if it doesn't exist
+    try {
+      await db.execAsync('ALTER TABLE meals ADD COLUMN weight REAL DEFAULT 0;');
+    } catch (error) {
+      // Column already exists, no need to add it
+    }
+
     // Create meals table if it doesn't exist
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS meals (
@@ -62,6 +83,9 @@ export const initializeDatabase = async () => {
         protein REAL,
         carbs REAL,
         fats REAL,
+        isFavorite INTEGER DEFAULT 0,
+        mealType TEXT DEFAULT "veg",
+        weight REAL DEFAULT 0,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -533,12 +557,21 @@ export const seedDummyData = async () => {
 
 /**
  * Add a new meal template
+ * @param {string} name - Meal name
+ * @param {string} category - Meal category
+ * @param {number} calories - Caloric content
+ * @param {number} protein - Protein in grams
+ * @param {number} carbs - Carbohydrates in grams
+ * @param {number} fats - Fats in grams
+ * @param {string} mealType - Type: 'veg' | 'non-veg' | 'egg' | 'vegan' (default: 'veg')
+ * @param {number} weight - Weight in grams (default: 0)
+ * @param {boolean} isFavorite - Is this a favorite meal (default: false)
  */
-export const addMeal = async (name, category, calories = 0, protein = 0, carbs = 0, fats = 0) => {
+export const addMeal = async (name, category, calories = 0, protein = 0, carbs = 0, fats = 0, mealType = 'veg', weight = 0, isFavorite = false) => {
   try {
     await db.runAsync(
-      'INSERT INTO meals (name, category, calories, protein, carbs, fats) VALUES (?, ?, ?, ?, ?, ?)',
-      [name, category, calories, protein, carbs, fats]
+      'INSERT INTO meals (name, category, calories, protein, carbs, fats, mealType, weight, isFavorite) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [name, category, calories, protein, carbs, fats, mealType, weight, isFavorite ? 1 : 0]
     );
 
     const lastMeal = await db.getFirstAsync(
@@ -897,15 +930,42 @@ export const deleteWeightEntry = async (weightDate) => {
 
 /**
  * Update a meal template
+ * @param {number} mealId - Meal ID to update
+ * @param {string} name - Meal name
+ * @param {string} category - Meal category
+ * @param {number} calories - Caloric content
+ * @param {number} protein - Protein in grams
+ * @param {number} carbs - Carbohydrates in grams
+ * @param {number} fats - Fats in grams
+ * @param {string} mealType - Type: 'veg' | 'non-veg' | 'egg' | 'vegan'
+ * @param {number} weight - Weight in grams
+ * @param {boolean} isFavorite - Is this a favorite meal
  */
-export const updateMeal = async (mealId, name, category, calories = 0, protein = 0, carbs = 0, fats = 0) => {
+export const updateMeal = async (mealId, name, category, calories = 0, protein = 0, carbs = 0, fats = 0, mealType = 'veg', weight = 0, isFavorite = false) => {
   try {
     await db.runAsync(
-      'UPDATE meals SET name = ?, category = ?, calories = ?, protein = ?, carbs = ?, fats = ? WHERE id = ?',
-      [name, category, calories, protein, carbs, fats, mealId]
+      'UPDATE meals SET name = ?, category = ?, calories = ?, protein = ?, carbs = ?, fats = ?, mealType = ?, weight = ?, isFavorite = ? WHERE id = ?',
+      [name, category, calories, protein, carbs, fats, mealType, weight, isFavorite ? 1 : 0, mealId]
     );
   } catch (error) {
     console.error('Error updating meal:', error);
+    throw error;
+  }
+};
+
+/**
+ * Toggle favorite status of a meal
+ * @param {number} mealId - Meal ID
+ * @param {boolean} isFavorite - Favorite status
+ */
+export const toggleMealFavorite = async (mealId, isFavorite) => {
+  try {
+    await db.runAsync(
+      'UPDATE meals SET isFavorite = ? WHERE id = ?',
+      [isFavorite ? 1 : 0, mealId]
+    );
+  } catch (error) {
+    console.error('Error toggling meal favorite:', error);
     throw error;
   }
 };

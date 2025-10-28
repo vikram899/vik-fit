@@ -23,7 +23,8 @@ export default function ComponentsShowcaseScreen({ navigation }) {
       name: "Grilled Chicken Salad",
       calories: 450,
       protein: 35,
-      weight: 350,
+      carbs: 25,
+      fats: 15,
       mealType: "non-veg",
       isFavorite: false,
     },
@@ -32,7 +33,8 @@ export default function ComponentsShowcaseScreen({ navigation }) {
       name: "Scrambled Eggs & Toast",
       calories: 320,
       protein: 18,
-      weight: 200,
+      carbs: 30,
+      fats: 12,
       mealType: "egg",
       isFavorite: false,
     },
@@ -41,7 +43,8 @@ export default function ComponentsShowcaseScreen({ navigation }) {
       name: "Quinoa Buddha Bowl",
       calories: 420,
       protein: 15,
-      weight: 350,
+      carbs: 52,
+      fats: 16,
       mealType: "vegan",
       isFavorite: false,
     },
@@ -50,7 +53,8 @@ export default function ComponentsShowcaseScreen({ navigation }) {
       name: "Paneer Tikka Masala",
       calories: 520,
       protein: 28,
-      weight: 300,
+      carbs: 35,
+      fats: 24,
       mealType: "veg",
       isFavorite: false,
     },
@@ -59,7 +63,8 @@ export default function ComponentsShowcaseScreen({ navigation }) {
       name: "Salmon & Brown Rice",
       calories: 580,
       protein: 48,
-      weight: 400,
+      carbs: 45,
+      fats: 18,
       mealType: "non-veg",
       isFavorite: false,
     },
@@ -87,7 +92,7 @@ export default function ComponentsShowcaseScreen({ navigation }) {
         <View style={styles.componentSection}>
           <Text style={styles.componentTitle}>Meal Card (Premium Design)</Text>
           <Text style={styles.componentDescription}>
-            Color-coded meal type indicators (Veg, Non-Veg, Egg, Vegan) with detailed stat badges and favorite star. Tap the star to mark as favorite.
+            Color-coded meal type indicators (Veg, Non-Veg, Egg, Vegan) with complete macros (Calories, Protein, Carbs, Fats) and favorite star. Tap the star to mark as favorite.
           </Text>
           {demoMeals.map((meal) => (
             <MealCardItem
