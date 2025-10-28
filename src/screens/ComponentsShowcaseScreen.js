@@ -16,16 +16,54 @@ import MealCardItem from "../components/MealCardItem";
 export default function ComponentsShowcaseScreen({ navigation }) {
   const [weight, setWeight] = useState("70.0");
 
-  // Demo meal for MealCard
-  const demoMeal = {
-    id: 1,
-    name: "Chicken Salad",
-    category: "Lunch",
-    calories: 450,
-    protein: 35,
-    carbs: 25,
-    fats: 15,
-  };
+  // Demo meals for MealCardItem
+  const demoMeals = [
+    {
+      id: 1,
+      name: "Grilled Chicken Salad",
+      calories: 450,
+      protein: 35,
+      weight: 350,
+      mealType: "non-veg",
+      isFavorite: false,
+    },
+    {
+      id: 2,
+      name: "Scrambled Eggs & Toast",
+      calories: 320,
+      protein: 18,
+      weight: 200,
+      mealType: "egg",
+      isFavorite: false,
+    },
+    {
+      id: 3,
+      name: "Quinoa Buddha Bowl",
+      calories: 420,
+      protein: 15,
+      weight: 350,
+      mealType: "vegan",
+      isFavorite: false,
+    },
+    {
+      id: 4,
+      name: "Paneer Tikka Masala",
+      calories: 520,
+      protein: 28,
+      weight: 300,
+      mealType: "veg",
+      isFavorite: false,
+    },
+    {
+      id: 5,
+      name: "Salmon & Brown Rice",
+      calories: 580,
+      protein: 48,
+      weight: 400,
+      mealType: "non-veg",
+      isFavorite: false,
+    },
+  ];
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -47,11 +85,19 @@ export default function ComponentsShowcaseScreen({ navigation }) {
 
         {/* Meal Card Item Component */}
         <View style={styles.componentSection}>
-          <Text style={styles.componentTitle}>Meal Card</Text>
-          <MealCardItem
-            meal={demoMeal}
-            onMenuPress={() => console.log("Meal menu pressed")}
-          />
+          <Text style={styles.componentTitle}>Meal Card (Premium Design)</Text>
+          <Text style={styles.componentDescription}>
+            Color-coded meal type indicators (Veg, Non-Veg, Egg, Vegan) with detailed stat badges and favorite star. Tap the star to mark as favorite.
+          </Text>
+          {demoMeals.map((meal) => (
+            <MealCardItem
+              key={meal.id}
+              meal={meal}
+              onPress={() => console.log("Meal pressed:", meal.name)}
+              onMenuPress={() => console.log("Meal menu pressed:", meal.name)}
+              onFavoritePress={(isFavorite) => console.log("Favorite toggled:", meal.name, "Is Favorite:", isFavorite)}
+            />
+          ))}
         </View>
       </ScrollView>
     </View>
@@ -250,6 +296,21 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 13,
     color: "#666",
+    lineHeight: 18,
+  },
+  componentSection: {
+    marginBottom: 24,
+  },
+  componentTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 8,
+  },
+  componentDescription: {
+    fontSize: 13,
+    color: "#666",
+    marginBottom: 12,
     lineHeight: 18,
   },
 });
