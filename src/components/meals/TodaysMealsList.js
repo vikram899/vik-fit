@@ -10,6 +10,9 @@ const TodaysMealsList = ({ meals = [], onMealPress, onMealEdit, onMealDelete }) 
   const MEAL_TYPES = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];
   const mealsByType = {};
 
+  // Collapsed state for each meal type
+  const [collapsedMeals, setCollapsedMeals] = React.useState({});
+
   MEAL_TYPES.forEach(type => {
     mealsByType[type] = meals.filter(meal => meal.mealType === type || (!meal.mealType && type === 'Breakfast'));
   });
@@ -23,6 +26,14 @@ const TodaysMealsList = ({ meals = [], onMealPress, onMealEdit, onMealDelete }) 
       'Dinner': { icon: 'moon-waning-crescent', color: '#7C4DFF' },
     };
     return icons[type] || { icon: 'food', color: '#999' };
+  };
+
+  // Toggle collapse for meal type
+  const toggleMealTypeCollapse = (mealType) => {
+    setCollapsedMeals(prev => ({
+      ...prev,
+      [mealType]: !prev[mealType]
+    }));
   };
 
   return (
@@ -49,10 +60,20 @@ const TodaysMealsList = ({ meals = [], onMealPress, onMealEdit, onMealDelete }) 
             const totalCalories = mealsOfType.reduce((sum, meal) => sum + (meal.calories || 0), 0);
             const totalProtein = mealsOfType.reduce((sum, meal) => sum + (meal.protein || 0), 0);
 
+            const isCollapsed = collapsedMeals[mealType];
+
             return (
               <View key={mealType} style={{ marginBottom: 16 }}>
-                {/* Meal Type Header */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 8, gap: 8 }}>
+                {/* Meal Type Header with Toggle */}
+                <TouchableOpacity
+                  onPress={() => toggleMealTypeCollapse(mealType)}
+                  style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 8, gap: 8 }}
+                >
+                  <MaterialCommunityIcons
+                    name={isCollapsed ? 'chevron-right' : 'chevron-down'}
+                    size={20}
+                    color={COLORS.primary}
+                  />
                   <MaterialCommunityIcons name={typeInfo.icon} size={20} color={typeInfo.color} />
                   <Text style={{ fontSize: 14, fontWeight: '700', color: '#333', flex: 1 }}>
                     {mealType}
@@ -60,10 +81,10 @@ const TodaysMealsList = ({ meals = [], onMealPress, onMealEdit, onMealDelete }) 
                   <Text style={{ fontSize: 12, fontWeight: '600', color: '#999' }}>
                     {Math.round(totalCalories)} cal
                   </Text>
-                </View>
+                </TouchableOpacity>
 
                 {/* Meals under this type - Using MealCard Component */}
-                {mealsOfType.map((meal) => {
+                {!isCollapsed && mealsOfType.map((meal) => {
                   // Map the foodType from database to mealType for MealCard component
                   const mealCardData = {
                     ...meal,

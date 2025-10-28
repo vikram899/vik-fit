@@ -5,11 +5,22 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  Modal,
+  Animated,
+  PanResponder,
+  Dimensions,
+  Alert,
+  TouchableWithoutFeedback,
 } from "react-native";
-import { COLORS } from "../styles";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { COLORS, buttonStyles } from "../styles";
 import HorizontalNumberPicker from "../components/HorizontalNumberPicker";
 import MealCard from "../components/MealCard";
 import SelectMealTimePopup from "../components/SelectMealTimePopup";
+import MealForm from "../components/MealForm";
+
+const screenHeight = Dimensions.get("window").height;
+const bottomSheetHeight = screenHeight * 0.9;
 
 /**
  * ComponentsShowcaseScreen
@@ -19,6 +30,77 @@ export default function ComponentsShowcaseScreen({ navigation }) {
   const [weight, setWeight] = useState("70.0");
   const [selectMealTimeVisible, setSelectMealTimeVisible] = useState(false);
   const [selectedMealTime, setSelectedMealTime] = useState("Breakfast");
+  const [mealForm, setMealForm] = useState({
+    name: "Grilled Chicken Salad",
+    calories: "450",
+    protein: "35",
+    carbs: "25",
+    fats: "15",
+  });
+  const [mealType, setMealType] = useState("Breakfast");
+  const [foodType, setFoodType] = useState("nonveg");
+  const [showMealFormModal, setShowMealFormModal] = useState(false);
+  const slideAnim = React.useRef(new Animated.Value(bottomSheetHeight)).current;
+
+  // Animation for bottom sheet
+  const handleOpenMealForm = () => {
+    setShowMealFormModal(true);
+    // Reset animation value before starting
+    slideAnim.setValue(bottomSheetHeight);
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleCloseMealForm = () => {
+    Animated.timing(slideAnim, {
+      toValue: bottomSheetHeight,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      setShowMealFormModal(false);
+    });
+  };
+
+  const panResponder = React.useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, { dy }) => Math.abs(dy) > 10,
+      onPanResponderMove: (_, { dy }) => {
+        if (dy > 0) {
+          slideAnim.setValue(dy);
+        }
+      },
+      onPanResponderRelease: (_, { dy }) => {
+        if (dy > 50) {
+          handleCloseMealForm();
+        } else {
+          Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
+  const handleSaveMealForm = () => {
+    Alert.alert(
+      "Success",
+      `Meal "${mealForm.name}" saved successfully!`,
+      [
+        {
+          text: "OK",
+          onPress: () => {
+            handleCloseMealForm();
+          },
+        },
+      ]
+    );
+  };
 
   // Demo meals for MealCardItem
   const demoMeals = [
@@ -138,6 +220,29 @@ export default function ComponentsShowcaseScreen({ navigation }) {
             </View>
           )}
         </View>
+
+        {/* Meal Form Component */}
+        <View style={styles.componentSection}>
+          <Text style={styles.componentTitle}>Meal Form</Text>
+          <Text style={styles.componentDescription}>
+            A reusable form component for adding/editing meals with fields for meal name, meal type (Breakfast/Lunch/Snacks/Dinner), food type (Veg/Non-Veg/Vegan/Egg), calories, protein, carbs, and fats. Opens in a bottom sheet modal with smooth slide animation.
+          </Text>
+          <TouchableOpacity
+            style={{
+              backgroundColor: COLORS.primary,
+              paddingVertical: 12,
+              paddingHorizontal: 16,
+              borderRadius: 8,
+              alignItems: "center",
+              marginTop: 12,
+            }}
+            onPress={handleOpenMealForm}
+          >
+            <Text style={{ color: "#fff", fontSize: 14, fontWeight: "600" }}>
+              Open Form in Bottom Sheet
+            </Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       {/* Select Meal Time Popup Modal */}
@@ -152,6 +257,141 @@ export default function ComponentsShowcaseScreen({ navigation }) {
         }}
         onCancel={() => setSelectMealTimeVisible(false)}
       />
+
+      {/* Meal Form Bottom Sheet Modal */}
+      <Modal
+        visible={showMealFormModal}
+        transparent={true}
+        animationType="none"
+        onRequestClose={handleCloseMealForm}
+      >
+        {/* Overlay */}
+        <Animated.View
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              opacity: slideAnim.interpolate({
+                inputRange: [0, bottomSheetHeight],
+                outputRange: [1, 0],
+              }),
+              zIndex: 999,
+            },
+          ]}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={handleCloseMealForm}
+            style={StyleSheet.absoluteFill}
+          />
+        </Animated.View>
+
+        {/* Bottom Sheet */}
+        <Animated.View
+          style={[
+            {
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: bottomSheetHeight,
+              backgroundColor: "#fff",
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              overflow: "hidden",
+              zIndex: 1000,
+            },
+            {
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+          {...panResponder.panHandlers}
+        >
+          {/* Drag handle indicator */}
+          <View
+            style={{
+              alignItems: "center",
+              paddingTop: 8,
+              paddingBottom: 4,
+            }}
+          >
+            <View
+              style={{
+                width: 40,
+                height: 4,
+                backgroundColor: "#ddd",
+                borderRadius: 2,
+              }}
+            />
+          </View>
+
+          {/* Header */}
+          <View
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              borderBottomWidth: 1,
+              borderBottomColor: "#f0f0f0",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Text style={{ fontSize: 18, fontWeight: "700", color: "#333" }}>
+              Meal Form Demo
+            </Text>
+            <TouchableOpacity
+              onPress={handleCloseMealForm}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <MaterialCommunityIcons name="close" size={24} color={COLORS.primary} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Form Content */}
+          <MealForm
+            form={mealForm}
+            onFormChange={setMealForm}
+            mealType={mealType}
+            onMealTypeChange={setMealType}
+            foodType={foodType}
+            onFoodTypeChange={setFoodType}
+            showLabels={true}
+          />
+
+          {/* Buttons - Fixed at Bottom */}
+          <View
+            style={{
+              flexDirection: "row",
+              padding: 12,
+              paddingBottom: 24,
+              backgroundColor: "#fff",
+              gap: 12,
+              borderTopWidth: 1,
+              borderTopColor: "#f0f0f0",
+            }}
+          >
+            <TouchableOpacity
+              style={[
+                buttonStyles.button,
+                buttonStyles.buttonHalf,
+                buttonStyles.buttonPrimary,
+              ]}
+              onPress={handleSaveMealForm}
+            >
+              <MaterialCommunityIcons name="check" size={20} color="#fff" />
+              <Text style={buttonStyles.buttonText}>Save</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[buttonStyles.button, buttonStyles.buttonHalf, buttonStyles.cancelButton]}
+              onPress={handleCloseMealForm}
+            >
+              <Text style={buttonStyles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+      </Modal>
     </View>
   );
 }

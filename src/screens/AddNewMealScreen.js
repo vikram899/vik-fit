@@ -1,27 +1,31 @@
 import React from "react";
 import {
-  Modal,
   View,
   Text,
+  TextInput,
   TouchableOpacity,
   Alert,
+  ScrollView,
+  Modal,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Platform,
   Animated,
   PanResponder,
   Dimensions,
   StyleSheet,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import {
-  updateMeal,
-  getAllMeals,
-} from "../../services/database";
-import { buttonStyles, COLORS } from "../../styles";
-import MealForm from "../MealForm";
+import { addMeal, logMeal, getMealLogsForDate, getDailyTotals } from "../services/database";
+import { modalStyles, formStyles, buttonStyles, COLORS } from "../styles";
+import MealForm from "../components/MealForm";
 
 const screenHeight = Dimensions.get("window").height;
 const bottomSheetHeight = screenHeight * 0.9;
 
-const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
+const AddNewMealScreen = ({ navigation }) => {
+  const today = new Date().toISOString().split("T")[0];
+
   const [form, setForm] = React.useState({
     name: "",
     calories: "",
@@ -29,6 +33,7 @@ const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
     carbs: "",
     fats: "",
   });
+
   const [mealType, setMealType] = React.useState("Breakfast");
   const [foodType, setFoodType] = React.useState("veg");
 
@@ -36,26 +41,13 @@ const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
   const slideAnim = React.useRef(new Animated.Value(bottomSheetHeight)).current;
 
   React.useEffect(() => {
-    if (visible && meal) {
-      setForm({
-        name: meal.name || "",
-        calories: meal.calories?.toString() || "",
-        protein: meal.protein?.toString() || "",
-        carbs: meal.carbs?.toString() || "",
-        fats: meal.fats?.toString() || "",
-      });
-      setMealType(meal.mealType || "Breakfast");
-      setFoodType(meal.mealType || "veg");
-
-      // Reset and animate in
-      slideAnim.setValue(bottomSheetHeight);
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [visible, meal, slideAnim]);
+    // Animate in
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [slideAnim]);
 
   const handleCloseBottomSheet = () => {
     Animated.timing(slideAnim, {
@@ -63,7 +55,7 @@ const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
       duration: 300,
       useNativeDriver: true,
     }).start(() => {
-      onClose();
+      navigation.goBack();
     });
   };
 
@@ -90,35 +82,28 @@ const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
     })
   ).current;
 
-  const handleSaveMeal = async () => {
+  const handleAddMeal = async () => {
     if (!form.name.trim()) {
-      Alert.alert(
-        "Validation Error",
-        "Please enter a meal name"
-      );
+      Alert.alert("Meal Name Required", "Please enter a meal name");
       return;
     }
 
     if (!form.calories.trim()) {
-      Alert.alert(
-        "Validation Error",
-        "Please enter calories"
-      );
+      Alert.alert("Calories Required", "Please enter calories");
       return;
     }
 
     if (!form.protein.trim()) {
-      Alert.alert(
-        "Validation Error",
-        "Please enter protein"
-      );
+      Alert.alert("Protein Required", "Please enter protein");
       return;
     }
 
     try {
-      await updateMeal(
-        meal.id,
-        form.name.trim(),
+      const mealName = form.name.trim();
+
+      // Add meal to existing meals table
+      const mealId = await addMeal(
+        mealName,
         "General",
         parseFloat(form.calories) || 0,
         parseFloat(form.protein) || 0,
@@ -127,14 +112,20 @@ const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
         foodType
       );
 
-      // Reload meals and callback
-      const updatedMeals = await getAllMeals();
-      onMealUpdated?.(updatedMeals);
-      onClose();
+      // Log the meal for today
+      await logMeal(
+        mealId,
+        today,
+        parseFloat(form.calories) || 0,
+        parseFloat(form.protein) || 0,
+        parseFloat(form.carbs) || 0,
+        parseFloat(form.fats) || 0,
+        mealType
+      );
 
       Alert.alert(
         "Success",
-        `${form.name} has been updated successfully!`,
+        `"${mealName}" has been added and logged for today!`,
         [
           {
             text: "OK",
@@ -145,19 +136,18 @@ const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
         ]
       );
     } catch (error) {
-      console.error("Error updating meal:", error);
-      Alert.alert(
-        "Error",
-        "Failed to update meal. Please try again."
-      );
+      console.error("Error adding meal:", error);
+      Alert.alert("Error", "Failed to add meal. Please try again.");
     }
   };
 
-  if (!meal) return null;
+  const handleClose = () => {
+    handleCloseBottomSheet();
+  };
 
   return (
     <Modal
-      visible={visible}
+      visible={true}
       transparent={true}
       animationType="none"
       onRequestClose={handleCloseBottomSheet}
@@ -176,11 +166,9 @@ const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
           },
         ]}
       >
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={handleCloseBottomSheet}
-          style={StyleSheet.absoluteFill}
-        />
+        <TouchableWithoutFeedback onPress={handleCloseBottomSheet}>
+          <View style={StyleSheet.absoluteFill} />
+        </TouchableWithoutFeedback>
       </Animated.View>
 
       {/* Bottom Sheet */}
@@ -235,10 +223,10 @@ const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
           }}
         >
           <Text style={{ fontSize: 18, fontWeight: "700", color: "#333" }}>
-            Edit Meal
+            Add New Meal
           </Text>
           <TouchableOpacity
-            onPress={handleCloseBottomSheet}
+            onPress={handleClose}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             <MaterialCommunityIcons name="close" size={24} color={COLORS.primary} />
@@ -253,7 +241,6 @@ const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
           onMealTypeChange={setMealType}
           foodType={foodType}
           onFoodTypeChange={setFoodType}
-          showLabels={true}
         />
 
         {/* Buttons - Fixed at Bottom */}
@@ -274,15 +261,15 @@ const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
               buttonStyles.buttonHalf,
               buttonStyles.buttonPrimary,
             ]}
-            onPress={handleSaveMeal}
+            onPress={handleAddMeal}
           >
             <MaterialCommunityIcons name="check" size={20} color="#fff" />
-            <Text style={buttonStyles.buttonText}>Save</Text>
+            <Text style={buttonStyles.buttonText}>Add</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[buttonStyles.button, buttonStyles.buttonHalf, buttonStyles.cancelButton]}
-            onPress={handleCloseBottomSheet}
+            onPress={handleClose}
           >
             <Text style={buttonStyles.buttonText}>Cancel</Text>
           </TouchableOpacity>
@@ -292,4 +279,4 @@ const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
   );
 };
 
-export default EditMealDetailsModal;
+export default AddNewMealScreen;

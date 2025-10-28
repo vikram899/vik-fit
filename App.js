@@ -25,6 +25,7 @@ import MacroGoalsScreen from "./src/screens/MacroGoalsScreen";
 import WeightTrackingScreen from "./src/screens/WeightTrackingScreen";
 import ComponentsShowcaseScreen from "./src/screens/ComponentsShowcaseScreen";
 import QuickAddMealsScreen from "./src/screens/QuickAddMealsScreen";
+import AddNewMealScreen from "./src/screens/AddNewMealScreen";
 
 // Services
 import { initializeDatabase, seedDummyData } from "./src/services/database";
@@ -141,6 +142,14 @@ function HomeStackNavigator({ navigation }) {
         }}
       />
       <Stack.Screen
+        name="AddNewMeal"
+        component={AddNewMealScreen}
+        options={{
+          headerShown: false,
+          animationEnabled: false,
+        }}
+      />
+      <Stack.Screen
         name="Menu"
         component={MenuScreen}
         options={{
@@ -238,6 +247,53 @@ function ProgressStackNavigator() {
         options={{
           title: "Progress",
           headerLeft: () => null,
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+/**
+ * MealsStackNavigator
+ * Navigation stack for meals view with add new meal option
+ */
+function MealsStackNavigator() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: true,
+        headerBackTitleVisible: false,
+        headerTintColor: "#007AFF",
+        animationEnabled: false,
+      }}
+    >
+      <Stack.Screen
+        name="MealsHome"
+        component={MealsListScreen}
+        options={({ navigation }) => ({
+          title: "Meals",
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("AddNewMeal");
+              }}
+              style={{ paddingRight: 16 }}
+            >
+              <MaterialCommunityIcons
+                name="plus-circle"
+                size={28}
+                color={COLORS.primary}
+              />
+            </TouchableOpacity>
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="AddNewMeal"
+        component={AddNewMealScreen}
+        options={{
+          headerShown: false,
+          animationEnabled: false,
         }}
       />
     </Stack.Navigator>
@@ -372,29 +428,14 @@ function MainTabNavigator({ onAddPress }) {
       />
       <Tab.Screen
         name="Meals"
-        component={MealsListScreen}
-        options={({ navigation }) => ({
+        component={MealsStackNavigator}
+        options={{
           tabBarLabel: "Meals",
           tabBarItemStyle: {
             marginHorizontal: 6,
           },
-          headerShown: true,
-          title: "Meals",
-          headerRight: () => (
-            <TouchableOpacity
-              onPress={() => {
-                navigation.setParams({ openAddModal: true });
-              }}
-              style={{ paddingRight: 16 }}
-            >
-              <MaterialCommunityIcons
-                name="plus-circle"
-                size={28}
-                color={COLORS.primary}
-              />
-            </TouchableOpacity>
-          ),
-        })}
+          headerShown: false,
+        }}
       />
       <Tab.Screen
         name="Progress"

@@ -19,7 +19,7 @@ import {
   getMacroGoals,
   deleteMeal,
 } from "../services/database";
-import { AddMealModal, EditMealDetailsModal } from "../components/meals";
+import { EditMealDetailsModal } from "../components/meals";
 import MealCard from "../components/MealCard";
 
 /**
@@ -33,9 +33,6 @@ export default function MealsListScreen({ navigation, route }) {
   const [searchText, setSearchText] = useState("");
   const [sortOption, setSortOption] = useState("name");
   const [fadeAnim] = useState(new Animated.Value(0));
-  const [addMealModalVisible, setAddMealModalVisible] = useState(
-    route?.params?.openAddModal || false
-  );
   const [editMealModalVisible, setEditMealModalVisible] = useState(false);
   const [selectedMealForEdit, setSelectedMealForEdit] = useState(null);
 
@@ -62,15 +59,13 @@ export default function MealsListScreen({ navigation, route }) {
   useFocusEffect(
     React.useCallback(() => {
       loadMeals();
-    }, [loadMeals])
+      // Handle navigation to AddNewMeal screen
+      if (route?.params?.openAddModal) {
+        navigation.navigate("AddNewMeal");
+        navigation.setParams({ openAddModal: false });
+      }
+    }, [loadMeals, route?.params?.openAddModal, navigation])
   );
-
-  React.useEffect(() => {
-    if (route?.params?.openAddModal) {
-      setAddMealModalVisible(true);
-      navigation.setParams({ openAddModal: false });
-    }
-  }, [route?.params?.openAddModal, navigation]);
 
   const applyFiltersAndSort = useCallback(() => {
     let filtered = [...meals];
@@ -99,11 +94,6 @@ export default function MealsListScreen({ navigation, route }) {
   const handleEditMeal = (meal) => {
     setSelectedMealForEdit(meal);
     setEditMealModalVisible(true);
-  };
-
-  const handleMealAdded = async () => {
-    setAddMealModalVisible(false);
-    await loadMeals();
   };
 
   const handleMealUpdated = async (updatedMeals) => {
@@ -237,7 +227,7 @@ export default function MealsListScreen({ navigation, route }) {
               </Text>
               {meals.length === 0 && (
                 <TouchableOpacity
-                  onPress={() => setAddMealModalVisible(true)}
+                  onPress={() => navigation.navigate("AddNewMeal")}
                   style={styles.emptyStateButton}
                 >
                   <MaterialCommunityIcons name="plus" size={20} color="#fff" />
@@ -261,12 +251,6 @@ export default function MealsListScreen({ navigation, route }) {
       </Animated.View>
 
       {/* Modals */}
-      <AddMealModal
-        visible={addMealModalVisible}
-        onClose={() => setAddMealModalVisible(false)}
-        onMealAdded={handleMealAdded}
-      />
-
       <EditMealDetailsModal
         visible={editMealModalVisible}
         meal={selectedMealForEdit}

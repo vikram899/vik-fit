@@ -11,7 +11,6 @@ import {
   getMacroGoals,
 } from "../services/database";
 import {
-  AddMealModal,
   EditMealModal,
   TodaysMealsList,
 } from "../components/meals";
@@ -21,7 +20,6 @@ const LogMealsScreen = ({ navigation }) => {
   const today = new Date().toISOString().split("T")[0];
 
   // Modals visibility
-  const [addMealModalVisible, setAddMealModalVisible] = React.useState(false);
   const [editMealModalVisible, setEditMealModalVisible] = React.useState(false);
 
   // Data
@@ -64,10 +62,6 @@ const LogMealsScreen = ({ navigation }) => {
     }, [])
   );
 
-  const handleAddMealModalClose = () => {
-    setAddMealModalVisible(false);
-  };
-
   const handleMealAdded = async ({ mealId, mealLogged }) => {
     try {
       // If meal was logged directly (from LogMealsScreen), refresh today's meals
@@ -85,6 +79,10 @@ const LogMealsScreen = ({ navigation }) => {
     } catch (error) {
       console.error("Error refreshing meals list:", error);
     }
+  };
+
+  const handleOpenAddNewScreen = () => {
+    navigation.navigate("AddNewMeal");
   };
 
   const handleOpenAddExistingScreen = () => {
@@ -185,7 +183,7 @@ const LogMealsScreen = ({ navigation }) => {
       <View style={logMealsScreenStyles.buttonsContainer}>
         <TouchableOpacity
           style={logMealsScreenStyles.buttonPrimary}
-          onPress={() => setAddMealModalVisible(true)}
+          onPress={handleOpenAddNewScreen}
         >
           <MaterialCommunityIcons name="plus" size={24} color={COLORS.white} />
           <Text style={logMealsScreenStyles.buttonText}>
@@ -204,13 +202,6 @@ const LogMealsScreen = ({ navigation }) => {
       </View>
 
       {/* Modals */}
-      <AddMealModal
-        visible={addMealModalVisible}
-        onClose={handleAddMealModalClose}
-        onMealAdded={handleMealAdded}
-        showMealType={true}
-      />
-
       <EditMealModal
         visible={editMealModalVisible}
         meal={selectedMealForEdit}

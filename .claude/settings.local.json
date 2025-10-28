@@ -15,7 +15,10 @@
       "Bash(cd:*)",
       "Bash(find:*)",
       "Bash(dir:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []
