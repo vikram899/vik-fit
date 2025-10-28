@@ -61,36 +61,18 @@ export default function MealCardItem({ meal, onPress, onMenuPress, onFavoritePre
 
   return (
     <TouchableOpacity
-      style={styles.mealCard}
+      style={[
+        styles.mealCard,
+        {
+          borderLeftWidth: 4,
+          borderLeftColor: mealTypeInfo.color,
+        },
+      ]}
       onPress={onPress}
       activeOpacity={0.85}
     >
-      {/* Top Row: Meal Type Badge + Name + Star + Menu */}
+      {/* Top Row: Meal Name + Star + Menu */}
       <View style={styles.topRow}>
-        {/* Meal Type Badge */}
-        <View
-          style={[
-            styles.mealTypeBadge,
-            {
-              backgroundColor: mealTypeInfo.backgroundColor,
-              borderColor: mealTypeInfo.borderColor,
-            },
-          ]}
-        >
-          <MaterialCommunityIcons
-            name={mealTypeInfo.icon}
-            size={14}
-            color={mealTypeInfo.color}
-          />
-          <Text
-            style={[
-              styles.mealTypeLabel,
-              { color: mealTypeInfo.color },
-            ]}
-          >
-            {mealTypeInfo.label}
-          </Text>
-        </View>
 
         <Text style={styles.mealName} numberOfLines={1}>
           {meal.name}
@@ -187,20 +169,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: 10,
-  },
-  mealTypeBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    borderWidth: 1.5,
-  },
-  mealTypeLabel: {
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 0.2,
   },
   mealName: {
     fontSize: 17,
