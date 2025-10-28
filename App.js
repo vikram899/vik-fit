@@ -17,7 +17,7 @@ import WorkoutsScreen from "./src/screens/WorkoutsScreen";
 import WorkoutsLibraryScreen from "./src/screens/WorkoutsLibraryScreen";
 import MealsScreen from "./src/screens/MealsScreen";
 import AddWorkoutScreen from "./src/screens/AddWorkoutScreen";
-import AddMealScreen from "./src/screens/AddMealScreen";
+import MealsListScreen from "./src/screens/MealsListScreen";
 import StartWorkoutScreen from "./src/screens/StartWorkoutScreen";
 import WorkoutSummaryScreen from "./src/screens/WorkoutSummaryScreen";
 import MenuScreen from "./src/screens/MenuScreen";
@@ -360,7 +360,7 @@ function MainTabNavigator({ onAddPress }) {
       />
       <Tab.Screen
         name="Meals"
-        component={AddMealScreen}
+        component={MealsListScreen}
         options={({ navigation }) => ({
           tabBarLabel: "Meals",
           tabBarItemStyle: {

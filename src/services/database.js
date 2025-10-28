@@ -676,7 +676,23 @@ export const logMeal = async (mealId, mealDate, calories, protein, carbs, fats, 
 export const getMealLogsForDate = async (mealDate) => {
   try {
     const result = await db.getAllAsync(
-      'SELECT ml.*, m.name FROM meal_logs ml LEFT JOIN meals m ON ml.mealId = m.id WHERE ml.mealDate = ? ORDER BY ml.createdAt DESC',
+      `SELECT
+        ml.id,
+        ml.mealId,
+        ml.mealDate,
+        ml.calories,
+        ml.protein,
+        ml.carbs,
+        ml.fats,
+        ml.createdAt,
+        ml.mealType,
+        m.name,
+        m.mealType as foodType,
+        m.isFavorite
+      FROM meal_logs ml
+      LEFT JOIN meals m ON ml.mealId = m.id
+      WHERE ml.mealDate = ?
+      ORDER BY ml.createdAt DESC`,
       [mealDate]
     );
     return result || [];

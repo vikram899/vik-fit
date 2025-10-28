@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { todaysMealsStyles, COLORS } from '../../styles';
 import { STRINGS } from '../../constants/strings';
+import MealCard from '../MealCard';
 
 const TodaysMealsList = ({ meals = [], onMealPress, onMealEdit, onMealDelete }) => {
   // Group meals by type
@@ -61,25 +62,22 @@ const TodaysMealsList = ({ meals = [], onMealPress, onMealEdit, onMealDelete }) 
                   </Text>
                 </View>
 
-                {/* Meals under this type */}
-                {mealsOfType.map((meal) => (
-                  <View key={meal.id} style={todaysMealsStyles.mealItem}>
-                    <View style={todaysMealsStyles.mealContent}>
-                      <Text style={todaysMealsStyles.mealName}>{meal.name}</Text>
-                      <Text style={todaysMealsStyles.mealMacros}>
-                        {Math.round(meal.calories)} cal • {Math.round(meal.protein)}g protein
-                      </Text>
+                {/* Meals under this type - Using MealCard Component */}
+                {mealsOfType.map((meal) => {
+                  // Map the foodType from database to mealType for MealCard component
+                  const mealCardData = {
+                    ...meal,
+                    mealType: meal.foodType || 'veg', // Use foodType as mealType for MealCard
+                  };
+                  return (
+                    <View key={meal.id} style={{ marginHorizontal: 16, marginBottom: 12 }}>
+                      <MealCard
+                        meal={mealCardData}
+                        onMenuPress={() => onMealPress?.(meal)}
+                      />
                     </View>
-                    {onMealPress && (
-                      <TouchableOpacity
-                        onPress={() => onMealPress(meal)}
-                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                      >
-                        <MaterialCommunityIcons name="dots-vertical" size={24} color={COLORS.gray600} />
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                ))}
+                  );
+                })}
               </View>
             );
           })

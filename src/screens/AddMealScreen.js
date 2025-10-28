@@ -166,33 +166,34 @@ export default function AddMealScreen({ navigation, route }) {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={true}
         >
-          {/* Search Bar */}
-          <View style={styles.searchContainer}>
-            <MaterialCommunityIcons
-              name="magnify"
-              size={20}
-              color="#999"
-              style={styles.searchIcon}
-            />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search meals..."
-              value={searchText}
-              onChangeText={setSearchText}
-              placeholderTextColor="#999"
-            />
-            {searchText.length > 0 && (
-              <TouchableOpacity
-                onPress={() => setSearchText("")}
-                style={styles.clearButton}
-              >
-                <MaterialCommunityIcons name="close" size={18} color="#999" />
-              </TouchableOpacity>
-            )}
-          </View>
+          {/* Search Bar + Sort Control in Same Row */}
+          <View style={styles.headerRow}>
+            {/* Search Bar */}
+            <View style={styles.searchContainer}>
+              <MaterialCommunityIcons
+                name="magnify"
+                size={20}
+                color="#999"
+                style={styles.searchIcon}
+              />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search meals..."
+                value={searchText}
+                onChangeText={setSearchText}
+                placeholderTextColor="#999"
+              />
+              {searchText.length > 0 && (
+                <TouchableOpacity
+                  onPress={() => setSearchText("")}
+                  style={styles.clearButton}
+                >
+                  <MaterialCommunityIcons name="close" size={18} color="#999" />
+                </TouchableOpacity>
+              )}
+            </View>
 
-          {/* Sort Control */}
-          <View style={styles.controlsContainer}>
+            {/* Sort Control */}
             <TouchableOpacity
               style={styles.controlButton}
               onPress={() => {
@@ -212,16 +213,9 @@ export default function AddMealScreen({ navigation, route }) {
             >
               <MaterialCommunityIcons
                 name="sort"
-                size={16}
+                size={18}
                 color={COLORS.primary}
               />
-              <Text style={styles.controlButtonText}>
-                {sortOption === "name"
-                  ? "Name"
-                  : sortOption === "calories"
-                  ? "Calories"
-                  : "Recent"}
-              </Text>
             </TouchableOpacity>
           </View>
 
@@ -293,11 +287,17 @@ const styles = StyleSheet.create({
   centerContent: { flex: 1, justifyContent: "center", alignItems: "center" },
   loadingText: { fontSize: 16, color: "#999" },
 
-  searchContainer: {
+  headerRow: {
     flexDirection: "row",
     alignItems: "center",
     marginHorizontal: 16,
     marginVertical: 12,
+    gap: 10,
+  },
+  searchContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 12,
     backgroundColor: "#f5f5f5",
     borderRadius: 8,
@@ -313,29 +313,15 @@ const styles = StyleSheet.create({
   },
   clearButton: { padding: 4 },
 
-  controlsContainer: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    marginBottom: 16,
-    gap: 8,
-  },
   controlButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 12,
     backgroundColor: "#f5f5f5",
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#e0e0e0",
-  },
-  controlButtonText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: COLORS.primary,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   emptyStateContainer: {
