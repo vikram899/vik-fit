@@ -4,10 +4,12 @@ import {
   Text,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
 } from "react-native";
 import { COLORS } from "../styles";
 import HorizontalNumberPicker from "../components/HorizontalNumberPicker";
 import MealCard from "../components/MealCard";
+import SelectMealTimePopup from "../components/SelectMealTimePopup";
 
 /**
  * ComponentsShowcaseScreen
@@ -15,6 +17,8 @@ import MealCard from "../components/MealCard";
  */
 export default function ComponentsShowcaseScreen({ navigation }) {
   const [weight, setWeight] = useState("70.0");
+  const [selectMealTimeVisible, setSelectMealTimeVisible] = useState(false);
+  const [selectedMealTime, setSelectedMealTime] = useState("Breakfast");
 
   // Demo meals for MealCardItem
   const demoMeals = [
@@ -104,7 +108,50 @@ export default function ComponentsShowcaseScreen({ navigation }) {
             />
           ))}
         </View>
+
+        {/* Select Meal Time Popup Component */}
+        <View style={styles.componentSection}>
+          <Text style={styles.componentTitle}>Select Meal Time Popup</Text>
+          <Text style={styles.componentDescription}>
+            A reusable modal popup for selecting meal time (Breakfast, Lunch, Snacks, Dinner) with a prominent meal name display and centered title.
+          </Text>
+          <TouchableOpacity
+            style={{
+              backgroundColor: COLORS.primary,
+              paddingVertical: 12,
+              paddingHorizontal: 16,
+              borderRadius: 8,
+              alignItems: "center",
+              marginTop: 12,
+            }}
+            onPress={() => setSelectMealTimeVisible(true)}
+          >
+            <Text style={{ color: "#fff", fontSize: 14, fontWeight: "600" }}>
+              Open Demo Popup
+            </Text>
+          </TouchableOpacity>
+          {selectMealTimeVisible && (
+            <View style={{ marginTop: 12, padding: 12, backgroundColor: "#f5f5f5", borderRadius: 8 }}>
+              <Text style={{ fontSize: 12, color: "#666" }}>
+                Selected Meal Time: <Text style={{ fontWeight: "600", color: "#333" }}>{selectedMealTime}</Text>
+              </Text>
+            </View>
+          )}
+        </View>
       </ScrollView>
+
+      {/* Select Meal Time Popup Modal */}
+      <SelectMealTimePopup
+        visible={selectMealTimeVisible}
+        mealName="Grilled Chicken Salad"
+        selectedMealType={selectedMealTime}
+        onMealTypeChange={setSelectedMealTime}
+        onConfirm={() => {
+          setSelectMealTimeVisible(false);
+          console.log("Confirmed meal time:", selectedMealTime);
+        }}
+        onCancel={() => setSelectMealTimeVisible(false)}
+      />
     </View>
   );
 }

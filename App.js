@@ -24,6 +24,7 @@ import MenuScreen from "./src/screens/MenuScreen";
 import MacroGoalsScreen from "./src/screens/MacroGoalsScreen";
 import WeightTrackingScreen from "./src/screens/WeightTrackingScreen";
 import ComponentsShowcaseScreen from "./src/screens/ComponentsShowcaseScreen";
+import QuickAddMealsScreen from "./src/screens/QuickAddMealsScreen";
 
 // Services
 import { initializeDatabase, seedDummyData } from "./src/services/database";
@@ -126,7 +127,18 @@ function HomeStackNavigator({ navigation }) {
       <Stack.Screen
         name="LogMeals"
         component={LogMealsScreen}
-        options={{ title: "Log Meals" }}
+        options={{
+          title: "Log Meals",
+          animationEnabled: false,
+        }}
+      />
+      <Stack.Screen
+        name="QuickAddMeals"
+        component={QuickAddMealsScreen}
+        options={{
+          headerShown: false,
+          animationEnabled: false,
+        }}
       />
       <Stack.Screen
         name="Menu"

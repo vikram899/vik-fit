@@ -14,7 +14,7 @@ import { COLORS } from "../styles";
  * - onMenuPress: function (callback for menu button)
  * - onFavoritePress: function (callback when star is tapped)
  */
-export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress }) {
+export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress, showPlusIcon = false, isAdded = false }) {
   const [isFavorite, setIsFavorite] = React.useState(meal.isFavorite || false);
 
   const getMealTypeInfo = (type) => {
@@ -89,7 +89,30 @@ export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress }
               color={isFavorite ? "#FFD700" : "#ccc"}
             />
           </TouchableOpacity>
-          {onMenuPress && (
+          {onMenuPress && showPlusIcon ? (
+            isAdded ? (
+              <MaterialCommunityIcons
+                name="check-circle"
+                size={28}
+                color={COLORS.success}
+              />
+            ) : (
+              <TouchableOpacity
+                onPress={(e) => {
+                  e.stopPropagation();
+                  onMenuPress();
+                }}
+                style={styles.menuButton}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <MaterialCommunityIcons
+                  name="plus"
+                  size={24}
+                  color={COLORS.primary}
+                />
+              </TouchableOpacity>
+            )
+          ) : onMenuPress ? (
             <TouchableOpacity
               onPress={(e) => {
                 e.stopPropagation();
@@ -104,7 +127,7 @@ export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress }
                 color={COLORS.primary}
               />
             </TouchableOpacity>
-          )}
+          ) : null}
         </View>
       </View>
 

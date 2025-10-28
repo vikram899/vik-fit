@@ -7,13 +7,11 @@ import { STRINGS } from "../constants/strings";
 import {
   getMealLogsForDate,
   getDailyTotals,
-  getAllMeals,
   deleteMealLog,
   getMacroGoals,
 } from "../services/database";
 import {
   AddMealModal,
-  ExistingMealsModal,
   EditMealModal,
   TodaysMealsList,
 } from "../components/meals";
@@ -24,14 +22,10 @@ const LogMealsScreen = ({ navigation }) => {
 
   // Modals visibility
   const [addMealModalVisible, setAddMealModalVisible] = React.useState(false);
-  const [addExistingMealModalVisible, setAddExistingMealModalVisible] =
-    React.useState(false);
   const [editMealModalVisible, setEditMealModalVisible] = React.useState(false);
-  const [mealMenuVisible, setMealMenuVisible] = React.useState(false);
 
   // Data
   const [todaysMeals, setTodaysMeals] = React.useState([]);
-  const [existingMeals, setExistingMeals] = React.useState([]);
   const [dailyTotals, setDailyTotals] = React.useState({
     totalCalories: 0,
     totalProtein: 0,
@@ -93,18 +87,8 @@ const LogMealsScreen = ({ navigation }) => {
     }
   };
 
-  const handleOpenAddExistingModal = async () => {
-    try {
-      const meals = await getAllMeals();
-      setExistingMeals(meals);
-      setAddExistingMealModalVisible(true);
-    } catch (error) {
-      console.error("Error fetching existing meals:", error);
-      Alert.alert(
-        STRINGS.logMealsScreen.alerts.errorLoadingMeals.title,
-        STRINGS.logMealsScreen.alerts.errorLoadingMeals.message
-      );
-    }
+  const handleOpenAddExistingScreen = () => {
+    navigation.navigate("QuickAddMeals");
   };
 
   const handleMealSelected = async ({ meals, totals }) => {
@@ -114,7 +98,6 @@ const LogMealsScreen = ({ navigation }) => {
 
   const handleEditMeal = (meal) => {
     setSelectedMealForEdit(meal);
-    setMealMenuVisible(false);
     setEditMealModalVisible(true);
   };
 
@@ -138,8 +121,6 @@ const LogMealsScreen = ({ navigation }) => {
 
               const totals = await getDailyTotals(today);
               setDailyTotals(totals);
-
-              setMealMenuVisible(false);
             } catch (error) {
               console.error("Error deleting meal:", error);
               // Add delay to show error alert after confirmation dialog closes
@@ -213,7 +194,7 @@ const LogMealsScreen = ({ navigation }) => {
         </TouchableOpacity>
         <TouchableOpacity
           style={logMealsScreenStyles.buttonSecondary}
-          onPress={handleOpenAddExistingModal}
+          onPress={handleOpenAddExistingScreen}
         >
           <MaterialCommunityIcons name="check" size={24} color={COLORS.white} />
           <Text style={logMealsScreenStyles.buttonText}>
@@ -230,13 +211,6 @@ const LogMealsScreen = ({ navigation }) => {
         showMealType={true}
       />
 
-      <ExistingMealsModal
-        visible={addExistingMealModalVisible}
-        meals={existingMeals}
-        onClose={() => setAddExistingMealModalVisible(false)}
-        onMealAdded={handleMealSelected}
-      />
-
       <EditMealModal
         visible={editMealModalVisible}
         meal={selectedMealForEdit}
@@ -246,8 +220,6 @@ const LogMealsScreen = ({ navigation }) => {
         }}
         onMealUpdated={handleMealUpdated}
       />
-
-      {/* TODO: Implement meal menu modal for edit/delete options */}
     </View>
   );
 };
