@@ -150,8 +150,8 @@ const LogMealsScreen = ({ navigation }) => {
       <SummaryCard
         dailyTotals={dailyTotals}
         macroGoals={macroGoals}
-        hideHeader={false}
-        showDate={true}
+        hideHeader={true}
+        showDate={false}
       />
 
       {/* Meals List with fixed title */}

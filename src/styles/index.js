@@ -1091,14 +1091,14 @@ export const logMealsScreenStyles = StyleSheet.create({
   },
   buttonsContainer: {
     flexDirection: 'row',
-    padding: SPACING.element,
+    padding: SPACING.small,
     backgroundColor: COLORS.white,
-    gap: SPACING.element,
+    gap: SPACING.small,
   },
   buttonPrimary: {
     flex: 1,
     backgroundColor: COLORS.primary,
-    paddingVertical: SPACING.element,
+    paddingVertical: SPACING.xs,
     borderRadius: SPACING.borderRadius,
     flexDirection: 'row',
     justifyContent: 'center',
@@ -1108,7 +1108,7 @@ export const logMealsScreenStyles = StyleSheet.create({
   buttonSecondary: {
     flex: 1,
     backgroundColor: COLORS.secondary,
-    paddingVertical: SPACING.element,
+    paddingVertical: SPACING.xs,
     borderRadius: SPACING.borderRadius,
     flexDirection: 'row',
     justifyContent: 'center',
@@ -1117,7 +1117,7 @@ export const logMealsScreenStyles = StyleSheet.create({
   },
   buttonText: {
     color: COLORS.white,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
   },
 });
