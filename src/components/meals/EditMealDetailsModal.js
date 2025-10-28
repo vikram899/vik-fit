@@ -130,7 +130,6 @@ const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
       // Reload meals and callback
       const updatedMeals = await getAllMeals();
       onMealUpdated?.(updatedMeals);
-      onClose();
 
       Alert.alert(
         "Success",

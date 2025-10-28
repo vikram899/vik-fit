@@ -4,7 +4,7 @@ import { TouchableOpacity } from "react-native";
 import { formStyles, COLORS } from "../styles";
 
 const MEAL_TYPES = ["Breakfast", "Lunch", "Snacks", "Dinner"];
-const FOOD_TYPES = ["veg", "nonveg", "vegan", "egg"];
+const FOOD_TYPES = ["veg", "non-veg", "vegan", "egg"];
 
 const MealForm = ({
   form,
@@ -17,7 +17,7 @@ const MealForm = ({
 }) => {
   const FOOD_TYPE_LABELS = {
     veg: "Veg",
-    nonveg: "Non-Veg",
+    "non-veg": "Non-Veg",
     vegan: "Vegan",
     egg: "Egg",
   };

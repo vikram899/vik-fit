@@ -38,7 +38,7 @@ export default function ComponentsShowcaseScreen({ navigation }) {
     fats: "15",
   });
   const [mealType, setMealType] = useState("Breakfast");
-  const [foodType, setFoodType] = useState("nonveg");
+  const [foodType, setFoodType] = useState("non-veg");
   const [showMealFormModal, setShowMealFormModal] = useState(false);
   const slideAnim = React.useRef(new Animated.Value(bottomSheetHeight)).current;
 
