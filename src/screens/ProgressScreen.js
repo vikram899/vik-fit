@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import MealsScreen from "./MealsScreen";
-import WorkoutsLibraryScreen from "./WorkoutsLibraryScreen";
+import MealProgressScreen from "./MealProgressScreen";
+import WorkoutProgressScreen from "./WorkoutProgressScreen";
 import { appStyles } from "../styles/app.styles";
 
 /**
@@ -53,9 +53,9 @@ export default function ProgressScreen({ navigation }) {
       {/* Content */}
       <View style={appStyles.progressContentContainer}>
         {activeTab === "workout" ? (
-          <WorkoutsLibraryScreen navigation={navigation} />
+          <WorkoutProgressScreen navigation={navigation} />
         ) : (
-          <MealsScreen navigation={navigation} />
+          <MealProgressScreen navigation={navigation} />
         )}
       </View>
     </View>

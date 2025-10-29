@@ -29,10 +29,10 @@ import {
 } from '../services/workoutStats';
 
 /**
- * WorkoutsScreen
+ * AllWorkoutsScreen
  * Shows all available workouts with search, filter, and sort functionality
  */
-export default function WorkoutsScreen({ navigation }) {
+export default function AllWorkoutsScreen({ navigation }) {
   const [workouts, setWorkouts] = useState([]);
   const [filteredWorkouts, setFilteredWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);

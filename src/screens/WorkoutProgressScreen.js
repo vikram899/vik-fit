@@ -24,10 +24,10 @@ import {
 } from '../services/workoutStats';
 
 /**
- * WorkoutsLibraryScreen
+ * WorkoutProgressScreen
  * Dashboard showing weekly workout analytics
  */
-export default function WorkoutsLibraryScreen({ navigation }) {
+export default function WorkoutProgressScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));

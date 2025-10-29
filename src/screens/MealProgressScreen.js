@@ -25,10 +25,10 @@ import {
 import { getMacroGoals, getEnabledGoalPreferences, getUserSetting } from '../services/database';
 
 /**
- * MealsScreen
+ * MealProgressScreen
  * Weekly meal analytics dashboard showing totals, goals, trends, and insights
  */
-export default function MealsScreen({ navigation }) {
+export default function MealProgressScreen({ navigation }) {
   const [currentWeekData, setCurrentWeekData] = useState({
     totalCalories: 0,
     totalProtein: 0,

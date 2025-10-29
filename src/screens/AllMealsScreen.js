@@ -24,10 +24,10 @@ import { EditMealDetailsModal, SearchFilterSort } from "../components/meals";
 import MealCard from "../components/MealCard";
 
 /**
- * MealsListScreen
+ * AllMealsScreen
  * Shows all available meals with search, filter, and sort functionality
  */
-export default function MealsListScreen({ navigation, route }) {
+export default function AllMealsScreen({ navigation, route }) {
   const [meals, setMeals] = useState([]);
   const [filteredMeals, setFilteredMeals] = useState([]);
   const [loading, setLoading] = useState(true);

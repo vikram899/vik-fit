@@ -13,19 +13,19 @@ import ExecuteWorkoutScreen from "./src/screens/ExecuteWorkoutScreen";
 import ProgressScreen from "./src/screens/ProgressScreen";
 import LogMealsScreen from "./src/screens/LogMealsScreen";
 import LogWorkoutScreen from "./src/screens/LogWorkoutScreen";
-import WorkoutDayViewScreen from "./src/screens/WorkoutDayViewScreen";
-import WorkoutsScreen from "./src/screens/WorkoutsScreen";
-import WorkoutsLibraryScreen from "./src/screens/WorkoutsLibraryScreen";
-import MealsScreen from "./src/screens/MealsScreen";
-import MealsListScreen from "./src/screens/MealsListScreen";
+import WorkoutDayScheduleScreen from "./src/screens/WorkoutDayScheduleScreen";
+import AllWorkoutsScreen from "./src/screens/AllWorkoutsScreen";
+import WorkoutProgressScreen from "./src/screens/WorkoutProgressScreen";
+import MealProgressScreen from "./src/screens/MealProgressScreen";
+import AllMealsScreen from "./src/screens/AllMealsScreen";
 import StartWorkoutScreen from "./src/screens/StartWorkoutScreen";
 import WorkoutSummaryScreen from "./src/screens/WorkoutSummaryScreen";
 import MenuScreen from "./src/screens/MenuScreen";
 import MacroGoalsScreen from "./src/screens/MacroGoalsScreen";
 import WeightTrackingScreen from "./src/screens/WeightTrackingScreen";
 import ComponentsShowcaseScreen from "./src/screens/ComponentsShowcaseScreen";
-import QuickAddMealsScreen from "./src/screens/QuickAddMealsScreen";
-import AddNewMealScreen from "./src/screens/AddNewMealScreen";
+import QuickSelectMealsScreen from "./src/screens/QuickSelectMealsScreen";
+import CreateMealScreen from "./src/screens/CreateMealScreen";
 
 // Services
 import { initializeDatabase, seedDummyData } from "./src/services/database";
@@ -135,7 +135,7 @@ function HomeStackNavigator({ navigation }) {
       />
       <Stack.Screen
         name="QuickAddMeals"
-        component={QuickAddMealsScreen}
+        component={QuickSelectMealsScreen}
         options={{
           headerShown: false,
           animationEnabled: false,
@@ -143,7 +143,7 @@ function HomeStackNavigator({ navigation }) {
       />
       <Stack.Screen
         name="AddNewMeal"
-        component={AddNewMealScreen}
+        component={CreateMealScreen}
         options={{
           headerShown: false,
           animationEnabled: false,
@@ -200,7 +200,7 @@ function WorkoutsStackNavigator() {
     >
       <Stack.Screen
         name="WorkoutsLibrary"
-        component={WorkoutsLibraryScreen}
+        component={WorkoutProgressScreen}
         options={{
           title: "Workouts",
         }}
@@ -251,7 +251,7 @@ function ProgressStackNavigator() {
       />
       <Stack.Screen
         name="MealProgress"
-        component={MealsListScreen}
+        component={MealProgressScreen}
         options={{
           title: "Meal Progress",
         }}
@@ -276,7 +276,7 @@ function MealsStackNavigator() {
     >
       <Stack.Screen
         name="MealsHome"
-        component={MealsListScreen}
+        component={AllMealsScreen}
         options={({ navigation }) => ({
           title: "Meals",
           headerRight: () => (
@@ -297,7 +297,7 @@ function MealsStackNavigator() {
       />
       <Stack.Screen
         name="AddNewMeal"
-        component={AddNewMealScreen}
+        component={CreateMealScreen}
         options={{
           headerShown: false,
           animationEnabled: false,
@@ -377,7 +377,7 @@ function MainTabNavigator({ onAddPress }) {
       />
       <Tab.Screen
         name="Workouts"
-        component={WorkoutsScreen}
+        component={AllWorkoutsScreen}
         options={({ navigation }) => ({
           tabBarLabel: "Workouts",
           tabBarItemStyle: {

@@ -23,7 +23,7 @@ import SelectMealTimePopup from "../components/SelectMealTimePopup";
 const screenHeight = Dimensions.get("window").height;
 const bottomSheetHeight = screenHeight * 0.9;
 
-const QuickAddMealsScreen = ({ navigation, route }) => {
+const QuickSelectMealsScreen = ({ navigation, route }) => {
   const today = new Date().toISOString().split("T")[0];
   const MEAL_TYPES = ["Breakfast", "Lunch", "Snacks", "Dinner"];
 
@@ -308,4 +308,4 @@ const QuickAddMealsScreen = ({ navigation, route }) => {
   );
 };
 
-export default QuickAddMealsScreen;
+export default QuickSelectMealsScreen;

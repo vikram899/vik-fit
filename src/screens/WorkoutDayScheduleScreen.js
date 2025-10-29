@@ -28,10 +28,10 @@ import {
 } from "../services/database";
 
 /**
- * WorkoutDayViewScreen
+ * WorkoutDayScheduleScreen
  * Display plans scheduled for each day of the week with scheduling functionality
  */
-export default function WorkoutDayViewScreen({ navigation }) {
+export default function WorkoutDayScheduleScreen({ navigation }) {
   const [selectedDay, setSelectedDay] = useState(new Date().getDay());
   const [plansForDay, setPlansForDay] = useState([]);
   const [filteredPlansForDay, setFilteredPlansForDay] = useState([]);

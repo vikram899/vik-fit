@@ -23,7 +23,7 @@ import MealForm from "../components/MealForm";
 const screenHeight = Dimensions.get("window").height;
 const bottomSheetHeight = screenHeight * 0.9;
 
-const AddNewMealScreen = ({ navigation }) => {
+const CreateMealScreen = ({ navigation }) => {
   const today = new Date().toISOString().split("T")[0];
 
   const [form, setForm] = React.useState({
@@ -279,4 +279,4 @@ const AddNewMealScreen = ({ navigation }) => {
   );
 };
 
-export default AddNewMealScreen;
+export default CreateMealScreen;
