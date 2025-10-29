@@ -14,6 +14,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { WeeklyWorkoutSummaryCards } from '../components/layouts';
 import { WorkoutHistoryModal, WorkoutGoalSettingsModal } from '../components/workouts';
 import { StreakCard } from '../components/common';
+import { SearchFilterSort } from '../components/meals';
 import { COLORS } from '../styles';
 import { getEnabledGoalPreferences, getUserSetting } from '../services/database';
 import {
@@ -47,6 +48,17 @@ export default function WorkoutsLibraryScreen({ navigation }) {
     totalScheduledExercises: 0,
     completedWorkouts: 0,
     completedExercises: 0,
+  });
+
+  // Search, Filter, Sort state
+  const [searchText, setSearchText] = useState("");
+  const [sortOption, setSortOption] = useState("name");
+  const [filterOptions, setFilterOptions] = useState({
+    starred: false,
+    veg: false,
+    "non-veg": false,
+    egg: false,
+    vegan: false,
   });
 
   const weekStartDate = currentSunday;
@@ -298,6 +310,17 @@ export default function WorkoutsLibraryScreen({ navigation }) {
               </TouchableOpacity>
             </View>
           </View>
+
+          {/* Search, Filter, Sort */}
+          <SearchFilterSort
+            searchText={searchText}
+            onSearchChange={setSearchText}
+            sortOption={sortOption}
+            onSortChange={setSortOption}
+            filterOptions={filterOptions}
+            onFilterChange={setFilterOptions}
+            searchPlaceholder="Search workouts..."
+          />
 
           {/* Stats Section - Workout Completion Streak */}
           <StreakCard

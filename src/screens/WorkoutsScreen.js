@@ -12,6 +12,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { WeekCalendar } from '../components/layouts';
 import { AssignDaysModal } from '../components/modals';
+import { SearchFilterSort } from '../components/meals';
 import { COLORS } from '../constants/colors';
 import { SPACING } from '../constants/spacing';
 import { STRINGS } from '../constants/strings';
@@ -33,9 +34,21 @@ import {
 export default function WorkoutsScreen({ navigation }) {
   const [selectedDay, setSelectedDay] = useState(new Date().getDay());
   const [plansForDay, setPlansForDay] = useState([]);
+  const [filteredPlansForDay, setFilteredPlansForDay] = useState([]);
   const [allPlans, setAllPlans] = useState([]);
   const [scheduledDays, setScheduledDays] = useState({});
   const [loading, setLoading] = useState(true);
+
+  // Search, Filter, Sort state
+  const [searchText, setSearchText] = useState("");
+  const [sortOption, setSortOption] = useState("name");
+  const [filterOptions, setFilterOptions] = useState({
+    starred: false,
+    veg: false,
+    "non-veg": false,
+    egg: false,
+    vegan: false,
+  });
 
   const [assignModalVisible, setAssignModalVisible] = useState(false);
   const [selectedPlanForAssign, setSelectedPlanForAssign] = useState(null);
@@ -98,6 +111,35 @@ export default function WorkoutsScreen({ navigation }) {
       loadData();
     }, [selectedDay])
   );
+
+  // Apply search, filter, and sort to plans
+  const applyFiltersAndSort = useCallback(() => {
+    let filtered = [...plansForDay];
+
+    // Apply search filter
+    if (searchText.trim()) {
+      filtered = filtered.filter((p) =>
+        p.name.toLowerCase().includes(searchText.toLowerCase())
+      );
+    }
+
+    // Apply sorting
+    if (sortOption === "name") {
+      filtered.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortOption === "calories") {
+      // If workouts have difficulty/intensity, sort by that
+      filtered.sort((a, b) => (b.difficulty || 0) - (a.difficulty || 0));
+    } else if (sortOption === "recent") {
+      filtered.reverse();
+    }
+
+    setFilteredPlansForDay(filtered);
+  }, [plansForDay, searchText, sortOption]);
+
+  // Reapply filters and sort whenever plansForDay or search/sort options change
+  React.useEffect(() => {
+    applyFiltersAndSort();
+  }, [applyFiltersAndSort]);
 
   const handleDaySelect = (day) => {
     setSelectedDay(day);
@@ -213,6 +255,17 @@ export default function WorkoutsScreen({ navigation }) {
         highlightedDays={Object.values(scheduledDays).flat().filter((v, i, a) => a.indexOf(v) === i)}
       />
 
+      {/* Search, Filter, Sort */}
+      <SearchFilterSort
+        searchText={searchText}
+        onSearchChange={setSearchText}
+        sortOption={sortOption}
+        onSortChange={setSortOption}
+        filterOptions={filterOptions}
+        onFilterChange={setFilterOptions}
+        searchPlaceholder="Search workouts..."
+      />
+
       {/* Plans for Selected Day */}
       <ScrollView
         style={styles.plansList}
@@ -220,7 +273,7 @@ export default function WorkoutsScreen({ navigation }) {
         scrollEnabled={true}
         showsVerticalScrollIndicator={true}
       >
-        {plansForDay.length === 0 ? (
+        {filteredPlansForDay.length === 0 ? (
           <View style={styles.emptyState}>
             <MaterialCommunityIcons
               name="dumbbell"
@@ -228,11 +281,11 @@ export default function WorkoutsScreen({ navigation }) {
               color="#ccc"
             />
             <Text style={styles.emptyText}>
-              No workouts scheduled for this day
+              {searchText.trim() ? "No workouts found" : "No workouts scheduled for this day"}
             </Text>
           </View>
         ) : (
-          plansForDay.map((plan) => (
+          filteredPlansForDay.map((plan) => (
             <View key={plan.id} style={styles.planCard}>
               <View style={styles.planHeader}>
                 <View style={styles.planInfo}>

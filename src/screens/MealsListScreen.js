@@ -20,7 +20,7 @@ import {
   deleteMeal,
   toggleMealFavorite,
 } from "../services/database";
-import { EditMealDetailsModal } from "../components/meals";
+import { EditMealDetailsModal, SearchFilterSort } from "../components/meals";
 import MealCard from "../components/MealCard";
 
 /**
@@ -33,6 +33,13 @@ export default function MealsListScreen({ navigation, route }) {
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [sortOption, setSortOption] = useState("name");
+  const [filterOptions, setFilterOptions] = useState({
+    starred: false,
+    veg: false,
+    "non-veg": false,
+    egg: false,
+    vegan: false,
+  }); // Filter by meal type and starred
   const [fadeAnim] = useState(new Animated.Value(0));
   const [editMealModalVisible, setEditMealModalVisible] = useState(false);
   const [selectedMealForEdit, setSelectedMealForEdit] = useState(null);
@@ -71,16 +78,49 @@ export default function MealsListScreen({ navigation, route }) {
   const applyFiltersAndSort = useCallback(() => {
     let filtered = [...meals];
 
+    // Apply search filter
     if (searchText.trim()) {
       filtered = filtered.filter((m) =>
         m.name.toLowerCase().includes(searchText.toLowerCase())
       );
     }
 
+    // Check if any filter is active
+    const hasActiveFilters =
+      filterOptions.starred ||
+      filterOptions.veg ||
+      filterOptions["non-veg"] ||
+      filterOptions.egg ||
+      filterOptions.vegan;
+
+    // Apply meal type and starred filters
+    if (hasActiveFilters) {
+      filtered = filtered.filter((m) => {
+        if (filterOptions.starred && !m.isFavorite) {
+          return false;
+        }
+        // If meal type filters are selected, at least one must match
+        const mealTypeFilters =
+          filterOptions.veg ||
+          filterOptions["non-veg"] ||
+          filterOptions.egg ||
+          filterOptions.vegan;
+
+        if (mealTypeFilters) {
+          const mealType = m.mealType || "veg";
+          if (!filterOptions[mealType]) {
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+
+    // Apply sorting
     if (sortOption === "name") {
       filtered.sort((a, b) => {
-        // First sort by favorite status (starred on top)
-        if ((b.isFavorite || 0) !== (a.isFavorite || 0)) {
+        // First sort by favorite status (starred on top) - only if not filtering by starred
+        if (!filterOptions.starred && (b.isFavorite || 0) !== (a.isFavorite || 0)) {
           return (b.isFavorite || 0) - (a.isFavorite || 0);
         }
         // Then sort by name
@@ -88,8 +128,8 @@ export default function MealsListScreen({ navigation, route }) {
       });
     } else if (sortOption === "calories") {
       filtered.sort((a, b) => {
-        // First sort by favorite status (starred on top)
-        if ((b.isFavorite || 0) !== (a.isFavorite || 0)) {
+        // First sort by favorite status (starred on top) - only if not filtering by starred
+        if (!filterOptions.starred && (b.isFavorite || 0) !== (a.isFavorite || 0)) {
           return (b.isFavorite || 0) - (a.isFavorite || 0);
         }
         // Then sort by calories
@@ -97,8 +137,8 @@ export default function MealsListScreen({ navigation, route }) {
       });
     } else if (sortOption === "recent") {
       filtered.sort((a, b) => {
-        // First sort by favorite status (starred on top)
-        if ((b.isFavorite || 0) !== (a.isFavorite || 0)) {
+        // First sort by favorite status (starred on top) - only if not filtering by starred
+        if (!filterOptions.starred && (b.isFavorite || 0) !== (a.isFavorite || 0)) {
           return (b.isFavorite || 0) - (a.isFavorite || 0);
         }
         // Then sort by recent
@@ -107,7 +147,7 @@ export default function MealsListScreen({ navigation, route }) {
     }
 
     setFilteredMeals(filtered);
-  }, [meals, searchText, sortOption]);
+  }, [meals, searchText, sortOption, filterOptions]);
 
   React.useEffect(() => {
     applyFiltersAndSort();
@@ -202,58 +242,15 @@ export default function MealsListScreen({ navigation, route }) {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={true}
         >
-          {/* Search Bar + Sort Control in Same Row */}
-          <View style={styles.headerRow}>
-            {/* Search Bar */}
-            <View style={styles.searchContainer}>
-              <MaterialCommunityIcons
-                name="magnify"
-                size={20}
-                color="#999"
-                style={styles.searchIcon}
-              />
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search meals..."
-                value={searchText}
-                onChangeText={setSearchText}
-                placeholderTextColor="#999"
-              />
-              {searchText.length > 0 && (
-                <TouchableOpacity
-                  onPress={() => setSearchText("")}
-                  style={styles.clearButton}
-                >
-                  <MaterialCommunityIcons name="close" size={18} color="#999" />
-                </TouchableOpacity>
-              )}
-            </View>
-
-            {/* Sort Control */}
-            <TouchableOpacity
-              style={styles.controlButton}
-              onPress={() => {
-                Alert.alert("Sort", "Sort by:", [
-                  { text: "Name (A-Z)", onPress: () => setSortOption("name") },
-                  {
-                    text: "Highest Calories",
-                    onPress: () => setSortOption("calories"),
-                  },
-                  {
-                    text: "Recently Created",
-                    onPress: () => setSortOption("recent"),
-                  },
-                  { text: "Cancel", style: "cancel" },
-                ]);
-              }}
-            >
-              <MaterialCommunityIcons
-                name="sort"
-                size={18}
-                color={COLORS.primary}
-              />
-            </TouchableOpacity>
-          </View>
+          {/* Search, Filter, Sort Combined */}
+          <SearchFilterSort
+            searchText={searchText}
+            onSearchChange={setSearchText}
+            sortOption={sortOption}
+            onSortChange={setSortOption}
+            filterOptions={filterOptions}
+            onFilterChange={setFilterOptions}
+          />
 
           {/* Meals List */}
           {filteredMeals.length === 0 ? (
@@ -320,43 +317,6 @@ const styles = StyleSheet.create({
   scrollContent: { paddingBottom: 20 },
   centerContent: { flex: 1, justifyContent: "center", alignItems: "center" },
   loadingText: { fontSize: 16, color: "#999" },
-
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginHorizontal: 16,
-    marginVertical: 12,
-    gap: 10,
-  },
-  searchContainer: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-  },
-  searchIcon: { marginRight: 8 },
-  searchInput: {
-    flex: 1,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: "#333",
-  },
-  clearButton: { padding: 4 },
-
-  controlButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-    alignItems: "center",
-    justifyContent: "center",
-  },
 
   emptyStateContainer: {
     flex: 1,

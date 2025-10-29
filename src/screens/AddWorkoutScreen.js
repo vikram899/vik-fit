@@ -13,6 +13,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AssignDaysModal } from '../components/modals';
+import { SearchFilterSort } from '../components/meals';
 import { COLORS } from '../styles';
 import {
   getAllPlans,
@@ -36,8 +37,13 @@ export default function AddWorkoutScreen({ navigation }) {
   const [filteredWorkouts, setFilteredWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
-  const [filterOption, setFilterOption] = useState('all');
   const [sortOption, setSortOption] = useState('name');
+  const [filterOptions, setFilterOptions] = useState({
+    difficulty: false,
+    duration: false,
+    muscleGroup: false,
+    equipment: false,
+  });
   const [exerciseCounts, setExerciseCounts] = useState({});
   const [completionCounts, setCompletionCounts] = useState({});
   const [assignModalVisible, setAssignModalVisible] = useState(false);
@@ -103,12 +109,6 @@ export default function AddWorkoutScreen({ navigation }) {
       );
     }
 
-    if (filterOption === 'assigned') {
-      filtered = filtered.filter(w => (scheduledDays[w.id] || []).length > 0);
-    } else if (filterOption === 'unassigned') {
-      filtered = filtered.filter(w => (scheduledDays[w.id] || []).length === 0);
-    }
-
     if (sortOption === 'name') {
       filtered.sort((a, b) => a.name.localeCompare(b.name));
     } else if (sortOption === 'assigned') {
@@ -122,7 +122,7 @@ export default function AddWorkoutScreen({ navigation }) {
     }
 
     setFilteredWorkouts(filtered);
-  }, [workouts, searchText, filterOption, sortOption, scheduledDays]);
+  }, [workouts, searchText, sortOption, scheduledDays]);
 
   React.useEffect(() => {
     applyFiltersAndSort();
@@ -238,101 +238,29 @@ export default function AddWorkoutScreen({ navigation }) {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={true}
         >
-          {/* Search Bar */}
-          <View style={styles.searchContainer}>
-            <MaterialCommunityIcons
-              name="magnify"
-              size={20}
-              color="#999"
-              style={styles.searchIcon}
-            />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search workouts..."
-              value={searchText}
-              onChangeText={setSearchText}
-              placeholderTextColor="#999"
-            />
-            {searchText.length > 0 && (
-              <TouchableOpacity
-                onPress={() => setSearchText('')}
-                style={styles.clearButton}
-              >
-                <MaterialCommunityIcons name="close" size={18} color="#999" />
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {/* Filter and Sort Controls */}
-          <View style={styles.controlsContainer}>
-            {/* Filter Dropdown */}
-            <TouchableOpacity
-              style={styles.controlButton}
-              onPress={() => {
-                Alert.alert(
-                  'Filter',
-                  'Show workouts:',
-                  [
-                    {
-                      text: 'All',
-                      onPress: () => setFilterOption('all'),
-                    },
-                    {
-                      text: 'Assigned Only',
-                      onPress: () => setFilterOption('assigned'),
-                    },
-                    {
-                      text: 'Unassigned Only',
-                      onPress: () => setFilterOption('unassigned'),
-                    },
-                    {
-                      text: 'Cancel',
-                      style: 'cancel',
-                    },
-                  ]
-                );
-              }}
-            >
-              <MaterialCommunityIcons name="filter" size={16} color={COLORS.primary} />
-              <Text style={styles.controlButtonText}>
-                {filterOption === 'all' ? 'All' : filterOption === 'assigned' ? 'Assigned' : 'Unassigned'}
-              </Text>
-            </TouchableOpacity>
-
-            {/* Sort Dropdown */}
-            <TouchableOpacity
-              style={styles.controlButton}
-              onPress={() => {
-                Alert.alert(
-                  'Sort',
-                  'Sort by:',
-                  [
-                    {
-                      text: 'Name (A-Z)',
-                      onPress: () => setSortOption('name'),
-                    },
-                    {
-                      text: 'Most Assigned',
-                      onPress: () => setSortOption('assigned'),
-                    },
-                    {
-                      text: 'Recently Created',
-                      onPress: () => setSortOption('recent'),
-                    },
-                    {
-                      text: 'Cancel',
-                      style: 'cancel',
-                    },
-                  ]
-                );
-              }}
-            >
-              <MaterialCommunityIcons name="sort" size={16} color={COLORS.primary} />
-              <Text style={styles.controlButtonText}>
-                {sortOption === 'name' ? 'Name' : sortOption === 'assigned' ? 'Most' : 'Recent'}
-              </Text>
-            </TouchableOpacity>
-          </View>
+          {/* Search, Filter, Sort */}
+          <SearchFilterSort
+            searchText={searchText}
+            onSearchChange={setSearchText}
+            sortOption={sortOption}
+            onSortChange={setSortOption}
+            filterOptions={filterOptions}
+            onFilterChange={setFilterOptions}
+            searchPlaceholder="Search workouts..."
+            filterLabels={{
+              difficulty: "Difficulty",
+              duration: "Duration",
+              muscleGroup: "Muscle Group",
+              equipment: "Equipment",
+            }}
+            filterAlertTitle="Filter Workouts"
+            sortOptions={[
+              { value: "name", label: "Name (A-Z)" },
+              { value: "assigned", label: "Most Assigned" },
+              { value: "recent", label: "Recently Created" },
+            ]}
+            sortAlertTitle="Sort Workouts"
+          />
 
           {/* Workouts List */}
           {filteredWorkouts.length === 0 ? (

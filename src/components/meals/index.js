@@ -8,3 +8,9 @@ export { default as EditMealDetailsModal } from "./EditMealDetailsModal";
 export { default as ExistingMealsModal } from "./ExistingMealsModal";
 export { default as GoalSettingsModal } from "./GoalSettingsModal";
 export { default as MealsHistoryModal } from "./MealsHistoryModal";
+
+// Search, Filter, Sort components
+export { default as SearchBar } from "./SearchBar";
+export { default as FilterButton } from "./FilterButton";
+export { default as SortButton } from "./SortButton";
+export { default as SearchFilterSort } from "./SearchFilterSort";
