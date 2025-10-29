@@ -83,11 +83,32 @@ export default function MealsScreen({ navigation, route }) {
     }
 
     if (sortOption === "name") {
-      filtered.sort((a, b) => a.name.localeCompare(b.name));
+      filtered.sort((a, b) => {
+        // First sort by favorite status (starred on top)
+        if ((b.isFavorite || 0) !== (a.isFavorite || 0)) {
+          return (b.isFavorite || 0) - (a.isFavorite || 0);
+        }
+        // Then sort by name
+        return a.name.localeCompare(b.name);
+      });
     } else if (sortOption === "calories") {
-      filtered.sort((a, b) => (b.calories || 0) - (a.calories || 0));
+      filtered.sort((a, b) => {
+        // First sort by favorite status (starred on top)
+        if ((b.isFavorite || 0) !== (a.isFavorite || 0)) {
+          return (b.isFavorite || 0) - (a.isFavorite || 0);
+        }
+        // Then sort by calories
+        return (b.calories || 0) - (a.calories || 0);
+      });
     } else if (sortOption === "recent") {
-      filtered.reverse();
+      filtered.sort((a, b) => {
+        // First sort by favorite status (starred on top)
+        if ((b.isFavorite || 0) !== (a.isFavorite || 0)) {
+          return (b.isFavorite || 0) - (a.isFavorite || 0);
+        }
+        // Then sort by recent
+        return 0; // Maintain original order for recent
+      });
     }
 
     setFilteredMeals(filtered);

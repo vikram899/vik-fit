@@ -258,24 +258,33 @@ const QuickAddMealsScreen = ({ navigation, route }) => {
                 </Text>
               </View>
             ) : (
-              meals.map((meal) => (
-                <View
-                  key={meal.id}
-                  style={{ marginBottom: 12 }}
-                >
-                  <MealCard
-                    meal={meal}
-                    showPlusIcon={true}
-                    isAdded={addedMealIds.has(meal.id)}
-                    onMenuPress={() => {
-                      if (addedMealIds.has(meal.id)) {
-                        return; // Don't do anything if already added
-                      }
-                      handleShowMealTypeSelector(meal);
-                    }}
-                  />
-                </View>
-              ))
+              [...meals]
+                .sort((a, b) => {
+                  // Sort by favorite status first (favorited meals on top)
+                  if ((b.isFavorite || 0) !== (a.isFavorite || 0)) {
+                    return (b.isFavorite || 0) - (a.isFavorite || 0);
+                  }
+                  // Then sort by name
+                  return a.name.localeCompare(b.name);
+                })
+                .map((meal) => (
+                  <View
+                    key={meal.id}
+                    style={{ marginBottom: 12 }}
+                  >
+                    <MealCard
+                      meal={meal}
+                      showPlusIcon={true}
+                      isAdded={addedMealIds.has(meal.id)}
+                      onMenuPress={() => {
+                        if (addedMealIds.has(meal.id)) {
+                          return; // Don't do anything if already added
+                        }
+                        handleShowMealTypeSelector(meal);
+                      }}
+                    />
+                  </View>
+                ))
             )}
           </ScrollView>
         )}
