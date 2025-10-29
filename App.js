@@ -199,14 +199,26 @@ function WorkoutsStackNavigator() {
       }}
     >
       <Stack.Screen
-        name="WorkoutsLibrary"
-        component={WorkoutProgressScreen}
-        options={{
+        name="WorkoutsHome"
+        component={AllWorkoutsScreen}
+        options={({ navigation }) => ({
           title: "Workouts",
-        }}
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate("CreatePlan")}
+              style={{ paddingRight: 16 }}
+            >
+              <MaterialCommunityIcons
+                name="plus-circle"
+                size={28}
+                color={COLORS.primary}
+              />
+            </TouchableOpacity>
+          ),
+        })}
       />
       <Stack.Screen
-        name="WorkoutsCreatePlan"
+        name="CreatePlan"
         component={CreatePlanScreen}
         options={({ navigation }) => ({
           title: "Create Workout",
@@ -377,27 +389,14 @@ function MainTabNavigator({ onAddPress }) {
       />
       <Tab.Screen
         name="Workouts"
-        component={AllWorkoutsScreen}
-        options={({ navigation }) => ({
+        component={WorkoutsStackNavigator}
+        options={{
           tabBarLabel: "Workouts",
           tabBarItemStyle: {
             marginHorizontal: 8,
           },
-          headerShown: true,
-          title: "Workouts",
-          headerRight: () => (
-            <TouchableOpacity
-              onPress={() => navigation.navigate("CreatePlan")}
-              style={{ paddingRight: 16 }}
-            >
-              <MaterialCommunityIcons
-                name="plus-circle"
-                size={28}
-                color={COLORS.primary}
-              />
-            </TouchableOpacity>
-          ),
-        })}
+          headerShown: false,
+        }}
       />
       <Tab.Screen
         name="Add"
