@@ -14,7 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { WeeklySummaryCards, WeeklyCalendarView } from '../components/layouts';
 import { GoalSettingsModal } from '../components/meals';
-import { Toast } from '../components/common';
+import { Toast, StreakCard } from '../components/common';
 import { COLORS } from '../styles';
 import {
   getWeeklyMealData,
@@ -363,36 +363,14 @@ export default function MealsScreen({ navigation }) {
             <>
               {/* Stats Section - Meal Logging Streak & Calorie Target */}
               <View style={styles.statsSection}>
-                {/* Meal Logging Streak - Minimalistic */}
-                <View style={styles.streakCard}>
-                  <View style={styles.streakMinimalRow}>
-                    <View>
-                      <Text style={styles.streakMinimalText}>
-                        <Text style={styles.streakBold}>{daysWithMeals}/7</Text> logged
-                      </Text>
-                      <Text style={styles.streakMetricLabel}>
-                        Tracked by {streakTrackingMetric.charAt(0).toUpperCase() + streakTrackingMetric.slice(1)}
-                      </Text>
-                    </View>
-                    <View style={styles.checkmarkRowMinimal}>
-                      {weeklyBreakdown.map((day, index) => {
-                        const color = getStreakColor(day);
-                        return (
-                          <View
-                            key={day.date}
-                            style={[
-                              styles.checkmarkMinimal,
-                              {
-                                backgroundColor: color.background,
-                                borderColor: color.border,
-                              },
-                            ]}
-                          />
-                        );
-                      })}
-                    </View>
-                  </View>
-                </View>
+                {/* Meal Logging Streak - Using StreakCard Component */}
+                <StreakCard
+                  daysTracked={daysWithMeals}
+                  totalDays={7}
+                  trackingMetric={streakTrackingMetric.charAt(0).toUpperCase() + streakTrackingMetric.slice(1)}
+                  weeklyBreakdown={weeklyBreakdown}
+                  getStreakColor={getStreakColor}
+                />
 
                 {/* Stats - Actionable Insights (Dynamic based on preferences) */}
                 {enabledGoalPreferences.length > 0 && (
@@ -681,7 +659,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
   statsSection: {
-    paddingHorizontal: 16,
     paddingVertical: 12,
     marginBottom: 20,
     gap: 16,
@@ -692,6 +669,8 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: '#e0e0e0',
+    marginHorizontal: 16,
+    marginBottom: 0,
   },
   statHeader: {
     marginBottom: 12,
@@ -700,41 +679,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#333',
-  },
-  streakCard: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    marginBottom: 12,
-  },
-  streakMinimalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  streakMinimalText: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '500',
-  },
-  streakBold: {
-    fontWeight: '700',
-    color: '#000',
-  },
-  streakMetricLabel: {
-    fontSize: 10,
-    color: '#999',
-    fontWeight: '500',
-    marginTop: 2,
-  },
-  checkmarkRowMinimal: {
-    flexDirection: 'row',
-    gap: 4,
-  },
-  checkmarkMinimal: {
-    width: 18,
-    height: 18,
-    borderRadius: 3,
-    borderWidth: 1,
   },
   statsInsightsContainer: {
     gap: 12,

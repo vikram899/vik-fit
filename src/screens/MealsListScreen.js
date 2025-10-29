@@ -120,7 +120,10 @@ export default function MealsListScreen({ navigation, route }) {
     if (sortOption === "name") {
       filtered.sort((a, b) => {
         // First sort by favorite status (starred on top) - only if not filtering by starred
-        if (!filterOptions.starred && (b.isFavorite || 0) !== (a.isFavorite || 0)) {
+        if (
+          !filterOptions.starred &&
+          (b.isFavorite || 0) !== (a.isFavorite || 0)
+        ) {
           return (b.isFavorite || 0) - (a.isFavorite || 0);
         }
         // Then sort by name
@@ -129,7 +132,10 @@ export default function MealsListScreen({ navigation, route }) {
     } else if (sortOption === "calories") {
       filtered.sort((a, b) => {
         // First sort by favorite status (starred on top) - only if not filtering by starred
-        if (!filterOptions.starred && (b.isFavorite || 0) !== (a.isFavorite || 0)) {
+        if (
+          !filterOptions.starred &&
+          (b.isFavorite || 0) !== (a.isFavorite || 0)
+        ) {
           return (b.isFavorite || 0) - (a.isFavorite || 0);
         }
         // Then sort by calories
@@ -138,7 +144,10 @@ export default function MealsListScreen({ navigation, route }) {
     } else if (sortOption === "recent") {
       filtered.sort((a, b) => {
         // First sort by favorite status (starred on top) - only if not filtering by starred
-        if (!filterOptions.starred && (b.isFavorite || 0) !== (a.isFavorite || 0)) {
+        if (
+          !filterOptions.starred &&
+          (b.isFavorite || 0) !== (a.isFavorite || 0)
+        ) {
           return (b.isFavorite || 0) - (a.isFavorite || 0);
         }
         // Then sort by recent
@@ -202,7 +211,12 @@ export default function MealsListScreen({ navigation, route }) {
 
   const handleFavoritePress = async (mealId, isFavorite) => {
     try {
-      console.log("Toggling favorite for meal:", mealId, "isFavorite:", isFavorite);
+      console.log(
+        "Toggling favorite for meal:",
+        mealId,
+        "isFavorite:",
+        isFavorite
+      );
 
       // Update in database
       await toggleMealFavorite(mealId, isFavorite);
@@ -211,7 +225,12 @@ export default function MealsListScreen({ navigation, route }) {
       setMeals((prevMeals) => {
         const updated = prevMeals.map((meal) => {
           if (meal.id === mealId) {
-            console.log("Updated meal:", meal.name, "to isFavorite:", isFavorite ? 1 : 0);
+            console.log(
+              "Updated meal:",
+              meal.name,
+              "to isFavorite:",
+              isFavorite ? 1 : 0
+            );
             return { ...meal, isFavorite: isFavorite ? 1 : 0 };
           }
           return meal;
