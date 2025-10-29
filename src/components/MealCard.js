@@ -13,9 +13,17 @@ import { COLORS } from "../styles";
  * - onPress: function (callback when card is tapped)
  * - onMenuPress: function (callback for menu button)
  * - onFavoritePress: function (callback when star is tapped)
+ * - isEditableStar: boolean (whether star can be toggled, default false)
  */
-export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress, showPlusIcon = false, isAdded = false }) {
+export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress, showPlusIcon = false, isAdded = false, isEditableStar = false }) {
   const [isFavorite, setIsFavorite] = React.useState(meal.isFavorite || false);
+
+  console.log("MealCard rendered:", meal.name, "isEditableStar:", isEditableStar, "isFavorite:", isFavorite);
+
+  // Update local state when meal prop changes
+  React.useEffect(() => {
+    setIsFavorite(meal.isFavorite || false);
+  }, [meal.isFavorite]);
 
   const getMealTypeInfo = (type) => {
     const mealTypes = {
@@ -54,9 +62,13 @@ export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress, 
   const mealTypeInfo = getMealTypeInfo(meal.mealType || "veg");
 
   const handleFavoritePress = (e) => {
+    console.log("STAR CLICKED");
     e.stopPropagation();
-    setIsFavorite(!isFavorite);
-    onFavoritePress && onFavoritePress(!isFavorite);
+    const newFavoriteState = !isFavorite;
+    console.log("MealCard handleFavoritePress:", meal.name, "current:", isFavorite, "new:", newFavoriteState);
+    setIsFavorite(newFavoriteState);
+    console.log("Calling onFavoritePress with:", newFavoriteState);
+    onFavoritePress && onFavoritePress(newFavoriteState);
   };
 
   return (
@@ -78,17 +90,27 @@ export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress, 
           {meal.name}
         </Text>
         <View style={styles.topRowActions}>
-          <TouchableOpacity
-            onPress={handleFavoritePress}
-            style={styles.starButton}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
+          {/* Always show star - editable in MealsScreen, read-only everywhere else */}
+          {isEditableStar ? (
+            <TouchableOpacity
+              onPress={handleFavoritePress}
+              style={styles.starButton}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <MaterialCommunityIcons
+                name={isFavorite ? "star" : "star-outline"}
+                size={22}
+                color={isFavorite ? "#FFD700" : "#ccc"}
+              />
+            </TouchableOpacity>
+          ) : (
             <MaterialCommunityIcons
               name={isFavorite ? "star" : "star-outline"}
               size={22}
               color={isFavorite ? "#FFD700" : "#ccc"}
+              style={styles.starButton}
             />
-          </TouchableOpacity>
+          )}
           {onMenuPress && showPlusIcon ? (
             isAdded ? (
               <MaterialCommunityIcons

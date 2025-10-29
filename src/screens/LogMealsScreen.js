@@ -136,6 +136,24 @@ const LogMealsScreen = ({ navigation }) => {
     );
   };
 
+  // Remove meal directly without confirmation popup
+  const handleRemoveMeal = async (mealId) => {
+    try {
+      await deleteMealLog(mealId);
+      const meals = await getMealLogsForDate(today);
+      setTodaysMeals(meals || []);
+
+      const totals = await getDailyTotals(today);
+      setDailyTotals(totals);
+    } catch (error) {
+      console.error("Error removing meal:", error);
+      Alert.alert(
+        STRINGS.logMealsScreen.alerts.deleteError.title,
+        STRINGS.logMealsScreen.alerts.deleteError.message
+      );
+    }
+  };
+
   const handleMealUpdated = async ({ meals, totals }) => {
     setTodaysMeals(meals || []);
     setDailyTotals(totals);
@@ -161,12 +179,8 @@ const LogMealsScreen = ({ navigation }) => {
             STRINGS.logMealsScreen.alerts.mealOptions(meal.name).message,
             [
               {
-                text: STRINGS.logMealsScreen.alerts.edit,
-                onPress: () => handleEditMeal(meal),
-              },
-              {
-                text: STRINGS.logMealsScreen.alerts.deleteConfirmButton,
-                onPress: () => handleDeleteMeal(meal.id),
+                text: "Remove",
+                onPress: () => handleRemoveMeal(meal.id),
                 style: "destructive",
               },
               {

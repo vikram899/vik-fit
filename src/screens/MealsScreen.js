@@ -18,6 +18,7 @@ import {
   getDailyTotals,
   getMacroGoals,
   deleteMeal,
+  toggleMealFavorite,
 } from "../services/database";
 import { AddMealModal, EditMealDetailsModal } from "../components/meals";
 import MealCard from "../components/MealCard";
@@ -148,6 +149,30 @@ export default function MealsScreen({ navigation, route }) {
     ]);
   };
 
+  const handleFavoritePress = async (mealId, isFavorite) => {
+    try {
+      console.log("Toggling favorite for meal:", mealId, "isFavorite:", isFavorite);
+
+      // Update in database
+      await toggleMealFavorite(mealId, isFavorite);
+
+      // Update local state
+      setMeals((prevMeals) => {
+        const updated = prevMeals.map((meal) => {
+          if (meal.id === mealId) {
+            console.log("Updated meal:", meal.name, "to isFavorite:", isFavorite ? 1 : 0);
+            return { ...meal, isFavorite: isFavorite ? 1 : 0 };
+          }
+          return meal;
+        });
+        return updated;
+      });
+    } catch (error) {
+      console.error("Error toggling meal favorite:", error);
+      Alert.alert("Error", "Failed to update favorite status");
+    }
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -247,11 +272,16 @@ export default function MealsScreen({ navigation, route }) {
             </View>
           ) : (
             filteredMeals.map((meal) => {
+              console.log("MealsScreen rendering meal:", meal.name, "with isEditableStar=true");
               return (
                 <View key={meal.id} style={styles.mealCardWrapper}>
                   <MealCard
                     meal={meal}
                     onMenuPress={() => handleMealMenu(meal)}
+                    isEditableStar={true}
+                    onFavoritePress={(isFavorite) =>
+                      handleFavoritePress(meal.id, isFavorite)
+                    }
                   />
                 </View>
               );
