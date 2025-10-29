@@ -249,6 +249,13 @@ function ProgressStackNavigator() {
           headerLeft: () => null,
         }}
       />
+      <Stack.Screen
+        name="MealProgress"
+        component={MealsListScreen}
+        options={{
+          title: "Meal Progress",
+        }}
+      />
     </Stack.Navigator>
   );
 }

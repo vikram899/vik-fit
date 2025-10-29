@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,191 +6,213 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
-  Alert,
+  RefreshControl,
   Animated,
-} from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { COLORS } from "../styles";
+  Alert,
+} from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { WeeklySummaryCards, WeeklyCalendarView } from '../components/layouts';
+import { GoalSettingsModal } from '../components/meals';
+import { Toast } from '../components/common';
+import { COLORS } from '../styles';
 import {
-  getAllMeals,
-  getDailyTotals,
-  getMacroGoals,
-  deleteMeal,
-  toggleMealFavorite,
-} from "../services/database";
-import { AddMealModal, EditMealDetailsModal } from "../components/meals";
-import MealCard from "../components/MealCard";
+  getWeeklyMealData,
+  getWeeklyDailyBreakdown,
+  getWeeklyGoals,
+  getSundayOfWeek,
+} from '../services/mealStats';
+import { getMacroGoals, getEnabledGoalPreferences, getUserSetting } from '../services/database';
 
 /**
  * MealsScreen
- * Shows all available meals with search, filter, and sort functionality
+ * Weekly meal analytics dashboard showing totals, goals, trends, and insights
  */
-export default function MealsScreen({ navigation, route }) {
-  const [meals, setMeals] = useState([]);
-  const [filteredMeals, setFilteredMeals] = useState([]);
+export default function MealsScreen({ navigation }) {
+  const [currentWeekData, setCurrentWeekData] = useState({
+    totalCalories: 0,
+    totalProtein: 0,
+    totalCarbs: 0,
+    totalFats: 0,
+  });
+  const [lastWeekData, setLastWeekData] = useState({
+    totalCalories: 0,
+    totalProtein: 0,
+    totalCarbs: 0,
+    totalFats: 0,
+  });
+  const [weeklyGoals, setWeeklyGoals] = useState({
+    calorieGoal: 0,
+    proteinGoal: 0,
+    carbsGoal: 0,
+    fatsGoal: 0,
+  });
+  const [dailyGoals, setDailyGoals] = useState({
+    calorieGoal: 0,
+    proteinGoal: 0,
+    carbsGoal: 0,
+    fatsGoal: 0,
+  });
+  const [weeklyBreakdown, setWeeklyBreakdown] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchText, setSearchText] = useState("");
-  const [sortOption, setSortOption] = useState("name");
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
   const [fadeAnim] = useState(new Animated.Value(0));
-  const [addMealModalVisible, setAddMealModalVisible] = useState(
-    route?.params?.openAddModal || false
+  const [currentSunday, setCurrentSunday] = useState(
+    getSundayOfWeek(new Date().toISOString().split('T')[0])
   );
-  const [editMealModalVisible, setEditMealModalVisible] = useState(false);
-  const [selectedMealForEdit, setSelectedMealForEdit] = useState(null);
+  const [goalSettingsModalVisible, setGoalSettingsModalVisible] = useState(false);
+  const [enabledGoalPreferences, setEnabledGoalPreferences] = useState([]);
+  const [streakTrackingMetric, setStreakTrackingMetric] = useState('calories');
 
-  const loadMeals = useCallback(async () => {
+  // Load weekly data
+  const loadWeeklyData = useCallback(async () => {
     try {
+      setError(null);
       setLoading(true);
 
-      const mealsList = await getAllMeals();
-      setMeals(mealsList);
+      // Get current week data
+      const currentWeek = await getWeeklyMealData(currentSunday);
+      setCurrentWeekData(currentWeek);
 
+      // Get last week data
+      const lastSunday = new Date(currentSunday);
+      lastSunday.setDate(lastSunday.getDate() - 7);
+      const lastSundayStr = lastSunday.toISOString().split('T')[0];
+      const lastWeek = await getWeeklyMealData(lastSundayStr);
+      setLastWeekData(lastWeek);
+
+      // Get weekly goals - query with today's date to find the most recent goals
+      const today = new Date().toISOString().split('T')[0];
+      const goals = await getWeeklyGoals(today);
+      setWeeklyGoals(goals);
+
+      // Get daily goals for breakdown cards
+      const dailyGoalsData = await getMacroGoals(currentSunday);
+      if (dailyGoalsData) {
+        setDailyGoals(dailyGoalsData);
+      }
+
+      // Get daily breakdown
+      const breakdown = await getWeeklyDailyBreakdown(currentSunday);
+      setWeeklyBreakdown(breakdown);
+
+      // Get enabled goal preferences
+      const prefs = await getEnabledGoalPreferences();
+      setEnabledGoalPreferences(prefs);
+
+      // Get streak tracking metric
+      const metric = await getUserSetting('streakTrackingMetric');
+      if (metric) {
+        setStreakTrackingMetric(metric);
+      }
+
+      // Trigger fade-in animation
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 500,
         useNativeDriver: true,
       }).start();
     } catch (error) {
-      console.error("Error loading meals:", error);
-      Alert.alert("Error", "Failed to load meals");
+      console.error('Error loading weekly meal data:', error);
+      setError('Failed to load meal data. Please try again.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  }, [fadeAnim]);
+  }, [currentSunday, fadeAnim]);
 
+  // Load data when screen is focused
   useFocusEffect(
     React.useCallback(() => {
-      loadMeals();
-    }, [loadMeals])
+      loadWeeklyData();
+    }, [loadWeeklyData])
   );
 
-  React.useEffect(() => {
-    if (route?.params?.openAddModal) {
-      setAddMealModalVisible(true);
-      navigation.setParams({ openAddModal: false });
-    }
-  }, [route?.params?.openAddModal, navigation]);
-
-  const applyFiltersAndSort = useCallback(() => {
-    let filtered = [...meals];
-
-    if (searchText.trim()) {
-      filtered = filtered.filter((m) =>
-        m.name.toLowerCase().includes(searchText.toLowerCase())
-      );
-    }
-
-    if (sortOption === "name") {
-      filtered.sort((a, b) => {
-        // First sort by favorite status (starred on top)
-        if ((b.isFavorite || 0) !== (a.isFavorite || 0)) {
-          return (b.isFavorite || 0) - (a.isFavorite || 0);
-        }
-        // Then sort by name
-        return a.name.localeCompare(b.name);
-      });
-    } else if (sortOption === "calories") {
-      filtered.sort((a, b) => {
-        // First sort by favorite status (starred on top)
-        if ((b.isFavorite || 0) !== (a.isFavorite || 0)) {
-          return (b.isFavorite || 0) - (a.isFavorite || 0);
-        }
-        // Then sort by calories
-        return (b.calories || 0) - (a.calories || 0);
-      });
-    } else if (sortOption === "recent") {
-      filtered.sort((a, b) => {
-        // First sort by favorite status (starred on top)
-        if ((b.isFavorite || 0) !== (a.isFavorite || 0)) {
-          return (b.isFavorite || 0) - (a.isFavorite || 0);
-        }
-        // Then sort by recent
-        return 0; // Maintain original order for recent
-      });
-    }
-
-    setFilteredMeals(filtered);
-  }, [meals, searchText, sortOption]);
-
-  React.useEffect(() => {
-    applyFiltersAndSort();
-  }, [applyFiltersAndSort]);
-
-  const handleEditMeal = (meal) => {
-    setSelectedMealForEdit(meal);
-    setEditMealModalVisible(true);
+  const handlePreviousWeek = () => {
+    const prevSunday = new Date(currentSunday);
+    prevSunday.setDate(prevSunday.getDate() - 7);
+    setCurrentSunday(prevSunday.toISOString().split('T')[0]);
   };
 
-  const handleMealAdded = async () => {
-    setAddMealModalVisible(false);
-    await loadMeals();
+  const handleNextWeek = () => {
+    const nextSunday = new Date(currentSunday);
+    nextSunday.setDate(nextSunday.getDate() + 7);
+    setCurrentSunday(nextSunday.toISOString().split('T')[0]);
   };
 
-  const handleMealUpdated = async (updatedMeals) => {
-    setEditMealModalVisible(false);
-    setSelectedMealForEdit(null);
-    setMeals(updatedMeals);
-    applyFiltersAndSort();
+  const handleTodayWeek = () => {
+    const today = new Date().toISOString().split('T')[0];
+    setCurrentSunday(getSundayOfWeek(today));
   };
 
-  const handleDeleteMeal = (meal) => {
-    Alert.alert(
-      "Delete Meal",
-      `Are you sure you want to delete "${meal.name}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          onPress: async () => {
-            try {
-              await deleteMeal(meal.id);
-              await loadMeals();
-            } catch (error) {
-              console.error("Error deleting meal:", error);
-              Alert.alert("Error", "Failed to delete meal");
-            }
-          },
-          style: "destructive",
-        },
-      ]
-    );
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadWeeklyData();
   };
 
-  const handleMealMenu = (meal) => {
-    Alert.alert("Meal Options", meal.name, [
-      { text: "Edit", onPress: () => handleEditMeal(meal) },
-      {
-        text: "Delete",
-        onPress: () => handleDeleteMeal(meal),
-        style: "destructive",
-      },
-      { text: "Cancel", style: "cancel" },
-    ]);
+  const handleGoalSettings = () => {
+    setGoalSettingsModalVisible(true);
   };
 
-  const handleFavoritePress = async (mealId, isFavorite) => {
+  const handleGoalSettingsSaved = async () => {
+    // Reload preferences and metric when settings are changed
     try {
-      console.log("Toggling favorite for meal:", mealId, "isFavorite:", isFavorite);
+      const prefs = await getEnabledGoalPreferences();
+      setEnabledGoalPreferences(prefs);
 
-      // Update in database
-      await toggleMealFavorite(mealId, isFavorite);
-
-      // Update local state
-      setMeals((prevMeals) => {
-        const updated = prevMeals.map((meal) => {
-          if (meal.id === mealId) {
-            console.log("Updated meal:", meal.name, "to isFavorite:", isFavorite ? 1 : 0);
-            return { ...meal, isFavorite: isFavorite ? 1 : 0 };
-          }
-          return meal;
-        });
-        return updated;
-      });
+      // Reload streak tracking metric
+      const metric = await getUserSetting('streakTrackingMetric');
+      if (metric) {
+        setStreakTrackingMetric(metric);
+      }
     } catch (error) {
-      console.error("Error toggling meal favorite:", error);
-      Alert.alert("Error", "Failed to update favorite status");
+      console.error('Error loading goal preferences:', error);
+    }
+  };
+
+  const handleLogMeal = () => {
+    navigation.navigate('LogMeals');
+  };
+
+  // Calculate consistency badge (days with logged meals)
+  const daysWithMeals = weeklyBreakdown.filter(
+    day => day.totalCalories > 0
+  ).length;
+  const consistencyBadge = daysWithMeals === 7 ? 'Complete' : `${daysWithMeals}/7 days`;
+
+  // Check if week has any data
+  const hasData = weeklyBreakdown.some(day => day.totalCalories > 0);
+
+  // Helper function to get streak color based on metric and daily goals
+  const getStreakColor = (day) => {
+    if (day.totalCalories === 0) {
+      return { background: '#f5f5f5', border: '#ddd' }; // Gray for no meals
+    }
+
+    let percentage = 0;
+    let goal = 0;
+
+    if (streakTrackingMetric === 'calories') {
+      percentage = (day.totalCalories / dailyGoals.calorieGoal) * 100;
+      goal = dailyGoals.calorieGoal;
+    } else if (streakTrackingMetric === 'protein') {
+      goal = dailyGoals.proteinGoal;
+      percentage = goal > 0 ? (day.totalProtein / goal) * 100 : 0;
+    } else if (streakTrackingMetric === 'carbs') {
+      goal = dailyGoals.carbsGoal;
+      percentage = goal > 0 ? (day.totalCarbs / goal) * 100 : 0;
+    } else if (streakTrackingMetric === 'fats') {
+      goal = dailyGoals.fatsGoal;
+      percentage = goal > 0 ? (day.totalFats / goal) * 100 : 0;
+    }
+
+    if (percentage >= 80) {
+      return { background: '#4CAF50', border: '#4CAF50' }; // Green
+    } else if (percentage >= 50) {
+      return { background: '#FF9800', border: '#FF9800' }; // Orange
+    } else {
+      return { background: '#FF6B6B', border: '#FF6B6B' }; // Red
     }
   };
 
@@ -204,210 +226,574 @@ export default function MealsScreen({ navigation, route }) {
     );
   }
 
+  // Format week label with month/day
+  const formatDateRange = () => {
+    const sundayDate = new Date(currentSunday);
+    const saturdayDate = new Date(sundayDate);
+    saturdayDate.setDate(saturdayDate.getDate() + 6);
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const sundayMonth = monthNames[sundayDate.getMonth()];
+    const sundayDay = sundayDate.getDate();
+    const saturdayMonth = monthNames[saturdayDate.getMonth()];
+    const saturdayDay = saturdayDate.getDate();
+
+    if (sundayMonth === saturdayMonth) {
+      return `${sundayMonth} ${sundayDay} - ${saturdayDay}`;
+    } else {
+      return `${sundayMonth} ${sundayDay} - ${saturdayMonth} ${saturdayDay}`;
+    }
+  };
+
+  const weekLabel = formatDateRange();
+
   return (
     <SafeAreaView style={styles.container}>
+      {/* Error Toast */}
+      {error && (
+        <Toast
+          message={error}
+          type="error"
+          duration={3000}
+          onDismiss={() => setError(null)}
+        />
+      )}
+
       <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={true}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={COLORS.primary}
+            />
+          }
         >
-          {/* Search Bar + Sort Control in Same Row */}
-          <View style={styles.headerRow}>
-            {/* Search Bar */}
-            <View style={styles.searchContainer}>
-              <MaterialCommunityIcons
-                name="magnify"
-                size={20}
-                color="#999"
-                style={styles.searchIcon}
-              />
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search meals..."
-                value={searchText}
-                onChangeText={setSearchText}
-                placeholderTextColor="#999"
-              />
-              {searchText.length > 0 && (
-                <TouchableOpacity
-                  onPress={() => setSearchText("")}
-                  style={styles.clearButton}
-                >
-                  <MaterialCommunityIcons name="close" size={18} color="#999" />
-                </TouchableOpacity>
-              )}
+          {/* Header with week navigation and action buttons */}
+          <View style={styles.header}>
+            <View style={styles.weekNavigation}>
+              <TouchableOpacity
+                onPress={handlePreviousWeek}
+                style={styles.navButton}
+              >
+                <MaterialCommunityIcons
+                  name="chevron-left"
+                  size={24}
+                  color={COLORS.primary}
+                />
+              </TouchableOpacity>
+
+              <View style={styles.weekLabel}>
+                <Text style={styles.weekLabelText}>{weekLabel}</Text>
+                <View style={styles.consistencyBadgeContainer}>
+                  <MaterialCommunityIcons
+                    name={daysWithMeals === 7 ? 'check-circle' : 'circle-outline'}
+                    size={12}
+                    color={daysWithMeals === 7 ? '#4CAF50' : '#999'}
+                  />
+                  <Text style={styles.consistencyBadge}>{consistencyBadge}</Text>
+                </View>
+              </View>
+
+              <TouchableOpacity
+                onPress={handleNextWeek}
+                style={styles.navButton}
+              >
+                <MaterialCommunityIcons
+                  name="chevron-right"
+                  size={24}
+                  color={COLORS.primary}
+                />
+              </TouchableOpacity>
             </View>
 
-            {/* Sort Control */}
-            <TouchableOpacity
-              style={styles.controlButton}
-              onPress={() => {
-                Alert.alert("Sort", "Sort by:", [
-                  { text: "Name (A-Z)", onPress: () => setSortOption("name") },
-                  {
-                    text: "Highest Calories",
-                    onPress: () => setSortOption("calories"),
-                  },
-                  {
-                    text: "Recently Created",
-                    onPress: () => setSortOption("recent"),
-                  },
-                  { text: "Cancel", style: "cancel" },
-                ]);
-              }}
-            >
-              <MaterialCommunityIcons
-                name="sort"
-                size={18}
-                color={COLORS.primary}
-              />
-            </TouchableOpacity>
+            {/* Action buttons */}
+            <View style={styles.actionButtonsRow}>
+              <TouchableOpacity
+                onPress={handleTodayWeek}
+                style={[styles.actionButton, styles.todayButton]}
+              >
+                <MaterialCommunityIcons name="calendar-today" size={14} color="#fff" />
+                <Text style={styles.actionButtonText}>Today</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleGoalSettings}
+                style={[styles.actionButton, styles.goalButton]}
+              >
+                <MaterialCommunityIcons name="target" size={14} color="#fff" />
+                <Text style={styles.actionButtonText}>Goals</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleLogMeal}
+                style={[styles.actionButton, styles.logButton]}
+              >
+                <MaterialCommunityIcons name="plus" size={14} color="#fff" />
+                <Text style={styles.actionButtonText}>Log</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
-          {/* Meals List */}
-          {filteredMeals.length === 0 ? (
+
+          {/* Empty State */}
+          {!hasData ? (
             <View style={styles.emptyStateContainer}>
               <MaterialCommunityIcons
-                name="silverware-fork-knife"
+                name="food-off"
                 size={64}
                 color="#ccc"
               />
-              <Text style={styles.emptyStateTitle}>
-                {meals.length === 0 ? "No Meals Created" : "No Meals Found"}
-              </Text>
+              <Text style={styles.emptyStateTitle}>No Meals Logged</Text>
               <Text style={styles.emptyStateSubtitle}>
-                {meals.length === 0
-                  ? "Create your first meal"
-                  : "Try adjusting your search"}
+                Start logging your meals to see weekly insights
               </Text>
-              {meals.length === 0 && (
-                <TouchableOpacity
-                  onPress={() => setAddMealModalVisible(true)}
-                  style={styles.emptyStateButton}
-                >
-                  <MaterialCommunityIcons name="plus" size={20} color="#fff" />
-                  <Text style={styles.emptyStateButtonText}>Create Meal</Text>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                onPress={handleLogMeal}
+                style={styles.emptyStateButton}
+              >
+                <MaterialCommunityIcons name="plus" size={20} color="#fff" />
+                <Text style={styles.emptyStateButtonText}>Log Your First Meal</Text>
+              </TouchableOpacity>
             </View>
           ) : (
-            filteredMeals.map((meal) => {
-              console.log("MealsScreen rendering meal:", meal.name, "with isEditableStar=true");
-              return (
-                <View key={meal.id} style={styles.mealCardWrapper}>
-                  <MealCard
-                    meal={meal}
-                    onMenuPress={() => handleMealMenu(meal)}
-                    isEditableStar={true}
-                    onFavoritePress={(isFavorite) =>
-                      handleFavoritePress(meal.id, isFavorite)
-                    }
-                  />
+            <>
+              {/* Stats Section - Meal Logging Streak & Calorie Target */}
+              <View style={styles.statsSection}>
+                {/* Meal Logging Streak - Minimalistic */}
+                <View style={styles.streakCard}>
+                  <View style={styles.streakMinimalRow}>
+                    <View>
+                      <Text style={styles.streakMinimalText}>
+                        <Text style={styles.streakBold}>{daysWithMeals}/7</Text> logged
+                      </Text>
+                      <Text style={styles.streakMetricLabel}>
+                        Tracked by {streakTrackingMetric.charAt(0).toUpperCase() + streakTrackingMetric.slice(1)}
+                      </Text>
+                    </View>
+                    <View style={styles.checkmarkRowMinimal}>
+                      {weeklyBreakdown.map((day, index) => {
+                        const color = getStreakColor(day);
+                        return (
+                          <View
+                            key={day.date}
+                            style={[
+                              styles.checkmarkMinimal,
+                              {
+                                backgroundColor: color.background,
+                                borderColor: color.border,
+                              },
+                            ]}
+                          />
+                        );
+                      })}
+                    </View>
+                  </View>
                 </View>
-              );
-            })
+
+                {/* Stats - Actionable Insights (Dynamic based on preferences) */}
+                {enabledGoalPreferences.length > 0 && (
+                  <View style={styles.statItem}>
+                    <View style={styles.statHeader}>
+                      <Text style={styles.statLabel}>Stats</Text>
+                    </View>
+                    <View style={styles.statsInsightsContainer}>
+                      {/* Calorie Target Achievement */}
+                      {enabledGoalPreferences.some(p => p.statName === 'calorieTarget') && (
+                        <View style={styles.statInsight}>
+                          <View style={styles.insightRow}>
+                            <Text style={styles.insightText}>
+                              You hit calorie target{' '}
+                              <Text style={styles.insightBold}>
+                                {weeklyBreakdown.filter(day => day.totalCalories >= dailyGoals.calorieGoal).length} days
+                              </Text>
+                            </Text>
+                            <View style={styles.trendBadge}>
+                              <MaterialCommunityIcons
+                                name="trending-up"
+                                size={14}
+                                color="#4CAF50"
+                              />
+                              <Text style={styles.trendBadgeText}>+1</Text>
+                            </View>
+                          </View>
+                        </View>
+                      )}
+
+                      {/* Protein Change */}
+                      {enabledGoalPreferences.some(p => p.statName === 'proteinIntake') && (
+                        <View style={styles.statInsight}>
+                          <View style={styles.insightRow}>
+                            <Text style={styles.insightText}>
+                              Protein intake{' '}
+                              <Text style={styles.insightBold}>
+                                +{Math.round(((currentWeekData.totalProtein - lastWeekData.totalProtein) / (lastWeekData.totalProtein || 1)) * 100)}%
+                              </Text>
+                              {' '}vs last week
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+
+                      {/* Carbs Change */}
+                      {enabledGoalPreferences.some(p => p.statName === 'carbsIntake') && (
+                        <View style={styles.statInsight}>
+                          <View style={styles.insightRow}>
+                            <Text style={styles.insightText}>
+                              Carbs intake{' '}
+                              <Text style={styles.insightBold}>
+                                +{Math.round(((currentWeekData.totalCarbs - lastWeekData.totalCarbs) / (lastWeekData.totalCarbs || 1)) * 100)}%
+                              </Text>
+                              {' '}vs last week
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+
+                      {/* Fats Change */}
+                      {enabledGoalPreferences.some(p => p.statName === 'fatsIntake') && (
+                        <View style={styles.statInsight}>
+                          <View style={styles.insightRow}>
+                            <Text style={styles.insightText}>
+                              Fats intake{' '}
+                              <Text style={styles.insightBold}>
+                                +{Math.round(((currentWeekData.totalFats - lastWeekData.totalFats) / (lastWeekData.totalFats || 1)) * 100)}%
+                              </Text>
+                              {' '}vs last week
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+
+                      {/* Smart Insight - Meal Prep Suggestion */}
+                      {enabledGoalPreferences.some(p => p.statName === 'mealPrepTips') && (
+                        <View style={[styles.statInsight, styles.insightWarning]}>
+                          <View style={styles.insightRow}>
+                            <MaterialCommunityIcons
+                              name="lightbulb-on"
+                              size={16}
+                              color="#FF9800"
+                            />
+                            <Text style={[styles.insightText, styles.warningText]}>
+                              You skipped <Text style={styles.insightBold}>lunch twice</Text> — consider prepping meals
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                )}
+
+                {/* Empty Stats Message */}
+                {enabledGoalPreferences.length === 0 && (
+                  <View style={styles.statItem}>
+                    <View style={styles.statHeader}>
+                      <Text style={styles.statLabel}>Stats</Text>
+                    </View>
+                    <View style={styles.emptyStatsContainer}>
+                      <MaterialCommunityIcons
+                        name="tune"
+                        size={24}
+                        color="#ccc"
+                      />
+                      <Text style={styles.emptyStatsText}>
+                        No stats selected. Configure from Goals button.
+                      </Text>
+                    </View>
+                  </View>
+                )}
+              </View>
+
+              {/* Weekly Summary Cards */}
+              <WeeklySummaryCards
+                currentWeekData={currentWeekData}
+                lastWeekData={lastWeekData}
+                weeklyGoals={weeklyGoals}
+              />
+
+              {/* Weekly Calendar View */}
+              <WeeklyCalendarView
+                weeklyData={weeklyBreakdown}
+                dailyGoal={dailyGoals.calorieGoal}
+                selectedDate={null}
+                onDateSelect={() => {}}
+              />
+
+            </>
           )}
         </ScrollView>
       </Animated.View>
 
-      {/* Modals */}
-      <AddMealModal
-        visible={addMealModalVisible}
-        onClose={() => setAddMealModalVisible(false)}
-        onMealAdded={handleMealAdded}
-      />
-
-      <EditMealDetailsModal
-        visible={editMealModalVisible}
-        meal={selectedMealForEdit}
-        onClose={() => {
-          setEditMealModalVisible(false);
-          setSelectedMealForEdit(null);
-        }}
-        onMealUpdated={handleMealUpdated}
+      {/* Goal Settings Modal */}
+      <GoalSettingsModal
+        visible={goalSettingsModalVisible}
+        onClose={() => setGoalSettingsModalVisible(false)}
+        onSettingsSaved={handleGoalSettingsSaved}
       />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
-  scrollView: { flex: 1 },
-  scrollContent: { paddingBottom: 20 },
-  centerContent: { flex: 1, justifyContent: "center", alignItems: "center" },
-  loadingText: { fontSize: 16, color: "#999" },
-
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginHorizontal: 16,
-    marginVertical: 12,
-    gap: 10,
-  },
-  searchContainer: {
+  container: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
+    backgroundColor: '#fff',
   },
-  searchIcon: { marginRight: 8 },
-  searchInput: {
+  scrollView: {
     flex: 1,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: "#333",
   },
-  clearButton: { padding: 4 },
-
-  controlButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
+  scrollContent: {
+    paddingBottom: 20,
+  },
+  centerContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#999',
+  },
+  header: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 12,
+  },
+  weekNavigation: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 12,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
-    alignItems: "center",
-    justifyContent: "center",
+    borderColor: '#e0e0e0',
   },
-
+  navButton: {
+    padding: 8,
+  },
+  weekLabel: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 4,
+  },
+  weekLabelText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#333',
+  },
+  consistencyBadgeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  consistencyBadge: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#999',
+  },
+  actionButtonsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'space-between',
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  todayButton: {
+    backgroundColor: '#2196F3',
+  },
+  goalButton: {
+    backgroundColor: '#FF9800',
+  },
+  logButton: {
+    backgroundColor: '#4CAF50',
+  },
+  actionButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#fff',
+  },
   emptyStateContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingVertical: 60,
     paddingHorizontal: 16,
   },
   emptyStateTitle: {
     fontSize: 18,
-    fontWeight: "700",
-    color: "#333",
+    fontWeight: '700',
+    color: '#333',
     marginTop: 16,
     marginBottom: 8,
   },
   emptyStateSubtitle: {
     fontSize: 14,
-    color: "#999",
-    textAlign: "center",
+    color: '#999',
+    textAlign: 'center',
     marginBottom: 24,
   },
   emptyStateButton: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
     backgroundColor: COLORS.primary,
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
   },
-  emptyStateButtonText: { fontSize: 14, fontWeight: "600", color: "#fff" },
-
-  mealCardWrapper: {
-    marginHorizontal: 16,
-    marginBottom: 10,
+  emptyStateButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  toggleSwitch: {
+    width: 50,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#e0e0e0',
+    justifyContent: 'center',
+    paddingHorizontal: 2,
+  },
+  toggleSwitchActive: {
+    backgroundColor: '#4CAF50',
+  },
+  toggleSwitchKnob: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#fff',
+    alignSelf: 'flex-start',
+  },
+  toggleSwitchKnobActive: {
+    alignSelf: 'flex-end',
+  },
+  statsSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 20,
+    gap: 16,
+  },
+  statItem: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  statHeader: {
+    marginBottom: 12,
+  },
+  statLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#333',
+  },
+  streakCard: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginBottom: 12,
+  },
+  streakMinimalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  streakMinimalText: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
+  },
+  streakBold: {
+    fontWeight: '700',
+    color: '#000',
+  },
+  streakMetricLabel: {
+    fontSize: 10,
+    color: '#999',
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  checkmarkRowMinimal: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  checkmarkMinimal: {
+    width: 18,
+    height: 18,
+    borderRadius: 3,
+    borderWidth: 1,
+  },
+  statsInsightsContainer: {
+    gap: 12,
+  },
+  statInsight: {
+    paddingVertical: 10,
+    paddingHorizontal: 0,
+  },
+  insightRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  insightText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
+    lineHeight: 18,
+  },
+  insightBold: {
+    fontWeight: '700',
+    color: '#000',
+  },
+  trendBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  trendBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#4CAF50',
+  },
+  insightWarning: {
+    backgroundColor: '#FFF3E0',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    marginTop: 4,
+  },
+  warningText: {
+    color: '#E65100',
+  },
+  emptyStatsContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 24,
+    gap: 8,
+  },
+  emptyStatsText: {
+    fontSize: 13,
+    color: '#999',
+    fontWeight: '500',
+    textAlign: 'center',
   },
 });
