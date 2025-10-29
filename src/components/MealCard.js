@@ -90,7 +90,7 @@ export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress, 
           {meal.name}
         </Text>
         <View style={styles.topRowActions}>
-          {/* Always show star - editable in MealsScreen, read-only everywhere else */}
+          {/* Show star - editable in MealsScreen, read-only only if favorited elsewhere */}
           {isEditableStar ? (
             <TouchableOpacity
               onPress={handleFavoritePress}
@@ -103,14 +103,14 @@ export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress, 
                 color={isFavorite ? "#FFD700" : "#ccc"}
               />
             </TouchableOpacity>
-          ) : (
+          ) : isFavorite ? (
             <MaterialCommunityIcons
-              name={isFavorite ? "star" : "star-outline"}
+              name="star"
               size={22}
-              color={isFavorite ? "#FFD700" : "#ccc"}
+              color="#FFD700"
               style={styles.starButton}
             />
-          )}
+          ) : null}
           {onMenuPress && showPlusIcon ? (
             isAdded ? (
               <MaterialCommunityIcons
