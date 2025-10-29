@@ -3,90 +3,63 @@ import {
   View,
   Text,
   SafeAreaView,
-  Alert,
   ScrollView,
-  TouchableOpacity,
   StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+  Animated,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { WeekCalendar } from '../components/layouts';
 import { AssignDaysModal } from '../components/modals';
 import { SearchFilterSort } from '../components/meals';
-import { COLORS } from '../constants/colors';
-import { SPACING } from '../constants/spacing';
-import { STRINGS } from '../constants/strings';
+import { COLORS } from '../styles';
 import {
   getAllPlans,
-  getExercisesByPlanId,
-  getPlansForDay,
   getScheduledDaysForPlan,
   assignPlanToDays,
-  markPlanCompleted,
-  getPlanExecutionStatus,
   deletePlan,
 } from '../services/database';
+import {
+  getWeeklyWorkoutCompletions,
+  getPlanExerciseCount,
+  getSundayOfWeek,
+  calculateCompletionPercentage,
+} from '../services/workoutStats';
 
 /**
  * WorkoutsScreen
- * Display plans scheduled for each day of the week with scheduling functionality
+ * Shows all available workouts with search, filter, and sort functionality
  */
 export default function WorkoutsScreen({ navigation }) {
-  const [selectedDay, setSelectedDay] = useState(new Date().getDay());
-  const [plansForDay, setPlansForDay] = useState([]);
-  const [filteredPlansForDay, setFilteredPlansForDay] = useState([]);
-  const [allPlans, setAllPlans] = useState([]);
-  const [scheduledDays, setScheduledDays] = useState({});
+  const [workouts, setWorkouts] = useState([]);
+  const [filteredWorkouts, setFilteredWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Search, Filter, Sort state
-  const [searchText, setSearchText] = useState("");
-  const [sortOption, setSortOption] = useState("name");
+  const [searchText, setSearchText] = useState('');
+  const [sortOption, setSortOption] = useState('name');
   const [filterOptions, setFilterOptions] = useState({
-    starred: false,
-    veg: false,
-    "non-veg": false,
-    egg: false,
-    vegan: false,
+    difficulty: false,
+    duration: false,
+    muscleGroup: false,
+    equipment: false,
   });
-
+  const [exerciseCounts, setExerciseCounts] = useState({});
+  const [completionCounts, setCompletionCounts] = useState({});
   const [assignModalVisible, setAssignModalVisible] = useState(false);
-  const [selectedPlanForAssign, setSelectedPlanForAssign] = useState(null);
+  const [selectedWorkoutForAssign, setSelectedWorkoutForAssign] = useState(null);
+  const [scheduledDays, setScheduledDays] = useState({});
+  const [fadeAnim] = useState(new Animated.Value(0));
 
-  // Set header options
-  React.useEffect(() => {
-    navigation.setOptions({
-      title: 'Log Workouts',
-      headerLeft: () => (
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={{ paddingLeft: 16 }}
-        >
-          <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.primary} />
-        </TouchableOpacity>
-      ),
-      headerRight: () => (
-        <TouchableOpacity
-          onPress={() => navigation.navigate('CreatePlan')}
-          style={{ paddingRight: 16, flexDirection: 'row', alignItems: 'center', gap: 4 }}
-        >
-          <MaterialCommunityIcons name="plus" size={20} color="#fff" />
-          <Text style={{ color: '#fff', fontWeight: '600' }}>Create</Text>
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation]);
+  const weekStartDate = getSundayOfWeek(new Date().toISOString().split('T')[0]);
 
-  // Load plans and their schedules
-  const loadData = useCallback(async () => {
+  const loadWorkouts = useCallback(async () => {
     try {
       setLoading(true);
 
-      // Get all plans
       const plans = await getAllPlans();
-      setAllPlans(plans);
+      setWorkouts(plans);
 
-      // Get scheduled days for each plan
       const daysMap = {};
       for (const plan of plans) {
         const days = await getScheduledDaysForPlan(plan.id);
@@ -94,68 +67,78 @@ export default function WorkoutsScreen({ navigation }) {
       }
       setScheduledDays(daysMap);
 
-      // Get plans for selected day
-      const dayPlans = await getPlansForDay(selectedDay);
-      setPlansForDay(dayPlans);
+      const exerciseCountsMap = {};
+      for (const plan of plans) {
+        const count = await getPlanExerciseCount(plan.id);
+        exerciseCountsMap[plan.id] = count;
+      }
+      setExerciseCounts(exerciseCountsMap);
+
+      const completionCountsMap = {};
+      for (const plan of plans) {
+        const count = await getWeeklyWorkoutCompletions(plan.id, weekStartDate);
+        completionCountsMap[plan.id] = count;
+      }
+      setCompletionCounts(completionCountsMap);
+
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
     } catch (error) {
       console.error('Error loading workouts:', error);
-      Alert.alert('Error', 'Failed to load workout plans');
+      Alert.alert('Error', 'Failed to load workouts');
     } finally {
       setLoading(false);
     }
-  }, [selectedDay]);
+  }, [weekStartDate, fadeAnim]);
 
-  // Load data when screen is focused
   useFocusEffect(
     React.useCallback(() => {
-      loadData();
-    }, [selectedDay])
+      loadWorkouts();
+    }, [loadWorkouts])
   );
 
-  // Apply search, filter, and sort to plans
   const applyFiltersAndSort = useCallback(() => {
-    let filtered = [...plansForDay];
+    let filtered = [...workouts];
 
-    // Apply search filter
     if (searchText.trim()) {
-      filtered = filtered.filter((p) =>
-        p.name.toLowerCase().includes(searchText.toLowerCase())
+      filtered = filtered.filter(w =>
+        w.name.toLowerCase().includes(searchText.toLowerCase())
       );
     }
 
-    // Apply sorting
-    if (sortOption === "name") {
+    if (sortOption === 'name') {
       filtered.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sortOption === "calories") {
-      // If workouts have difficulty/intensity, sort by that
-      filtered.sort((a, b) => (b.difficulty || 0) - (a.difficulty || 0));
-    } else if (sortOption === "recent") {
+    } else if (sortOption === 'assigned') {
+      filtered.sort((a, b) => {
+        const aDays = (scheduledDays[a.id] || []).length;
+        const bDays = (scheduledDays[b.id] || []).length;
+        return bDays - aDays;
+      });
+    } else if (sortOption === 'recent') {
       filtered.reverse();
     }
 
-    setFilteredPlansForDay(filtered);
-  }, [plansForDay, searchText, sortOption]);
+    setFilteredWorkouts(filtered);
+  }, [workouts, searchText, sortOption, scheduledDays]);
 
-  // Reapply filters and sort whenever plansForDay or search/sort options change
   React.useEffect(() => {
     applyFiltersAndSort();
   }, [applyFiltersAndSort]);
 
-  const handleDaySelect = (day) => {
-    setSelectedDay(day);
-  };
-
-  const handleAssignDays = (plan) => {
-    setSelectedPlanForAssign(plan);
+  const handleAssignDays = (workout) => {
+    setSelectedWorkoutForAssign(workout);
     setAssignModalVisible(true);
   };
 
   const handleSaveDays = async (selectedDays) => {
     try {
-      await assignPlanToDays(selectedPlanForAssign.id, selectedDays);
+      await assignPlanToDays(selectedWorkoutForAssign.id, selectedDays);
       setAssignModalVisible(false);
-      setSelectedPlanForAssign(null);
-      loadData();
+      setSelectedWorkoutForAssign(null);
+      loadWorkouts();
       Alert.alert('Success', 'Workout schedule updated!');
     } catch (error) {
       console.error('Error saving plan schedule:', error);
@@ -163,38 +146,28 @@ export default function WorkoutsScreen({ navigation }) {
     }
   };
 
-  const handleMarkComplete = async (plan) => {
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      await markPlanCompleted(plan.id, today);
-      loadData();
-      Alert.alert('Success', `${plan.name} marked as completed!`);
-    } catch (error) {
-      console.error('Error marking plan as complete:', error);
-      Alert.alert('Error', 'Failed to mark plan as completed');
-    }
+  const handleViewExercises = (workout) => {
+    navigation.navigate('ExecuteWorkout', { planId: workout.id });
   };
 
-  const handleDeletePlan = (plan) => {
+  const handleDeleteWorkout = (workout) => {
     Alert.alert(
       'Delete Workout',
-      `Are you sure you want to delete "${plan.name}"?`,
+      `Are you sure you want to delete "${workout.name}"?`,
       [
         {
           text: 'Cancel',
-          onPress: () => {},
           style: 'cancel',
         },
         {
           text: 'Delete',
           onPress: async () => {
             try {
-              await deletePlan(plan.id);
-              loadData();
-              Alert.alert('Success', 'Workout deleted!');
+              await deletePlan(workout.id);
+              loadWorkouts();
             } catch (error) {
-              console.error('Error deleting plan:', error);
-              Alert.alert('Error', 'Failed to delete plan');
+              console.error('Error deleting workout:', error);
+              Alert.alert('Error', 'Failed to delete workout');
             }
           },
           style: 'destructive',
@@ -203,143 +176,212 @@ export default function WorkoutsScreen({ navigation }) {
     );
   };
 
-  const handlePlanMenu = (plan) => {
+  const handleWorkoutMenu = (workout) => {
     Alert.alert(
       'Workout Options',
-      plan.name,
+      workout.name,
       [
         {
           text: 'Assign Days',
-          onPress: () => handleAssignDays(plan),
+          onPress: () => handleAssignDays(workout),
         },
         {
-          text: 'Mark as Complete',
-          onPress: () => handleMarkComplete(plan),
+          text: 'View Exercises',
+          onPress: () => handleViewExercises(workout),
         },
         {
           text: 'Delete',
-          onPress: () => handleDeletePlan(plan),
+          onPress: () => handleDeleteWorkout(workout),
           style: 'destructive',
         },
         {
           text: 'Cancel',
-          onPress: () => {},
           style: 'cancel',
         },
       ]
     );
   };
 
-  const getScheduledDaysDisplay = (planId) => {
-    const days = scheduledDays[planId] || [];
+  const getScheduledDaysDisplay = (workoutId) => {
+    const days = scheduledDays[workoutId] || [];
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    return days.map(d => dayNames[d]).join(', ') || 'No schedule';
+    return days.map(d => dayNames[d]).join(', ') || 'Unassigned';
+  };
+
+  const getCompletionProgress = (workoutId) => {
+    const assigned = (scheduledDays[workoutId] || []).length;
+    const completed = completionCounts[workoutId] || 0;
+    const percentage = calculateCompletionPercentage(completed, assigned);
+    return {
+      percentage,
+      completed,
+      assigned,
+      color: percentage >= 90 ? '#4CAF50' : percentage >= 70 ? '#FFC107' : percentage >= 50 ? '#FF9800' : '#FF6B6B',
+    };
   };
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <View style={styles.centerContent}>
           <Text style={styles.loadingText}>Loading...</Text>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {/* Week Calendar */}
-      <WeekCalendar
-        selectedDay={selectedDay}
-        onDaySelect={handleDaySelect}
-        highlightedDays={Object.values(scheduledDays).flat().filter((v, i, a) => a.indexOf(v) === i)}
-      />
+    <SafeAreaView style={styles.container}>
+      <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={true}
+        >
+          {/* Search, Filter, Sort */}
+          <SearchFilterSort
+            searchText={searchText}
+            onSearchChange={setSearchText}
+            sortOption={sortOption}
+            onSortChange={setSortOption}
+            filterOptions={filterOptions}
+            onFilterChange={setFilterOptions}
+            searchPlaceholder="Search workouts..."
+            filterLabels={{
+              difficulty: "Difficulty",
+              duration: "Duration",
+              muscleGroup: "Muscle Group",
+              equipment: "Equipment",
+            }}
+            filterAlertTitle="Filter Workouts"
+            sortOptions={[
+              { value: "name", label: "Name (A-Z)" },
+              { value: "assigned", label: "Most Assigned" },
+              { value: "recent", label: "Recently Created" },
+            ]}
+            sortAlertTitle="Sort Workouts"
+          />
 
-      {/* Search, Filter, Sort */}
-      <SearchFilterSort
-        searchText={searchText}
-        onSearchChange={setSearchText}
-        sortOption={sortOption}
-        onSortChange={setSortOption}
-        filterOptions={filterOptions}
-        onFilterChange={setFilterOptions}
-        searchPlaceholder="Search workouts..."
-      />
-
-      {/* Plans for Selected Day */}
-      <ScrollView
-        style={styles.plansList}
-        contentContainerStyle={styles.plansContent}
-        scrollEnabled={true}
-        showsVerticalScrollIndicator={true}
-      >
-        {filteredPlansForDay.length === 0 ? (
-          <View style={styles.emptyState}>
-            <MaterialCommunityIcons
-              name="dumbbell"
-              size={48}
-              color="#ccc"
-            />
-            <Text style={styles.emptyText}>
-              {searchText.trim() ? "No workouts found" : "No workouts scheduled for this day"}
-            </Text>
-          </View>
-        ) : (
-          filteredPlansForDay.map((plan) => (
-            <View key={plan.id} style={styles.planCard}>
-              <View style={styles.planHeader}>
-                <View style={styles.planInfo}>
-                  <Text style={styles.planName}>{plan.name}</Text>
-                  <Text style={styles.planSchedule}>
-                    {getScheduledDaysDisplay(plan.id)}
-                  </Text>
-                </View>
+          {/* Workouts List */}
+          {filteredWorkouts.length === 0 ? (
+            <View style={styles.emptyStateContainer}>
+              <MaterialCommunityIcons
+                name="dumbbell"
+                size={64}
+                color="#ccc"
+              />
+              <Text style={styles.emptyStateTitle}>
+                {workouts.length === 0 ? 'No Workouts Created' : 'No Workouts Found'}
+              </Text>
+              <Text style={styles.emptyStateSubtitle}>
+                {workouts.length === 0
+                  ? 'Create your first workout routine'
+                  : 'Try adjusting your search or filters'}
+              </Text>
+              {workouts.length === 0 && (
                 <TouchableOpacity
-                  onPress={() => handlePlanMenu(plan)}
-                  style={styles.kebabButton}
+                  onPress={() => navigation.navigate('CreatePlan')}
+                  style={styles.emptyStateButton}
                 >
-                  <MaterialCommunityIcons
-                    name="dots-vertical"
-                    size={24}
-                    color={COLORS.primary}
-                  />
+                  <MaterialCommunityIcons name="plus" size={20} color="#fff" />
+                  <Text style={styles.emptyStateButtonText}>Create Workout</Text>
                 </TouchableOpacity>
-              </View>
-
-              {plan.description && (
-                <Text style={styles.planDescription}>{plan.description}</Text>
               )}
-
-              <TouchableOpacity
-                style={styles.viewButton}
-                onPress={() =>
-                  navigation.navigate('ExecuteWorkout', { planId: plan.id })
-                }
-              >
-                <MaterialCommunityIcons
-                  name="chevron-right"
-                  size={20}
-                  color={COLORS.primary}
-                />
-                <Text style={styles.viewButtonText}>View Exercises</Text>
-              </TouchableOpacity>
             </View>
-          ))
-        )}
-      </ScrollView>
+          ) : (
+            filteredWorkouts.map(workout => {
+              const progress = getCompletionProgress(workout.id);
+              const exerciseCount = exerciseCounts[workout.id] || 0;
+
+              return (
+                <View key={workout.id} style={styles.workoutCard}>
+                  <View style={styles.cardHeader}>
+                    <View style={styles.cardInfo}>
+                      <Text style={styles.workoutName}>{workout.name}</Text>
+                      <Text style={styles.daysDisplay}>
+                        {getScheduledDaysDisplay(workout.id)}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => handleWorkoutMenu(workout)}
+                      style={styles.kebabButton}
+                    >
+                      <MaterialCommunityIcons
+                        name="dots-vertical"
+                        size={24}
+                        color={COLORS.primary}
+                      />
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Exercise Count */}
+                  <View style={styles.exerciseCountContainer}>
+                    <MaterialCommunityIcons
+                      name="dumbbell"
+                      size={14}
+                      color="#666"
+                    />
+                    <Text style={styles.exerciseCount}>
+                      {exerciseCount} {exerciseCount === 1 ? 'exercise' : 'exercises'}
+                    </Text>
+                  </View>
+
+                  {/* Weekly Completion Progress */}
+                  {progress.assigned > 0 && (
+                    <View style={styles.progressContainer}>
+                      <View style={styles.progressLabel}>
+                        <Text style={styles.progressText}>
+                          This week: {progress.completed}/{progress.assigned}
+                        </Text>
+                      </View>
+                      <View style={styles.progressBar}>
+                        <View
+                          style={[
+                            styles.progressFill,
+                            {
+                              width: `${progress.percentage}%`,
+                              backgroundColor: progress.color,
+                            },
+                          ]}
+                        />
+                      </View>
+                      <Text style={[styles.progressPercentage, { color: progress.color }]}>
+                        {Math.round(progress.percentage)}%
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Action Button */}
+                  <TouchableOpacity
+                    style={styles.viewButton}
+                    onPress={() => handleViewExercises(workout)}
+                  >
+                    <MaterialCommunityIcons
+                      name="chevron-right"
+                      size={20}
+                      color={COLORS.primary}
+                    />
+                    <Text style={styles.viewButtonText}>View Exercises</Text>
+                  </TouchableOpacity>
+                </View>
+              );
+            })
+          )}
+        </ScrollView>
+      </Animated.View>
 
       {/* Assign Days Modal */}
       <AssignDaysModal
         visible={assignModalVisible}
-        planName={selectedPlanForAssign?.name || ''}
-        selectedDays={scheduledDays[selectedPlanForAssign?.id] || []}
+        planName={selectedWorkoutForAssign?.name || ''}
+        selectedDays={scheduledDays[selectedWorkoutForAssign?.id] || []}
         onSave={handleSaveDays}
         onClose={() => {
           setAssignModalVisible(false);
-          setSelectedPlanForAssign(null);
+          setSelectedWorkoutForAssign(null);
         }}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -347,6 +389,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 20,
   },
   centerContent: {
     flex: 1,
@@ -357,50 +405,112 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#999',
   },
-  plansList: {
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
     flex: 1,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: '#333',
   },
-  plansContent: {
+  clearButton: {
+    padding: 4,
+  },
+  controlsContainer: {
+    flexDirection: 'row',
     paddingHorizontal: 16,
-    paddingBottom: 20,
-    flexGrow: 1,
+    marginBottom: 16,
+    gap: 8,
   },
-  emptyState: {
+  controlButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  controlButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.primary,
+  },
+  emptyStateContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 40,
+    paddingVertical: 60,
+    paddingHorizontal: 16,
   },
-  emptyText: {
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptyStateSubtitle: {
     fontSize: 14,
     color: '#999',
-    marginTop: 12,
     textAlign: 'center',
+    marginBottom: 24,
   },
-  planCard: {
+  emptyStateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  emptyStateButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  workoutCard: {
     backgroundColor: '#f9f9f9',
     borderRadius: 10,
     padding: 16,
+    marginHorizontal: 16,
     marginBottom: 12,
     borderWidth: 1,
     borderColor: '#e0e0e0',
   },
-  planHeader: {
+  cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 12,
   },
-  planInfo: {
+  cardInfo: {
     flex: 1,
   },
-  planName: {
+  workoutName: {
     fontSize: 16,
     fontWeight: '700',
     color: '#333',
     marginBottom: 4,
   },
-  planSchedule: {
+  daysDisplay: {
     fontSize: 12,
     color: '#999',
     fontWeight: '500',
@@ -409,11 +519,46 @@ const styles = StyleSheet.create({
     padding: 8,
     marginRight: -8,
   },
-  planDescription: {
-    fontSize: 13,
-    color: '#666',
+  exerciseCountContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     marginBottom: 12,
-    lineHeight: 18,
+  },
+  exerciseCount: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
+  },
+  progressContainer: {
+    marginBottom: 12,
+  },
+  progressLabel: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  progressText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#666',
+  },
+  progressBar: {
+    height: 6,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginBottom: 4,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  progressPercentage: {
+    fontSize: 11,
+    fontWeight: '600',
+    textAlign: 'right',
   },
   viewButton: {
     flexDirection: 'row',

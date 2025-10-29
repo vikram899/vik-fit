@@ -5,7 +5,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { COLORS } from "../constants/colors";
 import ProfileScreen from "../screens/ProfileScreen";
-import WorkoutsScreen from "../screens/WorkoutsScreen";
+import WorkoutDayViewScreen from "../screens/WorkoutDayViewScreen";
 import ComponentsShowcaseScreen from "../screens/ComponentsShowcaseScreen";
 
 console.log("🔧 AppNavigator.js - Navigation imports done");
@@ -52,7 +52,7 @@ function WorkoutStackNavigator() {
           cardStyle: { backgroundColor: COLORS.background },
         }}
       >
-        <WorkoutStack.Screen name="Workouts" component={WorkoutsScreen} />
+        <WorkoutStack.Screen name="Workouts" component={WorkoutDayViewScreen} />
         <WorkoutStack.Screen name="ComponentsShowcase" component={ComponentsShowcaseScreen} />
       </WorkoutStack.Navigator>
     );
