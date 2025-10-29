@@ -10,10 +10,7 @@ import {
   deleteMealLog,
   getMacroGoals,
 } from "../services/database";
-import {
-  EditMealModal,
-  TodaysMealsList,
-} from "../components/meals";
+import { EditMealModal, TodaysMealsList } from "../components/meals";
 import { SummaryCard } from "../components/home";
 
 const LogMealsScreen = ({ navigation }) => {
@@ -166,7 +163,7 @@ const LogMealsScreen = ({ navigation }) => {
       <SummaryCard
         dailyTotals={dailyTotals}
         macroGoals={macroGoals}
-        hideHeader={true}
+        hideLogButton={true}
         showDate={false}
       />
 

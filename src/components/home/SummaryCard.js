@@ -10,6 +10,7 @@ export default function SummaryCard({
   onLogPress,
   onEditMacrosPress,
   hideHeader = false,
+  hideLogButton = false,
   showDate = false,
 }) {
   const today = new Date().toISOString().split('T')[0];
@@ -21,11 +22,13 @@ export default function SummaryCard({
           <Text style={appStyles.summaryTitle}>
             {showDate ? today : "Today's Summary"}
           </Text>
-          <View style={styles.headerButtons}>
-            <TouchableOpacity style={styles.logButton} onPress={onLogPress}>
-              <Text style={styles.logButtonText}>+ Log</Text>
-            </TouchableOpacity>
-          </View>
+          {!hideLogButton && (
+            <View style={styles.headerButtons}>
+              <TouchableOpacity style={styles.logButton} onPress={onLogPress}>
+                <Text style={styles.logButtonText}>+ Log</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       )}
 
