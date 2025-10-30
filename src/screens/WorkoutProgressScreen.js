@@ -12,8 +12,8 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { WeeklyWorkoutSummaryCards } from '../components/layouts';
-import { WorkoutHistoryModal, WorkoutGoalSettingsModal } from '../components/workouts';
-import { StreakCard } from '../components/common';
+import { WorkoutHistoryModal } from '../components/workouts';
+import { StreakCard, GoalSettingsModal } from '../components/common';
 import { COLORS } from '../styles';
 import { getEnabledGoalPreferences, getUserSetting } from '../services/database';
 import {
@@ -141,11 +141,11 @@ export default function WorkoutProgressScreen({ navigation }) {
     setGoalSettingsModalVisible(true);
   };
 
-  const handleGoalSettingsSaved = async (settings) => {
+  const handleGoalSettingsSaved = async (settings = {}) => {
     try {
-      // Update streak tracking metric
-      if (settings.streakTrackingMetric) {
-        setStreakTrackingMetric(settings.streakTrackingMetric);
+      // Update streak tracking metric if provided
+      if (settings.workoutStreakTrackingMetric) {
+        setStreakTrackingMetric(settings.workoutStreakTrackingMetric);
       }
 
       // Reload preferences to show any changes
@@ -487,10 +487,12 @@ export default function WorkoutProgressScreen({ navigation }) {
       />
 
       {/* Workout Goal Settings Modal */}
-      <WorkoutGoalSettingsModal
+      <GoalSettingsModal
         visible={goalSettingsModalVisible}
         onClose={() => setGoalSettingsModalVisible(false)}
-        onSave={handleGoalSettingsSaved}
+        onSettingsSaved={handleGoalSettingsSaved}
+        type="workouts"
+        trackingMetricSettingKey="workoutStreakTrackingMetric"
       />
     </SafeAreaView>
   );

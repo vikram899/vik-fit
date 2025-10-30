@@ -205,20 +205,45 @@ export const initializeDatabase = async () => {
 
     // Insert default goal preferences if they don't exist
     const existingPrefs = await db.getAllAsync('SELECT * FROM goal_preferences');
-    if (existingPrefs.length === 0) {
-      const defaultPrefs = [
-        { statName: 'calorieTarget', isEnabled: 1, displayOrder: 0 },
-        { statName: 'proteinIntake', isEnabled: 1, displayOrder: 1 },
-        { statName: 'carbsIntake', isEnabled: 0, displayOrder: 2 },
-        { statName: 'fatsIntake', isEnabled: 0, displayOrder: 3 },
-        { statName: 'mealPrepTips', isEnabled: 1, displayOrder: 4 },
-      ];
+    const allDefaultPrefs = [
+      // Meal Stats
+      { statName: 'calorieTarget', isEnabled: 1, displayOrder: 0 },
+      { statName: 'proteinIntake', isEnabled: 1, displayOrder: 1 },
+      { statName: 'carbsIntake', isEnabled: 0, displayOrder: 2 },
+      { statName: 'fatsIntake', isEnabled: 0, displayOrder: 3 },
+      { statName: 'mealPrepTips', isEnabled: 1, displayOrder: 4 },
+      // Workout Stats
+      { statName: 'workoutTarget', isEnabled: 1, displayOrder: 5 },
+      { statName: 'exercisesCompleted', isEnabled: 1, displayOrder: 6 },
+      { statName: 'consistency', isEnabled: 1, displayOrder: 7 },
+      { statName: 'strengthStats', isEnabled: 1, displayOrder: 8 },
+      { statName: 'volumeStats', isEnabled: 1, displayOrder: 9 },
+      { statName: 'restTimeStats', isEnabled: 0, displayOrder: 10 },
+      { statName: 'recoveryStats', isEnabled: 0, displayOrder: 11 },
+    ];
 
-      for (const pref of defaultPrefs) {
+    if (existingPrefs.length === 0) {
+      // First time setup - insert all default preferences
+      for (const pref of allDefaultPrefs) {
         await db.runAsync(
           'INSERT INTO goal_preferences (statName, isEnabled, displayOrder) VALUES (?, ?, ?)',
           [pref.statName, pref.isEnabled, pref.displayOrder]
         );
+      }
+    } else {
+      // Migration: Insert any missing preferences that don't exist yet
+      const existingStatNames = existingPrefs.map(p => p.statName);
+      for (const pref of allDefaultPrefs) {
+        if (!existingStatNames.includes(pref.statName)) {
+          try {
+            await db.runAsync(
+              'INSERT INTO goal_preferences (statName, isEnabled, displayOrder) VALUES (?, ?, ?)',
+              [pref.statName, pref.isEnabled, pref.displayOrder]
+            );
+          } catch (error) {
+            // Stat already exists or insert failed, continue
+          }
+        }
       }
     }
 

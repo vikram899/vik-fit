@@ -12,8 +12,9 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { WeeklySummaryCards, WeeklyCalendarView } from '../components/layouts';
-import { GoalSettingsModal } from '../components/meals';
+import { WeeklySummaryCards } from '../components/layouts';
+import { MealsHistoryModal } from '../components/meals';
+import { GoalSettingsModal } from '../components/common';
 import { Toast, StreakCard } from '../components/common';
 import { COLORS } from '../styles';
 import {
@@ -62,6 +63,7 @@ export default function MealProgressScreen({ navigation }) {
     getSundayOfWeek(new Date().toISOString().split('T')[0])
   );
   const [goalSettingsModalVisible, setGoalSettingsModalVisible] = useState(false);
+  const [mealHistoryModalVisible, setMealHistoryModalVisible] = useState(false);
   const [enabledGoalPreferences, setEnabledGoalPreferences] = useState([]);
   const [streakTrackingMetric, setStreakTrackingMetric] = useState('calories');
 
@@ -171,8 +173,8 @@ export default function MealProgressScreen({ navigation }) {
     }
   };
 
-  const handleLogMeal = () => {
-    navigation.navigate('LogMeals');
+  const handleMealHistory = () => {
+    setMealHistoryModalVisible(true);
   };
 
   // Calculate consistency badge (days with logged meals)
@@ -329,11 +331,11 @@ export default function MealProgressScreen({ navigation }) {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={handleLogMeal}
-                style={[styles.actionButton, styles.logButton]}
+                onPress={handleMealHistory}
+                style={[styles.actionButton, styles.historyButton]}
               >
-                <MaterialCommunityIcons name="plus" size={14} color="#fff" />
-                <Text style={styles.actionButtonText}>Log</Text>
+                <MaterialCommunityIcons name="history" size={14} color="#fff" />
+                <Text style={styles.actionButtonText}>History</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -352,11 +354,11 @@ export default function MealProgressScreen({ navigation }) {
                 Start logging your meals to see weekly insights
               </Text>
               <TouchableOpacity
-                onPress={handleLogMeal}
+                onPress={handleMealHistory}
                 style={styles.emptyStateButton}
               >
-                <MaterialCommunityIcons name="plus" size={20} color="#fff" />
-                <Text style={styles.emptyStateButtonText}>Log Your First Meal</Text>
+                <MaterialCommunityIcons name="history" size={20} color="#fff" />
+                <Text style={styles.emptyStateButtonText}>View Meal History</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -492,13 +494,6 @@ export default function MealProgressScreen({ navigation }) {
                 weeklyGoals={weeklyGoals}
               />
 
-              {/* Weekly Calendar View */}
-              <WeeklyCalendarView
-                weeklyData={weeklyBreakdown}
-                dailyGoal={dailyGoals.calorieGoal}
-                selectedDate={null}
-                onDateSelect={() => {}}
-              />
 
             </>
           )}
@@ -510,6 +505,14 @@ export default function MealProgressScreen({ navigation }) {
         visible={goalSettingsModalVisible}
         onClose={() => setGoalSettingsModalVisible(false)}
         onSettingsSaved={handleGoalSettingsSaved}
+        type="meals"
+        trackingMetricSettingKey="streakTrackingMetric"
+      />
+
+      {/* Meal History Modal */}
+      <MealsHistoryModal
+        visible={mealHistoryModalVisible}
+        onClose={() => setMealHistoryModalVisible(false)}
       />
     </SafeAreaView>
   );
@@ -595,8 +598,8 @@ const styles = StyleSheet.create({
   goalButton: {
     backgroundColor: '#FF9800',
   },
-  logButton: {
-    backgroundColor: '#4CAF50',
+  historyButton: {
+    backgroundColor: '#9C27B0',
   },
   actionButtonText: {
     fontSize: 12,
