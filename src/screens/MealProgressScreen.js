@@ -14,8 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { WeeklySummaryCards } from '../components/layouts';
 import { MealsHistoryModal } from '../components/meals';
-import { GoalSettingsModal } from '../components/common';
-import { Toast, StreakCard } from '../components/common';
+import { GoalSettingsModal, Toast, StreakCard, BottomSheet, SectionHeader } from '../components/common';
 import { COLORS } from '../styles';
 import {
   getWeeklyMealData,
@@ -66,6 +65,42 @@ export default function MealProgressScreen({ navigation }) {
   const [mealHistoryModalVisible, setMealHistoryModalVisible] = useState(false);
   const [enabledGoalPreferences, setEnabledGoalPreferences] = useState([]);
   const [streakTrackingMetric, setStreakTrackingMetric] = useState('calories');
+  const [helpBottomSheetVisible, setHelpBottomSheetVisible] = useState(false);
+  const [selectedStatHelp, setSelectedStatHelp] = useState(null);
+
+  // Stat labels with descriptions for help
+  const statLabels = {
+    calorieTarget: {
+      label: 'Calorie Target',
+      description: 'Shows how many days you hit your calorie goal and trending progress.',
+      icon: 'fire',
+      iconColor: '#FF6B6B',
+    },
+    proteinIntake: {
+      label: 'Protein Intake',
+      description: 'Compares your protein consumption this week versus last week to track changes.',
+      icon: 'flash',
+      iconColor: '#2196F3',
+    },
+    carbsIntake: {
+      label: 'Carbs Intake',
+      description: 'Compares your carbs consumption this week versus last week to track changes.',
+      icon: 'bread-slice',
+      iconColor: '#FF9800',
+    },
+    fatsIntake: {
+      label: 'Fats Intake',
+      description: 'Compares your fats consumption this week versus last week to track changes.',
+      icon: 'water',
+      iconColor: '#9C27B0',
+    },
+    mealPrepTips: {
+      label: 'Meal Prep Tips',
+      description: 'Provides actionable meal prep suggestions to help you stay consistent with your nutrition goals.',
+      icon: 'lightbulb-on',
+      iconColor: '#FF9800',
+    },
+  };
 
   // Load weekly data
   const loadWeeklyData = useCallback(async () => {
@@ -377,9 +412,13 @@ export default function MealProgressScreen({ navigation }) {
                 {/* Stats - Actionable Insights (Dynamic based on preferences) */}
                 {enabledGoalPreferences.length > 0 && (
                   <View style={styles.statItem}>
-                    <View style={styles.statHeader}>
-                      <Text style={styles.statLabel}>Stats</Text>
-                    </View>
+                    <SectionHeader
+                      title="Stats"
+                      onHelpPress={() => {
+                        setSelectedStatHelp('statsOverview');
+                        setHelpBottomSheetVisible(true);
+                      }}
+                    />
                     <View style={styles.statsInsightsContainer}>
                       {/* Calorie Target Achievement */}
                       {enabledGoalPreferences.some(p => p.statName === 'calorieTarget') && (
@@ -470,9 +509,13 @@ export default function MealProgressScreen({ navigation }) {
                 {/* Empty Stats Message */}
                 {enabledGoalPreferences.length === 0 && (
                   <View style={styles.statItem}>
-                    <View style={styles.statHeader}>
-                      <Text style={styles.statLabel}>Stats</Text>
-                    </View>
+                    <SectionHeader
+                      title="Stats"
+                      onHelpPress={() => {
+                        setSelectedStatHelp('statsOverview');
+                        setHelpBottomSheetVisible(true);
+                      }}
+                    />
                     <View style={styles.emptyStatsContainer}>
                       <MaterialCommunityIcons
                         name="tune"
@@ -514,6 +557,45 @@ export default function MealProgressScreen({ navigation }) {
         visible={mealHistoryModalVisible}
         onClose={() => setMealHistoryModalVisible(false)}
       />
+
+      {/* Help Bottom Sheets for Stats */}
+      <BottomSheet
+        visible={helpBottomSheetVisible && selectedStatHelp === 'statsOverview'}
+        onClose={() => {
+          setHelpBottomSheetVisible(false);
+          setSelectedStatHelp(null);
+        }}
+        title="About Stats"
+      >
+        <View style={{ gap: 16 }}>
+          <Text style={{ fontSize: 14, color: '#666', lineHeight: 22 }}>
+            Your stats show actionable insights about your nutrition patterns. Each stat compares your current performance to previous weeks and highlights trends.
+          </Text>
+          <View style={{ backgroundColor: '#f5f5f5', borderRadius: 8, padding: 12, gap: 12 }}>
+            {enabledGoalPreferences.map(pref => {
+              const stat = statLabels[pref.statName];
+              if (!stat) return null;
+              return (
+                <View key={pref.statName} style={{ gap: 8 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <MaterialCommunityIcons
+                      name={stat.icon}
+                      size={18}
+                      color={stat.iconColor}
+                    />
+                    <Text style={{ fontWeight: '700', color: '#333', fontSize: 13 }}>
+                      {stat.label}
+                    </Text>
+                  </View>
+                  <Text style={{ fontSize: 12, color: '#666', marginLeft: 26 }}>
+                    {stat.description}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+      </BottomSheet>
     </SafeAreaView>
   );
 }
@@ -674,14 +756,6 @@ const styles = StyleSheet.create({
     borderColor: '#e0e0e0',
     marginHorizontal: 16,
     marginBottom: 0,
-  },
-  statHeader: {
-    marginBottom: 12,
-  },
-  statLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#333',
   },
   statsInsightsContainer: {
     gap: 12,

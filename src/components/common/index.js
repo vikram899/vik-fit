@@ -8,3 +8,5 @@ export { default as StreakCard } from "./StreakCard";
 export { default as StatCard } from "./StatCard";
 export { default as GoalSettingsModal } from "./GoalSettingsModal";
 export { default as BottomSheet } from "./BottomSheet";
+export { default as HelpIcon } from "./HelpIcon";
+export { default as SectionHeader } from "./SectionHeader";

@@ -13,7 +13,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { WeeklyWorkoutSummaryCards } from '../components/layouts';
 import { WorkoutHistoryModal } from '../components/workouts';
-import { StreakCard, GoalSettingsModal } from '../components/common';
+import { StreakCard, GoalSettingsModal, BottomSheet, SectionHeader } from '../components/common';
 import { COLORS } from '../styles';
 import { getEnabledGoalPreferences, getUserSetting } from '../services/database';
 import {
@@ -42,12 +42,60 @@ export default function WorkoutProgressScreen({ navigation }) {
   const [workoutHistoryModalVisible, setWorkoutHistoryModalVisible] = useState(false);
   const [enabledGoalPreferences, setEnabledGoalPreferences] = useState([]);
   const [streakTrackingMetric, setStreakTrackingMetric] = useState('workouts');
+  const [helpBottomSheetVisible, setHelpBottomSheetVisible] = useState(false);
+  const [selectedStatHelp, setSelectedStatHelp] = useState(null);
   const [scheduledGoals, setScheduledGoals] = useState({
     totalScheduledWorkouts: 0,
     totalScheduledExercises: 0,
     completedWorkouts: 0,
     completedExercises: 0,
   });
+
+  // Stat labels with descriptions for help
+  const statLabels = {
+    workoutTarget: {
+      label: 'Workout Target',
+      description: 'Shows completed vs scheduled workouts and tracks your progress toward weekly goals.',
+      icon: 'target',
+      iconColor: '#2196F3',
+    },
+    exercisesCompleted: {
+      label: 'Exercises',
+      description: 'Shows completed vs scheduled exercises to track exercise variety and volume.',
+      icon: 'check-circle',
+      iconColor: '#4CAF50',
+    },
+    consistency: {
+      label: 'Consistency',
+      description: 'Shows how many days you logged workouts to track your workout frequency.',
+      icon: 'calendar-check',
+      iconColor: '#FF9800',
+    },
+    strengthStats: {
+      label: 'Strength',
+      description: 'Displays strength progress and personal records for key lifts.',
+      icon: 'dumbbell',
+      iconColor: '#FF6B6B',
+    },
+    volumeStats: {
+      label: 'Volume',
+      description: 'Shows total training volume and reps completed to track workout intensity.',
+      icon: 'chart-box',
+      iconColor: '#9C27B0',
+    },
+    restTimeStats: {
+      label: 'Rest Time',
+      description: 'Shows average rest time between sets to monitor recovery pacing.',
+      icon: 'timer',
+      iconColor: '#00BCD4',
+    },
+    recoveryStats: {
+      label: 'Recovery',
+      description: 'Shows recovery status and rest day metrics for optimal performance.',
+      icon: 'heart-pulse',
+      iconColor: '#E91E63',
+    },
+  };
 
   // Search, Filter, Sort state
   const [searchText, setSearchText] = useState("");
@@ -322,9 +370,13 @@ export default function WorkoutProgressScreen({ navigation }) {
           {/* Stats Section - Actionable Insights */}
           {enabledGoalPreferences.length > 0 && (
             <View style={styles.statItem}>
-              <View style={styles.statHeader}>
-                <Text style={styles.statLabel}>Stats</Text>
-              </View>
+              <SectionHeader
+                title="Stats"
+                onHelpPress={() => {
+                  setSelectedStatHelp('statsOverview');
+                  setHelpBottomSheetVisible(true);
+                }}
+              />
               <View style={styles.statsInsightsContainer}>
                 {/* Workout Goal Achievement */}
                 {enabledGoalPreferences.some(p => p.statName === 'workoutTarget') && (
@@ -455,9 +507,13 @@ export default function WorkoutProgressScreen({ navigation }) {
           {/* Empty Stats Message */}
           {enabledGoalPreferences.length === 0 && (
             <View style={styles.statItem}>
-              <View style={styles.statHeader}>
-                <Text style={styles.statLabel}>Stats</Text>
-              </View>
+              <SectionHeader
+                title="Stats"
+                onHelpPress={() => {
+                  setSelectedStatHelp('statsOverview');
+                  setHelpBottomSheetVisible(true);
+                }}
+              />
               <View style={styles.emptyStatsContainer}>
                 <MaterialCommunityIcons
                   name="tune"
@@ -494,6 +550,45 @@ export default function WorkoutProgressScreen({ navigation }) {
         type="workouts"
         trackingMetricSettingKey="workoutStreakTrackingMetric"
       />
+
+      {/* Help Bottom Sheets for Stats */}
+      <BottomSheet
+        visible={helpBottomSheetVisible && selectedStatHelp === 'statsOverview'}
+        onClose={() => {
+          setHelpBottomSheetVisible(false);
+          setSelectedStatHelp(null);
+        }}
+        title="About Stats"
+      >
+        <View style={{ gap: 16 }}>
+          <Text style={{ fontSize: 14, color: '#666', lineHeight: 22 }}>
+            Your stats show actionable insights about your workout patterns. Each stat compares your current performance to previous weeks and highlights trends.
+          </Text>
+          <View style={{ backgroundColor: '#f5f5f5', borderRadius: 8, padding: 12, gap: 12 }}>
+            {enabledGoalPreferences.map(pref => {
+              const stat = statLabels[pref.statName];
+              if (!stat) return null;
+              return (
+                <View key={pref.statName} style={{ gap: 8 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <MaterialCommunityIcons
+                      name={stat.icon}
+                      size={18}
+                      color={stat.iconColor}
+                    />
+                    <Text style={{ fontWeight: '700', color: '#333', fontSize: 13 }}>
+                      {stat.label}
+                    </Text>
+                  </View>
+                  <Text style={{ fontSize: 12, color: '#666', marginLeft: 26 }}>
+                    {stat.description}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+      </BottomSheet>
     </SafeAreaView>
   );
 }
@@ -658,14 +753,6 @@ const styles = StyleSheet.create({
     borderColor: '#e0e0e0',
     marginHorizontal: 16,
     marginBottom: 16,
-  },
-  statHeader: {
-    marginBottom: 12,
-  },
-  statLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#333',
   },
   statsInsightsContainer: {
     gap: 12,

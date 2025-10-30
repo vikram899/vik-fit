@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Modal,
   View,
@@ -7,19 +7,21 @@ import {
   StyleSheet,
   ScrollView,
   Dimensions,
+  Animated,
+  PanResponder,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS } from "../../styles";
 
-const { height: screenHeight } = Dimensions.get("window");
+const screenHeight = Dimensions.get("window").height;
 const MAX_HEIGHT = screenHeight * 0.7;
-const MIN_HEIGHT = screenHeight * 0.3;
-const HEADER_HEIGHT = 70; // handle bar + header
+const BOTTOM_SHEET_HEIGHT = screenHeight * 0.6; // Fixed large height
 
 /**
  * Reusable BottomSheet Component
  * Dynamically slides up from bottom (30% - 70% of screen height)
  * Content height determines actual sheet height
+ * Supports swipe-down gesture to close
  *
  * Props:
  * - visible: boolean - Whether bottom sheet is visible
@@ -28,106 +30,148 @@ const HEADER_HEIGHT = 70; // handle bar + header
  * - children: ReactNode - Content to display in bottom sheet
  */
 const BottomSheet = ({ visible, onClose, title, children }) => {
-  const [contentHeight, setContentHeight] = useState(0);
+  const slideAnim = useRef(new Animated.Value(BOTTOM_SHEET_HEIGHT)).current;
+  const panResponder = useRef(null);
 
-  // Calculate the actual height based on content
-  const getTotalHeight = () => {
-    // Total height = content + header/handle
-    const totalWithHeader = contentHeight + HEADER_HEIGHT;
+  // Create pan responder for swipe-down gesture
+  useEffect(() => {
+    panResponder.current = PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // Only respond to downward swipes
+        return (
+          Math.abs(gestureState.dy) > Math.abs(gestureState.dx) &&
+          gestureState.dy > 0
+        );
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        // Only allow downward movement
+        if (gestureState.dy > 0) {
+          slideAnim.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        // If swiped down more than 50px or velocity is high, close the sheet
+        if (gestureState.dy > 50 || gestureState.vy > 0.5) {
+          handleClose();
+        } else {
+          // Snap back to open position
+          Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    });
+  }, [slideAnim]);
 
-    // Apply min/max constraints
-    if (totalWithHeader < MIN_HEIGHT) {
-      return MIN_HEIGHT;
+  // Animate in when visible
+  useEffect(() => {
+    if (visible) {
+      slideAnim.setValue(BOTTOM_SHEET_HEIGHT);
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
     }
-    if (totalWithHeader > MAX_HEIGHT) {
-      return MAX_HEIGHT;
-    }
-    return totalWithHeader;
-  };
-
-  const sheetHeight = getTotalHeight();
-  const shouldScroll = contentHeight + HEADER_HEIGHT > MAX_HEIGHT;
+  }, [visible, slideAnim]);
 
   const handleClose = () => {
-    onClose();
+    Animated.timing(slideAnim, {
+      toValue: BOTTOM_SHEET_HEIGHT,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      onClose();
+    });
   };
 
   return (
     <Modal
       visible={visible}
       transparent={true}
-      animationType="fade"
+      animationType="none"
       onRequestClose={handleClose}
     >
-      <View style={styles.container}>
-        {/* Overlay */}
+      {/* Overlay with fade animation */}
+      <Animated.View
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            opacity: slideAnim.interpolate({
+              inputRange: [0, BOTTOM_SHEET_HEIGHT],
+              outputRange: [1, 0],
+            }),
+          },
+        ]}
+      >
         <TouchableOpacity
-          style={styles.overlay}
           activeOpacity={1}
           onPress={handleClose}
+          style={StyleSheet.absoluteFill}
         />
+      </Animated.View>
 
-        {/* Bottom Sheet Container */}
-        <View
-          style={[
-            styles.bottomSheetContainer,
-            {
-              height: sheetHeight,
-            },
-          ]}
-        >
-          {/* Handle Bar */}
-          <View style={styles.handleContainer}>
-            <View style={styles.handleBar} />
-          </View>
-
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.title}>{title}</Text>
-            <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-              <MaterialCommunityIcons
-                name="close"
-                size={24}
-                color={COLORS.primary}
-              />
-            </TouchableOpacity>
-          </View>
-
-          {/* Content with Dynamic Measurement */}
-          <ScrollView
-            scrollEnabled={shouldScroll}
-            showsVerticalScrollIndicator={true}
-            onContentSizeChange={(width, height) => {
-              setContentHeight(height);
-            }}
-          >
-            <View style={styles.content}>{children}</View>
-          </ScrollView>
+      {/* Bottom Sheet Container */}
+      <Animated.View
+        style={[
+          styles.bottomSheetContainer,
+          {
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
+        {...panResponder.current?.panHandlers}
+      >
+        {/* Handle Bar - Swipe indicator */}
+        <View style={styles.handleContainer}>
+          <View style={styles.handleBar} />
         </View>
-      </View>
+
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>{title}</Text>
+          <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+            <MaterialCommunityIcons
+              name="close"
+              size={24}
+              color={COLORS.primary}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Content with Scrolling */}
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={true}
+          scrollEventThrottle={16}
+        >
+          <View style={styles.content}>{children}</View>
+        </ScrollView>
+      </Animated.View>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  overlay: {
-    flex: 1,
-  },
   bottomSheetContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: BOTTOM_SHEET_HEIGHT,
     backgroundColor: "#fff",
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
+    overflow: "hidden",
+    zIndex: 1000,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 10,
-    width: "100%",
   },
   handleContainer: {
     alignItems: "center",
@@ -155,6 +199,9 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     padding: 8,
+  },
+  scrollView: {
+    flex: 1,
   },
   content: {
     paddingHorizontal: 16,
