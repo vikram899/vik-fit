@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import BottomSheet from './BottomSheet';
 
 /**
  * StreakCard Component
@@ -18,11 +19,7 @@ const StreakCard = ({
   const [showLegendModal, setShowLegendModal] = useState(false);
 
   const handleHelpPress = () => {
-    Alert.alert(
-      'Color Legend',
-      '🟢 Green (80%+): Achieved 80% or more of daily goal\n\n🟠 Orange (50-79%): Achieved 50-79% of daily goal\n\n🔴 Red (<50%): Achieved less than 50% of daily goal\n\n⚪ Gray: No data logged for this day',
-      [{ text: 'Got it!', style: 'default' }]
-    );
+    setShowLegendModal(true);
   };
 
   return (
@@ -76,6 +73,55 @@ const StreakCard = ({
           </View>
         </View>
       </View>
+
+      {/* Bottom Sheet for Color Legend */}
+      <BottomSheet
+        visible={showLegendModal}
+        onClose={() => setShowLegendModal(false)}
+        title="Color Legend"
+      >
+        <View style={styles.legendContent}>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendColor, { backgroundColor: '#4CAF50' }]} />
+            <View style={styles.legendText}>
+              <Text style={styles.legendTitle}>Green (80%+)</Text>
+              <Text style={styles.legendDescription}>
+                Achieved 80% or more of daily goal
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.legendItem}>
+            <View style={[styles.legendColor, { backgroundColor: '#FF9800' }]} />
+            <View style={styles.legendText}>
+              <Text style={styles.legendTitle}>Orange (50-79%)</Text>
+              <Text style={styles.legendDescription}>
+                Achieved 50-79% of daily goal
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.legendItem}>
+            <View style={[styles.legendColor, { backgroundColor: '#FF6B6B' }]} />
+            <View style={styles.legendText}>
+              <Text style={styles.legendTitle}>Red (&lt;50%)</Text>
+              <Text style={styles.legendDescription}>
+                Achieved less than 50% of daily goal
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.legendItem}>
+            <View style={[styles.legendColor, { backgroundColor: '#e0e0e0' }]} />
+            <View style={styles.legendText}>
+              <Text style={styles.legendTitle}>Gray</Text>
+              <Text style={styles.legendDescription}>
+                No data logged for this day
+              </Text>
+            </View>
+          </View>
+        </View>
+      </BottomSheet>
     </View>
   );
 };
@@ -150,6 +196,39 @@ const styles = StyleSheet.create({
   helpButton: {
     padding: 4,
     marginLeft: 8,
+  },
+  legendContent: {
+    gap: 16,
+    paddingBottom: 20,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+  },
+  legendColor: {
+    width: 40,
+    height: 40,
+    borderRadius: 6,
+    marginTop: 2,
+  },
+  legendText: {
+    flex: 1,
+  },
+  legendTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 4,
+  },
+  legendDescription: {
+    fontSize: 12,
+    color: '#666',
+    lineHeight: 18,
   },
 });
 
