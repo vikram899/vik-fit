@@ -67,7 +67,6 @@ export default function WeightTrackingScreen({ navigation }) {
             setWeightChange(change);
           }
         } catch (error) {
-          console.error("Error loading weight data:", error);
         }
       };
 
@@ -97,7 +96,6 @@ export default function WeightTrackingScreen({ navigation }) {
       const todayData = await getWeightEntryForDate(today);
       setTodayEntry(todayData);
     } catch (error) {
-      console.error("Error saving weight entry:", error);
       Alert.alert("Error", "Failed to save weight entry");
     }
   };

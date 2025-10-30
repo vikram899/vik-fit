@@ -115,7 +115,6 @@ export default function LogWorkoutScreen({ navigation }) {
         useNativeDriver: true,
       }).start();
     } catch (error) {
-      console.error('Error loading workouts:', error);
       Alert.alert('Error', 'Failed to load workouts');
     } finally {
       setLoading(false);
@@ -181,7 +180,6 @@ export default function LogWorkoutScreen({ navigation }) {
         Alert.alert('Success', 'Workout schedule updated!');
       }
     } catch (error) {
-      console.error('Error saving plan schedule:', error);
       Alert.alert('Error', 'Failed to save plan schedule');
     }
   };
@@ -218,7 +216,6 @@ export default function LogWorkoutScreen({ navigation }) {
         navigation.navigate('StartWorkout', { planId: workout.id });
       }
     } catch (error) {
-      console.error('Error checking active workout:', error);
       // If there's an error, just start the workout
       navigation.navigate('StartWorkout', { planId: workout.id });
     }
@@ -242,7 +239,6 @@ export default function LogWorkoutScreen({ navigation }) {
               await removePlanFromDays(workout.id, [todayDayOfWeek]);
               loadWorkouts();
             } catch (error) {
-              console.error('Error removing workout:', error);
               Alert.alert('Error', 'Failed to remove workout');
             }
           },

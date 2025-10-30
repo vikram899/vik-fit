@@ -103,7 +103,6 @@ let nextExerciseId = 10;
 export const getAllPlans = async () => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      console.log('✅ Plans fetched (dummy):', workoutPlans.length, 'items');
       resolve({ data: workoutPlans, error: null });
     }, 300);
   });
@@ -117,7 +116,6 @@ export const getPlanById = async (planId) => {
     setTimeout(() => {
       const plan = workoutPlans.find((p) => p.id === planId);
       if (plan) {
-        console.log('✅ Plan fetched (dummy):', plan.name);
         resolve({ data: plan, error: null });
       } else {
         resolve({ data: null, error: 'Plan not found' });
@@ -139,7 +137,6 @@ export const createPlan = async (planData) => {
         exercises: [],
       };
       workoutPlans.unshift(newPlan);
-      console.log('✅ Plan created (dummy):', newPlan.name);
       resolve({ data: newPlan, error: null });
     }, 500);
   });
@@ -157,7 +154,6 @@ export const updatePlan = async (planId, planData) => {
           ...workoutPlans[planIndex],
           ...planData,
         };
-        console.log('✅ Plan updated (dummy):', workoutPlans[planIndex].name);
         resolve({ data: workoutPlans[planIndex], error: null });
       } else {
         resolve({ data: null, error: 'Plan not found' });
@@ -173,7 +169,6 @@ export const deletePlan = async (planId) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       workoutPlans = workoutPlans.filter((p) => p.id !== planId);
-      console.log('✅ Plan deleted (dummy):', planId);
       resolve({ data: null, error: null });
     }, 300);
   });
@@ -192,7 +187,6 @@ export const addExerciseToPlan = async (planId, exerciseData) => {
           ...exerciseData,
         };
         plan.exercises.push(newExercise);
-        console.log('✅ Exercise added (dummy):', exerciseData.name);
         resolve({ data: newExercise, error: null });
       } else {
         resolve({ data: null, error: 'Plan not found' });
@@ -210,7 +204,6 @@ export const removeExerciseFromPlan = async (planId, exerciseId) => {
       const plan = workoutPlans.find((p) => p.id === planId);
       if (plan) {
         plan.exercises = plan.exercises.filter((e) => e.id !== exerciseId);
-        console.log('✅ Exercise removed (dummy):', exerciseId);
         resolve({ data: null, error: null });
       } else {
         resolve({ data: null, error: 'Plan not found' });
@@ -233,7 +226,6 @@ export const updateExerciseInPlan = async (planId, exerciseId, exerciseData) => 
             ...plan.exercises[exerciseIndex],
             ...exerciseData,
           };
-          console.log('✅ Exercise updated (dummy):', exerciseData.name);
           resolve({ data: plan.exercises[exerciseIndex], error: null });
         } else {
           resolve({ data: null, error: 'Exercise not found' });
@@ -252,7 +244,6 @@ export const resetAllPlans = () => {
   workoutPlans = [];
   nextPlanId = 1;
   nextExerciseId = 1;
-  console.log('✅ All plans reset');
 };
 
 /**

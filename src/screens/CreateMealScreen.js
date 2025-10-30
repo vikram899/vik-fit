@@ -136,7 +136,6 @@ const CreateMealScreen = ({ navigation }) => {
         ]
       );
     } catch (error) {
-      console.error("Error adding meal:", error);
       Alert.alert("Error", "Failed to add meal. Please try again.");
     }
   };

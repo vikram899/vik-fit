@@ -184,9 +184,9 @@ export default function ComponentsShowcaseScreen({ navigation }) {
             <MealCard
               key={meal.id}
               meal={meal}
-              onPress={() => console.log("Meal pressed:", meal.name)}
-              onMenuPress={() => console.log("Meal menu pressed:", meal.name)}
-              onFavoritePress={(isFavorite) => console.log("Favorite toggled:", meal.name, "Is Favorite:", isFavorite)}
+              
+              
+              
             />
           ))}
         </View>
@@ -253,7 +253,6 @@ export default function ComponentsShowcaseScreen({ navigation }) {
         onMealTypeChange={setSelectedMealTime}
         onConfirm={() => {
           setSelectMealTimeVisible(false);
-          console.log("Confirmed meal time:", selectedMealTime);
         }}
         onCancel={() => setSelectMealTimeVisible(false)}
       />

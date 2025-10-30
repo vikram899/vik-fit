@@ -77,7 +77,6 @@ const HorizontalNumberPicker = ({
           });
         } catch (error) {
           // Silently fail if index is out of range
-          console.warn('scrollToIndex failed:', error);
         }
       }, 100);
     }
@@ -163,7 +162,6 @@ const HorizontalNumberPicker = ({
           getItemLayout={getItemLayout}
           onScrollToIndexFailed={() => {
             // Silently handle scroll to index failures
-            console.warn('onScrollToIndexFailed');
           }}
         />
       </View>

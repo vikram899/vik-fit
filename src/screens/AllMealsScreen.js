@@ -57,7 +57,6 @@ export default function AllMealsScreen({ navigation, route }) {
         useNativeDriver: true,
       }).start();
     } catch (error) {
-      console.error("Error loading meals:", error);
       Alert.alert("Error", "Failed to load meals");
     } finally {
       setLoading(false);
@@ -187,7 +186,6 @@ export default function AllMealsScreen({ navigation, route }) {
               await deleteMeal(meal.id);
               await loadMeals();
             } catch (error) {
-              console.error("Error deleting meal:", error);
               Alert.alert("Error", "Failed to delete meal");
             }
           },
@@ -211,7 +209,6 @@ export default function AllMealsScreen({ navigation, route }) {
 
   const handleFavoritePress = async (mealId, isFavorite) => {
     try {
-      console.log(
         "Toggling favorite for meal:",
         mealId,
         "isFavorite:",
@@ -225,7 +222,6 @@ export default function AllMealsScreen({ navigation, route }) {
       setMeals((prevMeals) => {
         const updated = prevMeals.map((meal) => {
           if (meal.id === mealId) {
-            console.log(
               "Updated meal:",
               meal.name,
               "to isFavorite:",
@@ -238,7 +234,6 @@ export default function AllMealsScreen({ navigation, route }) {
         return updated;
       });
     } catch (error) {
-      console.error("Error toggling meal favorite:", error);
       Alert.alert("Error", "Failed to update favorite status");
     }
   };

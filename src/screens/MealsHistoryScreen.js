@@ -65,7 +65,6 @@ export default function MealsHistoryScreen({ navigation }) {
         useNativeDriver: true,
       }).start();
     } catch (error) {
-      console.error('Error loading meal history data:', error);
       setError('Failed to load meal history. Please try again.');
     } finally {
       setLoading(false);

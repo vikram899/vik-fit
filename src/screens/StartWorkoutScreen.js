@@ -93,7 +93,6 @@ export default function StartWorkoutScreen({ navigation, route }) {
             initializeExercise(exercisesData[0]);
           }
         } catch (error) {
-          console.error('Error loading workout:', error);
           Alert.alert('Error', 'Failed to load workout');
         } finally {
           setLoading(false);
@@ -258,7 +257,6 @@ export default function StartWorkoutScreen({ navigation, route }) {
       setRepsInput(weight.toString());
       setWeightInput(weight.toString());
     } catch (error) {
-      console.error('Error logging set:', error);
       Alert.alert('Error', 'Failed to log set');
     } finally {
       // Re-enable the button after operation completes
@@ -326,7 +324,6 @@ export default function StartWorkoutScreen({ navigation, route }) {
       // Navigate to summary screen instead of showing alert
       navigation.navigate('WorkoutSummary', { workoutLogId });
     } catch (error) {
-      console.error('Error completing:', error);
       Alert.alert('Error', 'Failed to complete workout');
     }
   };

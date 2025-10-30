@@ -2,6 +2,7 @@
   "expo": {
     "name": "VikFit",
     "slug": "vik-fit",
+    "owner": "vikram0211",
     "version": "1.0.0",
     "description": "A simple, modern fitness tracking app",
     "runtimeVersion": "54.0.0",
@@ -20,7 +21,16 @@
     "ios": {
       "supportsTabletMode": true,
       "bundleIdentifier": "com.vikfit.app",
-      "buildNumber": "1"
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSHealthShareUsageDescription": "We need access to your health data to sync your step count from Apple Health.",
+        "NSHealthUpdateUsageDescription": "We would like to read your health data including step count.",
+        "UIRequiredDeviceCapabilities": [
+          "healthkit",
+          "healthkit"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -34,7 +44,20 @@
       "favicon": "./assets/favicon.png"
     },
     "scheme": "vikfit",
-    "plugins": []
+    "plugins": [
+      [
+        "react-native-health",
+        {
+          "permissions": [
+            "HKQuantityTypeIdentifierStepCount"
+          ]
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "c23cfad6-6491-4580-a7a4-dd1d8f03d2c2"
+      }
+    }
   }
 }
-

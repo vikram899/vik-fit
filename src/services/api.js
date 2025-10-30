@@ -86,7 +86,6 @@ export const calculateMacroGoals = (userProfile) => {
       fatsGoal: Math.round(fatsGoal),
     };
   } catch (error) {
-    console.error("Error calculating macro goals:", error);
     throw error;
   }
 };

@@ -144,7 +144,6 @@ const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
         ]
       );
     } catch (error) {
-      console.error("Error updating meal:", error);
       Alert.alert(
         "Error",
         "Failed to update meal. Please try again."

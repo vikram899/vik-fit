@@ -259,15 +259,21 @@ export const initializeDatabase = async () => {
     `);
 
     // Insert default user settings if they don't exist
-    const existingSettings = await db.getAllAsync('SELECT * FROM user_settings WHERE settingKey = ?', ['streakTrackingMetric']);
-    if (existingSettings.length === 0) {
-      await db.runAsync(
-        'INSERT INTO user_settings (settingKey, settingValue) VALUES (?, ?)',
-        ['streakTrackingMetric', 'calories']
-      );
+    const defaultSettings = [
+      { key: 'streakTrackingMetric', value: 'calories' },
+      { key: 'stepGoal', value: '10000' },
+    ];
+
+    for (const setting of defaultSettings) {
+      const existingSettings = await db.getAllAsync('SELECT * FROM user_settings WHERE settingKey = ?', [setting.key]);
+      if (existingSettings.length === 0) {
+        await db.runAsync(
+          'INSERT INTO user_settings (settingKey, settingValue) VALUES (?, ?)',
+          [setting.key, setting.value]
+        );
+      }
     }
   } catch (error) {
-    console.error('❌ Error initializing database:', error);
     throw error;
   }
 };
@@ -289,7 +295,6 @@ export const addPlan = async (name, description = '') => {
 
     return lastPlan?.id;
   } catch (error) {
-    console.error('Error adding plan:', error);
     throw error;
   }
 };
@@ -302,7 +307,6 @@ export const getAllPlans = async () => {
     const result = await db.getAllAsync('SELECT * FROM plans ORDER BY createdAt DESC');
     return result || [];
   } catch (error) {
-    console.error('Error getting plans:', error);
     return [];
   }
 };
@@ -318,7 +322,6 @@ export const getPlanById = async (planId) => {
     );
     return result;
   } catch (error) {
-    console.error('Error getting plan:', error);
     return null;
   }
 };
@@ -333,7 +336,6 @@ export const updatePlan = async (planId, name, description) => {
       [name, description, planId]
     );
   } catch (error) {
-    console.error('Error updating plan:', error);
     throw error;
   }
 };
@@ -345,7 +347,6 @@ export const deletePlan = async (planId) => {
   try {
     await db.runAsync('DELETE FROM plans WHERE id = ?', [planId]);
   } catch (error) {
-    console.error('Error deleting plan:', error);
     throw error;
   }
 };
@@ -367,7 +368,6 @@ export const addExercise = async (planId, name, sets, reps, weight = 0, time = 0
 
     return lastExercise?.id;
   } catch (error) {
-    console.error('Error adding exercise with planId', planId, ':', error);
     throw error;
   }
 };
@@ -383,7 +383,6 @@ export const getExercisesByPlanId = async (planId) => {
     );
     return result || [];
   } catch (error) {
-    console.error('Error getting exercises:', error);
     return [];
   }
 };
@@ -399,7 +398,6 @@ export const getExerciseCount = async (planId) => {
     );
     return result?.count || 0;
   } catch (error) {
-    console.error('Error getting exercise count:', error);
     return 0;
   }
 };
@@ -414,7 +412,6 @@ export const updateExercise = async (exerciseId, name, sets, reps, weight = 0, t
       [name, sets, reps, weight, time, notes, exerciseId]
     );
   } catch (error) {
-    console.error('Error updating exercise:', error);
     throw error;
   }
 };
@@ -426,7 +423,6 @@ export const deleteExercise = async (exerciseId) => {
   try {
     await db.runAsync('DELETE FROM exercises WHERE id = ?', [exerciseId]);
   } catch (error) {
-    console.error('Error deleting exercise:', error);
     throw error;
   }
 };
@@ -575,7 +571,6 @@ export const seedDummyData = async () => {
 
 
   } catch (error) {
-    console.error('❌ Error seeding dummy data:', error);
     throw error;
   }
 };
@@ -605,7 +600,6 @@ export const addMeal = async (name, category, calories = 0, protein = 0, carbs =
 
     return lastMeal?.id;
   } catch (error) {
-    console.error('Error adding meal:', error);
     throw error;
   }
 };
@@ -618,7 +612,6 @@ export const getAllMeals = async () => {
     const result = await db.getAllAsync('SELECT * FROM meals ORDER BY category ASC, name ASC');
     return result || [];
   } catch (error) {
-    console.error('Error getting meals:', error);
     return [];
   }
 };
@@ -634,7 +627,6 @@ export const getMealsByCategory = async (category) => {
     );
     return result || [];
   } catch (error) {
-    console.error('Error getting meals by category:', error);
     return [];
   }
 };
@@ -650,7 +642,6 @@ export const searchMeals = async (searchText) => {
     );
     return result || [];
   } catch (error) {
-    console.error('Error searching meals:', error);
     return [];
   }
 };
@@ -662,7 +653,6 @@ export const deleteMeal = async (mealId) => {
   try {
     await db.runAsync('DELETE FROM meals WHERE id = ?', [mealId]);
   } catch (error) {
-    console.error('Error deleting meal:', error);
     throw error;
   }
 };
@@ -690,7 +680,6 @@ export const logMeal = async (mealId, mealDate, calories, protein, carbs, fats, 
 
     return lastLog?.id;
   } catch (error) {
-    console.error('Error logging meal:', error);
     throw error;
   }
 };
@@ -722,7 +711,6 @@ export const getMealLogsForDate = async (mealDate) => {
     );
     return result || [];
   } catch (error) {
-    console.error('Error getting meal logs:', error);
     return [];
   }
 };
@@ -743,7 +731,6 @@ export const getDailyTotals = async (mealDate) => {
       totalFats: result?.totalFats || 0,
     };
   } catch (error) {
-    console.error('Error getting daily totals:', error);
     return { totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFats: 0 };
   }
 };
@@ -771,7 +758,6 @@ export const updateMealLog = async (mealLogId, calories, protein, carbs, fats, m
       );
     }
   } catch (error) {
-    console.error('Error updating meal log:', error);
     throw error;
   }
 };
@@ -783,7 +769,6 @@ export const deleteMealLog = async (mealLogId) => {
   try {
     await db.runAsync('DELETE FROM meal_logs WHERE id = ?', [mealLogId]);
   } catch (error) {
-    console.error('Error deleting meal log:', error);
     throw error;
   }
 };
@@ -806,7 +791,6 @@ export const setMacroGoals = async (goalDate, calorieGoal, proteinGoal, carbsGoa
       [goalDate, calorieGoal, proteinGoal, carbsGoal, fatsGoal]
     );
   } catch (error) {
-    console.error('Error setting macro goals:', error);
     throw error;
   }
 };
@@ -838,7 +822,6 @@ export const getMacroGoals = async (goalDate) => {
       fatsGoal: 80,
     };
   } catch (error) {
-    console.error('Error getting macro goals:', error);
     // Return default goals on error
     return {
       calorieGoal: 2500,
@@ -857,7 +840,6 @@ export const debugGetAllMacroGoals = async () => {
     const allGoals = await db.getAllAsync('SELECT * FROM macro_goals ORDER BY goalDate DESC');
     return allGoals;
   } catch (error) {
-    console.error('Error getting all macro goals:', error);
     return [];
   }
 };
@@ -869,7 +851,6 @@ export const debugClearAllMacroGoals = async () => {
   try {
     await db.runAsync('DELETE FROM macro_goals');
   } catch (error) {
-    console.error('Error clearing macro goals:', error);
   }
 };
 
@@ -887,7 +868,6 @@ export const addWeightEntry = async (weightDate, currentWeight, targetWeight) =>
       [weightDate, currentWeight, targetWeight]
     );
   } catch (error) {
-    console.error('Error adding weight entry:', error);
     throw error;
   }
 };
@@ -903,7 +883,6 @@ export const getWeightEntries = async (startDate, endDate) => {
     );
     return result || [];
   } catch (error) {
-    console.error('Error getting weight entries:', error);
     return [];
   }
 };
@@ -918,7 +897,6 @@ export const getAllWeightEntries = async () => {
     );
     return result || [];
   } catch (error) {
-    console.error('Error getting all weight entries:', error);
     return [];
   }
 };
@@ -933,7 +911,6 @@ export const getLatestWeightEntry = async () => {
     );
     return result || null;
   } catch (error) {
-    console.error('Error getting latest weight entry:', error);
     return null;
   }
 };
@@ -949,7 +926,6 @@ export const getWeightEntryForDate = async (weightDate) => {
     );
     return result || null;
   } catch (error) {
-    console.error('Error getting weight entry for date:', error);
     return null;
   }
 };
@@ -964,7 +940,6 @@ export const deleteWeightEntry = async (weightDate) => {
       [weightDate]
     );
   } catch (error) {
-    console.error('Error deleting weight entry:', error);
     throw error;
   }
 };
@@ -989,7 +964,6 @@ export const updateMeal = async (mealId, name, category, calories = 0, protein =
       [name, category, calories, protein, carbs, fats, mealType, weight, isFavorite ? 1 : 0, mealId]
     );
   } catch (error) {
-    console.error('Error updating meal:', error);
     throw error;
   }
 };
@@ -1006,7 +980,6 @@ export const toggleMealFavorite = async (mealId, isFavorite) => {
       [isFavorite ? 1 : 0, mealId]
     );
   } catch (error) {
-    console.error('Error toggling meal favorite:', error);
     throw error;
   }
 };
@@ -1032,7 +1005,6 @@ export const assignPlanToDays = async (planId, daysOfWeek) => {
       );
     }
   } catch (error) {
-    console.error('Error assigning plan to days:', error);
     throw error;
   }
 };
@@ -1048,7 +1020,6 @@ export const getScheduledDaysForPlan = async (planId) => {
     );
     return result ? result.map(r => r.dayOfWeek) : [];
   } catch (error) {
-    console.error('Error getting scheduled days:', error);
     return [];
   }
 };
@@ -1067,7 +1038,6 @@ export const getPlansForDay = async (dayOfWeek) => {
     );
     return result || [];
   } catch (error) {
-    console.error('Error getting plans for day:', error);
     return [];
   }
 };
@@ -1084,7 +1054,6 @@ export const removePlanFromDays = async (planId, daysOfWeek) => {
       );
     }
   } catch (error) {
-    console.error('Error removing plan from days:', error);
     throw error;
   }
 };
@@ -1100,7 +1069,6 @@ export const markPlanCompleted = async (planId, executionDate) => {
       [planId, executionDate, 'completed', new Date().toISOString()]
     );
   } catch (error) {
-    console.error('Error marking plan as completed:', error);
     throw error;
   }
 };
@@ -1116,7 +1084,6 @@ export const getPlanExecutionStatus = async (planId, executionDate) => {
     );
     return result;
   } catch (error) {
-    console.error('Error getting execution status:', error);
     return null;
   }
 };
@@ -1144,7 +1111,6 @@ export const startWorkoutLog = async (planId, logDate = new Date().toISOString()
 
     return result.id;
   } catch (error) {
-    console.error('Error starting workout log:', error);
     throw error;
   }
 };
@@ -1187,7 +1153,6 @@ export const getActiveWorkoutLog = async (planId) => {
 
     return null;
   } catch (error) {
-    console.error('Error getting active workout log:', error);
     return null;
   }
 };
@@ -1210,7 +1175,6 @@ export const getTodayActiveWorkout = async () => {
 
     return result || null;
   } catch (error) {
-    console.error('Error getting today active workout:', error);
     return null;
   }
 };
@@ -1231,7 +1195,6 @@ export const getTodayWorkoutLogForPlan = async (planId) => {
 
     return result || null;
   } catch (error) {
-    console.error('Error getting today workout log:', error);
     return null;
   }
 };
@@ -1259,7 +1222,6 @@ export const logExerciseSet = async (workoutLogId, exerciseId, setNumber, repsCo
 
     return result?.id;
   } catch (error) {
-    console.error('Error logging exercise set:', error);
     throw error;
   }
 };
@@ -1276,7 +1238,6 @@ export const updateSetLog = async (setLogId, durationSeconds, restTimeUsedSecond
       [durationSeconds, restTimeUsedSeconds, setLogId]
     );
   } catch (error) {
-    console.error('Error updating set log:', error);
     throw error;
   }
 };
@@ -1292,7 +1253,6 @@ export const getExerciseSetLogs = async (workoutLogId, exerciseId) => {
     );
     return result || [];
   } catch (error) {
-    console.error('Error getting exercise set logs:', error);
     return [];
   }
 };
@@ -1308,7 +1268,6 @@ export const getWorkoutSetLogs = async (workoutLogId) => {
     );
     return result || [];
   } catch (error) {
-    console.error('Error getting workout set logs:', error);
     return [];
   }
 };
@@ -1326,7 +1285,6 @@ export const completeWorkoutLog = async (workoutLogId, totalDurationSeconds) => 
       ['completed', totalDurationSeconds, now, workoutLogId]
     );
   } catch (error) {
-    console.error('Error completing workout log:', error);
     throw error;
   }
 };
@@ -1341,7 +1299,6 @@ export const cancelWorkoutLog = async (workoutLogId) => {
       ['cancelled', workoutLogId]
     );
   } catch (error) {
-    console.error('Error cancelling workout log:', error);
     throw error;
   }
 };
@@ -1407,7 +1364,6 @@ export const getWorkoutSummary = async (workoutLogId) => {
       },
     };
   } catch (error) {
-    console.error('Error getting workout summary:', error);
     return null;
   }
 };
@@ -1426,7 +1382,6 @@ export const getWorkoutHistory = async (planId, limit = 10) => {
     );
     return result || [];
   } catch (error) {
-    console.error('Error getting workout history:', error);
     return [];
   }
 };
@@ -1441,7 +1396,6 @@ export const getGoalPreferences = async () => {
     );
     return result || [];
   } catch (error) {
-    console.error('Error getting goal preferences:', error);
     return [];
   }
 };
@@ -1456,7 +1410,6 @@ export const updateGoalPreference = async (statName, isEnabled) => {
       [isEnabled ? 1 : 0, statName]
     );
   } catch (error) {
-    console.error('Error updating goal preference:', error);
     throw error;
   }
 };
@@ -1471,7 +1424,6 @@ export const getEnabledGoalPreferences = async () => {
     );
     return result || [];
   } catch (error) {
-    console.error('Error getting enabled goal preferences:', error);
     return [];
   }
 };
@@ -1487,7 +1439,6 @@ export const getUserSetting = async (settingKey) => {
     );
     return result?.settingValue || null;
   } catch (error) {
-    console.error('Error getting user setting:', error);
     return null;
   }
 };
@@ -1502,7 +1453,6 @@ export const updateUserSetting = async (settingKey, settingValue) => {
       [settingKey, settingValue]
     );
   } catch (error) {
-    console.error('Error updating user setting:', error);
     throw error;
   }
 };

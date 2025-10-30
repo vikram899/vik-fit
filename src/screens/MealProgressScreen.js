@@ -151,7 +151,6 @@ export default function MealProgressScreen({ navigation }) {
         useNativeDriver: true,
       }).start();
     } catch (error) {
-      console.error('Error loading weekly meal data:', error);
       setError('Failed to load meal data. Please try again.');
     } finally {
       setLoading(false);
@@ -204,7 +203,6 @@ export default function MealProgressScreen({ navigation }) {
         setStreakTrackingMetric(metric);
       }
     } catch (error) {
-      console.error('Error loading goal preferences:', error);
     }
   };
 

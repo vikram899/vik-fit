@@ -70,7 +70,6 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
         STRINGS.existingMealsModal.alerts.addSuccess.message(meal.name)
       );
     } catch (error) {
-      console.error("Error adding meal to today:", error);
       Alert.alert(
         STRINGS.existingMealsModal.alerts.addError.title,
         STRINGS.existingMealsModal.alerts.addError.message

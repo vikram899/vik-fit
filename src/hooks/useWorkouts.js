@@ -21,7 +21,6 @@ export const useWorkouts = () => {
    * @returns {Promise<boolean>} Success status
    */
   const logWorkout = useCallback(async (workoutData, userId = null) => {
-    console.log('🏋️ logWorkout hook called with:', workoutData);
     setLoading(true);
     setError(null);
 
@@ -31,27 +30,21 @@ export const useWorkouts = () => {
         created_at: getCurrentDate(),
         user_id: userId,
       };
-      console.log('🏋️ Payload prepared:', payload);
 
       const { data, error: saveError } = await saveWorkout(payload);
-      console.log('🏋️ saveWorkout response - data:', data, 'error:', saveError);
 
       if (saveError) {
-        console.error('🏋️ Save error occurred:', saveError);
         setError(saveError.message || 'Failed to save workout');
         return false;
       }
 
       // Add to local state optimistically
       if (data && data[0]) {
-        console.log('🏋️ Adding to local state:', data[0]);
         setWorkouts((prev) => [data[0], ...prev]);
       }
 
-      console.log('🏋️ Workout logged successfully');
       return true;
     } catch (err) {
-      console.error('🏋️ Error in logWorkout:', err);
       setError(err.message || 'An error occurred while saving workout');
       return false;
     } finally {

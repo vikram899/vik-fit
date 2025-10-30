@@ -22,7 +22,10 @@
       "Bash(git checkout:*)",
       "Bash(lsof:*)",
       "Bash(xargs kill -9)",
-      "WebFetch(domain:www.notjust.dev)"
+      "WebFetch(domain:www.notjust.dev)",
+      "WebFetch(domain:expo.dev)",
+      "Bash(eas login:*)",
+      "Bash(eas build:*)"
     ],
     "deny": [],
     "ask": []

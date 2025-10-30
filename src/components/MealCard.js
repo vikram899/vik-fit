@@ -18,7 +18,6 @@ import { COLORS } from "../styles";
 export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress, showPlusIcon = false, isAdded = false, isEditableStar = false }) {
   const [isFavorite, setIsFavorite] = React.useState(meal.isFavorite || false);
 
-  console.log("MealCard rendered:", meal.name, "isEditableStar:", isEditableStar, "isFavorite:", isFavorite);
 
   // Update local state when meal prop changes
   React.useEffect(() => {
@@ -62,12 +61,9 @@ export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress, 
   const mealTypeInfo = getMealTypeInfo(meal.mealType || "veg");
 
   const handleFavoritePress = (e) => {
-    console.log("STAR CLICKED");
     e.stopPropagation();
     const newFavoriteState = !isFavorite;
-    console.log("MealCard handleFavoritePress:", meal.name, "current:", isFavorite, "new:", newFavoriteState);
     setIsFavorite(newFavoriteState);
-    console.log("Calling onFavoritePress with:", newFavoriteState);
     onFavoritePress && onFavoritePress(newFavoriteState);
   };
 

@@ -103,7 +103,6 @@ const AddMealModal = ({ visible, onClose, onMealAdded, showMealType = false, sel
         STRINGS.addMealModal.alerts.success.message(mealName)
       );
     } catch (error) {
-      console.error("Error adding meal:", error);
       Alert.alert(
         STRINGS.addMealModal.alerts.error.title,
         STRINGS.addMealModal.alerts.error.message

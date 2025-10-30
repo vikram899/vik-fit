@@ -30,7 +30,6 @@ export default function WorkoutSummaryScreen({ navigation, route }) {
       const data = await getWorkoutSummary(workoutLogId);
       setSummary(data);
     } catch (error) {
-      console.error('Error loading summary:', error);
       Alert.alert('Error', 'Failed to load workout summary');
     } finally {
       setLoading(false);

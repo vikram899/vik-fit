@@ -33,7 +33,6 @@ const MealsHistoryModal = ({ visible, onClose }) => {
       const breakdown = await getWeeklyDailyBreakdown(currentSunday);
       setWeeklyBreakdown(breakdown);
     } catch (error) {
-      console.error('Error loading meal history:', error);
       Alert.alert('Error', 'Failed to load meal history');
     } finally {
       setLoading(false);

@@ -116,7 +116,6 @@ export default function CreatePlanScreen({ navigation }) {
       }, 1500);
     } catch (error) {
       showToast("Failed to create plan", "error");
-      console.error("Error creating plan:", error);
     } finally {
       setLoading(false);
     }

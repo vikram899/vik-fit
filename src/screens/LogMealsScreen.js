@@ -51,7 +51,6 @@ const LogMealsScreen = ({ navigation }) => {
           const goals = await getMacroGoals(todayDate);
           setMacroGoals(goals);
         } catch (error) {
-          console.error("Error fetching meals:", error);
         }
       };
 
@@ -74,7 +73,6 @@ const LogMealsScreen = ({ navigation }) => {
         setExistingMeals(meals);
       }
     } catch (error) {
-      console.error("Error refreshing meals list:", error);
     }
   };
 
@@ -117,7 +115,6 @@ const LogMealsScreen = ({ navigation }) => {
               const totals = await getDailyTotals(today);
               setDailyTotals(totals);
             } catch (error) {
-              console.error("Error deleting meal:", error);
               // Add delay to show error alert after confirmation dialog closes
               setTimeout(() => {
                 Alert.alert(
@@ -143,7 +140,6 @@ const LogMealsScreen = ({ navigation }) => {
       const totals = await getDailyTotals(today);
       setDailyTotals(totals);
     } catch (error) {
-      console.error("Error removing meal:", error);
       Alert.alert(
         STRINGS.logMealsScreen.alerts.deleteError.title,
         STRINGS.logMealsScreen.alerts.deleteError.message

@@ -24,7 +24,6 @@ export const getDailyMealData = async (date) => {
     );
     return result || { totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFats: 0 };
   } catch (error) {
-    console.error('Error getting daily meal data:', error);
     return { totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFats: 0 };
   }
 };
@@ -52,7 +51,6 @@ export const getWeeklyMealData = async (startDate) => {
     );
     return result || { totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFats: 0 };
   } catch (error) {
-    console.error('Error getting weekly meal data:', error);
     return { totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFats: 0 };
   }
 };
@@ -85,7 +83,6 @@ export const getWeeklyDailyBreakdown = async (startDate) => {
 
     return weekData;
   } catch (error) {
-    console.error('Error getting weekly daily breakdown:', error);
     return [];
   }
 };
@@ -122,7 +119,6 @@ export const getWeeklyGoals = async (startDate) => {
     }
     return { calorieGoal: 0, proteinGoal: 0, carbsGoal: 0, fatsGoal: 0 };
   } catch (error) {
-    console.error('Error getting weekly goals:', error);
     return { calorieGoal: 0, proteinGoal: 0, carbsGoal: 0, fatsGoal: 0 };
   }
 };

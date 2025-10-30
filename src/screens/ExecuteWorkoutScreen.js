@@ -39,7 +39,6 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
         const planExercises = await getExercisesByPlanId(planId);
         setExercises(planExercises);
       } catch (error) {
-        console.error("Error loading exercises:", error);
       } finally {
         setLoading(false);
       }
@@ -67,7 +66,6 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
       [
         {
           text: "Cancel",
-          onPress: () => console.log("Delete cancelled"),
           style: "cancel",
         },
         {
@@ -94,7 +92,6 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
       [
         {
           text: "Cancel",
-          onPress: () => console.log("Delete cancelled"),
           style: "cancel",
         },
         {

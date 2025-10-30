@@ -52,7 +52,6 @@ export default function AddMealScreen({ navigation, route }) {
         useNativeDriver: true,
       }).start();
     } catch (error) {
-      console.error("Error loading meals:", error);
       Alert.alert("Error", "Failed to load meals");
     } finally {
       setLoading(false);
@@ -126,7 +125,6 @@ export default function AddMealScreen({ navigation, route }) {
               await deleteMeal(meal.id);
               await loadMeals();
             } catch (error) {
-              console.error("Error deleting meal:", error);
               Alert.alert("Error", "Failed to delete meal");
             }
           },

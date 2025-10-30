@@ -45,7 +45,6 @@ const QuickSelectMealsScreen = ({ navigation, route }) => {
         const mealsList = await getAllMeals();
         setMeals(mealsList || []);
       } catch (error) {
-        console.error("Error loading meals:", error);
       } finally {
         setLoading(false);
       }
@@ -119,7 +118,6 @@ const QuickSelectMealsScreen = ({ navigation, route }) => {
       setMealTypeSelectVisible(false);
       setMealTypeSelectMeal(null);
     } catch (error) {
-      console.error("Error adding meal to today:", error);
     }
   };
 

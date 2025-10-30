@@ -150,7 +150,6 @@ export default function WorkoutProgressScreen({ navigation }) {
         useNativeDriver: true,
       }).start();
     } catch (error) {
-      console.error('Error loading workouts:', error);
     } finally {
       setLoading(false);
     }
@@ -206,9 +205,7 @@ export default function WorkoutProgressScreen({ navigation }) {
         setStreakTrackingMetric(metric);
       }
 
-      console.log('Workout goals saved:', settings);
     } catch (error) {
-      console.error('Error saving goal settings:', error);
     }
   };
 

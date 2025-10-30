@@ -29,7 +29,6 @@ const WorkoutHistoryModal = ({ visible, onClose }) => {
       const breakdown = await getWeeklyWorkoutBreakdown(currentSunday);
       setWeeklyBreakdown(breakdown);
     } catch (error) {
-      console.error('Error loading workout history:', error);
       Alert.alert('Error', 'Failed to load workout history');
     } finally {
       setLoading(false);

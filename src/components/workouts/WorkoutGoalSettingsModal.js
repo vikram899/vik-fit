@@ -51,7 +51,6 @@ const WorkoutGoalSettingsModal = ({ visible, onClose, onSave }) => {
       const prefs = await getGoalPreferences();
       setPreferences(prefs);
     } catch (error) {
-      console.error('Error loading goal preferences:', error);
       Alert.alert('Error', 'Failed to load settings');
     } finally {
       setLoading(false);
@@ -79,7 +78,6 @@ const WorkoutGoalSettingsModal = ({ visible, onClose, onSave }) => {
         });
       }
     } catch (error) {
-      console.error('Error updating preference:', error);
       Alert.alert('Error', 'Failed to update setting');
     }
   };
@@ -100,7 +98,6 @@ const WorkoutGoalSettingsModal = ({ visible, onClose, onSave }) => {
         });
       }
     } catch (error) {
-      console.error('Error updating tracking metric:', error);
       Alert.alert('Error', 'Failed to update setting');
     }
   };
@@ -113,7 +110,6 @@ const WorkoutGoalSettingsModal = ({ visible, onClose, onSave }) => {
 
       onClose();
     } catch (error) {
-      console.error('Error saving goal settings:', error);
       Alert.alert('Error', 'Failed to save goal settings');
     }
   };

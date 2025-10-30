@@ -28,7 +28,6 @@ export const getWeeklyWorkoutCompletions = async (planId, startDate) => {
 
     return result?.completionCount || 0;
   } catch (error) {
-    console.error('Error getting weekly workout completions:', error);
     return 0;
   }
 };
@@ -57,7 +56,6 @@ export const getAllWorkoutsWithMetrics = async (startDate) => {
 
     return result || [];
   } catch (error) {
-    console.error('Error getting workouts with metrics:', error);
     return [];
   }
 };
@@ -74,7 +72,6 @@ export const getPlanExerciseCount = async (planId) => {
 
     return result?.exerciseCount || 0;
   } catch (error) {
-    console.error('Error getting exercise count:', error);
     return 0;
   }
 };
@@ -91,7 +88,6 @@ export const getPlanScheduledDays = async (planId) => {
 
     return result?.map(r => r.dayOfWeek) || [];
   } catch (error) {
-    console.error('Error getting plan scheduled days:', error);
     return [];
   }
 };
@@ -149,7 +145,6 @@ export const getWeeklyWorkoutStats = async (startDate) => {
       exercisesCompleted: result?.exercisesCompleted || 0,
     };
   } catch (error) {
-    console.error('Error getting weekly workout stats:', error);
     return { workoutsCompleted: 0, exercisesCompleted: 0 };
   }
 };
@@ -209,7 +204,6 @@ export const getWeeklyWorkoutBreakdown = async (startDate) => {
 
     return weekData;
   } catch (error) {
-    console.error('Error getting weekly workout breakdown:', error);
     return [];
   }
 };
@@ -262,7 +256,6 @@ export const getWeeklyScheduledGoals = async (startDate) => {
       completedExercises: completedData?.completedExercises || 0,
     };
   } catch (error) {
-    console.error('Error calculating weekly scheduled goals:', error);
     return {
       totalScheduledWorkouts: 0,
       totalScheduledExercises: 0,

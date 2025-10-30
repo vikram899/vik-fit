@@ -4,7 +4,6 @@
  * Replaces Supabase for testing the UI
  */
 
-console.log('🔧 dummyData.js module loading...');
 
 // In-memory storage
 let workoutsData = [
@@ -52,8 +51,6 @@ let nextMealId = 3;
  * and new format (planName, exercises array, duration, etc)
  */
 export const saveWorkout = async (workoutData) => {
-  console.log('📝 saveWorkout called with:', workoutData);
-  console.log('📝 Current workoutsData before save:', workoutsData);
 
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -67,15 +64,11 @@ export const saveWorkout = async (workoutData) => {
           reps: workoutData.reps || 0,
           weight: workoutData.weight || 0,
         };
-        console.log('📝 New workout object created:', newWorkout);
 
         workoutsData.unshift(newWorkout);
-        console.log('✅ Workout saved (dummy):', newWorkout);
-        console.log('📝 workoutsData after save:', workoutsData);
 
         resolve({ data: [newWorkout], error: null });
       } catch (err) {
-        console.error('❌ Error in saveWorkout:', err);
         resolve({ data: null, error: err });
       }
     }, 500); // Simulate network delay
@@ -89,7 +82,6 @@ export const fetchWorkouts = async (userId, limit = 50) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       const data = workoutsData.slice(0, limit);
-      console.log('✅ Workouts fetched (dummy):', data.length, 'items');
       resolve({ data, error: null });
     }, 300);
   });
@@ -102,7 +94,6 @@ export const deleteWorkout = async (workoutId) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       workoutsData = workoutsData.filter((w) => w.id !== workoutId);
-      console.log('✅ Workout deleted (dummy):', workoutId);
       resolve({ data: null, error: null });
     }, 300);
   });
@@ -119,7 +110,6 @@ export const saveMeal = async (mealData) => {
         ...mealData,
       };
       mealsData.unshift(newMeal);
-      console.log('✅ Meal saved (dummy):', newMeal);
       resolve({ data: [newMeal], error: null });
     }, 500); // Simulate network delay
   });
@@ -132,7 +122,6 @@ export const fetchMeals = async (userId, limit = 50) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       const data = mealsData.slice(0, limit);
-      console.log('✅ Meals fetched (dummy):', data.length, 'items');
       resolve({ data, error: null });
     }, 300);
   });
@@ -145,7 +134,6 @@ export const deleteMeal = async (mealId) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       mealsData = mealsData.filter((m) => m.id !== mealId);
-      console.log('✅ Meal deleted (dummy):', mealId);
       resolve({ data: null, error: null });
     }, 300);
   });
@@ -170,7 +158,6 @@ export const resetAllData = () => {
   mealsData = [];
   nextWorkoutId = 1;
   nextMealId = 1;
-  console.log('✅ All dummy data reset');
 };
 
 /**

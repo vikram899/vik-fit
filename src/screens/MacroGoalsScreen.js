@@ -57,7 +57,6 @@ export default function MacroGoalsScreen({ navigation }) {
         }
         setLoading(false);
       } catch (error) {
-        console.error("Error loading macro goals:", error);
         setLoading(false);
       }
     };
@@ -97,15 +96,12 @@ export default function MacroGoalsScreen({ navigation }) {
           result.carbsGoal,
           result.fatsGoal
         );
-        console.log("Macros saved automatically");
       } catch (saveError) {
-        console.error("Error auto-saving macros:", saveError);
       }
 
       // Switch back to manual entry tab
       setTab("manual");
     } catch (error) {
-      console.error("Error calculating macros:", error);
       Alert.alert("Error", error.message || "Failed to calculate macros. Please check your API key.");
     } finally {
       setCalculating(false);
@@ -129,7 +125,6 @@ export default function MacroGoalsScreen({ navigation }) {
       Alert.alert("Success", "Default macro goals saved successfully!");
       navigation.goBack();
     } catch (error) {
-      console.error("Error saving macro goals:", error);
       Alert.alert("Error", "Failed to save macro goals");
     }
   };

@@ -87,7 +87,6 @@ const GoalSettingsModal = ({ visible, onClose, onSettingsSaved }) => {
         setStreakTrackingMetric(metric);
       }
     } catch (error) {
-      console.error('Error loading goal preferences:', error);
       Alert.alert('Error', 'Failed to load settings');
     } finally {
       setLoading(false);
@@ -113,7 +112,6 @@ const GoalSettingsModal = ({ visible, onClose, onSettingsSaved }) => {
         onSettingsSaved();
       }
     } catch (error) {
-      console.error('Error updating preference:', error);
       Alert.alert('Error', 'Failed to update setting');
     }
   };
@@ -128,7 +126,6 @@ const GoalSettingsModal = ({ visible, onClose, onSettingsSaved }) => {
         onSettingsSaved();
       }
     } catch (error) {
-      console.error('Error updating tracking metric:', error);
       Alert.alert('Error', 'Failed to update setting');
     }
   };

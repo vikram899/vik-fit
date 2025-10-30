@@ -107,7 +107,6 @@ export default function WorkoutDayScheduleScreen({ navigation }) {
       const dayPlans = await getPlansForDay(selectedDay);
       setPlansForDay(dayPlans);
     } catch (error) {
-      console.error("Error loading workouts:", error);
       Alert.alert("Error", "Failed to load workout plans");
     } finally {
       setLoading(false);
@@ -167,7 +166,6 @@ export default function WorkoutDayScheduleScreen({ navigation }) {
       loadData();
       Alert.alert("Success", "Workout schedule updated!");
     } catch (error) {
-      console.error("Error saving plan schedule:", error);
       Alert.alert("Error", "Failed to save plan schedule");
     }
   };
@@ -179,7 +177,6 @@ export default function WorkoutDayScheduleScreen({ navigation }) {
       loadData();
       Alert.alert("Success", `${plan.name} marked as completed!`);
     } catch (error) {
-      console.error("Error marking plan as complete:", error);
       Alert.alert("Error", "Failed to mark plan as completed");
     }
   };
@@ -202,7 +199,6 @@ export default function WorkoutDayScheduleScreen({ navigation }) {
               loadData();
               Alert.alert("Success", "Workout deleted!");
             } catch (error) {
-              console.error("Error deleting plan:", error);
               Alert.alert("Error", "Failed to delete plan");
             }
           },

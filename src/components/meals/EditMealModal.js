@@ -66,7 +66,6 @@ const EditMealModal = ({
         STRINGS.editMealModal.alerts.success.message
       );
     } catch (error) {
-      console.error('Error updating meal:', error);
       Alert.alert(
         STRINGS.editMealModal.alerts.error.title,
         STRINGS.editMealModal.alerts.error.message

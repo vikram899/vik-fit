@@ -16,7 +16,6 @@ export default function MenuScreen({ navigation }) {
       icon: "account-circle",
       onPress: () => {
         // Navigate to profile screen when created
-        console.log("Profile pressed");
       },
     },
     {
@@ -41,7 +40,6 @@ export default function MenuScreen({ navigation }) {
       icon: "cog",
       onPress: () => {
         // Navigate to settings screen when created
-        console.log("Settings pressed");
       },
     },
     {
@@ -58,7 +56,6 @@ export default function MenuScreen({ navigation }) {
       icon: "information",
       onPress: () => {
         // Navigate to about screen when created
-        console.log("About pressed");
       },
     },
   ];

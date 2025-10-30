@@ -87,7 +87,6 @@ export default function AllWorkoutsScreen({ navigation }) {
         useNativeDriver: true,
       }).start();
     } catch (error) {
-      console.error('Error loading workouts:', error);
       Alert.alert('Error', 'Failed to load workouts');
     } finally {
       setLoading(false);
@@ -141,7 +140,6 @@ export default function AllWorkoutsScreen({ navigation }) {
       loadWorkouts();
       Alert.alert('Success', 'Workout schedule updated!');
     } catch (error) {
-      console.error('Error saving plan schedule:', error);
       Alert.alert('Error', 'Failed to save plan schedule');
     }
   };
@@ -166,7 +164,6 @@ export default function AllWorkoutsScreen({ navigation }) {
               await deletePlan(workout.id);
               loadWorkouts();
             } catch (error) {
-              console.error('Error deleting workout:', error);
               Alert.alert('Error', 'Failed to delete workout');
             }
           },

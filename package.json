@@ -21,9 +21,11 @@
     "@supabase/supabase-js": "2.26.0",
     "@vseslav/react-native-horizontal-picker": "^0.1.1",
     "expo": "^54.0.0",
+    "expo-dev-client": "^6.0.16",
     "expo-sqlite": "^16.0.8",
     "react": "19.1.0",
     "react-native": "0.81.4",
+    "react-native-health": "^1.19.0",
     "react-native-number-horizontal-picker": "^1.0.2",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0"

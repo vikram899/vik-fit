@@ -13,6 +13,7 @@ import { SummaryCard, WorkoutsSection } from "../components/home";
 import { appStyles } from "../styles/app.styles";
 import { COLORS } from "../styles";
 import WeightProgressGraph from "../components/WeightProgressGraph";
+import StepsCard from "../components/health/StepsCard";
 import {
   getDailyTotals,
   getMacroGoals,
@@ -89,7 +90,6 @@ export default function HomeScreen({ navigation }) {
           setTargetWeight(recentWeightData[0].targetWeight);
         }
       } catch (error) {
-        console.error("Error loading today's data:", error);
       }
     };
 
@@ -149,7 +149,6 @@ export default function HomeScreen({ navigation }) {
             }
           }
         } catch (error) {
-          console.error("Error loading today's data:", error);
         }
       };
 
@@ -189,6 +188,9 @@ export default function HomeScreen({ navigation }) {
           onLogPress={() => navigation.navigate("LogWorkout")}
           onWorkoutPress={() => navigation.navigate("LogWorkout")}
         />
+
+        {/* Daily Steps Card - Synced from Apple Health */}
+        <StepsCard />
 
         {/* Weight Progress Card */}
         <View style={styles.weightCard}>
