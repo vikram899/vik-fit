@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
     marginBottom: 20,
+    marginTop: -8,
   },
   titleRow: {
     flexDirection: "row",

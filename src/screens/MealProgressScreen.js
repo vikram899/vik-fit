@@ -374,170 +374,144 @@ export default function MealProgressScreen({ navigation }) {
           </View>
 
 
-          {/* Empty State */}
-          {!hasData ? (
-            <View style={styles.emptyStateContainer}>
-              <MaterialCommunityIcons
-                name="food-off"
-                size={64}
-                color="#ccc"
-              />
-              <Text style={styles.emptyStateTitle}>No Meals Logged</Text>
-              <Text style={styles.emptyStateSubtitle}>
-                Start logging your meals to see weekly insights
-              </Text>
-              <TouchableOpacity
-                onPress={handleMealHistory}
-                style={styles.emptyStateButton}
-              >
-                <MaterialCommunityIcons name="history" size={20} color="#fff" />
-                <Text style={styles.emptyStateButtonText}>View Meal History</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <>
-              {/* Stats Section - Meal Logging Streak & Calorie Target */}
-              <View style={styles.statsSection}>
-                {/* Meal Logging Streak - Using StreakCard Component */}
-                <StreakCard
-                  daysTracked={daysWithMeals}
-                  totalDays={7}
-                  trackingMetric={streakTrackingMetric.charAt(0).toUpperCase() + streakTrackingMetric.slice(1)}
-                  weeklyBreakdown={weeklyBreakdown}
-                  getStreakColor={getStreakColor}
+          {/* Stats Section - Meal Logging Streak & Calorie Target */}
+          <View style={styles.statsSection}>
+            {/* Meal Logging Streak - Using StreakCard Component */}
+            <StreakCard
+              daysTracked={daysWithMeals}
+              totalDays={7}
+              trackingMetric={streakTrackingMetric.charAt(0).toUpperCase() + streakTrackingMetric.slice(1)}
+              weeklyBreakdown={weeklyBreakdown}
+              getStreakColor={getStreakColor}
+            />
+
+            {/* Stats - Actionable Insights (Dynamic based on preferences) */}
+            {enabledGoalPreferences.length > 0 && (
+              <View style={styles.statItem}>
+                <SectionHeader
+                  title="Stats"
+                  onHelpPress={() => {
+                    setSelectedStatHelp('statsOverview');
+                    setHelpBottomSheetVisible(true);
+                  }}
                 />
-
-                {/* Stats - Actionable Insights (Dynamic based on preferences) */}
-                {enabledGoalPreferences.length > 0 && (
-                  <View style={styles.statItem}>
-                    <SectionHeader
-                      title="Stats"
-                      onHelpPress={() => {
-                        setSelectedStatHelp('statsOverview');
-                        setHelpBottomSheetVisible(true);
-                      }}
-                    />
-                    <View style={styles.statsInsightsContainer}>
-                      {/* Calorie Target Achievement */}
-                      {enabledGoalPreferences.some(p => p.statName === 'calorieTarget') && (
-                        <View style={styles.statInsight}>
-                          <View style={styles.insightRow}>
-                            <Text style={styles.insightText}>
-                              You hit calorie target{' '}
-                              <Text style={styles.insightBold}>
-                                {weeklyBreakdown.filter(day => day.totalCalories >= dailyGoals.calorieGoal).length} days
-                              </Text>
-                            </Text>
-                            <View style={styles.trendBadge}>
-                              <MaterialCommunityIcons
-                                name="trending-up"
-                                size={14}
-                                color="#4CAF50"
-                              />
-                              <Text style={styles.trendBadgeText}>+1</Text>
-                            </View>
-                          </View>
+                <View style={styles.statsInsightsContainer}>
+                  {/* Calorie Target Achievement */}
+                  {enabledGoalPreferences.some(p => p.statName === 'calorieTarget') && (
+                    <View style={styles.statInsight}>
+                      <View style={styles.insightRow}>
+                        <Text style={styles.insightText}>
+                          You hit calorie target{' '}
+                          <Text style={styles.insightBold}>
+                            {weeklyBreakdown.filter(day => day.totalCalories >= dailyGoals.calorieGoal).length} days
+                          </Text>
+                        </Text>
+                        <View style={styles.trendBadge}>
+                          <MaterialCommunityIcons
+                            name="trending-up"
+                            size={14}
+                            color="#4CAF50"
+                          />
+                          <Text style={styles.trendBadgeText}>+1</Text>
                         </View>
-                      )}
-
-                      {/* Protein Change */}
-                      {enabledGoalPreferences.some(p => p.statName === 'proteinIntake') && (
-                        <View style={styles.statInsight}>
-                          <View style={styles.insightRow}>
-                            <Text style={styles.insightText}>
-                              Protein intake{' '}
-                              <Text style={styles.insightBold}>
-                                +{Math.round(((currentWeekData.totalProtein - lastWeekData.totalProtein) / (lastWeekData.totalProtein || 1)) * 100)}%
-                              </Text>
-                              {' '}vs last week
-                            </Text>
-                          </View>
-                        </View>
-                      )}
-
-                      {/* Carbs Change */}
-                      {enabledGoalPreferences.some(p => p.statName === 'carbsIntake') && (
-                        <View style={styles.statInsight}>
-                          <View style={styles.insightRow}>
-                            <Text style={styles.insightText}>
-                              Carbs intake{' '}
-                              <Text style={styles.insightBold}>
-                                +{Math.round(((currentWeekData.totalCarbs - lastWeekData.totalCarbs) / (lastWeekData.totalCarbs || 1)) * 100)}%
-                              </Text>
-                              {' '}vs last week
-                            </Text>
-                          </View>
-                        </View>
-                      )}
-
-                      {/* Fats Change */}
-                      {enabledGoalPreferences.some(p => p.statName === 'fatsIntake') && (
-                        <View style={styles.statInsight}>
-                          <View style={styles.insightRow}>
-                            <Text style={styles.insightText}>
-                              Fats intake{' '}
-                              <Text style={styles.insightBold}>
-                                +{Math.round(((currentWeekData.totalFats - lastWeekData.totalFats) / (lastWeekData.totalFats || 1)) * 100)}%
-                              </Text>
-                              {' '}vs last week
-                            </Text>
-                          </View>
-                        </View>
-                      )}
-
-                      {/* Smart Insight - Meal Prep Suggestion */}
-                      {enabledGoalPreferences.some(p => p.statName === 'mealPrepTips') && (
-                        <View style={[styles.statInsight, styles.insightWarning]}>
-                          <View style={styles.insightRow}>
-                            <MaterialCommunityIcons
-                              name="lightbulb-on"
-                              size={16}
-                              color="#FF9800"
-                            />
-                            <Text style={[styles.insightText, styles.warningText]}>
-                              You skipped <Text style={styles.insightBold}>lunch twice</Text> — consider prepping meals
-                            </Text>
-                          </View>
-                        </View>
-                      )}
+                      </View>
                     </View>
-                  </View>
-                )}
+                  )}
 
-                {/* Empty Stats Message */}
-                {enabledGoalPreferences.length === 0 && (
-                  <View style={styles.statItem}>
-                    <SectionHeader
-                      title="Stats"
-                      onHelpPress={() => {
-                        setSelectedStatHelp('statsOverview');
-                        setHelpBottomSheetVisible(true);
-                      }}
-                    />
-                    <View style={styles.emptyStatsContainer}>
-                      <MaterialCommunityIcons
-                        name="tune"
-                        size={24}
-                        color="#ccc"
-                      />
-                      <Text style={styles.emptyStatsText}>
-                        No stats selected. Configure from Goals button.
-                      </Text>
+                  {/* Protein Change */}
+                  {enabledGoalPreferences.some(p => p.statName === 'proteinIntake') && (
+                    <View style={styles.statInsight}>
+                      <View style={styles.insightRow}>
+                        <Text style={styles.insightText}>
+                          Protein intake{' '}
+                          <Text style={styles.insightBold}>
+                            +{Math.round(((currentWeekData.totalProtein - lastWeekData.totalProtein) / (lastWeekData.totalProtein || 1)) * 100)}%
+                          </Text>
+                          {' '}vs last week
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                )}
+                  )}
+
+                  {/* Carbs Change */}
+                  {enabledGoalPreferences.some(p => p.statName === 'carbsIntake') && (
+                    <View style={styles.statInsight}>
+                      <View style={styles.insightRow}>
+                        <Text style={styles.insightText}>
+                          Carbs intake{' '}
+                          <Text style={styles.insightBold}>
+                            +{Math.round(((currentWeekData.totalCarbs - lastWeekData.totalCarbs) / (lastWeekData.totalCarbs || 1)) * 100)}%
+                          </Text>
+                          {' '}vs last week
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+
+                  {/* Fats Change */}
+                  {enabledGoalPreferences.some(p => p.statName === 'fatsIntake') && (
+                    <View style={styles.statInsight}>
+                      <View style={styles.insightRow}>
+                        <Text style={styles.insightText}>
+                          Fats intake{' '}
+                          <Text style={styles.insightBold}>
+                            +{Math.round(((currentWeekData.totalFats - lastWeekData.totalFats) / (lastWeekData.totalFats || 1)) * 100)}%
+                          </Text>
+                          {' '}vs last week
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+
+                  {/* Smart Insight - Meal Prep Suggestion */}
+                  {enabledGoalPreferences.some(p => p.statName === 'mealPrepTips') && (
+                    <View style={[styles.statInsight, styles.insightWarning]}>
+                      <View style={styles.insightRow}>
+                        <MaterialCommunityIcons
+                          name="lightbulb-on"
+                          size={16}
+                          color="#FF9800"
+                        />
+                        <Text style={[styles.insightText, styles.warningText]}>
+                          You skipped <Text style={styles.insightBold}>lunch twice</Text> — consider prepping meals
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                </View>
               </View>
+            )}
 
-              {/* Weekly Summary Cards */}
-              <WeeklySummaryCards
-                currentWeekData={currentWeekData}
-                lastWeekData={lastWeekData}
-                weeklyGoals={weeklyGoals}
-              />
+            {/* Empty Stats Message */}
+            {enabledGoalPreferences.length === 0 && (
+              <View style={styles.statItem}>
+                <SectionHeader
+                  title="Stats"
+                  onHelpPress={() => {
+                    setSelectedStatHelp('statsOverview');
+                    setHelpBottomSheetVisible(true);
+                  }}
+                />
+                <View style={styles.emptyStatsContainer}>
+                  <MaterialCommunityIcons
+                    name="tune"
+                    size={24}
+                    color="#ccc"
+                  />
+                  <Text style={styles.emptyStatsText}>
+                    No stats selected. Configure from Goals button.
+                  </Text>
+                </View>
+              </View>
+            )}
+          </View>
 
-
-            </>
-          )}
+          {/* Weekly Summary Cards */}
+          <WeeklySummaryCards
+            currentWeekData={currentWeekData}
+            lastWeekData={lastWeekData}
+            weeklyGoals={weeklyGoals}
+          />
         </ScrollView>
       </Animated.View>
 
