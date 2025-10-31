@@ -420,6 +420,8 @@ export default function LogWorkoutScreen({ navigation }) {
                   scheduledDays={scheduledDays[workout.id] || []}
                   onViewExercises={handleViewExercisesFromCard}
                   onMenuPress={(w) => handleWorkoutMenu(w, true)}
+                  onStart={handleStartWorkout}
+                  showStartButton={true}
                 />
               ))
             ) : (

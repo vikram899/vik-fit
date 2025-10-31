@@ -17,7 +17,9 @@ const WorkoutCard = ({
   exerciseCount = 0,
   scheduledDays = [],
   onViewExercises,
-  onMenuPress
+  onMenuPress,
+  onStart = null,
+  showStartButton = false
 }) => {
   const getScheduledDaysArray = () => {
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -91,6 +93,23 @@ const WorkoutCard = ({
           color={COLORS.primary}
         />
       </TouchableOpacity>
+
+      {/* Start Button - For Today's Workouts */}
+      {showStartButton && onStart && (
+        <TouchableOpacity
+          style={styles.startButton}
+          onPress={() => onStart(workout)}
+          activeOpacity={0.8}
+        >
+          <MaterialCommunityIcons
+            name="play"
+            size={18}
+            color="#fff"
+            style={{ marginRight: 6 }}
+          />
+          <Text style={styles.startButtonText}>Start Workout</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -209,6 +228,27 @@ const styles = StyleSheet.create({
     marginTop: 2,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+  startButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginTop: 12,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  startButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#fff',
+    letterSpacing: 0.3,
   },
 });
 
