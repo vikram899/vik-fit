@@ -21,7 +21,8 @@ const WorkoutCard = ({
   onStart = null,
   onViewSummary = null,
   showStartButton = false,
-  isCompleted = false
+  isCompleted = false,
+  showDayTags = true
 }) => {
   const getScheduledDaysArray = () => {
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -36,25 +37,27 @@ const WorkoutCard = ({
       <View style={styles.cardHeader}>
         <View style={styles.cardInfo}>
           <Text style={styles.workoutName}>{workout.name}</Text>
-          <View style={styles.daysContainer}>
-            {getScheduledDaysArray() ? (
-              getScheduledDaysArray().map((day, index) => (
-                <View key={index} style={styles.dayBadge}>
-                  <Text style={styles.dayBadgeText}>{day}</Text>
+          {showDayTags && (
+            <View style={styles.daysContainer}>
+              {getScheduledDaysArray() ? (
+                getScheduledDaysArray().map((day, index) => (
+                  <View key={index} style={styles.dayBadge}>
+                    <Text style={styles.dayBadgeText}>{day}</Text>
+                  </View>
+                ))
+              ) : (
+                <View style={styles.noDaysBadge}>
+                  <MaterialCommunityIcons
+                    name="calendar-remove"
+                    size={14}
+                    color="#999"
+                    style={{ marginRight: 4 }}
+                  />
+                  <Text style={styles.noDaysText}>No days assigned</Text>
                 </View>
-              ))
-            ) : (
-              <View style={styles.noDaysBadge}>
-                <MaterialCommunityIcons
-                  name="calendar-remove"
-                  size={14}
-                  color="#999"
-                  style={{ marginRight: 4 }}
-                />
-                <Text style={styles.noDaysText}>No days assigned</Text>
-              </View>
-            )}
-          </View>
+              )}
+            </View>
+          )}
         </View>
         <TouchableOpacity
           onPress={() => onMenuPress(workout)}

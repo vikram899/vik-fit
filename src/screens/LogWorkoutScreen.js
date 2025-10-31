@@ -407,6 +407,11 @@ export default function LogWorkoutScreen({ navigation }) {
             <Text style={[styles.tabText, activeTab === 'today' && styles.tabTextActive]}>
               Today
             </Text>
+            {todaysWorkouts.length > 0 && (
+              <View style={styles.tabBadge}>
+                <Text style={styles.tabBadgeText}>{todaysWorkouts.length}</Text>
+              </View>
+            )}
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tab, activeTab === 'all' && styles.tabActive]}
@@ -428,19 +433,6 @@ export default function LogWorkoutScreen({ navigation }) {
             <>
               {/* Today's Workouts Section */}
               <View style={styles.todaySection}>
-            <View style={styles.sectionHeader}>
-              <MaterialCommunityIcons
-                name="calendar-today"
-                size={20}
-                color="#FF9800"
-              />
-              <Text style={styles.sectionTitle}>Today's Workouts</Text>
-              {todaysWorkouts.length > 0 && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{todaysWorkouts.length}</Text>
-                </View>
-              )}
-            </View>
             {todaysWorkouts.length > 0 ? (
               todaysWorkouts.map(workout => {
                 const isCompleted = todayWorkoutLogs[workout.id]?.status === 'completed';
@@ -456,6 +448,7 @@ export default function LogWorkoutScreen({ navigation }) {
                     onViewSummary={handleViewWorkoutSummary}
                     showStartButton={true}
                     isCompleted={isCompleted}
+                    showDayTags={false}
                   />
                 );
               })
@@ -566,8 +559,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 14,
     alignItems: 'center',
+    justifyContent: 'center',
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
+    flexDirection: 'row',
+    gap: 6,
   },
   tabActive: {
     borderBottomColor: COLORS.primary,
@@ -579,6 +575,20 @@ const styles = StyleSheet.create({
   },
   tabTextActive: {
     color: COLORS.primary,
+  },
+  tabBadge: {
+    backgroundColor: '#FF9800',
+    borderRadius: 8,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    minWidth: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#fff',
   },
   optionsContainer: {
     flex: 1,
