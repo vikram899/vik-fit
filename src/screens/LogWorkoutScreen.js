@@ -102,6 +102,22 @@ export default function LogWorkoutScreen({ navigation }) {
         }
       }
 
+      // Get today's workout logs to check completion status
+      const logsMapForSorting = {};
+      for (const workout of combinedTodayWorkouts) {
+        const log = await getTodayWorkoutLogForWorkout(workout.id);
+        if (log) {
+          logsMapForSorting[workout.id] = log;
+        }
+      }
+
+      // Sort: incomplete workouts first, completed ones at the end
+      combinedTodayWorkouts.sort((a, b) => {
+        const aCompleted = logsMapForSorting[a.id]?.status === 'completed' ? 1 : 0;
+        const bCompleted = logsMapForSorting[b.id]?.status === 'completed' ? 1 : 0;
+        return aCompleted - bCompleted;
+      });
+
       setTodaysWorkouts(combinedTodayWorkouts);
 
       // Get scheduled days for each workout
@@ -120,12 +136,15 @@ export default function LogWorkoutScreen({ navigation }) {
       }
       setExerciseCounts(exerciseCountsMap);
 
-      // Get today's workout logs for each workout
-      const workoutLogsMap = {};
+      // Get today's workout logs for all workouts (use already-loaded logs for today's workouts)
+      const workoutLogsMap = { ...logsMapForSorting };
+      // Get logs for the remaining workouts that aren't in today's list
       for (const workout of workouts) {
-        const log = await getTodayWorkoutLogForWorkout(workout.id);
-        if (log) {
-          workoutLogsMap[workout.id] = log;
+        if (!workoutLogsMap[workout.id]) {
+          const log = await getTodayWorkoutLogForWorkout(workout.id);
+          if (log) {
+            workoutLogsMap[workout.id] = log;
+          }
         }
       }
       // Always set the logs map, even if empty (to clear old logs)
