@@ -209,6 +209,7 @@ export default function AllMealsScreen({ navigation, route }) {
 
   const handleFavoritePress = async (mealId, isFavorite) => {
     try {
+      console.log(
         "Toggling favorite for meal:",
         mealId,
         "isFavorite:",
@@ -222,11 +223,6 @@ export default function AllMealsScreen({ navigation, route }) {
       setMeals((prevMeals) => {
         const updated = prevMeals.map((meal) => {
           if (meal.id === mealId) {
-              "Updated meal:",
-              meal.name,
-              "to isFavorite:",
-              isFavorite ? 1 : 0
-            );
             return { ...meal, isFavorite: isFavorite ? 1 : 0 };
           }
           return meal;
