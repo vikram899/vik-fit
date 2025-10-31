@@ -18,7 +18,7 @@ import { COLORS } from '../styles';
 import {
   getWeeklyMealData,
   getWeeklyDailyBreakdown,
-  getSundayOfWeek,
+  getMondayOfWeek,
 } from '../services/mealStats';
 import { getMacroGoals } from '../services/database';
 
@@ -38,8 +38,8 @@ export default function MealsHistoryScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [fadeAnim] = useState(new Animated.Value(0));
-  const [currentSunday, setCurrentSunday] = useState(
-    getSundayOfWeek(new Date().toISOString().split('T')[0])
+  const [currentMonday, setCurrentMonday] = useState(
+    getMondayOfWeek(new Date().toISOString().split('T')[0])
   );
 
   // Load weekly data
@@ -49,11 +49,11 @@ export default function MealsHistoryScreen({ navigation }) {
       setLoading(true);
 
       // Get daily breakdown
-      const breakdown = await getWeeklyDailyBreakdown(currentSunday);
+      const breakdown = await getWeeklyDailyBreakdown(currentMonday);
       setWeeklyBreakdown(breakdown);
 
       // Get daily goals for completion cards
-      const dailyGoalsData = await getMacroGoals(currentSunday);
+      const dailyGoalsData = await getMacroGoals(currentMonday);
       if (dailyGoalsData) {
         setDailyGoals(dailyGoalsData);
       }
@@ -70,7 +70,7 @@ export default function MealsHistoryScreen({ navigation }) {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [currentSunday, fadeAnim]);
+  }, [currentMonday, fadeAnim]);
 
   // Load data when screen is focused
   useFocusEffect(
@@ -80,15 +80,15 @@ export default function MealsHistoryScreen({ navigation }) {
   );
 
   const handlePreviousWeek = () => {
-    const prevSunday = new Date(currentSunday);
-    prevSunday.setDate(prevSunday.getDate() - 7);
-    setCurrentSunday(prevSunday.toISOString().split('T')[0]);
+    const prevMonday = new Date(currentMonday);
+    prevMonday.setDate(prevMonday.getDate() - 7);
+    setCurrentSunday(prevMonday.toISOString().split('T')[0]);
   };
 
   const handleNextWeek = () => {
-    const nextSunday = new Date(currentSunday);
-    nextSunday.setDate(nextSunday.getDate() + 7);
-    setCurrentSunday(nextSunday.toISOString().split('T')[0]);
+    const nextMonday = new Date(currentMonday);
+    nextMonday.setDate(nextMonday.getDate() + 7);
+    setCurrentSunday(nextMonday.toISOString().split('T')[0]);
   };
 
   const handleTodayWeek = () => {
@@ -106,7 +106,7 @@ export default function MealsHistoryScreen({ navigation }) {
 
   // Format week label with month/day
   const formatDateRange = () => {
-    const sundayDate = new Date(currentSunday);
+    const sundayDate = new Date(currentMonday);
     const saturdayDate = new Date(sundayDate);
     saturdayDate.setDate(saturdayDate.getDate() + 6);
 

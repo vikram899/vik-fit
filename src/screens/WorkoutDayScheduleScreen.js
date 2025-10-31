@@ -17,14 +17,14 @@ import { COLORS } from "../constants/colors";
 import { SPACING } from "../constants/spacing";
 import { STRINGS } from "../constants/strings";
 import {
-  getAllPlans,
-  getExercisesByPlanId,
-  getPlansForDay,
-  getScheduledDaysForPlan,
-  assignPlanToDays,
-  markPlanCompleted,
-  getPlanExecutionStatus,
-  deletePlan,
+  getAllWorkouts,
+  getExercisesByWorkoutId,
+  getWorkoutsForDay,
+  getScheduledDaysForWorkout,
+  assignWorkoutToDays,
+  markWorkoutCompleted,
+  getWorkoutExecutionStatus,
+  deleteWorkout,
 } from "../services/database";
 
 /**
@@ -92,19 +92,19 @@ export default function WorkoutDayScheduleScreen({ navigation }) {
       setLoading(true);
 
       // Get all plans
-      const plans = await getAllPlans();
+      const plans = await getAllWorkouts();
       setAllPlans(plans);
 
       // Get scheduled days for each plan
       const daysMap = {};
       for (const plan of plans) {
-        const days = await getScheduledDaysForPlan(plan.id);
+        const days = await getScheduledDaysForWorkout(plan.id);
         daysMap[plan.id] = days;
       }
       setScheduledDays(daysMap);
 
       // Get plans for selected day
-      const dayPlans = await getPlansForDay(selectedDay);
+      const dayPlans = await getWorkoutsForDay(selectedDay);
       setPlansForDay(dayPlans);
     } catch (error) {
       Alert.alert("Error", "Failed to load workout plans");
@@ -160,7 +160,7 @@ export default function WorkoutDayScheduleScreen({ navigation }) {
 
   const handleSaveDays = async (selectedDays) => {
     try {
-      await assignPlanToDays(selectedPlanForAssign.id, selectedDays);
+      await assignWorkoutToDays(selectedPlanForAssign.id, selectedDays);
       setAssignModalVisible(false);
       setSelectedPlanForAssign(null);
       loadData();
@@ -173,7 +173,7 @@ export default function WorkoutDayScheduleScreen({ navigation }) {
   const handleMarkComplete = async (plan) => {
     try {
       const today = new Date().toISOString().split("T")[0];
-      await markPlanCompleted(plan.id, today);
+      await markWorkoutCompleted(plan.id, today);
       loadData();
       Alert.alert("Success", `${plan.name} marked as completed!`);
     } catch (error) {
@@ -195,7 +195,7 @@ export default function WorkoutDayScheduleScreen({ navigation }) {
           text: "Delete",
           onPress: async () => {
             try {
-              await deletePlan(plan.id);
+              await deleteWorkout(plan.id);
               loadData();
               Alert.alert("Success", "Workout deleted!");
             } catch (error) {
@@ -231,8 +231,8 @@ export default function WorkoutDayScheduleScreen({ navigation }) {
     ]);
   };
 
-  const getScheduledDaysDisplay = (planId) => {
-    const days = scheduledDays[planId] || [];
+  const getScheduledDaysDisplay = (workoutId) => {
+    const days = scheduledDays[workoutId] || [];
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     return days.map((d) => dayNames[d]).join(", ") || "No schedule";
   };
@@ -314,7 +314,7 @@ export default function WorkoutDayScheduleScreen({ navigation }) {
               <TouchableOpacity
                 style={styles.viewButton}
                 onPress={() =>
-                  navigation.navigate("ExecuteWorkout", { planId: plan.id })
+                  navigation.navigate("ExecuteWorkout", { workoutId: plan.id })
                 }
               >
                 <MaterialCommunityIcons

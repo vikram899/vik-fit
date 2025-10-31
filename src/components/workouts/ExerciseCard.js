@@ -9,8 +9,8 @@ const ExerciseCard = ({ exercise, onDelete, onEdit, showDeleteButton = true, sho
       <View style={styles.exerciseCardHeader}>
         <Text style={styles.exerciseName}>{exercise.name}</Text>
         <View style={styles.headerRight}>
-          {(exercise.time || 0) > 0 && (
-            <Text style={styles.timeDisplay}>{exercise.time} {STRINGS.exerciseCard.units.seconds}</Text>
+          {(exercise.restTime || 0) > 0 && (
+            <Text style={styles.timeDisplay}>{exercise.restTime} {STRINGS.exerciseCard.units.seconds}</Text>
           )}
           {showEditButton && (
             <TouchableOpacity

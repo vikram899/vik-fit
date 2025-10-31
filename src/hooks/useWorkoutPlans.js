@@ -1,13 +1,13 @@
 import { useState, useCallback } from 'react';
 import {
-  getAllPlans,
-  getPlanById,
-  createPlan,
-  updatePlan,
-  deletePlan,
-  addExerciseToPlan,
-  removeExerciseFromPlan,
-  updateExerciseInPlan,
+  getAllWorkouts,
+  getWorkoutById,
+  createWorkout,
+  updateWorkout,
+  deleteWorkout,
+  addExerciseToWorkout,
+  removeExerciseFromWorkout,
+  updateExerciseInWorkout,
 } from '../services/dummyDataPlans';
 
 /**
@@ -27,7 +27,7 @@ export const useWorkoutPlans = () => {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: fetchError } = await getAllPlans();
+      const { data, error: fetchError } = await getAllWorkouts();
       if (fetchError) throw fetchError;
       setPlans(data || []);
     } catch (err) {
@@ -40,11 +40,11 @@ export const useWorkoutPlans = () => {
   /**
    * Load a specific plan
    */
-  const loadPlanById = useCallback(async (planId) => {
+  const loadPlanById = useCallback(async (workoutId) => {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: fetchError } = await getPlanById(planId);
+      const { data, error: fetchError } = await getWorkoutById(workoutId);
       if (fetchError) throw fetchError;
       setCurrentPlan(data);
     } catch (err) {
@@ -83,7 +83,7 @@ export const useWorkoutPlans = () => {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: updateError } = await updatePlan(currentPlan.id, planData);
+      const { data, error: updateError } = await updateWorkout(currentPlan.id, planData);
       if (updateError) throw updateError;
       setCurrentPlan(data);
       setPlans((prev) =>
@@ -101,14 +101,14 @@ export const useWorkoutPlans = () => {
   /**
    * Delete a plan
    */
-  const deletePlanById = useCallback(async (planId) => {
+  const deleteWorkoutById = useCallback(async (workoutId) => {
     setLoading(true);
     setError(null);
     try {
-      const { error: deleteError } = await deletePlan(planId);
+      const { error: deleteError } = await deleteWorkout(workoutId);
       if (deleteError) throw deleteError;
-      setPlans((prev) => prev.filter((p) => p.id !== planId));
-      if (currentPlan?.id === planId) {
+      setPlans((prev) => prev.filter((p) => p.id !== workoutId));
+      if (currentPlan?.id === workoutId) {
         setCurrentPlan(null);
       }
       return { success: true };
@@ -240,7 +240,7 @@ export const useWorkoutPlans = () => {
     loadPlanById,
     createNewPlan,
     updateCurrentPlan,
-    deletePlanById,
+    deleteWorkoutById,
     addExercise,
     removeExercise,
     updateExercise,

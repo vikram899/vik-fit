@@ -8,7 +8,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
  * Current day is highlighted and automatically centered
  */
 const WeeklyCalendarView = ({ weeklyData, dailyGoal, selectedDate, onDateSelect }) => {
-  const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const scrollRef = useRef(null);
 
   // Get today's date to highlight current day

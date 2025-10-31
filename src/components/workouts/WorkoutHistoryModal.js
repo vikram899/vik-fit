@@ -11,12 +11,12 @@ import {
   Alert,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { getWeeklyWorkoutBreakdown, getSundayOfWeek } from '../../services/workoutStats';
+import { getWeeklyWorkoutBreakdown, getMondayOfWeek } from '../../services/workoutStats';
 import { COLORS } from '../../styles';
 
 const WorkoutHistoryModal = ({ visible, onClose }) => {
-  const [currentSunday, setCurrentSunday] = useState(
-    getSundayOfWeek(new Date().toISOString().split('T')[0])
+  const [currentMonday, setCurrentSunday] = useState(
+    getMondayOfWeek(new Date().toISOString().split('T')[0])
   );
   const [weeklyBreakdown, setWeeklyBreakdown] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -26,7 +26,7 @@ const WorkoutHistoryModal = ({ visible, onClose }) => {
   const loadWorkoutHistory = async () => {
     try {
       setLoading(true);
-      const breakdown = await getWeeklyWorkoutBreakdown(currentSunday);
+      const breakdown = await getWeeklyWorkoutBreakdown(currentMonday);
       setWeeklyBreakdown(breakdown);
     } catch (error) {
       Alert.alert('Error', 'Failed to load workout history');
@@ -40,7 +40,7 @@ const WorkoutHistoryModal = ({ visible, onClose }) => {
     if (visible) {
       loadWorkoutHistory();
     }
-  }, [visible, currentSunday]);
+  }, [visible, currentMonday]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -48,25 +48,25 @@ const WorkoutHistoryModal = ({ visible, onClose }) => {
   };
 
   const handlePreviousWeek = () => {
-    const prevSunday = new Date(currentSunday);
+    const prevSunday = new Date(currentMonday);
     prevSunday.setDate(prevSunday.getDate() - 7);
     setCurrentSunday(prevSunday.toISOString().split('T')[0]);
   };
 
   const handleNextWeek = () => {
-    const nextSunday = new Date(currentSunday);
+    const nextSunday = new Date(currentMonday);
     nextSunday.setDate(nextSunday.getDate() + 7);
     setCurrentSunday(nextSunday.toISOString().split('T')[0]);
   };
 
   const handleTodayWeek = () => {
     const today = new Date().toISOString().split('T')[0];
-    setCurrentSunday(getSundayOfWeek(today));
+    setCurrentSunday(getMondayOfWeek(today));
   };
 
   // Format week label with month/day
   const formatDateRange = () => {
-    const sundayDate = new Date(currentSunday);
+    const sundayDate = new Date(currentMonday);
     const saturdayDate = new Date(sundayDate);
     saturdayDate.setDate(saturdayDate.getDate() + 6);
 

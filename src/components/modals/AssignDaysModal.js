@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -14,13 +13,13 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { modalStyles, buttonStyles, COLORS } from '../../styles';
 
 const DAYS = [
-  { label: 'Sunday', value: 0 },
   { label: 'Monday', value: 1 },
   { label: 'Tuesday', value: 2 },
   { label: 'Wednesday', value: 3 },
   { label: 'Thursday', value: 4 },
   { label: 'Friday', value: 5 },
   { label: 'Saturday', value: 6 },
+  { label: 'Sunday', value: 0 },
 ];
 
 /**
@@ -28,12 +27,12 @@ const DAYS = [
  * Modal for assigning a plan to multiple days of the week
  *
  * @param {boolean} visible - Modal visibility
- * @param {string} planName - Name of the plan being assigned
+ * @param {string} workoutName - Name of the plan being assigned
  * @param {array} selectedDays - Currently selected days (array of 0-6)
  * @param {function} onSave - Callback when days are saved
  * @param {function} onClose - Callback when modal is closed
  */
-const AssignDaysModal = ({ visible, planName, selectedDays = [], onSave, onClose }) => {
+const AssignDaysModal = ({ visible, workoutName, selectedDays = [], onSave, onClose }) => {
   const [checkedDays, setCheckedDays] = React.useState(new Set(selectedDays));
 
   React.useEffect(() => {
@@ -51,10 +50,6 @@ const AssignDaysModal = ({ visible, planName, selectedDays = [], onSave, onClose
   };
 
   const handleSave = () => {
-    if (checkedDays.size === 0) {
-      Alert.alert('Error', 'Please select at least one day');
-      return;
-    }
     onSave(Array.from(checkedDays).sort());
   };
 
@@ -80,7 +75,7 @@ const AssignDaysModal = ({ visible, planName, selectedDays = [], onSave, onClose
             </View>
 
             {/* Plan Name */}
-            <Text style={styles.planName}>{planName}</Text>
+            <Text style={styles.workoutName}>{workoutName}</Text>
 
             {/* Days Selection */}
             <ScrollView
@@ -153,7 +148,7 @@ const AssignDaysModal = ({ visible, planName, selectedDays = [], onSave, onClose
 };
 
 const styles = StyleSheet.create({
-  planName: {
+  workoutName: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',

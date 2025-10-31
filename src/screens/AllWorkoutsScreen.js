@@ -14,18 +14,16 @@ import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AssignDaysModal } from '../components/modals';
 import { SearchFilterSort } from '../components/meals';
+import WorkoutCard from '../components/workouts/WorkoutCardComponent';
 import { COLORS } from '../styles';
 import {
-  getAllPlans,
-  getScheduledDaysForPlan,
-  assignPlanToDays,
-  deletePlan,
+  getAllWorkouts,
+  getScheduledDaysForWorkout,
+  assignWorkoutToDays,
+  deleteWorkout,
 } from '../services/database';
 import {
-  getWeeklyWorkoutCompletions,
   getPlanExerciseCount,
-  getSundayOfWeek,
-  calculateCompletionPercentage,
 } from '../services/workoutStats';
 
 /**
@@ -45,24 +43,21 @@ export default function AllWorkoutsScreen({ navigation }) {
     equipment: false,
   });
   const [exerciseCounts, setExerciseCounts] = useState({});
-  const [completionCounts, setCompletionCounts] = useState({});
   const [assignModalVisible, setAssignModalVisible] = useState(false);
   const [selectedWorkoutForAssign, setSelectedWorkoutForAssign] = useState(null);
   const [scheduledDays, setScheduledDays] = useState({});
   const [fadeAnim] = useState(new Animated.Value(0));
 
-  const weekStartDate = getSundayOfWeek(new Date().toISOString().split('T')[0]);
-
   const loadWorkouts = useCallback(async () => {
     try {
       setLoading(true);
 
-      const plans = await getAllPlans();
+      const plans = await getAllWorkouts();
       setWorkouts(plans);
 
       const daysMap = {};
       for (const plan of plans) {
-        const days = await getScheduledDaysForPlan(plan.id);
+        const days = await getScheduledDaysForWorkout(plan.id);
         daysMap[plan.id] = days;
       }
       setScheduledDays(daysMap);
@@ -74,13 +69,6 @@ export default function AllWorkoutsScreen({ navigation }) {
       }
       setExerciseCounts(exerciseCountsMap);
 
-      const completionCountsMap = {};
-      for (const plan of plans) {
-        const count = await getWeeklyWorkoutCompletions(plan.id, weekStartDate);
-        completionCountsMap[plan.id] = count;
-      }
-      setCompletionCounts(completionCountsMap);
-
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 500,
@@ -91,7 +79,7 @@ export default function AllWorkoutsScreen({ navigation }) {
     } finally {
       setLoading(false);
     }
-  }, [weekStartDate, fadeAnim]);
+  }, [fadeAnim]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -134,7 +122,7 @@ export default function AllWorkoutsScreen({ navigation }) {
 
   const handleSaveDays = async (selectedDays) => {
     try {
-      await assignPlanToDays(selectedWorkoutForAssign.id, selectedDays);
+      await assignWorkoutToDays(selectedWorkoutForAssign.id, selectedDays);
       setAssignModalVisible(false);
       setSelectedWorkoutForAssign(null);
       loadWorkouts();
@@ -145,7 +133,7 @@ export default function AllWorkoutsScreen({ navigation }) {
   };
 
   const handleViewExercises = (workout) => {
-    navigation.navigate('ExecuteWorkout', { planId: workout.id });
+    navigation.navigate('ExecuteWorkout', { workoutId: workout.id });
   };
 
   const handleDeleteWorkout = (workout) => {
@@ -161,7 +149,7 @@ export default function AllWorkoutsScreen({ navigation }) {
           text: 'Delete',
           onPress: async () => {
             try {
-              await deletePlan(workout.id);
+              await deleteWorkout(workout.id);
               loadWorkouts();
             } catch (error) {
               Alert.alert('Error', 'Failed to delete workout');
@@ -197,27 +185,6 @@ export default function AllWorkoutsScreen({ navigation }) {
         },
       ]
     );
-  };
-
-  const getScheduledDaysArray = (workoutId) => {
-    const days = scheduledDays[workoutId] || [];
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    if (days.length === 0) {
-      return null;
-    }
-    return days.map(d => dayNames[d]);
-  };
-
-  const getCompletionProgress = (workoutId) => {
-    const assigned = (scheduledDays[workoutId] || []).length;
-    const completed = completionCounts[workoutId] || 0;
-    const percentage = calculateCompletionPercentage(completed, assigned);
-    return {
-      percentage,
-      completed,
-      assigned,
-      color: percentage >= 90 ? '#4CAF50' : percentage >= 70 ? '#FFC107' : percentage >= 50 ? '#FF9800' : '#FF6B6B',
-    };
   };
 
   if (loading) {
@@ -289,103 +256,16 @@ export default function AllWorkoutsScreen({ navigation }) {
               )}
             </View>
           ) : (
-            filteredWorkouts.map(workout => {
-              const progress = getCompletionProgress(workout.id);
-              const exerciseCount = exerciseCounts[workout.id] || 0;
-
-              return (
-                <View key={workout.id} style={styles.workoutCard}>
-                  <View style={styles.cardHeader}>
-                    <View style={styles.cardInfo}>
-                      <Text style={styles.workoutName}>{workout.name}</Text>
-                      <View style={styles.daysContainer}>
-                        {getScheduledDaysArray(workout.id) ? (
-                          getScheduledDaysArray(workout.id).map((day, index) => (
-                            <View key={index} style={styles.dayBadge}>
-                              <Text style={styles.dayBadgeText}>{day}</Text>
-                            </View>
-                          ))
-                        ) : (
-                          <View style={styles.noDaysBadge}>
-                            <MaterialCommunityIcons
-                              name="calendar-remove"
-                              size={14}
-                              color="#999"
-                              style={{ marginRight: 4 }}
-                            />
-                            <Text style={styles.noDaysText}>No days assigned</Text>
-                          </View>
-                        )}
-                      </View>
-                    </View>
-                    <TouchableOpacity
-                      onPress={() => handleWorkoutMenu(workout)}
-                      style={styles.kebabButton}
-                    >
-                      <MaterialCommunityIcons
-                        name="dots-vertical"
-                        size={24}
-                        color={COLORS.primary}
-                      />
-                    </TouchableOpacity>
-                  </View>
-
-                  {/* Exercise Count - Clickable */}
-                  <TouchableOpacity
-                    style={styles.exerciseCountContainer}
-                    onPress={() => handleViewExercises(workout)}
-                    activeOpacity={0.7}
-                  >
-                    <View style={styles.exerciseIconBox}>
-                      <MaterialCommunityIcons
-                        name="lightning-bolt"
-                        size={18}
-                        color="#fff"
-                      />
-                    </View>
-                    <View style={styles.exerciseInfo}>
-                      <Text style={styles.exerciseCount}>
-                        {exerciseCount}
-                      </Text>
-                      <Text style={styles.exerciseLabel}>
-                        {exerciseCount === 1 ? 'Exercise' : 'Exercises'}
-                      </Text>
-                    </View>
-                    <MaterialCommunityIcons
-                      name="chevron-right"
-                      size={20}
-                      color={COLORS.primary}
-                    />
-                  </TouchableOpacity>
-
-                  {/* Weekly Completion Progress */}
-                  {progress.assigned > 0 && (
-                    <View style={styles.progressContainer}>
-                      <View style={styles.progressLabel}>
-                        <Text style={styles.progressText}>
-                          This week: {progress.completed}/{progress.assigned}
-                        </Text>
-                      </View>
-                      <View style={styles.progressBar}>
-                        <View
-                          style={[
-                            styles.progressFill,
-                            {
-                              width: `${progress.percentage}%`,
-                              backgroundColor: progress.color,
-                            },
-                          ]}
-                        />
-                      </View>
-                      <Text style={[styles.progressPercentage, { color: progress.color }]}>
-                        {Math.round(progress.percentage)}%
-                      </Text>
-                    </View>
-                  )}
-
-                </View>
-              );
-            })
+            filteredWorkouts.map(workout => (
+              <WorkoutCard
+                key={workout.id}
+                workout={workout}
+                exerciseCount={exerciseCounts[workout.id] || 0}
+                scheduledDays={scheduledDays[workout.id] || []}
+                onViewExercises={handleViewExercises}
+                onMenuPress={handleWorkoutMenu}
+              />
+            ))
           )}
         </ScrollView>
       </Animated.View>
@@ -505,161 +385,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#fff',
-  },
-  workoutCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 12,
-    borderWidth: 0,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  cardInfo: {
-    flex: 1,
-  },
-  workoutName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 4,
-  },
-  daysContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginTop: 8,
-  },
-  dayBadge: {
-    backgroundColor: COLORS.primary,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 12,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  dayBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#fff',
-    letterSpacing: 0.3,
-  },
-  noDaysBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: '#e0e0e0',
-    borderStyle: 'dashed',
-  },
-  noDaysText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#999',
-  },
-  kebabButton: {
-    padding: 8,
-    marginRight: -8,
-  },
-  exerciseCountContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 12,
-    backgroundColor: '#EEF5FF',
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.primary,
-    justifyContent: 'space-between',
-  },
-  exerciseIconBox: {
-    backgroundColor: COLORS.primary,
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  exerciseInfo: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  exerciseCount: {
-    fontSize: 18,
-    color: COLORS.primary,
-    fontWeight: '700',
-  },
-  exerciseLabel: {
-    fontSize: 11,
-    color: '#888',
-    fontWeight: '600',
-    marginTop: 2,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  progressContainer: {
-    marginBottom: 12,
-  },
-  progressLabel: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  progressText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#666',
-  },
-  progressBar: {
-    height: 6,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 3,
-    overflow: 'hidden',
-    marginBottom: 4,
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 3,
-  },
-  progressPercentage: {
-    fontSize: 11,
-    fontWeight: '600',
-    textAlign: 'right',
-  },
-  viewButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 0,
-  },
-  viewButtonText: {
-    fontSize: 14,
-    color: COLORS.primary,
-    fontWeight: '600',
-    marginLeft: 4,
   },
 });

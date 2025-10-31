@@ -19,7 +19,7 @@ import { appStyles } from "../../styles/app.styles";
  * Props:
  * - visible: boolean - whether modal is visible
  * - title: string - modal title (e.g., "Add Exercise" or "Edit Exercise")
- * - exercise: object - exercise data { name, sets, reps, weight, time }
+ * - exercise: object - exercise data { name, sets, reps, weight, restTime }
  * - onExerciseChange: function - callback when exercise fields change
  * - onSubmit: function - callback when form is submitted
  * - onCancel: function - callback to close modal
@@ -67,7 +67,7 @@ export default function ExerciseFormModal({
                   />
                 </View>
 
-                {/* Sets, Reps, Weight, Time */}
+                {/* Sets, Reps, Weight, Rest Time */}
                 <View style={appStyles.rowGroup}>
                   <View style={[appStyles.formGroup, { flex: 1 }]}>
                     <Text style={appStyles.label}>Sets</Text>
@@ -112,14 +112,14 @@ export default function ExerciseFormModal({
                   </View>
 
                   <View style={[appStyles.formGroup, { flex: 1 }]}>
-                    <Text style={appStyles.label}>Time (s)</Text>
+                    <Text style={appStyles.label}>Rest Time</Text>
                     <TextInput
                       style={appStyles.input}
                       placeholder="0"
                       placeholderTextColor="#999"
-                      value={exercise.time}
+                      value={exercise.restTime}
                       onChangeText={(value) =>
-                        onExerciseChange({ ...exercise, time: value })
+                        onExerciseChange({ ...exercise, restTime: value })
                       }
                       keyboardType="numeric"
                     />

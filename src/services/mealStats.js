@@ -29,8 +29,8 @@ export const getDailyMealData = async (date) => {
 };
 
 /**
- * Get weekly totals for a specific week (Sunday to Saturday)
- * @param {string} startDate - Sunday of the week (YYYY-MM-DD)
+ * Get weekly totals for a specific week (Monday to Sunday)
+ * @param {string} startDate - Monday of the week (YYYY-MM-DD)
  */
 export const getWeeklyMealData = async (startDate) => {
   try {
@@ -57,14 +57,14 @@ export const getWeeklyMealData = async (startDate) => {
 
 /**
  * Get daily meal data for entire week
- * @param {string} startDate - Sunday of the week (YYYY-MM-DD)
+ * @param {string} startDate - Monday of the week (YYYY-MM-DD)
  * Returns array with 7 days of data
  */
 export const getWeeklyDailyBreakdown = async (startDate) => {
   try {
     const weekData = [];
     const startDateObj = new Date(startDate);
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     for (let i = 0; i < 7; i++) {
       const currentDate = new Date(startDateObj);
@@ -134,14 +134,16 @@ export const calculatePercentageChange = (currentValue, previousValue) => {
 };
 
 /**
- * Get Sunday of the week for a given date
+ * Get Monday of the week for a given date
  */
-export const getSundayOfWeek = (date) => {
+export const getMondayOfWeek = (date) => {
   const dateObj = new Date(date);
   const dayOfWeek = dateObj.getDay();
-  const difference = dateObj.getDate() - dayOfWeek;
-  const sunday = new Date(dateObj.setDate(difference));
-  return sunday.toISOString().split('T')[0];
+  // If Sunday (0), go back 6 days. Otherwise, go back (dayOfWeek - 1) days
+  const daysBack = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const difference = dateObj.getDate() - daysBack;
+  const monday = new Date(dateObj.setDate(difference));
+  return monday.toISOString().split('T')[0];
 };
 
 /**

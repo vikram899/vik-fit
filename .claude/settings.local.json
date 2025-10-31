@@ -25,7 +25,8 @@
       "WebFetch(domain:www.notjust.dev)",
       "WebFetch(domain:expo.dev)",
       "Bash(eas login:*)",
-      "Bash(eas build:*)"
+      "Bash(eas build:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

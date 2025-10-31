@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '../../styles';
-import { getWeeklyDailyBreakdown, getSundayOfWeek } from '../../services/mealStats';
+import { getWeeklyDailyBreakdown, getMondayOfWeek } from '../../services/mealStats';
 
 /**
  * MealsHistoryModal Component
@@ -22,15 +22,15 @@ const MealsHistoryModal = ({ visible, onClose }) => {
   const [weeklyBreakdown, setWeeklyBreakdown] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [currentSunday, setCurrentSunday] = useState(
-    getSundayOfWeek(new Date().toISOString().split('T')[0])
+  const [currentMonday, setCurrentSunday] = useState(
+    getMondayOfWeek(new Date().toISOString().split('T')[0])
   );
 
   // Load weekly data
   const loadWeeklyData = async () => {
     try {
       setLoading(true);
-      const breakdown = await getWeeklyDailyBreakdown(currentSunday);
+      const breakdown = await getWeeklyDailyBreakdown(currentMonday);
       setWeeklyBreakdown(breakdown);
     } catch (error) {
       Alert.alert('Error', 'Failed to load meal history');
@@ -44,23 +44,23 @@ const MealsHistoryModal = ({ visible, onClose }) => {
     if (visible) {
       loadWeeklyData();
     }
-  }, [visible, currentSunday]);
+  }, [visible, currentMonday]);
 
   const handlePreviousWeek = () => {
-    const prevSunday = new Date(currentSunday);
+    const prevSunday = new Date(currentMonday);
     prevSunday.setDate(prevSunday.getDate() - 7);
     setCurrentSunday(prevSunday.toISOString().split('T')[0]);
   };
 
   const handleNextWeek = () => {
-    const nextSunday = new Date(currentSunday);
+    const nextSunday = new Date(currentMonday);
     nextSunday.setDate(nextSunday.getDate() + 7);
     setCurrentSunday(nextSunday.toISOString().split('T')[0]);
   };
 
   const handleTodayWeek = () => {
     const today = new Date().toISOString().split('T')[0];
-    setCurrentSunday(getSundayOfWeek(today));
+    setCurrentSunday(getMondayOfWeek(today));
   };
 
   const handleRefresh = async () => {
@@ -70,7 +70,7 @@ const MealsHistoryModal = ({ visible, onClose }) => {
 
   // Format week label with month/day
   const formatDateRange = () => {
-    const sundayDate = new Date(currentSunday);
+    const sundayDate = new Date(currentMonday);
     const saturdayDate = new Date(sundayDate);
     saturdayDate.setDate(saturdayDate.getDate() + 6);
 

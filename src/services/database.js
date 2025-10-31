@@ -11,9 +11,9 @@ export const initializeDatabase = async () => {
     // Re-enable foreign keys
     await db.execAsync('PRAGMA foreign_keys = ON;');
 
-    // Create plans table if it doesn't exist
+    // Create workouts table if it doesn't exist
     await db.execAsync(`
-      CREATE TABLE IF NOT EXISTS plans (
+      CREATE TABLE IF NOT EXISTS workouts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         description TEXT,
@@ -26,21 +26,66 @@ export const initializeDatabase = async () => {
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS exercises (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        planId INTEGER NOT NULL,
+        workoutId INTEGER NOT NULL,
         name TEXT NOT NULL,
         sets INTEGER,
         reps INTEGER,
         weight REAL,
-        time INTEGER,
+        restTime INTEGER,
         notes TEXT,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (planId) REFERENCES plans(id) ON DELETE CASCADE
+        FOREIGN KEY (workoutId) REFERENCES workouts(id) ON DELETE CASCADE
       );
     `);
 
-    // Migration: Add time column if it doesn't exist
+    // Migration: Rename planId to workoutId in exercises table
     try {
-      await db.execAsync('ALTER TABLE exercises ADD COLUMN time INTEGER DEFAULT 0;');
+      // Check if the old column exists
+      const tableInfo = await db.getAllAsync("PRAGMA table_info(exercises)");
+      const hasOldColumn = tableInfo.some(col => col.name === 'planId');
+      const hasNewColumn = tableInfo.some(col => col.name === 'workoutId');
+
+      if (hasOldColumn && !hasNewColumn) {
+        // SQLite doesn't support direct column rename, so we need to recreate the table
+        await db.execAsync(`
+          BEGIN TRANSACTION;
+
+          -- Create new table with correct schema
+          CREATE TABLE exercises_new (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            workoutId INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            sets INTEGER,
+            reps INTEGER,
+            weight REAL,
+            restTime INTEGER,
+            notes TEXT,
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (workoutId) REFERENCES workouts(id) ON DELETE CASCADE
+          );
+
+          -- Copy data from old table
+          INSERT INTO exercises_new (id, workoutId, name, sets, reps, weight, restTime, notes, createdAt)
+          SELECT id, planId, name, sets, reps, weight, restTime, notes, createdAt FROM exercises;
+
+          -- Drop old table
+          DROP TABLE exercises;
+
+          -- Rename new table
+          ALTER TABLE exercises_new RENAME TO exercises;
+
+          COMMIT;
+        `);
+        console.log('Migration completed: Renamed planId to workoutId in exercises table');
+      }
+    } catch (error) {
+      console.error('Migration error for exercises table:', error);
+      // Continue anyway, table might already be migrated
+    }
+
+    // Migration: Add restTime column if it doesn't exist (renamed from time)
+    try {
+      await db.execAsync('ALTER TABLE exercises ADD COLUMN restTime INTEGER DEFAULT 0;');
     } catch (error) {
       // Column already exists, no need to add it
     }
@@ -130,29 +175,29 @@ export const initializeDatabase = async () => {
       );
     `);
 
-    // Create plan_schedule table for assigning plans to days of week
+    // Create workout_schedule table for assigning workouts to days of week
     await db.execAsync(`
-      CREATE TABLE IF NOT EXISTS plan_schedule (
+      CREATE TABLE IF NOT EXISTS workout_schedule (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        planId INTEGER NOT NULL,
+        workoutId INTEGER NOT NULL,
         dayOfWeek INTEGER NOT NULL,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (planId) REFERENCES plans(id) ON DELETE CASCADE,
-        UNIQUE(planId, dayOfWeek)
+        FOREIGN KEY (workoutId) REFERENCES workouts(id) ON DELETE CASCADE,
+        UNIQUE(workoutId, dayOfWeek)
       );
     `);
 
-    // Create plan_execution table for tracking plan completion
+    // Create workout_execution table for tracking workout completion
     await db.execAsync(`
-      CREATE TABLE IF NOT EXISTS plan_execution (
+      CREATE TABLE IF NOT EXISTS workout_execution (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        planId INTEGER NOT NULL,
+        workoutId INTEGER NOT NULL,
         executionDate TEXT NOT NULL,
         status TEXT DEFAULT 'pending',
         completedAt TIMESTAMP,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (planId) REFERENCES plans(id) ON DELETE CASCADE,
-        UNIQUE(planId, executionDate)
+        FOREIGN KEY (workoutId) REFERENCES workouts(id) ON DELETE CASCADE,
+        UNIQUE(workoutId, executionDate)
       );
     `);
 
@@ -160,17 +205,55 @@ export const initializeDatabase = async () => {
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS workout_logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        planId INTEGER NOT NULL,
+        workoutId INTEGER NOT NULL,
         logDate TEXT NOT NULL,
         status TEXT DEFAULT 'in_progress',
         totalDurationSeconds INTEGER DEFAULT 0,
         startedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         completedAt TIMESTAMP,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (planId) REFERENCES plans(id) ON DELETE CASCADE,
-        UNIQUE(planId, logDate)
+        FOREIGN KEY (workoutId) REFERENCES workouts(id) ON DELETE CASCADE,
+        UNIQUE(workoutId, logDate)
       );
     `);
+
+    // Migration: Rename planId to workoutId in workout_logs table
+    try {
+      const tableInfo = await db.getAllAsync("PRAGMA table_info(workout_logs)");
+      const hasOldColumn = tableInfo.some(col => col.name === 'planId');
+      const hasNewColumn = tableInfo.some(col => col.name === 'workoutId');
+
+      if (hasOldColumn && !hasNewColumn) {
+        await db.execAsync(`
+          BEGIN TRANSACTION;
+
+          CREATE TABLE workout_logs_new (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            workoutId INTEGER NOT NULL,
+            logDate TEXT NOT NULL,
+            status TEXT DEFAULT 'in_progress',
+            totalDurationSeconds INTEGER DEFAULT 0,
+            startedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            completedAt TIMESTAMP,
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (workoutId) REFERENCES workouts(id) ON DELETE CASCADE,
+            UNIQUE(workoutId, logDate)
+          );
+
+          INSERT INTO workout_logs_new (id, workoutId, logDate, status, totalDurationSeconds, startedAt, completedAt, createdAt)
+          SELECT id, planId, logDate, status, totalDurationSeconds, startedAt, completedAt, createdAt FROM workout_logs;
+
+          DROP TABLE workout_logs;
+
+          ALTER TABLE workout_logs_new RENAME TO workout_logs;
+
+          COMMIT;
+        `);
+        console.log('Migration completed: Renamed planId to workoutId in workout_logs table');
+      }
+    } catch (error) {
+      console.error('Migration error for workout_logs table:', error);
+    }
 
     // Create set_logs table for tracking individual set data
     await db.execAsync(`
@@ -281,30 +364,30 @@ export const initializeDatabase = async () => {
 /**
  * Add a new workout plan
  */
-export const addPlan = async (name, description = '') => {
+export const addWorkout = async (name, description = '') => {
   try {
     await db.runAsync(
-      'INSERT INTO plans (name, description) VALUES (?, ?)',
+      'INSERT INTO workouts (name, description) VALUES (?, ?)',
       [name, description]
     );
 
-    // Fetch the last inserted plan to get its ID
-    const lastPlan = await db.getFirstAsync(
-      'SELECT id FROM plans ORDER BY id DESC LIMIT 1'
+    // Fetch the last inserted workout to get its ID
+    const lastWorkout = await db.getFirstAsync(
+      'SELECT id FROM workouts ORDER BY id DESC LIMIT 1'
     );
 
-    return lastPlan?.id;
+    return lastWorkout?.id;
   } catch (error) {
     throw error;
   }
 };
 
 /**
- * Get all workout plans
+ * Get all workouts
  */
-export const getAllPlans = async () => {
+export const getAllWorkouts = async () => {
   try {
-    const result = await db.getAllAsync('SELECT * FROM plans ORDER BY createdAt DESC');
+    const result = await db.getAllAsync('SELECT * FROM workouts ORDER BY createdAt DESC');
     return result || [];
   } catch (error) {
     return [];
@@ -312,13 +395,13 @@ export const getAllPlans = async () => {
 };
 
 /**
- * Get a single plan by ID
+ * Get a single workout by ID
  */
-export const getPlanById = async (planId) => {
+export const getWorkoutById = async (workoutId) => {
   try {
     const result = await db.getFirstAsync(
-      'SELECT * FROM plans WHERE id = ?',
-      [planId]
+      'SELECT * FROM workouts WHERE id = ?',
+      [workoutId]
     );
     return result;
   } catch (error) {
@@ -327,13 +410,13 @@ export const getPlanById = async (planId) => {
 };
 
 /**
- * Update a workout plan
+ * Update a workout
  */
-export const updatePlan = async (planId, name, description) => {
+export const updateWorkout = async (workoutId, name, description) => {
   try {
     await db.runAsync(
-      'UPDATE plans SET name = ?, description = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?',
-      [name, description, planId]
+      'UPDATE workouts SET name = ?, description = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?',
+      [name, description, workoutId]
     );
   } catch (error) {
     throw error;
@@ -341,24 +424,24 @@ export const updatePlan = async (planId, name, description) => {
 };
 
 /**
- * Delete a workout plan
+ * Delete a workout
  */
-export const deletePlan = async (planId) => {
+export const deleteWorkout = async (workoutId) => {
   try {
-    await db.runAsync('DELETE FROM plans WHERE id = ?', [planId]);
+    await db.runAsync('DELETE FROM workouts WHERE id = ?', [workoutId]);
   } catch (error) {
     throw error;
   }
 };
 
 /**
- * Add an exercise to a plan
+ * Add an exercise to a workout
  */
-export const addExercise = async (planId, name, sets, reps, weight = 0, time = 0, notes = '') => {
+export const addExercise = async (workoutId, name, sets, reps, weight = 0, restTime = 0, notes = '') => {
   try {
     await db.runAsync(
-      'INSERT INTO exercises (planId, name, sets, reps, weight, time, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [planId, name, sets, reps, weight, time, notes]
+      'INSERT INTO exercises (workoutId, name, sets, reps, weight, restTime, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [workoutId, name, sets, reps, weight, restTime, notes]
     );
 
     // Fetch the last inserted exercise to get its ID
@@ -373,13 +456,13 @@ export const addExercise = async (planId, name, sets, reps, weight = 0, time = 0
 };
 
 /**
- * Get all exercises for a plan
+ * Get all exercises for a workout
  */
-export const getExercisesByPlanId = async (planId) => {
+export const getExercisesByWorkoutId = async (workoutId) => {
   try {
     const result = await db.getAllAsync(
-      'SELECT * FROM exercises WHERE planId = ? ORDER BY createdAt ASC',
-      [planId]
+      'SELECT * FROM exercises WHERE workoutId = ? ORDER BY createdAt ASC',
+      [workoutId]
     );
     return result || [];
   } catch (error) {
@@ -388,13 +471,13 @@ export const getExercisesByPlanId = async (planId) => {
 };
 
 /**
- * Get count of exercises for a plan
+ * Get count of exercises for a workout
  */
-export const getExerciseCount = async (planId) => {
+export const getExerciseCount = async (workoutId) => {
   try {
     const result = await db.getFirstAsync(
-      'SELECT COUNT(*) as count FROM exercises WHERE planId = ?',
-      [planId]
+      'SELECT COUNT(*) as count FROM exercises WHERE workoutId = ?',
+      [workoutId]
     );
     return result?.count || 0;
   } catch (error) {
@@ -405,11 +488,11 @@ export const getExerciseCount = async (planId) => {
 /**
  * Update an exercise
  */
-export const updateExercise = async (exerciseId, name, sets, reps, weight = 0, time = 0, notes = '') => {
+export const updateExercise = async (exerciseId, name, sets, reps, weight = 0, restTime = 0, notes = '') => {
   try {
     await db.runAsync(
-      'UPDATE exercises SET name = ?, sets = ?, reps = ?, weight = ?, time = ?, notes = ? WHERE id = ?',
-      [name, sets, reps, weight, time, notes, exerciseId]
+      'UPDATE exercises SET name = ?, sets = ?, reps = ?, weight = ?, restTime = ?, notes = ? WHERE id = ?',
+      [name, sets, reps, weight, restTime, notes, exerciseId]
     );
   } catch (error) {
     throw error;
@@ -433,8 +516,8 @@ export const deleteExercise = async (exerciseId) => {
 export const seedDummyData = async () => {
   try {
     // Check if data already exists
-    const existingPlans = await getAllPlans();
-    if (existingPlans.length > 0) {
+    const existingWorkouts = await getAllWorkouts();
+    if (existingWorkouts.length > 0) {
       // Seed macro goals with today's date (will apply to today and all future dates)
       const today = new Date().toISOString().split('T')[0];
       const existingMacros = await db.getFirstAsync('SELECT * FROM macro_goals WHERE goalDate = ?', [today]);
@@ -494,12 +577,12 @@ export const seedDummyData = async () => {
     const today = new Date().toISOString().split('T')[0];
     await setMacroGoals(today, 2500, 120, 300, 80);
 
-    // Add dummy plans and wait for each to complete
-    const plan1Id = await addPlan('Chest Day', 'Focus on chest and triceps');
+    // Add dummy workouts and wait for each to complete
+    const plan1Id = await addWorkout('Chest Day', 'Focus on chest and triceps');
 
-    const plan2Id = await addPlan('Leg Day', 'Focus on quads, hamstrings, and glutes');
+    const plan2Id = await addWorkout('Leg Day', 'Focus on quads, hamstrings, and glutes');
 
-    const plan3Id = await addPlan('Back & Biceps', 'Focus on back and biceps');
+    const plan3Id = await addWorkout('Back & Biceps', 'Focus on back and biceps');
 
     // Add exercises for Chest Day
     await addExercise(plan1Id, 'Bench Press', 4, 8, 185, 'Explosive');
@@ -992,16 +1075,37 @@ export const toggleMealFavorite = async (mealId, isFavorite) => {
  * Assign a plan to specific days of the week
  * daysOfWeek: array of numbers (0-6, where 0 = Sunday, 6 = Saturday)
  */
-export const assignPlanToDays = async (planId, daysOfWeek) => {
+export const assignWorkoutToDays = async (workoutId, daysOfWeek) => {
   try {
-    // Delete existing assignments for this plan
-    await db.runAsync('DELETE FROM plan_schedule WHERE planId = ?', [planId]);
+    const today = new Date().toISOString().split('T')[0];
+    const todayDayOfWeek = new Date().getDay();
+
+    // Get the old assignments to check what's being removed
+    const oldAssignments = await db.getAllAsync(
+      'SELECT dayOfWeek FROM workout_schedule WHERE workoutId = ?',
+      [workoutId]
+    );
+    const oldDays = oldAssignments ? oldAssignments.map(r => r.dayOfWeek) : [];
+
+    // Check if today's day is being removed from assignments
+    const isTodayBeingRemoved = oldDays.includes(todayDayOfWeek) && !daysOfWeek.includes(todayDayOfWeek);
+
+    // Delete existing assignments for this workout
+    await db.runAsync('DELETE FROM workout_schedule WHERE workoutId = ?', [workoutId]);
+
+    // If today is being removed from the schedule, clean up any in-progress logs for today
+    if (isTodayBeingRemoved) {
+      await db.runAsync(
+        'DELETE FROM workout_logs WHERE workoutId = ? AND logDate = ?',
+        [workoutId, today]
+      );
+    }
 
     // Add new assignments
     for (const day of daysOfWeek) {
       await db.runAsync(
-        'INSERT INTO plan_schedule (planId, dayOfWeek) VALUES (?, ?)',
-        [planId, day]
+        'INSERT INTO workout_schedule (workoutId, dayOfWeek) VALUES (?, ?)',
+        [workoutId, day]
       );
     }
   } catch (error) {
@@ -1010,13 +1114,13 @@ export const assignPlanToDays = async (planId, daysOfWeek) => {
 };
 
 /**
- * Get scheduled days for a plan
+ * Get scheduled days for a workout
  */
-export const getScheduledDaysForPlan = async (planId) => {
+export const getScheduledDaysForWorkout = async (workoutId) => {
   try {
     const result = await db.getAllAsync(
-      'SELECT dayOfWeek FROM plan_schedule WHERE planId = ? ORDER BY dayOfWeek',
-      [planId]
+      'SELECT dayOfWeek FROM workout_schedule WHERE workoutId = ? ORDER BY dayOfWeek',
+      [workoutId]
     );
     return result ? result.map(r => r.dayOfWeek) : [];
   } catch (error) {
@@ -1025,15 +1129,15 @@ export const getScheduledDaysForPlan = async (planId) => {
 };
 
 /**
- * Get all plans scheduled for a specific day of week
+ * Get all workouts scheduled for a specific day of week
  */
-export const getPlansForDay = async (dayOfWeek) => {
+export const getWorkoutsForDay = async (dayOfWeek) => {
   try {
     const result = await db.getAllAsync(
-      `SELECT p.* FROM plans p
-       INNER JOIN plan_schedule ps ON p.id = ps.planId
-       WHERE ps.dayOfWeek = ?
-       ORDER BY p.name`,
+      `SELECT w.* FROM workouts w
+       INNER JOIN workout_schedule ws ON w.id = ws.workoutId
+       WHERE ws.dayOfWeek = ?
+       ORDER BY w.name`,
       [dayOfWeek]
     );
     return result || [];
@@ -1043,15 +1147,92 @@ export const getPlansForDay = async (dayOfWeek) => {
 };
 
 /**
- * Remove plan assignment from specific days
+ * DEBUG: Get all scheduled workouts with their assigned days
  */
-export const removePlanFromDays = async (planId, daysOfWeek) => {
+export const debugGetAllScheduledWorkouts = async () => {
   try {
+    const result = await db.getAllAsync(`
+      SELECT
+        w.id,
+        w.name,
+        w.description,
+        GROUP_CONCAT(ws.dayOfWeek, ',') as assignedDays
+      FROM workouts w
+      LEFT JOIN workout_schedule ws ON w.id = ws.workoutId
+      GROUP BY w.id
+      ORDER BY w.name
+    `);
+    return result || [];
+  } catch (error) {
+    console.error('debugGetAllScheduledWorkouts error:', error);
+    return [];
+  }
+};
+
+/**
+ * DEBUG: Get today's scheduled workouts with full details
+ */
+export const debugGetTodayScheduledWorkouts = async () => {
+  try {
+    const todayDayOfWeek = new Date().getDay();
+    const result = await db.getAllAsync(`
+      SELECT
+        w.id,
+        w.name,
+        w.description,
+        (SELECT COUNT(*) FROM exercises WHERE workoutId = w.id) as exerciseCount
+      FROM workouts w
+      INNER JOIN workout_schedule ws ON w.id = ws.workoutId
+      WHERE ws.dayOfWeek = ?
+      ORDER BY w.name
+    `, [todayDayOfWeek]);
+    return result || [];
+  } catch (error) {
+    console.error('debugGetTodayScheduledWorkouts error:', error);
+    return [];
+  }
+};
+
+/**
+ * DEBUG: Get all exercises for a specific workout
+ */
+export const debugGetExercisesForWorkout = async (workoutId) => {
+  try {
+    console.log('DEBUG: Querying exercises for workoutId:', workoutId);
+    const result = await db.getAllAsync(`
+      SELECT * FROM exercises WHERE workoutId = ?
+    `, [workoutId]);
+    console.log('DEBUG: Found exercises:', result);
+    return result || [];
+  } catch (error) {
+    console.error('DEBUG: Error querying exercises:', error);
+    return [];
+  }
+};
+
+/**
+ * Remove workout assignment from specific days
+ */
+export const removeWorkoutFromDays = async (workoutId, daysOfWeek) => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const todayDayOfWeek = new Date().getDay();
+
     for (const day of daysOfWeek) {
+      // Delete from workout_schedule
       await db.runAsync(
-        'DELETE FROM plan_schedule WHERE planId = ? AND dayOfWeek = ?',
-        [planId, day]
+        'DELETE FROM workout_schedule WHERE workoutId = ? AND dayOfWeek = ?',
+        [workoutId, day]
       );
+
+      // If removing a day that matches today's day of week,
+      // also remove any in-progress or pending workout logs for this workout today
+      if (day === todayDayOfWeek) {
+        await db.runAsync(
+          'DELETE FROM workout_logs WHERE workoutId = ? AND logDate = ?',
+          [workoutId, today]
+        );
+      }
     }
   } catch (error) {
     throw error;
@@ -1059,14 +1240,14 @@ export const removePlanFromDays = async (planId, daysOfWeek) => {
 };
 
 /**
- * Mark plan as completed for a date
+ * Mark workout as completed for a date
  */
-export const markPlanCompleted = async (planId, executionDate) => {
+export const markWorkoutCompleted = async (workoutId, executionDate) => {
   try {
     await db.runAsync(
-      `INSERT OR REPLACE INTO plan_execution (planId, executionDate, status, completedAt)
+      `INSERT OR REPLACE INTO workout_execution (workoutId, executionDate, status, completedAt)
        VALUES (?, ?, ?, ?)`,
-      [planId, executionDate, 'completed', new Date().toISOString()]
+      [workoutId, executionDate, 'completed', new Date().toISOString()]
     );
   } catch (error) {
     throw error;
@@ -1074,13 +1255,13 @@ export const markPlanCompleted = async (planId, executionDate) => {
 };
 
 /**
- * Get execution status for a plan on a specific date
+ * Get execution status for a workout on a specific date
  */
-export const getPlanExecutionStatus = async (planId, executionDate) => {
+export const getWorkoutExecutionStatus = async (workoutId, executionDate) => {
   try {
     const result = await db.getFirstAsync(
-      'SELECT * FROM plan_execution WHERE planId = ? AND executionDate = ?',
-      [planId, executionDate]
+      'SELECT * FROM workout_execution WHERE workoutId = ? AND executionDate = ?',
+      [workoutId, executionDate]
     );
     return result;
   } catch (error) {
@@ -1093,16 +1274,16 @@ export const getPlanExecutionStatus = async (planId, executionDate) => {
 /**
  * Start a new workout session
  */
-export const startWorkoutLog = async (planId, logDate = new Date().toISOString().split('T')[0]) => {
+export const startWorkoutLog = async (workoutId, logDate = new Date().toISOString().split('T')[0]) => {
   try {
     const insertResult = await db.runAsync(
-      'INSERT INTO workout_logs (planId, logDate, status) VALUES (?, ?, ?)',
-      [planId, logDate, 'in_progress']
+      'INSERT INTO workout_logs (workoutId, logDate, status) VALUES (?, ?, ?)',
+      [workoutId, logDate, 'in_progress']
     );
 
     const result = await db.getFirstAsync(
-      'SELECT id FROM workout_logs WHERE planId = ? AND logDate = ? ORDER BY id DESC LIMIT 1',
-      [planId, logDate]
+      'SELECT id FROM workout_logs WHERE workoutId = ? AND logDate = ? ORDER BY id DESC LIMIT 1',
+      [workoutId, logDate]
     );
 
     if (!result || !result.id) {
@@ -1118,14 +1299,14 @@ export const startWorkoutLog = async (planId, logDate = new Date().toISOString()
 /**
  * Get active workout log for a plan today
  */
-export const getActiveWorkoutLog = async (planId) => {
+export const getActiveWorkoutLog = async (workoutId) => {
   try {
     const today = new Date().toISOString().split('T')[0];
 
     // First try to find an in_progress workout
     let result = await db.getFirstAsync(
-      'SELECT * FROM workout_logs WHERE planId = ? AND logDate = ? AND status = ?',
-      [planId, today, 'in_progress']
+      'SELECT * FROM workout_logs WHERE workoutId = ? AND logDate = ? AND status = ?',
+      [workoutId, today, 'in_progress']
     );
 
     if (result) {
@@ -1135,8 +1316,8 @@ export const getActiveWorkoutLog = async (planId) => {
     // If no in_progress workout, check if ANY workout exists for today
     // This handles cases where a previous attempt failed or was completed
     result = await db.getFirstAsync(
-      'SELECT * FROM workout_logs WHERE planId = ? AND logDate = ?',
-      [planId, today]
+      'SELECT * FROM workout_logs WHERE workoutId = ? AND logDate = ?',
+      [workoutId, today]
     );
 
     if (result) {
@@ -1166,9 +1347,9 @@ export const getTodayActiveWorkout = async () => {
     const today = new Date().toISOString().split('T')[0];
 
     const result = await db.getFirstAsync(
-      `SELECT wl.*, p.name as planName
+      `SELECT wl.*, w.name as workoutName
        FROM workout_logs wl
-       JOIN plans p ON wl.planId = p.id
+       JOIN workouts w ON wl.workoutId = w.id
        WHERE wl.logDate = ? AND wl.status = ?`,
       [today, 'in_progress']
     );
@@ -1180,17 +1361,17 @@ export const getTodayActiveWorkout = async () => {
 };
 
 /**
- * Get workout log for a specific plan for today (any status)
+ * Get workout log for a specific workout for today (any status)
  * Used to check if workout is in progress or completed
  */
-export const getTodayWorkoutLogForPlan = async (planId) => {
+export const getTodayWorkoutLogForWorkout = async (workoutId) => {
   try {
     const today = new Date().toISOString().split('T')[0];
 
     const result = await db.getFirstAsync(
       `SELECT * FROM workout_logs
-       WHERE planId = ? AND logDate = ?`,
-      [planId, today]
+       WHERE workoutId = ? AND logDate = ?`,
+      [workoutId, today]
     );
 
     return result || null;
@@ -1371,14 +1552,14 @@ export const getWorkoutSummary = async (workoutLogId) => {
 /**
  * Get workout history for a plan
  */
-export const getWorkoutHistory = async (planId, limit = 10) => {
+export const getWorkoutHistory = async (workoutId, limit = 10) => {
   try {
     const result = await db.getAllAsync(
       `SELECT * FROM workout_logs
-       WHERE planId = ? AND status = ?
+       WHERE workoutId = ? AND status = ?
        ORDER BY logDate DESC
        LIMIT ?`,
-      [planId, 'completed', limit]
+      [workoutId, 'completed', limit]
     );
     return result || [];
   } catch (error) {
@@ -1451,6 +1632,20 @@ export const updateUserSetting = async (settingKey, settingValue) => {
     await db.runAsync(
       'INSERT OR REPLACE INTO user_settings (settingKey, settingValue, updatedAt) VALUES (?, ?, CURRENT_TIMESTAMP)',
       [settingKey, settingValue]
+    );
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Delete workout log for a specific date
+ */
+export const deleteWorkoutLog = async (workoutId, logDate = new Date().toISOString().split('T')[0]) => {
+  try {
+    await db.runAsync(
+      'DELETE FROM workout_logs WHERE workoutId = ? AND logDate = ?',
+      [workoutId, logDate]
     );
   } catch (error) {
     throw error;

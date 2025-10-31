@@ -9,7 +9,7 @@ const db = SQLite.openDatabaseSync('vikfit.db');
 
 /**
  * Get workout completion count for a specific week
- * @param {number} planId - Plan/Workout ID
+ * @param {number} planId - Workout ID
  * @param {string} startDate - Sunday of the week (YYYY-MM-DD)
  */
 export const getWeeklyWorkoutCompletions = async (planId, startDate) => {
@@ -22,7 +22,7 @@ export const getWeeklyWorkoutCompletions = async (planId, startDate) => {
     const result = await db.getFirstAsync(
       `SELECT COUNT(*) as completionCount
        FROM workout_logs
-       WHERE planId = ? AND logDate >= ? AND logDate <= ? AND status = 'completed'`,
+       WHERE workoutId = ? AND logDate >= ? AND logDate <= ? AND status = 'completed'`,
       [planId, startDate, endDate]
     );
 
@@ -39,18 +39,18 @@ export const getAllWorkoutsWithMetrics = async (startDate) => {
   try {
     const result = await db.getAllAsync(
       `SELECT
-        p.id,
-        p.name,
-        p.description,
-        COUNT(DISTINCT ps.dayOfWeek) as assignedDaysCount,
+        w.id,
+        w.name,
+        w.description,
+        COUNT(DISTINCT ws.dayOfWeek) as assignedDaysCount,
         (SELECT COUNT(*) FROM workout_logs
-         WHERE planId = p.id
+         WHERE workoutId = w.id
          AND logDate >= ?
          AND logDate <= ?
          AND status = 'completed') as completionCount
-       FROM plans p
-       LEFT JOIN plan_schedule ps ON p.id = ps.planId
-       GROUP BY p.id`,
+       FROM workouts w
+       LEFT JOIN workout_schedule ws ON w.id = ws.workoutId
+       GROUP BY w.id`,
       [startDate, getEndDate(startDate)]
     );
 
@@ -66,7 +66,7 @@ export const getAllWorkoutsWithMetrics = async (startDate) => {
 export const getPlanExerciseCount = async (planId) => {
   try {
     const result = await db.getFirstAsync(
-      `SELECT COUNT(*) as exerciseCount FROM exercises WHERE planId = ?`,
+      `SELECT COUNT(*) as exerciseCount FROM exercises WHERE workoutId = ?`,
       [planId]
     );
 
@@ -82,7 +82,7 @@ export const getPlanExerciseCount = async (planId) => {
 export const getPlanScheduledDays = async (planId) => {
   try {
     const result = await db.getAllAsync(
-      `SELECT dayOfWeek FROM plan_schedule WHERE planId = ? ORDER BY dayOfWeek`,
+      `SELECT dayOfWeek FROM workout_schedule WHERE workoutId = ? ORDER BY dayOfWeek`,
       [planId]
     );
 
@@ -93,18 +93,20 @@ export const getPlanScheduledDays = async (planId) => {
 };
 
 /**
- * Get Sunday of the week for a given date
+ * Get Monday of the week for a given date
  */
-export const getSundayOfWeek = (date) => {
+export const getMondayOfWeek = (date) => {
   const dateObj = new Date(date);
   const dayOfWeek = dateObj.getDay();
-  const difference = dateObj.getDate() - dayOfWeek;
-  const sunday = new Date(dateObj.setDate(difference));
-  return sunday.toISOString().split('T')[0];
+  // If Sunday (0), go back 6 days. Otherwise, go back (dayOfWeek - 1) days
+  const daysBack = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const difference = dateObj.getDate() - daysBack;
+  const monday = new Date(dateObj.setDate(difference));
+  return monday.toISOString().split('T')[0];
 };
 
 /**
- * Get end date (Saturday) for a week
+ * Get end date (Sunday) for a week
  */
 const getEndDate = (startDate) => {
   const startDateObj = new Date(startDate);
@@ -132,7 +134,7 @@ export const getWeeklyWorkoutStats = async (startDate) => {
 
     const result = await db.getFirstAsync(
       `SELECT
-        COUNT(DISTINCT wl.planId) as workoutsCompleted,
+        COUNT(DISTINCT wl.workoutId) as workoutsCompleted,
         COUNT(DISTINCT sl.exerciseId) as exercisesCompleted
        FROM workout_logs wl
        LEFT JOIN set_logs sl ON wl.id = sl.workoutLogId
@@ -156,7 +158,7 @@ export const getWeeklyWorkoutBreakdown = async (startDate) => {
   try {
     const weekData = [];
     const startDateObj = new Date(startDate);
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     for (let i = 0; i < 7; i++) {
       const currentDate = new Date(startDateObj);
@@ -166,24 +168,24 @@ export const getWeeklyWorkoutBreakdown = async (startDate) => {
 
       // Get all assigned workouts for this day of the week
       const assignedWorkouts = await db.getAllAsync(
-        `SELECT DISTINCT p.id, p.name
-         FROM plans p
-         JOIN plan_schedule ps ON p.id = ps.planId
-         WHERE ps.dayOfWeek = ?`,
+        `SELECT DISTINCT w.id, w.name
+         FROM workouts w
+         JOIN workout_schedule ws ON w.id = ws.workoutId
+         WHERE ws.dayOfWeek = ?`,
         [dayOfWeek]
       );
 
       // Get all completed workouts for this day
       const completedWorkouts = await db.getAllAsync(
         `SELECT
-          p.id,
-          p.name,
+          w.id,
+          w.name,
           COUNT(DISTINCT sl.exerciseId) as exerciseCount
          FROM workout_logs wl
-         JOIN plans p ON wl.planId = p.id
+         JOIN workouts w ON wl.workoutId = w.id
          LEFT JOIN set_logs sl ON wl.id = sl.workoutLogId
          WHERE wl.logDate = ? AND wl.status = 'completed'
-         GROUP BY p.id`,
+         GROUP BY w.id`,
         [dateStr]
       );
 
@@ -218,20 +220,20 @@ export const getWeeklyScheduledGoals = async (startDate) => {
 
     // Get all scheduled workouts for this week
     const scheduledWorkouts = await db.getAllAsync(
-      `SELECT DISTINCT p.id, p.name,
-              (SELECT COUNT(*) FROM exercises WHERE planId = p.id) as exerciseCount
-       FROM plans p
-       JOIN plan_schedule ps ON p.id = ps.planId
-       WHERE ps.dayOfWeek >= 0 AND ps.dayOfWeek <= 6`
+      `SELECT DISTINCT w.id, w.name,
+              (SELECT COUNT(*) FROM exercises WHERE workoutId = w.id) as exerciseCount
+       FROM workouts w
+       JOIN workout_schedule ws ON w.id = ws.workoutId
+       WHERE ws.dayOfWeek >= 0 AND ws.dayOfWeek <= 6`
     );
 
     // Count total scheduled workout instances for the week
     const scheduleData = await db.getAllAsync(
-      `SELECT p.id, ps.dayOfWeek,
-              (SELECT COUNT(*) FROM exercises WHERE planId = p.id) as exerciseCount
-       FROM plans p
-       JOIN plan_schedule ps ON p.id = ps.planId
-       WHERE ps.dayOfWeek >= 0 AND ps.dayOfWeek <= 6`
+      `SELECT w.id, ws.dayOfWeek,
+              (SELECT COUNT(*) FROM exercises WHERE workoutId = w.id) as exerciseCount
+       FROM workouts w
+       JOIN workout_schedule ws ON w.id = ws.workoutId
+       WHERE ws.dayOfWeek >= 0 AND ws.dayOfWeek <= 6`
     );
 
     // Calculate totals
@@ -241,7 +243,7 @@ export const getWeeklyScheduledGoals = async (startDate) => {
     // Get completed workouts for this week
     const completedData = await db.getFirstAsync(
       `SELECT
-        COUNT(DISTINCT wl.planId) as completedWorkouts,
+        COUNT(DISTINCT wl.workoutId) as completedWorkouts,
         COUNT(DISTINCT sl.exerciseId) as completedExercises
        FROM workout_logs wl
        LEFT JOIN set_logs sl ON wl.id = sl.workoutLogId

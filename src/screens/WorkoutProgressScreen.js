@@ -19,7 +19,7 @@ import { getEnabledGoalPreferences, getUserSetting } from '../services/database'
 import {
   getWeeklyWorkoutStats,
   getWeeklyWorkoutBreakdown,
-  getSundayOfWeek,
+  getMondayOfWeek,
   getWeeklyScheduledGoals,
 } from '../services/workoutStats';
 
@@ -35,8 +35,8 @@ export default function WorkoutProgressScreen({ navigation }) {
   const [lastWeekStats, setLastWeekStats] = useState({ workoutsCompleted: 0, exercisesCompleted: 0 });
   const [weeklyBreakdown, setWeeklyBreakdown] = useState([]);
   const [showCalendar, setShowCalendar] = useState(true);
-  const [currentSunday, setCurrentSunday] = useState(
-    getSundayOfWeek(new Date().toISOString().split('T')[0])
+  const [currentMonday, setCurrentMonday] = useState(
+    getMondayOfWeek(new Date().toISOString().split('T')[0])
   );
   const [goalSettingsModalVisible, setGoalSettingsModalVisible] = useState(false);
   const [workoutHistoryModalVisible, setWorkoutHistoryModalVisible] = useState(false);
@@ -108,7 +108,7 @@ export default function WorkoutProgressScreen({ navigation }) {
     vegan: false,
   });
 
-  const weekStartDate = currentSunday;
+  const weekStartDate = currentMonday;
 
   const loadWorkouts = useCallback(async () => {
     try {
@@ -119,10 +119,10 @@ export default function WorkoutProgressScreen({ navigation }) {
       setCurrentWeekStats(currentStats);
 
       // Get weekly stats for last week
-      const lastSunday = new Date(weekStartDate);
-      lastSunday.setDate(lastSunday.getDate() - 7);
-      const lastSundayStr = lastSunday.toISOString().split('T')[0];
-      const lastStats = await getWeeklyWorkoutStats(lastSundayStr);
+      const lastMonday = new Date(weekStartDate);
+      lastMonday.setDate(lastMonday.getDate() - 7);
+      const lastMondayStr = lastMonday.toISOString().split('T')[0];
+      const lastStats = await getWeeklyWorkoutStats(lastMondayStr);
       setLastWeekStats(lastStats);
 
       // Get daily breakdown for the week
@@ -162,20 +162,20 @@ export default function WorkoutProgressScreen({ navigation }) {
   );
 
   const handlePreviousWeek = () => {
-    const prevSunday = new Date(currentSunday);
-    prevSunday.setDate(prevSunday.getDate() - 7);
-    setCurrentSunday(prevSunday.toISOString().split('T')[0]);
+    const prevMonday = new Date(currentMonday);
+    prevMonday.setDate(prevMonday.getDate() - 7);
+    setCurrentMonday(prevMonday.toISOString().split('T')[0]);
   };
 
   const handleNextWeek = () => {
-    const nextSunday = new Date(currentSunday);
-    nextSunday.setDate(nextSunday.getDate() + 7);
-    setCurrentSunday(nextSunday.toISOString().split('T')[0]);
+    const nextMonday = new Date(currentMonday);
+    nextMonday.setDate(nextMonday.getDate() + 7);
+    setCurrentMonday(nextMonday.toISOString().split('T')[0]);
   };
 
   const handleTodayWeek = () => {
     const today = new Date().toISOString().split('T')[0];
-    setCurrentSunday(getSundayOfWeek(today));
+    setCurrentMonday(getMondayOfWeek(today));
   };
 
   const handleRefresh = async () => {
@@ -215,20 +215,20 @@ export default function WorkoutProgressScreen({ navigation }) {
 
   // Format week label
   const formatDateRange = () => {
-    const sundayDate = new Date(currentSunday);
-    const saturdayDate = new Date(sundayDate);
-    saturdayDate.setDate(saturdayDate.getDate() + 6);
+    const mondayDate = new Date(currentMonday);
+    const sundayDate = new Date(mondayDate);
+    sundayDate.setDate(sundayDate.getDate() + 6);
 
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const mondayMonth = monthNames[mondayDate.getMonth()];
+    const mondayDay = mondayDate.getDate();
     const sundayMonth = monthNames[sundayDate.getMonth()];
     const sundayDay = sundayDate.getDate();
-    const saturdayMonth = monthNames[saturdayDate.getMonth()];
-    const saturdayDay = saturdayDate.getDate();
 
-    if (sundayMonth === saturdayMonth) {
-      return `${sundayMonth} ${sundayDay} - ${saturdayDay}`;
+    if (mondayMonth === sundayMonth) {
+      return `${mondayMonth} ${mondayDay} - ${sundayDay}`;
     } else {
-      return `${sundayMonth} ${sundayDay} - ${saturdayMonth} ${saturdayDay}`;
+      return `${mondayMonth} ${mondayDay} - ${sundayMonth} ${sundayDay}`;
     }
   };
 

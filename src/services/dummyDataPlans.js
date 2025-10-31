@@ -100,7 +100,7 @@ let nextExerciseId = 10;
 /**
  * Get all workout plans
  */
-export const getAllPlans = async () => {
+export const getAllWorkouts = async () => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({ data: workoutPlans, error: null });
@@ -111,10 +111,10 @@ export const getAllPlans = async () => {
 /**
  * Get a specific plan by ID
  */
-export const getPlanById = async (planId) => {
+export const getWorkoutById = async (workoutId) => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const plan = workoutPlans.find((p) => p.id === planId);
+      const plan = workoutPlans.find((p) => p.id === workoutId);
       if (plan) {
         resolve({ data: plan, error: null });
       } else {
@@ -127,7 +127,7 @@ export const getPlanById = async (planId) => {
 /**
  * Create a new workout plan
  */
-export const createPlan = async (planData) => {
+export const createWorkout = async (planData) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       const newPlan = {
@@ -145,10 +145,10 @@ export const createPlan = async (planData) => {
 /**
  * Update an existing plan
  */
-export const updatePlan = async (planId, planData) => {
+export const updateWorkout = async (workoutId, planData) => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const planIndex = workoutPlans.findIndex((p) => p.id === planId);
+      const planIndex = workoutPlans.findIndex((p) => p.id === workoutId);
       if (planIndex !== -1) {
         workoutPlans[planIndex] = {
           ...workoutPlans[planIndex],
@@ -165,10 +165,10 @@ export const updatePlan = async (planId, planData) => {
 /**
  * Delete a plan
  */
-export const deletePlan = async (planId) => {
+export const deleteWorkout = async (workoutId) => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      workoutPlans = workoutPlans.filter((p) => p.id !== planId);
+      workoutPlans = workoutPlans.filter((p) => p.id !== workoutId);
       resolve({ data: null, error: null });
     }, 300);
   });
@@ -177,10 +177,10 @@ export const deletePlan = async (planId) => {
 /**
  * Add exercise to plan
  */
-export const addExerciseToPlan = async (planId, exerciseData) => {
+export const addExerciseToWorkout = async (workoutId, exerciseData) => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const plan = workoutPlans.find((p) => p.id === planId);
+      const plan = workoutPlans.find((p) => p.id === workoutId);
       if (plan) {
         const newExercise = {
           id: String(nextExerciseId++),
@@ -198,10 +198,10 @@ export const addExerciseToPlan = async (planId, exerciseData) => {
 /**
  * Remove exercise from plan
  */
-export const removeExerciseFromPlan = async (planId, exerciseId) => {
+export const removeExerciseFromWorkout = async (workoutId, exerciseId) => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const plan = workoutPlans.find((p) => p.id === planId);
+      const plan = workoutPlans.find((p) => p.id === workoutId);
       if (plan) {
         plan.exercises = plan.exercises.filter((e) => e.id !== exerciseId);
         resolve({ data: null, error: null });
@@ -215,10 +215,10 @@ export const removeExerciseFromPlan = async (planId, exerciseId) => {
 /**
  * Update exercise in plan
  */
-export const updateExerciseInPlan = async (planId, exerciseId, exerciseData) => {
+export const updateExerciseInWorkout = async (workoutId, exerciseId, exerciseData) => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const plan = workoutPlans.find((p) => p.id === planId);
+      const plan = workoutPlans.find((p) => p.id === workoutId);
       if (plan) {
         const exerciseIndex = plan.exercises.findIndex((e) => e.id === exerciseId);
         if (exerciseIndex !== -1) {

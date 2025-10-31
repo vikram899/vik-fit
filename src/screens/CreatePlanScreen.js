@@ -13,7 +13,7 @@ import { Toast } from "../components/common";
 import { ExerciseCard } from "../components/workouts";
 import { ExerciseFormModal } from "../components/modals";
 import { appStyles } from "../styles/app.styles";
-import { addPlan, addExercise } from "../services/database";
+import { addWorkout, addExercise } from "../services/database";
 
 /**
  * CreatePlanScreen
@@ -67,7 +67,7 @@ export default function CreatePlanScreen({ navigation }) {
         sets: modalExercise.sets,
         reps: modalExercise.reps,
         weight: modalExercise.weight,
-        time: modalExercise.time,
+        restTime: modalExercise.restTime,
       },
     ]);
     setModalVisible(false);
@@ -76,7 +76,7 @@ export default function CreatePlanScreen({ navigation }) {
 
   const closeModal = () => {
     setModalVisible(false);
-    setModalExercise({ name: "", sets: "3", reps: "10", weight: "", time: "" });
+    setModalExercise({ name: "", sets: "3", reps: "10", weight: "", restTime: "" });
   };
 
   const removeExercise = (id) => {
@@ -85,37 +85,37 @@ export default function CreatePlanScreen({ navigation }) {
 
   const handleCreatePlan = async () => {
     if (!planName.trim()) {
-      showToast("Please enter a plan name", "error");
+      showToast("Please enter a workout name", "error");
       return;
     }
 
     try {
       setLoading(true);
-      const planId = await addPlan(planName.trim(), "");
+      const workoutId = await addWorkout(planName.trim(), "");
 
-      // Add all exercises to the plan
+      // Add all exercises to the workout
       for (const exercise of exercises) {
         if (exercise.name.trim()) {
           await addExercise(
-            planId,
+            workoutId,
             exercise.name.trim(),
             parseInt(exercise.sets) || 3,
             parseInt(exercise.reps) || 10,
             parseFloat(exercise.weight) || 0,
-            parseInt(exercise.time) || 0,
+            parseInt(exercise.restTime) || 0,
             ""
           );
         }
       }
 
-      showToast("Plan created successfully!", "success");
+      showToast("Workout created successfully!", "success");
       setTimeout(() => {
         setPlanName("");
         setExercises([]);
         navigation.goBack();
       }, 1500);
     } catch (error) {
-      showToast("Failed to create plan", "error");
+      showToast("Failed to create workout", "error");
     } finally {
       setLoading(false);
     }

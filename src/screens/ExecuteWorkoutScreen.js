@@ -5,10 +5,10 @@ import { ExerciseCard } from "../components/workouts";
 import { ExerciseFormModal, OptionsMenu } from "../components/modals";
 import { appStyles } from "../styles/app.styles";
 import {
-  getExercisesByPlanId,
+  getExercisesByWorkoutId,
   deleteExercise,
   updateExercise,
-  deletePlan,
+  deleteWorkout,
 } from "../services/database";
 
 /**
@@ -16,7 +16,11 @@ import {
  * Screen for viewing, editing, and executing workout plans
  */
 export default function ExecuteWorkoutScreen({ navigation, route }) {
-  const { planId, planName } = route.params;
+  const { workoutId, workoutName, planId, planName } = route.params;
+  // Support both workoutId/workoutName (new) and planId/planName (legacy)
+  const actualWorkoutId = workoutId || planId;
+  const actualWorkoutName = workoutName || planName;
+
   const [exercises, setExercises] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [isEditMode, setIsEditMode] = React.useState(false);
@@ -28,24 +32,25 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
     sets: "3",
     reps: "10",
     weight: "",
-    time: "",
+    restTime: "",
   });
 
-  // Load exercises for this plan
+  // Load exercises for this workout
   React.useEffect(() => {
     const loadExercises = async () => {
       try {
         setLoading(true);
-        const planExercises = await getExercisesByPlanId(planId);
-        setExercises(planExercises);
+        const workoutExercises = await getExercisesByWorkoutId(actualWorkoutId);
+        setExercises(workoutExercises);
       } catch (error) {
+        console.error('ExecuteWorkoutScreen: Error loading exercises:', error);
       } finally {
         setLoading(false);
       }
     };
 
     loadExercises();
-  }, [planId]);
+  }, [actualWorkoutId]);
 
   // Handle enable edit mode
   const handleEnableEditMode = () => {
@@ -58,11 +63,11 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
     setIsEditMode(false);
   };
 
-  // Handle delete plan
-  const handleDeletePlan = () => {
+  // Handle delete workout
+  const handleDeleteWorkout = () => {
     Alert.alert(
-      "Delete Plan",
-      `Are you sure you want to delete "${planName}"? This action cannot be undone.`,
+      "Delete Workout",
+      `Are you sure you want to delete "${actualWorkoutName}"? This action cannot be undone.`,
       [
         {
           text: "Cancel",
@@ -72,10 +77,10 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
           text: "Delete",
           onPress: async () => {
             try {
-              await deletePlan(planId);
+              await deleteWorkout(actualWorkoutId);
               navigation.goBack();
             } catch (error) {
-              Alert.alert("Error", "Failed to delete plan");
+              Alert.alert("Error", "Failed to delete workout");
             }
           },
           style: "destructive",
@@ -118,7 +123,7 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
       sets: exercise.sets.toString(),
       reps: exercise.reps.toString(),
       weight: exercise.weight.toString(),
-      time: exercise.time ? exercise.time.toString() : "",
+      restTime: exercise.restTime ? exercise.restTime.toString() : "",
     });
     setEditModalVisible(true);
   };
@@ -137,7 +142,7 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
         parseInt(editExercise.sets) || 3,
         parseInt(editExercise.reps) || 10,
         parseFloat(editExercise.weight) || 0,
-        parseInt(editExercise.time) || 0,
+        parseInt(editExercise.restTime) || 0,
         ""
       );
 
@@ -149,7 +154,7 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
               sets: parseInt(editExercise.sets) || 3,
               reps: parseInt(editExercise.reps) || 10,
               weight: parseFloat(editExercise.weight) || 0,
-              time: parseInt(editExercise.time) || 0,
+              restTime: parseInt(editExercise.restTime) || 0,
             }
           : ex
       );
@@ -170,10 +175,10 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
       onPress: handleEnableEditMode,
     },
     {
-      label: "Delete Plan",
+      label: "Delete Workout",
       icon: "trash-can",
       color: "#FF3B30",
-      onPress: handleDeletePlan,
+      onPress: handleDeleteWorkout,
     },
     {
       label: "Cancel",
@@ -192,7 +197,7 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
     >
       <View style={appStyles.compactHeader}>
         <View style={{ flex: 1 }}>
-          <Text style={appStyles.compactTitle}>{planName}</Text>
+          <Text style={appStyles.compactTitle}>{actualWorkoutName}</Text>
           <Text style={appStyles.compactSubtitle}>
             {exercises.length} exercises
           </Text>

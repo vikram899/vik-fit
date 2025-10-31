@@ -163,6 +163,7 @@ export const STRINGS = {
       sets: "Sets",
       reps: "Reps",
       weight: "Weight",
+      restTime: "Rest Time",
     },
     units: {
       seconds: "s",

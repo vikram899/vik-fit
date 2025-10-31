@@ -17,10 +17,11 @@ import StepsCard from "../components/health/StepsCard";
 import {
   getDailyTotals,
   getMacroGoals,
-  getPlansForDay,
-  getTodayWorkoutLogForPlan,
+  getWorkoutsForDay,
+  getTodayWorkoutLogForWorkout,
   getAllWeightEntries,
   getLatestWeightEntry,
+  getAllWorkouts,
 } from "../services/database";
 
 /**
@@ -58,21 +59,50 @@ export default function HomeScreen({ navigation }) {
         const goals = await getMacroGoals(today);
         setMacroGoalsState(goals);
 
-        // Load today's workouts
+        // Load today's workouts - combine scheduled + ad-hoc
         const todayDayOfWeek = new Date().getDay();
-        const workouts = await getPlansForDay(todayDayOfWeek);
-        setTodayWorkouts(workouts || []);
+        const scheduledWorkouts = await getWorkoutsForDay(todayDayOfWeek);
 
-        // Load today's workout logs to check completion status
+        // Get all workouts to find ad-hoc ones (those with logs but not scheduled)
+        const allWorkouts = await getAllWorkouts();
+        const combinedWorkouts = [];
+        const addedIds = new Set();
         const workoutLogsMap = {};
-        if (workouts) {
-          for (const workout of workouts) {
-            const log = await getTodayWorkoutLogForPlan(workout.id);
-            if (log) {
-              workoutLogsMap[workout.id] = log;
+
+        // First, add scheduled workouts
+        if (scheduledWorkouts) {
+          for (const workout of scheduledWorkouts) {
+            combinedWorkouts.push(workout);
+            addedIds.add(workout.id);
+          }
+        }
+
+        // Then, add ad-hoc workouts (those with logs but not scheduled)
+        for (const workout of allWorkouts) {
+          const log = await getTodayWorkoutLogForWorkout(workout.id);
+          if (log) {
+            workoutLogsMap[workout.id] = log;
+            // Only add if not already added (not scheduled)
+            if (!addedIds.has(workout.id)) {
+              combinedWorkouts.push(workout);
+              addedIds.add(workout.id);
             }
           }
         }
+
+        // Also load logs for scheduled workouts
+        if (scheduledWorkouts) {
+          for (const workout of scheduledWorkouts) {
+            if (!workoutLogsMap[workout.id]) {
+              const log = await getTodayWorkoutLogForWorkout(workout.id);
+              if (log) {
+                workoutLogsMap[workout.id] = log;
+              }
+            }
+          }
+        }
+
+        setTodayWorkouts(combinedWorkouts || []);
         setTodayWorkoutLogs(workoutLogsMap);
 
         // Load weight data (last 60 days for 2-month view)
@@ -118,14 +148,14 @@ export default function HomeScreen({ navigation }) {
 
           // Reload today's workouts
           const todayDayOfWeek = new Date().getDay();
-          const workouts = await getPlansForDay(todayDayOfWeek);
+          const workouts = await getWorkoutsForDay(todayDayOfWeek);
           if (isMounted) setTodayWorkouts(workouts || []);
 
           // Reload today's workout logs to check completion status
           const workoutLogsMap = {};
           if (workouts) {
             for (const workout of workouts) {
-              const log = await getTodayWorkoutLogForPlan(workout.id);
+              const log = await getTodayWorkoutLogForWorkout(workout.id);
               if (log) {
                 workoutLogsMap[workout.id] = log;
               }

@@ -20,7 +20,7 @@ import {
   getWeeklyMealData,
   getWeeklyDailyBreakdown,
   getWeeklyGoals,
-  getSundayOfWeek,
+  getMondayOfWeek,
 } from '../services/mealStats';
 import { getMacroGoals, getEnabledGoalPreferences, getUserSetting } from '../services/database';
 
@@ -58,8 +58,8 @@ export default function MealProgressScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [fadeAnim] = useState(new Animated.Value(0));
-  const [currentSunday, setCurrentSunday] = useState(
-    getSundayOfWeek(new Date().toISOString().split('T')[0])
+  const [currentMonday, setCurrentSunday] = useState(
+    getMondayOfWeek(new Date().toISOString().split('T')[0])
   );
   const [goalSettingsModalVisible, setGoalSettingsModalVisible] = useState(false);
   const [mealHistoryModalVisible, setMealHistoryModalVisible] = useState(false);
@@ -109,11 +109,11 @@ export default function MealProgressScreen({ navigation }) {
       setLoading(true);
 
       // Get current week data
-      const currentWeek = await getWeeklyMealData(currentSunday);
+      const currentWeek = await getWeeklyMealData(currentMonday);
       setCurrentWeekData(currentWeek);
 
       // Get last week data
-      const lastSunday = new Date(currentSunday);
+      const lastSunday = new Date(currentMonday);
       lastSunday.setDate(lastSunday.getDate() - 7);
       const lastSundayStr = lastSunday.toISOString().split('T')[0];
       const lastWeek = await getWeeklyMealData(lastSundayStr);
@@ -125,13 +125,13 @@ export default function MealProgressScreen({ navigation }) {
       setWeeklyGoals(goals);
 
       // Get daily goals for breakdown cards
-      const dailyGoalsData = await getMacroGoals(currentSunday);
+      const dailyGoalsData = await getMacroGoals(currentMonday);
       if (dailyGoalsData) {
         setDailyGoals(dailyGoalsData);
       }
 
       // Get daily breakdown
-      const breakdown = await getWeeklyDailyBreakdown(currentSunday);
+      const breakdown = await getWeeklyDailyBreakdown(currentMonday);
       setWeeklyBreakdown(breakdown);
 
       // Get enabled goal preferences
@@ -156,7 +156,7 @@ export default function MealProgressScreen({ navigation }) {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [currentSunday, fadeAnim]);
+  }, [currentMonday, fadeAnim]);
 
   // Load data when screen is focused
   useFocusEffect(
@@ -166,20 +166,20 @@ export default function MealProgressScreen({ navigation }) {
   );
 
   const handlePreviousWeek = () => {
-    const prevSunday = new Date(currentSunday);
+    const prevSunday = new Date(currentMonday);
     prevSunday.setDate(prevSunday.getDate() - 7);
     setCurrentSunday(prevSunday.toISOString().split('T')[0]);
   };
 
   const handleNextWeek = () => {
-    const nextSunday = new Date(currentSunday);
+    const nextSunday = new Date(currentMonday);
     nextSunday.setDate(nextSunday.getDate() + 7);
     setCurrentSunday(nextSunday.toISOString().split('T')[0]);
   };
 
   const handleTodayWeek = () => {
     const today = new Date().toISOString().split('T')[0];
-    setCurrentSunday(getSundayOfWeek(today));
+    setCurrentSunday(getMondayOfWeek(today));
   };
 
   const handleRefresh = async () => {
@@ -263,7 +263,7 @@ export default function MealProgressScreen({ navigation }) {
 
   // Format week label with month/day
   const formatDateRange = () => {
-    const sundayDate = new Date(currentSunday);
+    const sundayDate = new Date(currentMonday);
     const saturdayDate = new Date(sundayDate);
     saturdayDate.setDate(saturdayDate.getDate() + 6);
 

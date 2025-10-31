@@ -14,22 +14,23 @@ import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AssignDaysModal } from '../components/modals';
 import { SearchFilterSort } from '../components/meals';
+import WorkoutCard from '../components/workouts/WorkoutCardComponent';
 import { COLORS } from '../styles';
 import {
-  getAllPlans,
-  getScheduledDaysForPlan,
-  assignPlanToDays,
-  deletePlan,
-  getPlansForDay,
+  getAllWorkouts,
+  getScheduledDaysForWorkout,
+  assignWorkoutToDays,
+  deleteWorkout,
+  getWorkoutsForDay,
   getTodayActiveWorkout,
-  getTodayWorkoutLogForPlan,
-  removePlanFromDays,
+  getTodayWorkoutLogForWorkout,
+  removeWorkoutFromDays,
+  startWorkoutLog,
+  deleteWorkoutLog,
 } from '../services/database';
 import {
-  getWeeklyWorkoutCompletions,
   getPlanExerciseCount,
-  getSundayOfWeek,
-  calculateCompletionPercentage,
+  getMondayOfWeek,
 } from '../services/workoutStats';
 
 /**
@@ -50,7 +51,6 @@ export default function LogWorkoutScreen({ navigation }) {
     equipment: false,
   });
   const [exerciseCounts, setExerciseCounts] = useState({});
-  const [completionCounts, setCompletionCounts] = useState({});
   const [assignModalVisible, setAssignModalVisible] = useState(false);
   const [selectedWorkoutForAssign, setSelectedWorkoutForAssign] = useState(null);
   const [scheduledDays, setScheduledDays] = useState({});
@@ -59,53 +59,76 @@ export default function LogWorkoutScreen({ navigation }) {
   const [todayWorkoutLogs, setTodayWorkoutLogs] = useState({}); // Map of planId -> workoutLog
 
   const todayDayOfWeek = new Date().getDay();
-  const weekStartDate = getSundayOfWeek(new Date().toISOString().split('T')[0]);
+  const weekStartDate = getMondayOfWeek(new Date().toISOString().split('T')[0]);
 
   // Load all workouts and today's workouts
   const loadWorkouts = useCallback(async () => {
     try {
       setLoading(true);
 
-      // Get all plans
-      const plans = await getAllPlans();
-      setWorkouts(plans);
+      // Get all workouts
+      const workouts = await getAllWorkouts();
+      setWorkouts(workouts);
 
-      // Get today's workouts
-      const todayPlans = await getPlansForDay(todayDayOfWeek);
-      setTodaysWorkouts(todayPlans);
+      // Get today's workouts - combine scheduled workouts + workouts with logs for today
+      const currentDayOfWeek = new Date().getDay();
+      const scheduledWorkouts = await getWorkoutsForDay(currentDayOfWeek);
 
-      // Get scheduled days for each plan
+      // Get all workouts and find ones with logs for today
+      const today = new Date().toISOString().split('T')[0];
+      const todayLogsMap = {};
+      for (const workout of workouts) {
+        const log = await getTodayWorkoutLogForWorkout(workout.id);
+        if (log) {
+          todayLogsMap[workout.id] = true;
+        }
+      }
+
+      // Combine scheduled workouts with workouts that have logs for today
+      const combinedTodayWorkouts = [];
+      const addedIds = new Set();
+
+      // Add scheduled workouts
+      for (const workout of scheduledWorkouts) {
+        combinedTodayWorkouts.push(workout);
+        addedIds.add(workout.id);
+      }
+
+      // Add workouts with logs that aren't already scheduled
+      for (const workout of workouts) {
+        if (todayLogsMap[workout.id] && !addedIds.has(workout.id)) {
+          combinedTodayWorkouts.push(workout);
+          addedIds.add(workout.id);
+        }
+      }
+
+      setTodaysWorkouts(combinedTodayWorkouts);
+
+      // Get scheduled days for each workout
       const daysMap = {};
-      for (const plan of plans) {
-        const days = await getScheduledDaysForPlan(plan.id);
-        daysMap[plan.id] = days;
+      for (const workout of workouts) {
+        const days = await getScheduledDaysForWorkout(workout.id);
+        daysMap[workout.id] = days;
       }
       setScheduledDays(daysMap);
 
-      // Get exercise counts for each plan
+      // Get exercise counts for each workout
       const exerciseCountsMap = {};
-      for (const plan of plans) {
-        const count = await getPlanExerciseCount(plan.id);
-        exerciseCountsMap[plan.id] = count;
+      for (const workout of workouts) {
+        const count = await getPlanExerciseCount(workout.id);
+        exerciseCountsMap[workout.id] = count;
       }
       setExerciseCounts(exerciseCountsMap);
 
-      // Get completion counts for this week
-      const completionCountsMap = {};
-      for (const plan of plans) {
-        const count = await getWeeklyWorkoutCompletions(plan.id, weekStartDate);
-        completionCountsMap[plan.id] = count;
-      }
-      setCompletionCounts(completionCountsMap);
-
-      // Get today's workout logs for each plan
+      // Get today's workout logs for each workout
       const workoutLogsMap = {};
-      for (const plan of plans) {
-        const log = await getTodayWorkoutLogForPlan(plan.id);
+      for (const workout of workouts) {
+        const log = await getTodayWorkoutLogForWorkout(workout.id);
         if (log) {
-          workoutLogsMap[plan.id] = log;
+          workoutLogsMap[workout.id] = log;
         }
       }
+      // Always set the logs map, even if empty (to clear old logs)
       setTodayWorkoutLogs(workoutLogsMap);
 
       // Trigger fade-in animation
@@ -169,23 +192,23 @@ export default function LogWorkoutScreen({ navigation }) {
     try {
       // If called with (workoutId, days), use those directly
       if (typeof workoutIdOrSelectedDays === 'number' && daysOverride !== null) {
-        await assignPlanToDays(workoutIdOrSelectedDays, daysOverride);
+        await assignWorkoutToDays(workoutIdOrSelectedDays, daysOverride);
         loadWorkouts();
       } else {
         // Original behavior: called from modal with selected days
-        await assignPlanToDays(selectedWorkoutForAssign.id, workoutIdOrSelectedDays);
+        await assignWorkoutToDays(selectedWorkoutForAssign.id, workoutIdOrSelectedDays);
         setAssignModalVisible(false);
         setSelectedWorkoutForAssign(null);
-        loadWorkouts();
+        await loadWorkouts();
         Alert.alert('Success', 'Workout schedule updated!');
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to save plan schedule');
+      Alert.alert('Error', 'Failed to save workout schedule');
     }
   };
 
   const handleViewExercises = (workout) => {
-    navigation.navigate('ExecuteWorkout', { planId: workout.id });
+    navigation.navigate('ExecuteWorkout', { workoutId: workout.id, workoutName: workout.name });
   };
 
   const handleStartWorkout = async (workout) => {
@@ -193,11 +216,11 @@ export default function LogWorkoutScreen({ navigation }) {
       // Check if there's already a workout in progress
       const activeWorkout = await getTodayActiveWorkout();
 
-      if (activeWorkout && activeWorkout.planId !== workout.id) {
+      if (activeWorkout && activeWorkout.workoutId !== workout.id) {
         // There's a different workout in progress
         Alert.alert(
           'Workout Already Scheduled',
-          `There is already a workout scheduled: "${activeWorkout.planName}". Do you still want to start "${workout.name}"?`,
+          `There is already a workout scheduled: "${activeWorkout.workoutName}". Do you still want to start "${workout.name}"?`,
           [
             {
               text: 'Cancel',
@@ -206,46 +229,65 @@ export default function LogWorkoutScreen({ navigation }) {
             {
               text: 'Yes, Start',
               onPress: () => {
-                navigation.navigate('StartWorkout', { planId: workout.id });
+                navigation.navigate('StartWorkout', { workoutId: workout.id });
               },
             },
           ]
         );
       } else {
         // No conflict, start the workout
-        navigation.navigate('StartWorkout', { planId: workout.id });
+        navigation.navigate('StartWorkout', { workoutId: workout.id });
       }
     } catch (error) {
       // If there's an error, just start the workout
-      navigation.navigate('StartWorkout', { planId: workout.id });
+      navigation.navigate('StartWorkout', { workoutId: workout.id });
     }
   };
 
-  const handleRemoveFromToday = (workout) => {
+  const handleRemoveFromToday = async (workout) => {
     const todayDayOfWeek = new Date().getDay();
+    const isScheduled = scheduledDays[workout.id]?.includes(todayDayOfWeek);
+    const hasLog = todayWorkoutLogs[workout.id] !== undefined;
 
-    Alert.alert(
-      'Remove from Today',
-      `Are you sure you want to remove "${workout.name}" from today's plan? It will still appear next week.`,
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Remove',
-          onPress: async () => {
-            try {
-              await removePlanFromDays(workout.id, [todayDayOfWeek]);
-              loadWorkouts();
-            } catch (error) {
-              Alert.alert('Error', 'Failed to remove workout');
-            }
-          },
-          style: 'destructive',
-        },
-      ]
-    );
+    let alertMessage = '';
+    let onRemove = async () => {};
+
+    // If it has a log but is NOT scheduled for today, it's ad-hoc
+    if (hasLog && !isScheduled) {
+      // Ad-hoc workout (only has a log, not in weekly schedule)
+      alertMessage = `Are you sure you want to remove "${workout.name}" from today's schedule?`;
+      onRemove = async () => {
+        try {
+          await deleteWorkoutLog(workout.id);
+          await loadWorkouts();
+        } catch (error) {
+          Alert.alert('Error', 'Failed to remove workout');
+        }
+      };
+    } else {
+      // Scheduled workout (part of weekly schedule)
+      alertMessage = `Are you sure you want to remove "${workout.name}" from today's workout schedule? It will still appear next week.`;
+      onRemove = async () => {
+        try {
+          await removeWorkoutFromDays(workout.id, [todayDayOfWeek]);
+          await loadWorkouts();
+        } catch (error) {
+          Alert.alert('Error', 'Failed to remove workout');
+        }
+      };
+    }
+
+    Alert.alert('Remove from Today', alertMessage, [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Remove',
+        onPress: onRemove,
+        style: 'destructive',
+      },
+    ]);
   };
 
   const handleWorkoutMenu = (workout, isToday = false) => {
@@ -282,12 +324,21 @@ export default function LogWorkoutScreen({ navigation }) {
           },
           {
             text: 'Add to Today\'s Schedule',
-            onPress: () => {
-              const todayDayOfWeek = new Date().getDay();
-              if (!scheduledDays[workout.id]?.includes(todayDayOfWeek)) {
-                handleSaveDays(workout.id, [...(scheduledDays[workout.id] || []), todayDayOfWeek]);
-              } else {
-                Alert.alert('Already Scheduled', `${workout.name} is already scheduled for today.`);
+            onPress: async () => {
+              try {
+                // Check if there's already a workout log for today
+                const todayLog = await getTodayWorkoutLogForWorkout(workout.id);
+                if (todayLog) {
+                  Alert.alert('Already Scheduled', `${workout.name} is already scheduled for today.`);
+                  return;
+                }
+
+                // Create a new workout log for today (not modifying the weekly schedule)
+                await startWorkoutLog(workout.id);
+                await loadWorkouts();
+                Alert.alert('Success', `${workout.name} added to today's schedule!`);
+              } catch (error) {
+                Alert.alert('Error', 'Failed to add workout to today\'s schedule');
               }
             },
           },
@@ -300,128 +351,8 @@ export default function LogWorkoutScreen({ navigation }) {
     }
   };
 
-  const getScheduledDaysDisplay = (workoutId) => {
-    const days = scheduledDays[workoutId] || [];
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    return days.map(d => dayNames[d]).join(', ') || 'Unassigned';
-  };
-
-  const getCompletionProgress = (workoutId) => {
-    const assigned = (scheduledDays[workoutId] || []).length;
-    const completed = completionCounts[workoutId] || 0;
-    const percentage = calculateCompletionPercentage(completed, assigned);
-    return {
-      percentage,
-      completed,
-      assigned,
-      color: percentage >= 90 ? '#4CAF50' : percentage >= 70 ? '#FFC107' : percentage >= 50 ? '#FF9800' : '#FF6B6B',
-    };
-  };
-
-  const WorkoutCard = ({ workout, isToday = false }) => {
-    const progress = getCompletionProgress(workout.id);
-    const exerciseCount = exerciseCounts[workout.id] || 0;
-    const todayWorkoutLog = todayWorkoutLogs[workout.id];
-    const isWorkoutCompleted = todayWorkoutLog && todayWorkoutLog.status === 'completed';
-
-    const handleButtonPress = () => {
-      if (isWorkoutCompleted) {
-        // Show summary for completed workout
-        navigation.navigate('WorkoutSummary', { workoutLogId: todayWorkoutLog.id });
-      } else {
-        // Start or resume workout
-        handleStartWorkout(workout);
-      }
-    };
-
-    return (
-      <View key={workout.id} style={[styles.workoutCard, isToday && styles.todayWorkoutCard]}>
-        <View style={styles.cardHeader}>
-          <View style={styles.cardInfo}>
-            {isToday && (
-              <View style={styles.todayBadge}>
-                <MaterialCommunityIcons name="star" size={12} color="#fff" />
-                <Text style={styles.todayBadgeText}>Today</Text>
-              </View>
-            )}
-            <Text style={styles.workoutName}>{workout.name}</Text>
-            <Text style={styles.daysDisplay}>
-              {getScheduledDaysDisplay(workout.id)}
-            </Text>
-          </View>
-          <TouchableOpacity
-            onPress={() => handleWorkoutMenu(workout, isToday)}
-            style={styles.kebabButton}
-          >
-            <MaterialCommunityIcons
-              name="dots-vertical"
-              size={24}
-              color={COLORS.primary}
-            />
-          </TouchableOpacity>
-        </View>
-
-        {/* Exercise Count */}
-        <View style={styles.exerciseCountContainer}>
-          <MaterialCommunityIcons
-            name="dumbbell"
-            size={14}
-            color="#666"
-          />
-          <Text style={styles.exerciseCount}>
-            {exerciseCount} {exerciseCount === 1 ? 'exercise' : 'exercises'}
-          </Text>
-        </View>
-
-        {/* Weekly Completion Progress */}
-        {progress.assigned > 0 && (
-          <View style={styles.progressContainer}>
-            <View style={styles.progressLabel}>
-              <Text style={styles.progressText}>
-                This week: {progress.completed}/{progress.assigned}
-              </Text>
-            </View>
-            <View style={styles.progressBar}>
-              <View
-                style={[
-                  styles.progressFill,
-                  {
-                    width: `${progress.percentage}%`,
-                    backgroundColor: progress.color,
-                  },
-                ]}
-              />
-            </View>
-            <Text style={[styles.progressPercentage, { color: progress.color }]}>
-              {Math.round(progress.percentage)}%
-            </Text>
-          </View>
-        )}
-
-        {/* Action Buttons */}
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.secondaryButton]}
-            onPress={() => handleViewExercises(workout)}
-          >
-            <Text style={styles.secondaryButtonText}>View</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.primaryButton]}
-            onPress={handleButtonPress}
-          >
-            <MaterialCommunityIcons
-              name={isWorkoutCompleted ? 'eye' : 'play'}
-              size={18}
-              color="#fff"
-            />
-            <Text style={styles.primaryButtonText}>
-              {isWorkoutCompleted ? 'Summary' : 'Start'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
+  const handleViewExercisesFromCard = (workout) => {
+    navigation.navigate('ExecuteWorkout', { workoutId: workout.id, workoutName: workout.name });
   };
 
   if (loading) {
@@ -482,7 +413,14 @@ export default function LogWorkoutScreen({ navigation }) {
             </View>
             {todaysWorkouts.length > 0 ? (
               todaysWorkouts.map(workout => (
-                <WorkoutCard key={workout.id} workout={workout} isToday={true} />
+                <WorkoutCard
+                  key={workout.id}
+                  workout={workout}
+                  exerciseCount={exerciseCounts[workout.id] || 0}
+                  scheduledDays={scheduledDays[workout.id] || []}
+                  onViewExercises={handleViewExercisesFromCard}
+                  onMenuPress={(w) => handleWorkoutMenu(w, true)}
+                />
               ))
             ) : (
               <View style={styles.noWorkoutAssignedContainer}>
@@ -544,7 +482,14 @@ export default function LogWorkoutScreen({ navigation }) {
                   </View>
                 ) : (
                   filteredWorkouts.map(workout => (
-                    <WorkoutCard key={workout.id} workout={workout} isToday={false} />
+                    <WorkoutCard
+                      key={workout.id}
+                      workout={workout}
+                      exerciseCount={exerciseCounts[workout.id] || 0}
+                      scheduledDays={scheduledDays[workout.id] || []}
+                      onViewExercises={handleViewExercisesFromCard}
+                      onMenuPress={(w) => handleWorkoutMenu(w, false)}
+                    />
                   ))
                 )}
               </View>
@@ -766,7 +711,7 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
   allWorkoutsSection: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 0,
   },
   allWorkoutsTitle: {
     fontSize: 16,
@@ -791,109 +736,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#999',
     textAlign: 'center',
-  },
-  workoutCard: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  cardInfo: {
-    flex: 1,
-  },
-  workoutName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 4,
-  },
-  daysDisplay: {
-    fontSize: 12,
-    color: '#999',
-    fontWeight: '500',
-  },
-  kebabButton: {
-    padding: 8,
-    marginRight: -8,
-  },
-  exerciseCountContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 12,
-  },
-  exerciseCount: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '500',
-  },
-  progressContainer: {
-    marginBottom: 12,
-  },
-  progressLabel: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  progressText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#666',
-  },
-  progressBar: {
-    height: 6,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 3,
-    overflow: 'hidden',
-    marginBottom: 4,
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 3,
-  },
-  progressPercentage: {
-    fontSize: 11,
-    fontWeight: '600',
-    textAlign: 'right',
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: 8,
-    gap: 6,
-  },
-  primaryButton: {
-    backgroundColor: COLORS.primary,
-  },
-  secondaryButton: {
-    backgroundColor: '#f5f5f5',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  primaryButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  secondaryButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.primary,
   },
 });

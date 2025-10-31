@@ -2,29 +2,34 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const FULL_DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 /**
  * WeekCalendar Component
  * Displays a week view with selectable days
+ * Week order: Monday-Sunday (but values remain 0=Sunday to 6=Saturday for database compatibility)
  *
- * @param {number} selectedDay - Currently selected day (0-6)
+ * @param {number} selectedDay - Currently selected day (0-6, where 0=Sunday, 1=Monday, etc.)
  * @param {function} onDaySelect - Callback when day is selected
  * @param {array} highlightedDays - Days to highlight (optional, for showing scheduled plans)
  */
 const WeekCalendar = ({ selectedDay, onDaySelect, highlightedDays = [] }) => {
+  // Map display indices to day values (Mon=1, Tue=2, ..., Sun=0)
+  const dayValues = [1, 2, 3, 4, 5, 6, 0];
+
   return (
     <View style={styles.container}>
       <View style={styles.weekDays}>
-        {DAYS.map((day, index) => {
-          const isSelected = selectedDay === index;
-          const isHighlighted = highlightedDays.includes(index);
+        {DAYS.map((day, displayIndex) => {
+          const dayValue = dayValues[displayIndex];
+          const isSelected = selectedDay === dayValue;
+          const isHighlighted = highlightedDays.includes(dayValue);
 
           return (
             <TouchableOpacity
-              key={index}
-              onPress={() => onDaySelect(index)}
+              key={displayIndex}
+              onPress={() => onDaySelect(dayValue)}
               style={[
                 styles.dayButton,
                 isSelected && styles.dayButtonSelected,

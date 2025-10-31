@@ -14,8 +14,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '../styles';
 import {
-  getPlanById,
-  getExercisesByPlanId,
+  getWorkoutById,
+  getExercisesByWorkoutId,
   startWorkoutLog,
   getActiveWorkoutLog,
   logExerciseSet,
@@ -28,7 +28,7 @@ import {
  * Pre-filled values from history or exercise defaults
  */
 export default function StartWorkoutScreen({ navigation, route }) {
-  const { planId } = route.params;
+  const { workoutId } = route.params;
 
   const [plan, setPlan] = useState(null);
   const [exercises, setExercises] = useState([]);
@@ -72,19 +72,19 @@ export default function StartWorkoutScreen({ navigation, route }) {
         try {
           setLoading(true);
 
-          const planData = await getPlanById(planId);
+          const planData = await getWorkoutById(workoutId);
           setPlan(planData);
 
-          const exercisesData = await getExercisesByPlanId(planId);
+          const exercisesData = await getExercisesByWorkoutId(workoutId);
           setExercises(exercisesData);
 
           // Check if active workout exists
-          const existingLog = await getActiveWorkoutLog(planId);
+          const existingLog = await getActiveWorkoutLog(workoutId);
 
           if (existingLog) {
             setWorkoutLogId(existingLog.id);
           } else {
-            const logId = await startWorkoutLog(planId);
+            const logId = await startWorkoutLog(workoutId);
             setWorkoutLogId(logId);
           }
 
@@ -100,7 +100,7 @@ export default function StartWorkoutScreen({ navigation, route }) {
       };
 
       loadData();
-    }, [planId])
+    }, [workoutId])
   );
 
   // Initialize exercise with pre-filled values
