@@ -244,6 +244,17 @@ export default function LogWorkoutScreen({ navigation }) {
     }
   };
 
+  const handleViewWorkoutSummary = async (workout) => {
+    try {
+      const log = todayWorkoutLogs[workout.id];
+      if (log && log.id) {
+        navigation.navigate('WorkoutSummary', { workoutLogId: log.id });
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to view workout summary');
+    }
+  };
+
   const handleRemoveFromToday = async (workout) => {
     const todayDayOfWeek = new Date().getDay();
     const isScheduled = scheduledDays[workout.id]?.includes(todayDayOfWeek);
@@ -412,18 +423,23 @@ export default function LogWorkoutScreen({ navigation }) {
               )}
             </View>
             {todaysWorkouts.length > 0 ? (
-              todaysWorkouts.map(workout => (
-                <WorkoutCard
-                  key={workout.id}
-                  workout={workout}
-                  exerciseCount={exerciseCounts[workout.id] || 0}
-                  scheduledDays={scheduledDays[workout.id] || []}
-                  onViewExercises={handleViewExercisesFromCard}
-                  onMenuPress={(w) => handleWorkoutMenu(w, true)}
-                  onStart={handleStartWorkout}
-                  showStartButton={true}
-                />
-              ))
+              todaysWorkouts.map(workout => {
+                const isCompleted = todayWorkoutLogs[workout.id]?.status === 'completed';
+                return (
+                  <WorkoutCard
+                    key={workout.id}
+                    workout={workout}
+                    exerciseCount={exerciseCounts[workout.id] || 0}
+                    scheduledDays={scheduledDays[workout.id] || []}
+                    onViewExercises={handleViewExercisesFromCard}
+                    onMenuPress={(w) => handleWorkoutMenu(w, true)}
+                    onStart={handleStartWorkout}
+                    onViewSummary={handleViewWorkoutSummary}
+                    showStartButton={true}
+                    isCompleted={isCompleted}
+                  />
+                );
+              })
             ) : (
               <View style={styles.noWorkoutAssignedContainer}>
                 <MaterialCommunityIcons

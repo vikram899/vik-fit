@@ -19,7 +19,9 @@ const WorkoutCard = ({
   onViewExercises,
   onMenuPress,
   onStart = null,
-  showStartButton = false
+  onViewSummary = null,
+  showStartButton = false,
+  isCompleted = false
 }) => {
   const getScheduledDaysArray = () => {
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -94,21 +96,39 @@ const WorkoutCard = ({
         />
       </TouchableOpacity>
 
-      {/* Start Button - For Today's Workouts */}
-      {showStartButton && onStart && (
-        <TouchableOpacity
-          style={styles.startButton}
-          onPress={() => onStart(workout)}
-          activeOpacity={0.8}
-        >
-          <MaterialCommunityIcons
-            name="play"
-            size={18}
-            color="#fff"
-            style={{ marginRight: 6 }}
-          />
-          <Text style={styles.startButtonText}>Start Workout</Text>
-        </TouchableOpacity>
+      {/* Start/Summary Button - For Today's Workouts */}
+      {showStartButton && (
+        <>
+          {isCompleted && onViewSummary ? (
+            <TouchableOpacity
+              style={[styles.startButton, styles.summaryButton]}
+              onPress={() => onViewSummary(workout)}
+              activeOpacity={0.8}
+            >
+              <MaterialCommunityIcons
+                name="check-circle"
+                size={18}
+                color="#fff"
+                style={{ marginRight: 6 }}
+              />
+              <Text style={styles.startButtonText}>View Summary</Text>
+            </TouchableOpacity>
+          ) : onStart ? (
+            <TouchableOpacity
+              style={styles.startButton}
+              onPress={() => onStart(workout)}
+              activeOpacity={0.8}
+            >
+              <MaterialCommunityIcons
+                name="play"
+                size={18}
+                color="#fff"
+                style={{ marginRight: 6 }}
+              />
+              <Text style={styles.startButtonText}>Start Workout</Text>
+            </TouchableOpacity>
+          ) : null}
+        </>
       )}
     </View>
   );
@@ -250,6 +270,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#fff',
     letterSpacing: 0.3,
+  },
+  summaryButton: {
+    backgroundColor: '#4CAF50',
+    shadowColor: '#4CAF50',
   },
 });
 
