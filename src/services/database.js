@@ -1491,9 +1491,9 @@ export const getWorkoutSummary = async (workoutLogId) => {
   try {
     // Get workout info
     const workoutLog = await db.getFirstAsync(
-      `SELECT wl.*, p.name as planName
+      `SELECT wl.*, w.name as planName
        FROM workout_logs wl
-       JOIN plans p ON wl.planId = p.id
+       JOIN workouts w ON wl.workoutId = w.id
        WHERE wl.id = ?`,
       [workoutLogId]
     );

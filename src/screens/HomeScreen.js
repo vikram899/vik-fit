@@ -120,6 +120,7 @@ export default function HomeScreen({ navigation }) {
           setTargetWeight(recentWeightData[0].targetWeight);
         }
       } catch (error) {
+        console.error('Failed to load workout summary:', error);
       }
     };
 
@@ -179,6 +180,7 @@ export default function HomeScreen({ navigation }) {
             }
           }
         } catch (error) {
+          console.error('Failed to load workout summary on focus:', error);
         }
       };
 
