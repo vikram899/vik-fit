@@ -635,20 +635,15 @@ const styles = StyleSheet.create({
     color: '#999',
   },
   todaySection: {
-    paddingHorizontal: 16,
     paddingVertical: 12,
     marginBottom: 16,
-    backgroundColor: '#fff9f0',
-    borderRadius: 10,
-    marginHorizontal: 16,
-    borderWidth: 1,
-    borderColor: '#ffe0cc',
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
     gap: 8,
+    paddingHorizontal: 16,
   },
   sectionTitle: {
     fontSize: 16,
@@ -671,6 +666,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 32,
+    paddingHorizontal: 16,
     gap: 12,
   },
   noWorkoutAssignedText: {
