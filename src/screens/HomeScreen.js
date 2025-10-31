@@ -102,6 +102,13 @@ export default function HomeScreen({ navigation }) {
           }
         }
 
+        // Sort: incomplete workouts first, completed ones at the end
+        combinedWorkouts.sort((a, b) => {
+          const aCompleted = workoutLogsMap[a.id]?.status === 'completed' ? 1 : 0;
+          const bCompleted = workoutLogsMap[b.id]?.status === 'completed' ? 1 : 0;
+          return aCompleted - bCompleted;
+        });
+
         setTodayWorkouts(combinedWorkouts || []);
         setTodayWorkoutLogs(workoutLogsMap);
 
@@ -147,22 +154,59 @@ export default function HomeScreen({ navigation }) {
             setMacroGoalsState(goals);
           }
 
-          // Reload today's workouts
+          // Reload today's workouts - combine scheduled + ad-hoc
           const todayDayOfWeek = new Date().getDay();
-          const workouts = await getWorkoutsForDay(todayDayOfWeek);
-          if (isMounted) setTodayWorkouts(workouts || []);
+          const scheduledWorkouts = await getWorkoutsForDay(todayDayOfWeek);
+          const allWorkouts = await getAllWorkouts();
 
-          // Reload today's workout logs to check completion status
+          const combinedWorkouts = [];
+          const addedIds = new Set();
           const workoutLogsMap = {};
-          if (workouts) {
-            for (const workout of workouts) {
-              const log = await getTodayWorkoutLogForWorkout(workout.id);
-              if (log) {
-                workoutLogsMap[workout.id] = log;
+
+          // First, add scheduled workouts
+          if (scheduledWorkouts) {
+            for (const workout of scheduledWorkouts) {
+              combinedWorkouts.push(workout);
+              addedIds.add(workout.id);
+            }
+          }
+
+          // Then, add ad-hoc workouts (those with logs but not scheduled)
+          for (const workout of allWorkouts) {
+            const log = await getTodayWorkoutLogForWorkout(workout.id);
+            if (log) {
+              workoutLogsMap[workout.id] = log;
+              // Only add if not already added (not scheduled)
+              if (!addedIds.has(workout.id)) {
+                combinedWorkouts.push(workout);
+                addedIds.add(workout.id);
               }
             }
           }
-          if (isMounted) setTodayWorkoutLogs(workoutLogsMap);
+
+          // Also load logs for scheduled workouts
+          if (scheduledWorkouts) {
+            for (const workout of scheduledWorkouts) {
+              if (!workoutLogsMap[workout.id]) {
+                const log = await getTodayWorkoutLogForWorkout(workout.id);
+                if (log) {
+                  workoutLogsMap[workout.id] = log;
+                }
+              }
+            }
+          }
+
+          // Sort: incomplete workouts first, completed ones at the end
+          combinedWorkouts.sort((a, b) => {
+            const aCompleted = workoutLogsMap[a.id]?.status === 'completed' ? 1 : 0;
+            const bCompleted = workoutLogsMap[b.id]?.status === 'completed' ? 1 : 0;
+            return aCompleted - bCompleted;
+          });
+
+          if (isMounted) {
+            setTodayWorkouts(combinedWorkouts || []);
+            setTodayWorkoutLogs(workoutLogsMap);
+          }
 
           // Reload weight data (last 60 days for 2-month view)
           const allWeightEntries = await getAllWeightEntries();
