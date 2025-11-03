@@ -5,7 +5,7 @@ export const COLORS = {
 
   // Background
   background: "#FFFFFF", // White
-  gray: "T#F5F5F5", // Light Gray for cards
+  gray: "#F5F5F5", // Light Gray for cards
 
   // Text
   textPrimary: "#000000",
@@ -19,4 +19,10 @@ export const COLORS = {
   lightGray: "#E8E8E8",
   white: "#FFFFFF",
   black: "#000000",
+
+  // Macro colors
+  calories: "#007AFF", // Blue
+  protein: "#FF9800", // Orange
+  carbs: "#4CAF50", // Green
+  fats: "#FF6B6B", // Red
 };

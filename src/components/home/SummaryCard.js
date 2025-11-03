@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import MacroItem from "./MacroItem";
 import { appStyles } from "../../styles/app.styles";
+import { COLORS } from "../../constants/colors";
 
 export default function SummaryCard({
   dailyTotals,
@@ -35,45 +36,45 @@ export default function SummaryCard({
       <View style={appStyles.summaryContent}>
         <MacroItem
           icon="fire"
-          iconColor="#007AFF"
+          iconColor={COLORS.calories}
           label="Calories"
           value={Math.round(dailyTotals.totalCalories)}
           goal={Math.round(macroGoals.calorieGoal)}
           progress={(dailyTotals.totalCalories / macroGoals.calorieGoal) * 100}
-          progressColor="#007AFF"
+          progressColor={COLORS.calories}
         />
 
         <MacroItem
           icon="flash"
-          iconColor="#FF9800"
+          iconColor={COLORS.protein}
           label="Protein"
           value={Math.round(dailyTotals.totalProtein)}
           goal={Math.round(macroGoals.proteinGoal)}
           unit="g"
           progress={(dailyTotals.totalProtein / macroGoals.proteinGoal) * 100}
-          progressColor="#FF9800"
+          progressColor={COLORS.protein}
         />
 
         <MacroItem
           icon="bread-slice"
-          iconColor="#4CAF50"
+          iconColor={COLORS.carbs}
           label="Carbs"
           value={Math.round(dailyTotals.totalCarbs)}
           goal={Math.round(macroGoals.carbsGoal)}
           unit="g"
           progress={(dailyTotals.totalCarbs / macroGoals.carbsGoal) * 100}
-          progressColor="#4CAF50"
+          progressColor={COLORS.carbs}
         />
 
         <MacroItem
           icon="water"
-          iconColor="#FF6B6B"
+          iconColor={COLORS.fats}
           label="Fats"
           value={Math.round(dailyTotals.totalFats)}
           goal={Math.round(macroGoals.fatsGoal)}
           unit="g"
           progress={(dailyTotals.totalFats / macroGoals.fatsGoal) * 100}
-          progressColor="#FF6B6B"
+          progressColor={COLORS.fats}
         />
       </View>
     </View>
@@ -95,7 +96,7 @@ const styles = {
   editButton: {
     paddingVertical: 6,
     paddingHorizontal: 10,
-    backgroundColor: "#FF9800",
+    backgroundColor: COLORS.protein,
     borderRadius: 6,
     justifyContent: "center",
     alignItems: "center",
@@ -105,7 +106,7 @@ const styles = {
   logButton: {
     paddingVertical: 6,
     paddingHorizontal: 12,
-    backgroundColor: "#007AFF",
+    backgroundColor: COLORS.calories,
     borderRadius: 6,
     justifyContent: "center",
     alignItems: "center",
@@ -114,7 +115,7 @@ const styles = {
   logButtonText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#fff",
+    color: COLORS.white,
     lineHeight: 12,
   },
 };
