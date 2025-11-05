@@ -55,7 +55,7 @@ const CreateMealBottomSheet = ({
             left: 0,
             right: 0,
             height: bottomSheetHeight,
-            backgroundColor: COLORS.background,
+            backgroundColor: COLORS.mainBackground,
             borderTopLeftRadius: SPACING.borderRadius,
             borderTopRightRadius: SPACING.borderRadius,
             overflow: "hidden",

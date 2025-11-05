@@ -18,7 +18,7 @@ const CreateMealHeader = ({ title = "Add New Meal", onClose }) => {
         paddingHorizontal: SPACING.element,
         paddingVertical: SPACING.small,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.lightGray,
+        borderBottomColor: COLORS.secondaryBackground,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",

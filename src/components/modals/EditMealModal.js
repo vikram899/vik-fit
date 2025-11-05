@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Modal,
   View,
@@ -9,38 +9,41 @@ import {
   TouchableWithoutFeedback,
   Platform,
   Alert,
-} from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { updateMealLog, getMealLogsForDate, getDailyTotals } from '../../services/database';
-import { modalStyles, formStyles, buttonStyles, COLORS } from '../../styles';
-import { STRINGS } from '../../constants/strings';
-import { COLORS as SHARED_COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
+} from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  updateMealLog,
+  getMealLogsForDate,
+  getDailyTotals,
+} from "../../services/database";
+import { modalStyles, formStyles, buttonStyles, COLORS } from "../../styles";
+import { STRINGS } from "../../constants/strings";
+import {
+  COLORS as SHARED_COLORS,
+  SPACING,
+  TYPOGRAPHY,
+} from "../../shared/constants";
 
-const EditMealModal = ({
-  visible,
-  meal,
-  onClose,
-  onMealUpdated,
-}) => {
-  const today = new Date().toISOString().split('T')[0];
-  const MEAL_TYPES = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];
+const EditMealModal = ({ visible, meal, onClose, onMealUpdated }) => {
+  const today = new Date().toISOString().split("T")[0];
+  const MEAL_TYPES = ["Breakfast", "Lunch", "Snacks", "Dinner"];
 
   const [form, setForm] = React.useState({
-    calories: '',
-    protein: '',
-    carbs: '',
-    fats: '',
-    mealType: 'Breakfast',
+    calories: "",
+    protein: "",
+    carbs: "",
+    fats: "",
+    mealType: "Breakfast",
   });
 
   React.useEffect(() => {
     if (meal) {
       setForm({
-        calories: meal.calories?.toString() || '',
-        protein: meal.protein?.toString() || '',
-        carbs: meal.carbs?.toString() || '',
-        fats: meal.fats?.toString() || '',
-        mealType: meal.mealType || 'Breakfast',
+        calories: meal.calories?.toString() || "",
+        protein: meal.protein?.toString() || "",
+        carbs: meal.carbs?.toString() || "",
+        fats: meal.fats?.toString() || "",
+        mealType: meal.mealType || "Breakfast",
       });
     }
   }, [meal]);
@@ -75,7 +78,13 @@ const EditMealModal = ({
   };
 
   const handleClose = () => {
-    setForm({ calories: '', protein: '', carbs: '', fats: '', mealType: 'Breakfast' });
+    setForm({
+      calories: "",
+      protein: "",
+      carbs: "",
+      fats: "",
+      mealType: "Breakfast",
+    });
     onClose();
   };
 
@@ -90,33 +99,43 @@ const EditMealModal = ({
     >
       <KeyboardAvoidingView
         style={modalStyles.overlay}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <TouchableWithoutFeedback onPress={handleClose}>
           <View style={modalStyles.overlay}>
             <TouchableWithoutFeedback onPress={() => {}}>
               <View style={modalStyles.content}>
-                <Text style={modalStyles.title}>{STRINGS.editMealModal.title}</Text>
+                <Text style={modalStyles.title}>
+                  {STRINGS.editMealModal.title}
+                </Text>
                 <Text style={modalStyles.mealNameLabel}>{meal.name}</Text>
 
                 {/* Calories and Protein */}
                 <View style={formStyles.rowGroup}>
                   <View style={[formStyles.formGroup, { flex: 1 }]}>
-                    <Text style={formStyles.label}>{STRINGS.editMealModal.labels.calories}</Text>
+                    <Text style={formStyles.label}>
+                      {STRINGS.editMealModal.labels.calories}
+                    </Text>
                     <TextInput
                       style={formStyles.input}
                       value={form.calories}
-                      onChangeText={(value) => setForm({ ...form, calories: value })}
+                      onChangeText={(value) =>
+                        setForm({ ...form, calories: value })
+                      }
                       keyboardType="decimal-pad"
                     />
                   </View>
 
                   <View style={[formStyles.formGroup, { flex: 1 }]}>
-                    <Text style={formStyles.label}>{STRINGS.editMealModal.labels.protein}</Text>
+                    <Text style={formStyles.label}>
+                      {STRINGS.editMealModal.labels.protein}
+                    </Text>
                     <TextInput
                       style={formStyles.input}
                       value={form.protein}
-                      onChangeText={(value) => setForm({ ...form, protein: value })}
+                      onChangeText={(value) =>
+                        setForm({ ...form, protein: value })
+                      }
                       keyboardType="decimal-pad"
                     />
                   </View>
@@ -125,21 +144,29 @@ const EditMealModal = ({
                 {/* Carbs and Fats */}
                 <View style={formStyles.rowGroup}>
                   <View style={[formStyles.formGroup, { flex: 1 }]}>
-                    <Text style={formStyles.label}>{STRINGS.editMealModal.labels.carbs}</Text>
+                    <Text style={formStyles.label}>
+                      {STRINGS.editMealModal.labels.carbs}
+                    </Text>
                     <TextInput
                       style={formStyles.input}
                       value={form.carbs}
-                      onChangeText={(value) => setForm({ ...form, carbs: value })}
+                      onChangeText={(value) =>
+                        setForm({ ...form, carbs: value })
+                      }
                       keyboardType="decimal-pad"
                     />
                   </View>
 
                   <View style={[formStyles.formGroup, { flex: 1 }]}>
-                    <Text style={formStyles.label}>{STRINGS.editMealModal.labels.fats}</Text>
+                    <Text style={formStyles.label}>
+                      {STRINGS.editMealModal.labels.fats}
+                    </Text>
                     <TextInput
                       style={formStyles.input}
                       value={form.fats}
-                      onChangeText={(value) => setForm({ ...form, fats: value })}
+                      onChangeText={(value) =>
+                        setForm({ ...form, fats: value })
+                      }
                       keyboardType="decimal-pad"
                     />
                   </View>
@@ -148,20 +175,32 @@ const EditMealModal = ({
                 {/* Meal Type Selection */}
                 <View style={formStyles.formGroup}>
                   <Text style={formStyles.label}>Meal Type</Text>
-                  <View style={{ flexDirection: 'row', gap: SPACING.small, flexWrap: 'wrap' }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      gap: SPACING.small,
+                      flexWrap: "wrap",
+                    }}
+                  >
                     {MEAL_TYPES.map((type) => (
                       <TouchableOpacity
                         key={type}
                         style={{
                           flex: 1,
-                          minWidth: '48%',
+                          minWidth: "48%",
                           paddingVertical: SPACING.small,
                           paddingHorizontal: SPACING.small,
                           borderRadius: SPACING.borderRadius,
                           borderWidth: 2,
-                          borderColor: form.mealType === type ? COLORS.primary : SHARED_COLORS.mediumGray,
-                          backgroundColor: form.mealType === type ? COLORS.primary : SHARED_COLORS.lightGray,
-                          alignItems: 'center',
+                          borderColor:
+                            form.mealType === type
+                              ? COLORS.primary
+                              : SHARED_COLORS.mediumGray,
+                          backgroundColor:
+                            form.mealType === type
+                              ? COLORS.primary
+                              : SHARED_COLORS.secondaryBackground,
+                          alignItems: "center",
                         }}
                         onPress={() => setForm({ ...form, mealType: type })}
                       >
@@ -169,7 +208,10 @@ const EditMealModal = ({
                           style={{
                             fontSize: TYPOGRAPHY.small.fontSize,
                             fontWeight: TYPOGRAPHY.weights.semibold,
-                            color: form.mealType === type ? SHARED_COLORS.white : SHARED_COLORS.textPrimary,
+                            color:
+                              form.mealType === type
+                                ? SHARED_COLORS.white
+                                : SHARED_COLORS.textPrimary,
                           }}
                         >
                           {type}
@@ -181,13 +223,35 @@ const EditMealModal = ({
 
                 {/* Buttons */}
                 <View style={buttonStyles.buttonGroup}>
-                  <TouchableOpacity style={[buttonStyles.button, buttonStyles.buttonHalf, buttonStyles.buttonPrimary]} onPress={handleSave}>
-                    <MaterialCommunityIcons name="check" size={20} color={COLORS.white} />
-                    <Text style={buttonStyles.buttonText}>{STRINGS.editMealModal.buttons.save}</Text>
+                  <TouchableOpacity
+                    style={[
+                      buttonStyles.button,
+                      buttonStyles.buttonHalf,
+                      buttonStyles.buttonPrimary,
+                    ]}
+                    onPress={handleSave}
+                  >
+                    <MaterialCommunityIcons
+                      name="check"
+                      size={20}
+                      color={COLORS.white}
+                    />
+                    <Text style={buttonStyles.buttonText}>
+                      {STRINGS.editMealModal.buttons.save}
+                    </Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity style={[buttonStyles.button, buttonStyles.buttonHalf, buttonStyles.cancelButton]} onPress={handleClose}>
-                    <Text style={buttonStyles.buttonText}>{STRINGS.editMealModal.buttons.cancel}</Text>
+                  <TouchableOpacity
+                    style={[
+                      buttonStyles.button,
+                      buttonStyles.buttonHalf,
+                      buttonStyles.cancelButton,
+                    ]}
+                    onPress={handleClose}
+                  >
+                    <Text style={buttonStyles.buttonText}>
+                      {STRINGS.editMealModal.buttons.cancel}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>

@@ -32,11 +32,7 @@ export default function MacroItem({
       {/* Content overlay */}
       <View style={styles.content}>
         <View style={styles.iconContainer}>
-          <MaterialCommunityIcons
-            name={icon}
-            size={20}
-            color={iconColor}
-          />
+          <MaterialCommunityIcons name={icon} size={20} color={iconColor} />
         </View>
         <View style={styles.textContainer}>
           <Text style={appStyles.summaryLabel}>{label}</Text>
@@ -59,7 +55,7 @@ const styles = {
     left: 0,
     top: 0,
     bottom: 0,
-    opacity: 0.2,
+    opacity: 0.6,
     zIndex: 0,
     borderRadius: 8,
   },

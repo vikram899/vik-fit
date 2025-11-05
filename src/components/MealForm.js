@@ -64,7 +64,9 @@ const MealForm = ({
                 borderColor:
                   mealType === type ? COLORS.primary : COLORS.mediumGray,
                 backgroundColor:
-                  mealType === type ? COLORS.primary : COLORS.lightGray,
+                  mealType === type
+                    ? COLORS.primary
+                    : COLORS.secondaryBackground,
                 alignItems: "center",
                 justifyContent: "center",
                 marginBottom: SPACING.xs,
@@ -108,7 +110,9 @@ const MealForm = ({
                 borderColor:
                   foodType === type ? COLORS.primary : COLORS.mediumGray,
                 backgroundColor:
-                  foodType === type ? COLORS.primary : COLORS.lightGray,
+                  foodType === type
+                    ? COLORS.primary
+                    : COLORS.secondaryBackground,
                 alignItems: "center",
                 justifyContent: "center",
                 marginBottom: SPACING.xs,
@@ -184,7 +188,13 @@ const MealForm = ({
       </View>
 
       {showLabels && (
-        <Text style={{ ...TYPOGRAPHY.small, color: COLORS.textTertiary, marginTop: SPACING.small }}>
+        <Text
+          style={{
+            ...TYPOGRAPHY.small,
+            color: COLORS.textTertiary,
+            marginTop: SPACING.small,
+          }}
+        >
           * Required fields
         </Text>
       )}

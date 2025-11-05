@@ -1,12 +1,7 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { COLORS, SPACING, TYPOGRAPHY } from "../../shared/constants";
 
 /**
  * WorkoutCard - Reusable workout card component
@@ -22,14 +17,14 @@ const WorkoutCard = ({
   onViewSummary = null,
   showStartButton = false,
   isCompleted = false,
-  showDayTags = true
+  showDayTags = true,
 }) => {
   const getScheduledDaysArray = () => {
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     if (scheduledDays.length === 0) {
       return null;
     }
-    return scheduledDays.map(d => dayNames[d]);
+    return scheduledDays.map((d) => dayNames[d]);
   };
 
   return (
@@ -85,11 +80,9 @@ const WorkoutCard = ({
           />
         </View>
         <View style={styles.exerciseInfo}>
-          <Text style={styles.exerciseCount}>
-            {exerciseCount}
-          </Text>
+          <Text style={styles.exerciseCount}>{exerciseCount}</Text>
           <Text style={styles.exerciseLabel}>
-            {exerciseCount === 1 ? 'Exercise' : 'Exercises'}
+            {exerciseCount === 1 ? "Exercise" : "Exercises"}
           </Text>
         </View>
         <MaterialCommunityIcons
@@ -153,9 +146,9 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: SPACING.medium,
   },
   cardInfo: {
@@ -168,8 +161,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   daysContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: SPACING.xs,
     marginTop: SPACING.small,
   },
@@ -191,15 +184,15 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   noDaysBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.lightBackground,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.tertiaryBackground,
     paddingVertical: SPACING.xs,
     paddingHorizontal: SPACING.small,
     borderRadius: SPACING.borderRadiusRound,
     borderWidth: 1.5,
     borderColor: COLORS.mediumGray,
-    borderStyle: 'dashed',
+    borderStyle: "dashed",
   },
   noDaysText: {
     fontSize: TYPOGRAPHY.sizes.xs,
@@ -211,8 +204,8 @@ const styles = StyleSheet.create({
     marginRight: -SPACING.small,
   },
   exerciseCountContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: SPACING.medium,
     marginBottom: SPACING.medium,
     backgroundColor: COLORS.primaryLight,
@@ -221,15 +214,15 @@ const styles = StyleSheet.create({
     borderRadius: SPACING.borderRadiusLarge,
     borderLeftWidth: 4,
     borderLeftColor: COLORS.primary,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   exerciseIconBox: {
     backgroundColor: COLORS.primary,
     width: 44,
     height: 44,
     borderRadius: SPACING.borderRadiusLarge,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
@@ -238,7 +231,7 @@ const styles = StyleSheet.create({
   },
   exerciseInfo: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   exerciseCount: {
     fontSize: TYPOGRAPHY.sizes.xl,
@@ -250,13 +243,13 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontWeight: TYPOGRAPHY.weights.semibold,
     marginTop: SPACING.xs,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   startButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: COLORS.primary,
     paddingVertical: SPACING.medium,
     paddingHorizontal: SPACING.element,

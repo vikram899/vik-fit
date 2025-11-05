@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   View,
@@ -9,11 +9,18 @@ import {
   SafeAreaView,
   Alert,
   RefreshControl,
-} from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS } from '../../styles';
-import { COLORS as SHARED_COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
-import { getWeeklyDailyBreakdown, getMondayOfWeek } from '../../services/mealStats';
+} from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { COLORS } from "../../styles";
+import {
+  COLORS as SHARED_COLORS,
+  SPACING,
+  TYPOGRAPHY,
+} from "../../shared/constants";
+import {
+  getWeeklyDailyBreakdown,
+  getMondayOfWeek,
+} from "../../services/mealStats";
 
 /**
  * MealsHistoryModal Component
@@ -24,7 +31,7 @@ const MealsHistoryModal = ({ visible, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentMonday, setCurrentSunday] = useState(
-    getMondayOfWeek(new Date().toISOString().split('T')[0])
+    getMondayOfWeek(new Date().toISOString().split("T")[0])
   );
 
   // Load weekly data
@@ -34,7 +41,7 @@ const MealsHistoryModal = ({ visible, onClose }) => {
       const breakdown = await getWeeklyDailyBreakdown(currentMonday);
       setWeeklyBreakdown(breakdown);
     } catch (error) {
-      Alert.alert('Error', 'Failed to load meal history');
+      Alert.alert("Error", "Failed to load meal history");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -50,17 +57,17 @@ const MealsHistoryModal = ({ visible, onClose }) => {
   const handlePreviousWeek = () => {
     const prevSunday = new Date(currentMonday);
     prevSunday.setDate(prevSunday.getDate() - 7);
-    setCurrentSunday(prevSunday.toISOString().split('T')[0]);
+    setCurrentSunday(prevSunday.toISOString().split("T")[0]);
   };
 
   const handleNextWeek = () => {
     const nextSunday = new Date(currentMonday);
     nextSunday.setDate(nextSunday.getDate() + 7);
-    setCurrentSunday(nextSunday.toISOString().split('T')[0]);
+    setCurrentSunday(nextSunday.toISOString().split("T")[0]);
   };
 
   const handleTodayWeek = () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     setCurrentSunday(getMondayOfWeek(today));
   };
 
@@ -75,7 +82,20 @@ const MealsHistoryModal = ({ visible, onClose }) => {
     const saturdayDate = new Date(sundayDate);
     saturdayDate.setDate(saturdayDate.getDate() + 6);
 
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     const sundayMonth = monthNames[sundayDate.getMonth()];
     const sundayDay = sundayDate.getDate();
     const saturdayMonth = monthNames[saturdayDate.getMonth()];
@@ -128,10 +148,7 @@ const MealsHistoryModal = ({ visible, onClose }) => {
             <Text style={styles.weekLabelText}>{weekLabel}</Text>
           </View>
 
-          <TouchableOpacity
-            onPress={handleNextWeek}
-            style={styles.navButton}
-          >
+          <TouchableOpacity onPress={handleNextWeek} style={styles.navButton}>
             <MaterialCommunityIcons
               name="chevron-right"
               size={24}
@@ -146,7 +163,11 @@ const MealsHistoryModal = ({ visible, onClose }) => {
             onPress={handleTodayWeek}
             style={styles.todayButton}
           >
-            <MaterialCommunityIcons name="calendar-today" size={14} color={SHARED_COLORS.white} />
+            <MaterialCommunityIcons
+              name="calendar-today"
+              size={14}
+              color={SHARED_COLORS.white}
+            />
             <Text style={styles.todayButtonText}>Today</Text>
           </TouchableOpacity>
         </View>
@@ -169,11 +190,7 @@ const MealsHistoryModal = ({ visible, onClose }) => {
             </View>
           ) : weeklyBreakdown.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <MaterialCommunityIcons
-                name="food-off"
-                size={48}
-                color="#ccc"
-              />
+              <MaterialCommunityIcons name="food-off" size={48} color="#ccc" />
               <Text style={styles.emptyText}>No meals logged this week</Text>
             </View>
           ) : (
@@ -197,7 +214,9 @@ const MealsHistoryModal = ({ visible, onClose }) => {
                       color={SHARED_COLORS.proteinIcon}
                     />
                     <Text style={styles.macroLabel}>Protein</Text>
-                    <Text style={styles.macroValue}>{Math.round(day.totalProtein)}g</Text>
+                    <Text style={styles.macroValue}>
+                      {Math.round(day.totalProtein)}g
+                    </Text>
                   </View>
 
                   <View style={styles.macroItem}>
@@ -207,7 +226,9 @@ const MealsHistoryModal = ({ visible, onClose }) => {
                       color={SHARED_COLORS.carbsIcon}
                     />
                     <Text style={styles.macroLabel}>Carbs</Text>
-                    <Text style={styles.macroValue}>{Math.round(day.totalCarbs)}g</Text>
+                    <Text style={styles.macroValue}>
+                      {Math.round(day.totalCarbs)}g
+                    </Text>
                   </View>
 
                   <View style={styles.macroItem}>
@@ -217,7 +238,9 @@ const MealsHistoryModal = ({ visible, onClose }) => {
                       color={SHARED_COLORS.fatsIcon}
                     />
                     <Text style={styles.macroLabel}>Fats</Text>
-                    <Text style={styles.macroValue}>{Math.round(day.totalFats)}g</Text>
+                    <Text style={styles.macroValue}>
+                      {Math.round(day.totalFats)}g
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -227,10 +250,7 @@ const MealsHistoryModal = ({ visible, onClose }) => {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <TouchableOpacity
-            style={styles.doneButton}
-            onPress={onClose}
-          >
+          <TouchableOpacity style={styles.doneButton} onPress={onClose}>
             <Text style={styles.doneButtonText}>Done</Text>
           </TouchableOpacity>
         </View>
@@ -245,9 +265,9 @@ const styles = StyleSheet.create({
     backgroundColor: SHARED_COLORS.white,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: SPACING.element,
     paddingVertical: SPACING.small,
     borderBottomWidth: 1,
@@ -258,16 +278,16 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
     color: SHARED_COLORS.textPrimary,
   },
   weekNavigation: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: SPACING.element,
     paddingVertical: SPACING.small,
-    backgroundColor: SHARED_COLORS.lightGray,
+    backgroundColor: SHARED_COLORS.secondaryBackground,
     borderBottomWidth: 1,
     borderBottomColor: SHARED_COLORS.mediumGray,
   },
@@ -276,11 +296,11 @@ const styles = StyleSheet.create({
   },
   weekLabelContainer: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   weekLabelText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
     color: SHARED_COLORS.textPrimary,
   },
   todayButtonContainer: {
@@ -288,9 +308,9 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.small,
   },
   todayButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: SPACING.xs,
     paddingVertical: SPACING.xs,
     paddingHorizontal: SPACING.element,
@@ -299,7 +319,7 @@ const styles = StyleSheet.create({
   },
   todayButtonText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
     color: SHARED_COLORS.white,
   },
   scrollView: {
@@ -312,8 +332,8 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: 60,
   },
   loadingText: {
@@ -322,8 +342,8 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: 80,
     gap: SPACING.small,
   },
@@ -332,21 +352,21 @@ const styles = StyleSheet.create({
     color: SHARED_COLORS.textTertiary,
   },
   dayCard: {
-    backgroundColor: SHARED_COLORS.lightGray,
+    backgroundColor: SHARED_COLORS.secondaryBackground,
     borderRadius: SPACING.borderRadiusLarge,
     padding: SPACING.small,
     borderWidth: 1,
     borderColor: SHARED_COLORS.mediumGray,
   },
   dayHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: SPACING.small,
   },
   dayName: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: "700",
     color: SHARED_COLORS.textPrimary,
   },
   dayDate: {
@@ -356,28 +376,28 @@ const styles = StyleSheet.create({
   },
   dayCalories: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.primary,
   },
   macrosContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     paddingTop: SPACING.xs,
     borderTopWidth: 1,
     borderTopColor: SHARED_COLORS.mediumGray,
   },
   macroItem: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: SPACING.xs,
   },
   macroLabel: {
     fontSize: 11,
     color: SHARED_COLORS.textTertiary,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   macroValue: {
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: "700",
     color: SHARED_COLORS.textPrimary,
   },
   footer: {
@@ -391,11 +411,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     paddingVertical: SPACING.small,
     borderRadius: SPACING.borderRadius,
-    alignItems: 'center',
+    alignItems: "center",
   },
   doneButtonText: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
     color: SHARED_COLORS.white,
   },
 });

@@ -22,8 +22,8 @@ export const useTabBarStyles = () => {
     },
     headerShown: false,
     tabBarStyle: {
-      backgroundColor: COLORS.background,
-      borderTopColor: COLORS.lightGray,
+      backgroundColor: COLORS.mainBackground,
+      borderTopColor: COLORS.secondaryBackground,
       borderTopWidth: 1,
       paddingBottom: SPACING.small + insets.bottom,
       paddingTop: SPACING.xs,

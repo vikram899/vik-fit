@@ -293,7 +293,7 @@ export default function AllMealsScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.mainBackground,
   },
   scrollView: {
     flex: 1,

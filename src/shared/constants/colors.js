@@ -15,7 +15,7 @@ export const COLORS = {
   // PRIMARY & SECONDARY COLORS
   // ============================================================================
   primary: "#007AFF", // Electric Blue - main brand color
-  secondary: "#000000", // Black - secondary brand color
+  secondary: "#ffffffff", // Black - secondary brand color
 
   // ============================================================================
   // STATUS COLORS
@@ -29,19 +29,19 @@ export const COLORS = {
   // ============================================================================
   // BACKGROUND COLORS
   // ============================================================================
-  background: "#FFFFFF", // Main background - white
-  lightBackground: "#F5F5F5", // Alternative light background
-  lightGray: "#f9f9f9", // Light gray for subtle backgrounds
-  gray: "#F5F5F5", // Standard gray background
-  mediumGray: "#e0e0e0", // Medium gray - borders and dividers
+  mainBackground: "#030303ff", // Main background - white
+  tertiaryBackground: "#3d3d3dff", // Alternative light background
+  secondaryBackground: "#202021ff", // Light gray for subtle backgrounds
+  gray: "#60e378ff", // Standard gray background
+  mediumGray: "#202021ff", // Medium gray - borders and dividers
 
   // ============================================================================
   // TEXT COLORS
   // ============================================================================
   text: "#000000", // Default text
-  textPrimary: "#000000", // Primary text - strong contrast
-  textSecondary: "#666666", // Secondary text - medium contrast
-  textTertiary: "#999999", // Tertiary text - weak contrast
+  textPrimary: "#FFFFFF", // Primary text - strong contrast
+  textSecondary: "#e04040ff", // Secondary text - medium contrast
+  textTertiary: "#d4d4d4ff", // Tertiary text - weak contrast
   darkGray: "#999999", // Alias for tertiary text
 
   // ============================================================================
@@ -61,7 +61,7 @@ export const COLORS = {
   // MACRO/NUTRITION COLORS
   // Used for nutrition tracking: calories, protein, carbs, fats
   // ============================================================================
-  calories: "#007AFF", // Blue - calorie tracking
+  calories: "#00eeffff", // Blue - calorie tracking
   protein: "#FF9800", // Orange - protein tracking
   carbs: "#4CAF50", // Green - carbohydrates tracking
   fats: "#FF6B6B", // Red - fats tracking

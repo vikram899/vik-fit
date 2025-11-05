@@ -1,17 +1,26 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { STRINGS } from '../../constants/strings';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
+import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { STRINGS } from "../../constants/strings";
+import { COLORS, SPACING, TYPOGRAPHY } from "../../shared/constants";
 
-const ExerciseCard = ({ exercise, onDelete, onEdit, showDeleteButton = true, showEditButton = false, disabled = false }) => {
+const ExerciseCard = ({
+  exercise,
+  onDelete,
+  onEdit,
+  showDeleteButton = true,
+  showEditButton = false,
+  disabled = false,
+}) => {
   return (
     <View style={styles.exerciseDetailsCard}>
       <View style={styles.exerciseCardHeader}>
         <Text style={styles.exerciseName}>{exercise.name}</Text>
         <View style={styles.headerRight}>
           {(exercise.restTime || 0) > 0 && (
-            <Text style={styles.timeDisplay}>{exercise.restTime} {STRINGS.exerciseCard.units.seconds}</Text>
+            <Text style={styles.timeDisplay}>
+              {exercise.restTime} {STRINGS.exerciseCard.units.seconds}
+            </Text>
           )}
           {showEditButton && (
             <TouchableOpacity
@@ -19,7 +28,11 @@ const ExerciseCard = ({ exercise, onDelete, onEdit, showDeleteButton = true, sho
               disabled={disabled}
               activeOpacity={0.7}
             >
-              <MaterialCommunityIcons name="pencil" size={20} color={COLORS.info} />
+              <MaterialCommunityIcons
+                name="pencil"
+                size={20}
+                color={COLORS.info}
+              />
             </TouchableOpacity>
           )}
           {showDeleteButton && (
@@ -28,23 +41,35 @@ const ExerciseCard = ({ exercise, onDelete, onEdit, showDeleteButton = true, sho
               disabled={disabled}
               activeOpacity={0.7}
             >
-              <MaterialCommunityIcons name="close-circle" size={20} color={COLORS.danger} />
+              <MaterialCommunityIcons
+                name="close-circle"
+                size={20}
+                color={COLORS.danger}
+              />
             </TouchableOpacity>
           )}
         </View>
       </View>
       <View style={styles.exerciseDetails}>
         <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>{STRINGS.exerciseCard.detailLabels.sets}</Text>
+          <Text style={styles.detailLabel}>
+            {STRINGS.exerciseCard.detailLabels.sets}
+          </Text>
           <Text style={styles.detailValue}>{exercise.sets}</Text>
         </View>
         <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>{STRINGS.exerciseCard.detailLabels.reps}</Text>
+          <Text style={styles.detailLabel}>
+            {STRINGS.exerciseCard.detailLabels.reps}
+          </Text>
           <Text style={styles.detailValue}>{exercise.reps}</Text>
         </View>
         <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>{STRINGS.exerciseCard.detailLabels.weight}</Text>
-          <Text style={styles.detailValue}>{exercise.weight || '0'} {STRINGS.exerciseCard.units.kilograms}</Text>
+          <Text style={styles.detailLabel}>
+            {STRINGS.exerciseCard.detailLabels.weight}
+          </Text>
+          <Text style={styles.detailValue}>
+            {exercise.weight || "0"} {STRINGS.exerciseCard.units.kilograms}
+          </Text>
         </View>
       </View>
     </View>
@@ -53,7 +78,7 @@ const ExerciseCard = ({ exercise, onDelete, onEdit, showDeleteButton = true, sho
 
 const styles = StyleSheet.create({
   exerciseDetailsCard: {
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: COLORS.secondaryBackground,
     borderRadius: SPACING.borderRadiusLarge,
     padding: SPACING.element,
     marginBottom: SPACING.medium,
@@ -61,9 +86,9 @@ const styles = StyleSheet.create({
     borderColor: COLORS.mediumGray,
   },
   exerciseCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: SPACING.medium,
   },
   exerciseName: {
@@ -72,12 +97,12 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
   },
   exerciseDetails: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: SPACING.element,
   },
   detailItem: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: COLORS.white,
     paddingVertical: SPACING.small,
     paddingHorizontal: SPACING.medium,
@@ -97,15 +122,15 @@ const styles = StyleSheet.create({
     color: COLORS.info,
   },
   headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: SPACING.medium,
   },
   timeDisplay: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontWeight: TYPOGRAPHY.weights.semibold,
     color: COLORS.textSecondary,
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: COLORS.secondaryBackground,
     paddingHorizontal: SPACING.small,
     paddingVertical: SPACING.xs,
     borderRadius: SPACING.borderRadiusSmall,

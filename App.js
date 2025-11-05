@@ -64,6 +64,9 @@ function HomeStackNavigator({ navigation }) {
         options={{
           headerShown: true,
           headerTitle: "VikFit",
+          headerStyle: {
+            backgroundColor: COLORS.mainBackground,
+          },
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => {
@@ -346,7 +349,12 @@ function MainTabNavigator({ onAddPress }) {
       screenOptions={({ route }) => ({
         ...screenOptions,
         tabBarIcon: ({ focused, color, size }) => (
-          <TabBarIcon route={route} focused={focused} color={color} size={size} />
+          <TabBarIcon
+            route={route}
+            focused={focused}
+            color={color}
+            size={size}
+          />
         ),
       })}
     >
@@ -377,7 +385,9 @@ function MainTabNavigator({ onAddPress }) {
         component={() => null}
         options={{
           tabBarLabel: "",
-          tabBarButton: (props) => <TabBarFAB {...props} onPress={onAddPress} />,
+          tabBarButton: (props) => (
+            <TabBarFAB {...props} onPress={onAddPress} />
+          ),
         }}
       />
       <Tab.Screen

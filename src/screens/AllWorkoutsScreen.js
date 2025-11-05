@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,23 +9,21 @@ import {
   TextInput,
   Alert,
   Animated,
-} from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { AssignDaysModal } from '../components/modals';
-import { SearchFilterSort } from '../components/meals';
-import WorkoutCard from '../components/workouts/WorkoutCardComponent';
-import { AllWorkoutsEmptyState } from '../components/workouts';
-import { COLORS, SPACING, TYPOGRAPHY } from '../shared/constants';
+} from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { AssignDaysModal } from "../components/modals";
+import { SearchFilterSort } from "../components/meals";
+import WorkoutCard from "../components/workouts/WorkoutCardComponent";
+import { AllWorkoutsEmptyState } from "../components/workouts";
+import { COLORS, SPACING, TYPOGRAPHY } from "../shared/constants";
 import {
   getAllWorkouts,
   getScheduledDaysForWorkout,
   assignWorkoutToDays,
   deleteWorkout,
-} from '../services/database';
-import {
-  getPlanExerciseCount,
-} from '../services/workoutStats';
+} from "../services/database";
+import { getPlanExerciseCount } from "../services/workoutStats";
 
 /**
  * AllWorkoutsScreen
@@ -35,8 +33,8 @@ export default function AllWorkoutsScreen({ navigation }) {
   const [workouts, setWorkouts] = useState([]);
   const [filteredWorkouts, setFilteredWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchText, setSearchText] = useState('');
-  const [sortOption, setSortOption] = useState('name');
+  const [searchText, setSearchText] = useState("");
+  const [sortOption, setSortOption] = useState("name");
   const [filterOptions, setFilterOptions] = useState({
     difficulty: false,
     duration: false,
@@ -45,7 +43,8 @@ export default function AllWorkoutsScreen({ navigation }) {
   });
   const [exerciseCounts, setExerciseCounts] = useState({});
   const [assignModalVisible, setAssignModalVisible] = useState(false);
-  const [selectedWorkoutForAssign, setSelectedWorkoutForAssign] = useState(null);
+  const [selectedWorkoutForAssign, setSelectedWorkoutForAssign] =
+    useState(null);
   const [scheduledDays, setScheduledDays] = useState({});
   const [fadeAnim] = useState(new Animated.Value(0));
 
@@ -76,7 +75,7 @@ export default function AllWorkoutsScreen({ navigation }) {
         useNativeDriver: true,
       }).start();
     } catch (error) {
-      Alert.alert('Error', 'Failed to load workouts');
+      Alert.alert("Error", "Failed to load workouts");
     } finally {
       setLoading(false);
     }
@@ -92,20 +91,20 @@ export default function AllWorkoutsScreen({ navigation }) {
     let filtered = [...workouts];
 
     if (searchText.trim()) {
-      filtered = filtered.filter(w =>
+      filtered = filtered.filter((w) =>
         w.name.toLowerCase().includes(searchText.toLowerCase())
       );
     }
 
-    if (sortOption === 'name') {
+    if (sortOption === "name") {
       filtered.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sortOption === 'assigned') {
+    } else if (sortOption === "assigned") {
       filtered.sort((a, b) => {
         const aDays = (scheduledDays[a.id] || []).length;
         const bDays = (scheduledDays[b.id] || []).length;
         return bDays - aDays;
       });
-    } else if (sortOption === 'recent') {
+    } else if (sortOption === "recent") {
       filtered.reverse();
     }
 
@@ -127,65 +126,61 @@ export default function AllWorkoutsScreen({ navigation }) {
       setAssignModalVisible(false);
       setSelectedWorkoutForAssign(null);
       loadWorkouts();
-      Alert.alert('Success', 'Workout schedule updated!');
+      Alert.alert("Success", "Workout schedule updated!");
     } catch (error) {
-      Alert.alert('Error', 'Failed to save plan schedule');
+      Alert.alert("Error", "Failed to save plan schedule");
     }
   };
 
   const handleViewExercises = (workout) => {
-    navigation.navigate('ExecuteWorkout', { workoutId: workout.id });
+    navigation.navigate("ExecuteWorkout", { workoutId: workout.id });
   };
 
   const handleDeleteWorkout = (workout) => {
     Alert.alert(
-      'Delete Workout',
+      "Delete Workout",
       `Are you sure you want to delete "${workout.name}"?`,
       [
         {
-          text: 'Cancel',
-          style: 'cancel',
+          text: "Cancel",
+          style: "cancel",
         },
         {
-          text: 'Delete',
+          text: "Delete",
           onPress: async () => {
             try {
               await deleteWorkout(workout.id);
               loadWorkouts();
             } catch (error) {
-              Alert.alert('Error', 'Failed to delete workout');
+              Alert.alert("Error", "Failed to delete workout");
             }
           },
-          style: 'destructive',
+          style: "destructive",
         },
       ]
     );
   };
 
   const handleWorkoutMenu = (workout) => {
-    Alert.alert(
-      'Workout Options',
-      workout.name,
-      [
-        {
-          text: 'Assign Days',
-          onPress: () => handleAssignDays(workout),
-        },
-        {
-          text: 'View Exercises',
-          onPress: () => handleViewExercises(workout),
-        },
-        {
-          text: 'Delete',
-          onPress: () => handleDeleteWorkout(workout),
-          style: 'destructive',
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-      ]
-    );
+    Alert.alert("Workout Options", workout.name, [
+      {
+        text: "Assign Days",
+        onPress: () => handleAssignDays(workout),
+      },
+      {
+        text: "View Exercises",
+        onPress: () => handleViewExercises(workout),
+      },
+      {
+        text: "Delete",
+        onPress: () => handleDeleteWorkout(workout),
+        style: "destructive",
+      },
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+    ]);
   };
 
   if (loading) {
@@ -234,10 +229,10 @@ export default function AllWorkoutsScreen({ navigation }) {
           {filteredWorkouts.length === 0 ? (
             <AllWorkoutsEmptyState
               hasAnyWorkouts={workouts.length > 0}
-              onCreatePress={() => navigation.navigate('CreatePlan')}
+              onCreatePress={() => navigation.navigate("CreatePlan")}
             />
           ) : (
-            filteredWorkouts.map(workout => (
+            filteredWorkouts.map((workout) => (
               <WorkoutCard
                 key={workout.id}
                 workout={workout}
@@ -254,7 +249,7 @@ export default function AllWorkoutsScreen({ navigation }) {
       {/* Assign Days Modal */}
       <AssignDaysModal
         visible={assignModalVisible}
-        planName={selectedWorkoutForAssign?.name || ''}
+        planName={selectedWorkoutForAssign?.name || ""}
         selectedDays={scheduledDays[selectedWorkoutForAssign?.id] || []}
         onSave={handleSaveDays}
         onClose={() => {
@@ -269,7 +264,7 @@ export default function AllWorkoutsScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.mainBackground,
   },
   scrollView: {
     flex: 1,
@@ -279,8 +274,8 @@ const styles = StyleSheet.create({
   },
   centerContent: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingText: {
     ...TYPOGRAPHY.body,

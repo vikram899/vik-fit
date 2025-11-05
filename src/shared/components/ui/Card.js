@@ -35,9 +35,15 @@
  * </Card>
  */
 
-import React from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../../shared/constants';
+import React from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
+import { COLORS, SPACING, TYPOGRAPHY } from "../../../shared/constants";
 
 const Card = ({
   // Content
@@ -57,7 +63,7 @@ const Card = ({
   isError = false,
 
   // Appearance
-  variant = 'default', // 'default', 'highlight', 'outline'
+  variant = "default", // 'default', 'highlight', 'outline'
 }) => {
   const handlePress = () => {
     if (!isDisabled && !isLoading && onPress) {
@@ -75,8 +81,8 @@ const Card = ({
     <TouchableOpacity
       style={[
         styles.container,
-        variant === 'highlight' && styles.containerHighlight,
-        variant === 'outline' && styles.containerOutline,
+        variant === "highlight" && styles.containerHighlight,
+        variant === "outline" && styles.containerOutline,
         isDisabled && styles.containerDisabled,
         isError && styles.containerError,
       ]}
@@ -133,14 +139,14 @@ const Card = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.secondaryBackground,
     borderRadius: SPACING.borderRadiusLarge,
     padding: SPACING.element,
     marginHorizontal: SPACING.element,
     marginVertical: SPACING.small,
     borderWidth: 1,
-    borderColor: COLORS.mediumGray,
-    shadowColor: '#000',
+    borderColor: COLORS.secondaryBackground,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -154,7 +160,7 @@ const styles = StyleSheet.create({
   },
 
   containerOutline: {
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.mainBackground,
     borderColor: COLORS.mediumGray,
   },
 
@@ -168,9 +174,9 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: SPACING.element,
   },
 
@@ -193,8 +199,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.element,
     backgroundColor: COLORS.primary,
     borderRadius: SPACING.borderRadius,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     minHeight: 28,
     marginLeft: SPACING.element,
   },
@@ -206,14 +212,14 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    width: '100%',
+    width: "100%",
   },
 
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     borderRadius: SPACING.borderRadiusLarge,
   },
 

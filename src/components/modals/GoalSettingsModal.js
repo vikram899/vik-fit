@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   View,
@@ -9,16 +9,20 @@ import {
   Switch,
   SafeAreaView,
   Alert,
-} from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS } from '../../styles';
-import { COLORS as SHARED_COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
+} from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { COLORS } from "../../styles";
+import {
+  COLORS as SHARED_COLORS,
+  SPACING,
+  TYPOGRAPHY,
+} from "../../shared/constants";
 import {
   getGoalPreferences,
   updateGoalPreference,
   getUserSetting,
   updateUserSetting,
-} from '../../services/database';
+} from "../../services/database";
 
 /**
  * GoalSettingsModal Component
@@ -27,44 +31,56 @@ import {
 const GoalSettingsModal = ({ visible, onClose, onSettingsSaved }) => {
   const [preferences, setPreferences] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [streakTrackingMetric, setStreakTrackingMetric] = useState('calories');
+  const [streakTrackingMetric, setStreakTrackingMetric] = useState("calories");
 
   const trackingMetricOptions = {
-    calories: { label: 'Calories', icon: 'fire', color: SHARED_COLORS.caloriesIcon },
-    protein: { label: 'Protein', icon: 'flash', color: SHARED_COLORS.proteinIcon },
-    carbs: { label: 'Carbs', icon: 'bread-slice', color: SHARED_COLORS.carbsIcon },
-    fats: { label: 'Fats', icon: 'water', color: SHARED_COLORS.fatsIcon },
+    calories: {
+      label: "Calories",
+      icon: "fire",
+      color: SHARED_COLORS.caloriesIcon,
+    },
+    protein: {
+      label: "Protein",
+      icon: "flash",
+      color: SHARED_COLORS.proteinIcon,
+    },
+    carbs: {
+      label: "Carbs",
+      icon: "bread-slice",
+      color: SHARED_COLORS.carbsIcon,
+    },
+    fats: { label: "Fats", icon: "water", color: SHARED_COLORS.fatsIcon },
   };
 
   const statLabels = {
     calorieTarget: {
-      label: 'Calorie Target',
-      description: 'Show days you hit calorie goal + trend',
-      icon: 'fire',
+      label: "Calorie Target",
+      description: "Show days you hit calorie goal + trend",
+      icon: "fire",
       iconColor: SHARED_COLORS.caloriesIcon,
     },
     proteinIntake: {
-      label: 'Protein Intake',
-      description: 'Show protein change vs last week',
-      icon: 'flash',
+      label: "Protein Intake",
+      description: "Show protein change vs last week",
+      icon: "flash",
       iconColor: SHARED_COLORS.proteinIcon,
     },
     carbsIntake: {
-      label: 'Carbs Intake',
-      description: 'Show carbs change vs last week',
-      icon: 'bread-slice',
+      label: "Carbs Intake",
+      description: "Show carbs change vs last week",
+      icon: "bread-slice",
       iconColor: SHARED_COLORS.carbsIcon,
     },
     fatsIntake: {
-      label: 'Fats Intake',
-      description: 'Show fats change vs last week',
-      icon: 'water',
+      label: "Fats Intake",
+      description: "Show fats change vs last week",
+      icon: "water",
       iconColor: SHARED_COLORS.fatsIcon,
     },
     mealPrepTips: {
-      label: 'Meal Prep Tips',
-      description: 'Show actionable meal prep suggestions',
-      icon: 'lightbulb-on',
+      label: "Meal Prep Tips",
+      description: "Show actionable meal prep suggestions",
+      icon: "lightbulb-on",
       iconColor: SHARED_COLORS.caloriesIcon,
     },
   };
@@ -83,12 +99,12 @@ const GoalSettingsModal = ({ visible, onClose, onSettingsSaved }) => {
       setPreferences(prefs);
 
       // Load streak tracking metric
-      const metric = await getUserSetting('streakTrackingMetric');
+      const metric = await getUserSetting("streakTrackingMetric");
       if (metric) {
         setStreakTrackingMetric(metric);
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to load settings');
+      Alert.alert("Error", "Failed to load settings");
     } finally {
       setLoading(false);
     }
@@ -101,7 +117,7 @@ const GoalSettingsModal = ({ visible, onClose, onSettingsSaved }) => {
 
       // Update local state
       setPreferences(
-        preferences.map(pref =>
+        preferences.map((pref) =>
           pref.statName === statName
             ? { ...pref, isEnabled: newValue ? 1 : 0 }
             : pref
@@ -113,21 +129,21 @@ const GoalSettingsModal = ({ visible, onClose, onSettingsSaved }) => {
         onSettingsSaved();
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to update setting');
+      Alert.alert("Error", "Failed to update setting");
     }
   };
 
   const handleChangeTrackingMetric = async (metric) => {
     try {
       setStreakTrackingMetric(metric);
-      await updateUserSetting('streakTrackingMetric', metric);
+      await updateUserSetting("streakTrackingMetric", metric);
 
       // Notify parent component
       if (onSettingsSaved) {
         onSettingsSaved();
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to update setting');
+      Alert.alert("Error", "Failed to update setting");
     }
   };
 
@@ -164,7 +180,10 @@ const GoalSettingsModal = ({ visible, onClose, onSettingsSaved }) => {
         </View>
 
         {/* Settings List */}
-        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+        >
           {/* Streak Tracking Metric Section */}
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Streak Tracking Metric</Text>
@@ -184,12 +203,13 @@ const GoalSettingsModal = ({ visible, onClose, onSettingsSaved }) => {
                   <MaterialCommunityIcons
                     name={option.icon}
                     size={18}
-                    color={streakTrackingMetric === key ? '#fff' : option.color}
+                    color={streakTrackingMetric === key ? "#fff" : option.color}
                   />
                   <Text
                     style={[
                       styles.metricOptionText,
-                      streakTrackingMetric === key && styles.metricOptionTextSelected,
+                      streakTrackingMetric === key &&
+                        styles.metricOptionTextSelected,
                     ]}
                   >
                     {option.label}
@@ -230,8 +250,15 @@ const GoalSettingsModal = ({ visible, onClose, onSettingsSaved }) => {
                     onValueChange={() =>
                       handleToggleStat(pref.statName, pref.isEnabled === 1)
                     }
-                    trackColor={{ false: SHARED_COLORS.mediumGray, true: SHARED_COLORS.success }}
-                    thumbColor={pref.isEnabled === 1 ? SHARED_COLORS.success : SHARED_COLORS.gray}
+                    trackColor={{
+                      false: SHARED_COLORS.mediumGray,
+                      true: SHARED_COLORS.success,
+                    }}
+                    thumbColor={
+                      pref.isEnabled === 1
+                        ? SHARED_COLORS.success
+                        : SHARED_COLORS.gray
+                    }
                   />
                 </View>
               );
@@ -241,10 +268,7 @@ const GoalSettingsModal = ({ visible, onClose, onSettingsSaved }) => {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <TouchableOpacity
-            style={styles.doneButton}
-            onPress={handleClose}
-          >
+          <TouchableOpacity style={styles.doneButton} onPress={handleClose}>
             <Text style={styles.doneButtonText}>Done</Text>
           </TouchableOpacity>
         </View>
@@ -259,9 +283,9 @@ const styles = StyleSheet.create({
     backgroundColor: SHARED_COLORS.white,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: SPACING.element,
     paddingVertical: SPACING.small,
     borderBottomWidth: 1,
@@ -272,18 +296,18 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
     color: SHARED_COLORS.textPrimary,
   },
   descriptionContainer: {
     paddingHorizontal: SPACING.element,
     paddingVertical: SPACING.small,
-    backgroundColor: SHARED_COLORS.lightGray,
+    backgroundColor: SHARED_COLORS.secondaryBackground,
   },
   description: {
     fontSize: 13,
     color: SHARED_COLORS.textSecondary,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   scrollView: {
     flex: 1,
@@ -294,39 +318,39 @@ const styles = StyleSheet.create({
     gap: SPACING.small,
   },
   settingItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: SPACING.element,
     paddingHorizontal: SPACING.small,
-    backgroundColor: SHARED_COLORS.lightGray,
+    backgroundColor: SHARED_COLORS.secondaryBackground,
     borderRadius: SPACING.borderRadiusLarge,
     borderWidth: 1,
     borderColor: SHARED_COLORS.mediumGray,
   },
   settingContent: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: SPACING.small,
   },
   iconSection: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   labelSection: {
     flex: 1,
   },
   settingLabel: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: "700",
     color: SHARED_COLORS.textPrimary,
     marginBottom: 4,
   },
   settingDescription: {
     fontSize: 12,
     color: SHARED_COLORS.textTertiary,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   footer: {
     paddingHorizontal: SPACING.element,
@@ -339,11 +363,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     paddingVertical: SPACING.small,
     borderRadius: SPACING.borderRadius,
-    alignItems: 'center',
+    alignItems: "center",
   },
   doneButtonText: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
     color: SHARED_COLORS.white,
   },
   sectionContainer: {
@@ -351,29 +375,29 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: "700",
     color: SHARED_COLORS.textPrimary,
     marginBottom: 6,
   },
   sectionDescription: {
     fontSize: 12,
     color: SHARED_COLORS.textTertiary,
-    fontWeight: '500',
+    fontWeight: "500",
     marginBottom: SPACING.element,
   },
   metricOptionsContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: SPACING.small,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   metricOption: {
     flex: 1,
-    flexDirection: 'column',
-    alignItems: 'center',
+    flexDirection: "column",
+    alignItems: "center",
     gap: SPACING.xs,
     paddingVertical: SPACING.small,
     paddingHorizontal: SPACING.xs,
-    backgroundColor: SHARED_COLORS.lightGray,
+    backgroundColor: SHARED_COLORS.secondaryBackground,
     borderRadius: SPACING.borderRadiusLarge,
     borderWidth: 2,
     borderColor: SHARED_COLORS.mediumGray,
@@ -384,7 +408,7 @@ const styles = StyleSheet.create({
   },
   metricOptionText: {
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: "600",
     color: SHARED_COLORS.textPrimary,
   },
   metricOptionTextSelected: {

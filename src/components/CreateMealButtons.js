@@ -20,10 +20,10 @@ const CreateMealButtons = ({ onAdd, onCancel, isLoading = false }) => {
         flexDirection: "row",
         padding: SPACING.element,
         paddingBottom: SPACING.container,
-        backgroundColor: COLORS.background,
+        backgroundColor: COLORS.mainBackground,
         gap: SPACING.small,
         borderTopWidth: 1,
-        borderTopColor: COLORS.lightGray,
+        borderTopColor: COLORS.secondaryBackground,
       }}
     >
       <TouchableOpacity

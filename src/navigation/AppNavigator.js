@@ -1,4 +1,3 @@
-
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -6,7 +5,6 @@ import { COLORS } from "../constants/colors";
 import ProfileScreen from "../screens/ProfileScreen";
 import WorkoutDayScheduleScreen from "../screens/WorkoutDayScheduleScreen";
 import ComponentsShowcaseScreen from "../screens/ComponentsShowcaseScreen";
-
 
 // Import screen components
 // import HomeScreen from '../screens/HomeScreen';
@@ -19,7 +17,6 @@ import ComponentsShowcaseScreen from "../screens/ComponentsShowcaseScreen";
 // import { WorkoutExecutionScreen } from '../screens/WorkoutExecutionScreen';
 
 // Import constants
-
 
 // Create navigators
 const Tab = createBottomTabNavigator();
@@ -39,8 +36,14 @@ function WorkoutStackNavigator() {
           cardStyle: { backgroundColor: COLORS.background },
         }}
       >
-        <WorkoutStack.Screen name="Workouts" component={WorkoutDayScheduleScreen} />
-        <WorkoutStack.Screen name="ComponentsShowcase" component={ComponentsShowcaseScreen} />
+        <WorkoutStack.Screen
+          name="Workouts"
+          component={WorkoutDayScheduleScreen}
+        />
+        <WorkoutStack.Screen
+          name="ComponentsShowcase"
+          component={ComponentsShowcaseScreen}
+        />
       </WorkoutStack.Navigator>
     );
     return nav;
@@ -74,7 +77,6 @@ export default function AppNavigator() {
               } else if (route?.name === "Profile") {
                 iconName = focused ? "account" : "account-outline";
               }
-
 
               // Return the icon component
               return (

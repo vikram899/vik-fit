@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, Dimensions, ScrollView } from "react-native";
-import { COLORS } from "../styles";
+import { COLORS } from "../shared/constants";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const VISIBLE_GRAPH_WIDTH = SCREEN_WIDTH - 32; // padding 16 on each side
@@ -246,13 +246,13 @@ const styles = StyleSheet.create({
     height: 200,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f8f8f8",
+    backgroundColor: COLORS.secondaryBackground,
     borderRadius: 12,
     marginHorizontal: 16,
   },
   emptyText: {
     fontSize: 14,
-    color: "#999",
+    color: COLORS.textTertiary,
   },
   graphContainer: {
     flexDirection: "row",
@@ -268,18 +268,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   graph: {
-    backgroundColor: "#fafafa",
+    backgroundColor: COLORS.secondaryBackground,
     position: "relative",
   },
   gridLine: {
     position: "absolute",
     height: 1,
-    backgroundColor: "#e8e8e8",
+    backgroundColor: COLORS.textTertiary,
   },
   targetLine: {
     position: "absolute",
     height: 2,
-    backgroundColor: "#FFB84D",
+    backgroundColor: COLORS.success,
     borderStyle: "dashed",
   },
   line: {
@@ -294,21 +294,21 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     backgroundColor: COLORS.primary,
-    borderWidth: 2,
-    borderColor: "#fff",
+    borderWidth: 1,
+    borderColor: COLORS.secondary,
   },
   yLabel: {
     position: "absolute",
     left: 8,
     fontSize: 11,
-    color: "#999",
+    color: COLORS.textTertiary,
     width: 25,
   },
   xLabel: {
     position: "absolute",
     bottom: 5,
     fontSize: 11,
-    color: "#999",
+    color: COLORS.textTertiary,
     width: 40,
   },
   legend: {
@@ -329,11 +329,11 @@ const styles = StyleSheet.create({
   },
   legendLabel: {
     fontSize: 12,
-    color: "#666",
+    color: COLORS.secondaryBackground,
   },
   statsContainer: {
     flexDirection: "row",
-    backgroundColor: "#f8f8f8",
+    backgroundColor: COLORS.secondary,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 12,
@@ -344,18 +344,18 @@ const styles = StyleSheet.create({
   },
   statDivider: {
     width: 1,
-    backgroundColor: "#e0e0e0",
+    backgroundColor: COLORS.secondaryBackground,
     marginHorizontal: 8,
   },
   statLabel: {
     fontSize: 12,
-    color: "#999",
+    color: COLORS.secondaryBackground,
     marginBottom: 4,
   },
   statValue: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#333",
+    color: COLORS.secondaryBackground,
   },
 });
 

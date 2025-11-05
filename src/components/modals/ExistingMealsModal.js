@@ -20,15 +20,20 @@ import {
 } from "../../services/database";
 import { modalStyles, formStyles, buttonStyles, COLORS } from "../../styles";
 import { STRINGS } from "../../constants/strings";
-import { COLORS as SHARED_COLORS, SPACING, TYPOGRAPHY } from "../../shared/constants";
+import {
+  COLORS as SHARED_COLORS,
+  SPACING,
+  TYPOGRAPHY,
+} from "../../shared/constants";
 import MealCard from "../MealCard";
 
 const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
   const today = new Date().toISOString().split("T")[0];
-  const MEAL_TYPES = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];
+  const MEAL_TYPES = ["Breakfast", "Lunch", "Snacks", "Dinner"];
   const [localMeals, setLocalMeals] = React.useState(meals);
   const [addedMealIds, setAddedMealIds] = React.useState(new Set());
-  const [mealTypeSelectVisible, setMealTypeSelectVisible] = React.useState(false);
+  const [mealTypeSelectVisible, setMealTypeSelectVisible] =
+    React.useState(false);
   const [mealTypeSelectMeal, setMealTypeSelectMeal] = React.useState(null);
   const [selectedMealType, setSelectedMealType] = React.useState("Breakfast");
 
@@ -99,7 +104,9 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
               <View style={modalStyles.content}>
                 {/* Header with title */}
                 <View style={modalStyles.header}>
-                  <Text style={modalStyles.title}>{STRINGS.existingMealsModal.title}</Text>
+                  <Text style={modalStyles.title}>
+                    {STRINGS.existingMealsModal.title}
+                  </Text>
                 </View>
 
                 {/* Meals List */}
@@ -115,14 +122,19 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
                     </Text>
                   ) : (
                     localMeals.map((meal) => (
-                      <View key={meal.id} style={{ position: 'relative', marginHorizontal: 0, marginBottom: SPACING.small }}>
-                        <MealCard
-                          meal={meal}
-                        />
+                      <View
+                        key={meal.id}
+                        style={{
+                          position: "relative",
+                          marginHorizontal: 0,
+                          marginBottom: SPACING.small,
+                        }}
+                      >
+                        <MealCard meal={meal} />
                         {/* Overlay button for quick-add */}
                         <View
                           style={{
-                            position: 'absolute',
+                            position: "absolute",
                             right: SPACING.element,
                             top: SPACING.small,
                             zIndex: 10,
@@ -143,7 +155,12 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
                                 borderRadius: 50,
                                 padding: SPACING.xs,
                               }}
-                              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                              hitSlop={{
+                                top: 10,
+                                bottom: 10,
+                                left: 10,
+                                right: 10,
+                              }}
                             >
                               <MaterialCommunityIcons
                                 name="plus"
@@ -169,7 +186,9 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
                       size={20}
                       color={COLORS.white}
                     />
-                    <Text style={buttonStyles.buttonText}>{STRINGS.existingMealsModal.buttons.close}</Text>
+                    <Text style={buttonStyles.buttonText}>
+                      {STRINGS.existingMealsModal.buttons.close}
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
@@ -179,7 +198,9 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
                     ]}
                     onPress={handleClose}
                   >
-                    <Text style={buttonStyles.buttonText}>{STRINGS.existingMealsModal.buttons.cancel}</Text>
+                    <Text style={buttonStyles.buttonText}>
+                      {STRINGS.existingMealsModal.buttons.cancel}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -213,25 +234,39 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
                 <View style={modalStyles.content}>
                   <Text style={modalStyles.title}>Select Meal Type</Text>
                   {mealTypeSelectMeal && (
-                    <Text style={modalStyles.mealNameLabel}>{mealTypeSelectMeal.name}</Text>
+                    <Text style={modalStyles.mealNameLabel}>
+                      {mealTypeSelectMeal.name}
+                    </Text>
                   )}
 
                   {/* Meal Type Selection */}
                   <View style={formStyles.formGroup}>
-                    <View style={{ flexDirection: 'row', gap: SPACING.small, flexWrap: 'wrap' }}>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        gap: SPACING.small,
+                        flexWrap: "wrap",
+                      }}
+                    >
                       {MEAL_TYPES.map((type) => (
                         <TouchableOpacity
                           key={type}
                           style={{
                             flex: 1,
-                            minWidth: '48%',
+                            minWidth: "48%",
                             paddingVertical: SPACING.small,
                             paddingHorizontal: SPACING.small,
                             borderRadius: SPACING.borderRadius,
                             borderWidth: 2,
-                            borderColor: selectedMealType === type ? COLORS.primary : SHARED_COLORS.mediumGray,
-                            backgroundColor: selectedMealType === type ? COLORS.primary : SHARED_COLORS.lightGray,
-                            alignItems: 'center',
+                            borderColor:
+                              selectedMealType === type
+                                ? COLORS.primary
+                                : SHARED_COLORS.mediumGray,
+                            backgroundColor:
+                              selectedMealType === type
+                                ? COLORS.primary
+                                : SHARED_COLORS.secondaryBackground,
+                            alignItems: "center",
                           }}
                           onPress={() => setSelectedMealType(type)}
                         >
@@ -239,7 +274,10 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
                             style={{
                               fontSize: TYPOGRAPHY.small.fontSize,
                               fontWeight: TYPOGRAPHY.weights.semibold,
-                              color: selectedMealType === type ? SHARED_COLORS.white : SHARED_COLORS.textPrimary,
+                              color:
+                                selectedMealType === type
+                                  ? SHARED_COLORS.white
+                                  : SHARED_COLORS.textPrimary,
                             }}
                           >
                             {type}
@@ -252,17 +290,32 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
                   {/* Buttons */}
                   <View style={buttonStyles.buttonGroup}>
                     <TouchableOpacity
-                      style={[buttonStyles.button, buttonStyles.buttonHalf, buttonStyles.buttonPrimary]}
+                      style={[
+                        buttonStyles.button,
+                        buttonStyles.buttonHalf,
+                        buttonStyles.buttonPrimary,
+                      ]}
                       onPress={() => {
-                        handleAddMealToday(mealTypeSelectMeal, selectedMealType);
+                        handleAddMealToday(
+                          mealTypeSelectMeal,
+                          selectedMealType
+                        );
                       }}
                     >
-                      <MaterialCommunityIcons name="check" size={20} color={SHARED_COLORS.white} />
+                      <MaterialCommunityIcons
+                        name="check"
+                        size={20}
+                        color={SHARED_COLORS.white}
+                      />
                       <Text style={buttonStyles.buttonText}>Add</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                      style={[buttonStyles.button, buttonStyles.buttonHalf, buttonStyles.cancelButton]}
+                      style={[
+                        buttonStyles.button,
+                        buttonStyles.buttonHalf,
+                        buttonStyles.cancelButton,
+                      ]}
                       onPress={() => {
                         setMealTypeSelectVisible(false);
                         setMealTypeSelectMeal(null);

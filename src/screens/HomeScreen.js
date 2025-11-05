@@ -1,14 +1,12 @@
 import React from "react";
-import {
-  View,
-  ScrollView,
-} from "react-native";
+import { View, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SummaryCard, WorkoutsSection } from "../components/home";
 import { Card, LogButton } from "../shared/components";
 import WeightProgressGraph from "../components/WeightProgressGraph";
 import StepsCard from "../components/health/StepsCard";
 import { useMealData, useWorkoutData, useWeightData } from "../shared/hooks";
+import { COLORS } from "../shared/constants";
 
 /**
  * HomeScreen
@@ -28,12 +26,13 @@ export default function HomeScreen({ navigation }) {
 
   // Load all required data using custom hooks
   const { dailyTotals, macroGoals } = useMealData();
-  const { workouts: todayWorkouts, workoutLogs: todayWorkoutLogs } = useWorkoutData();
+  const { workouts: todayWorkouts, workoutLogs: todayWorkoutLogs } =
+    useWorkoutData();
   const { weightData, targetWeight } = useWeightData();
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: "#fff" }}
+      style={{ flex: 1, backgroundColor: COLORS.mainBackground }}
       contentContainerStyle={{ paddingBottom: 20 }}
       showsVerticalScrollIndicator={false}
     >
