@@ -30,11 +30,3 @@ export { TYPOGRAPHY } from './typography';
 // App-wide configuration, feature flags, and settings
 export { APP_CONFIG } from './config';
 
-// ============================================================================
-// CONVENIENCE EXPORTS
-// ============================================================================
-
-// Re-export specific values for easier access
-export { default as COLORS_DEFAULT } from './colors';
-export { default as SPACING_DEFAULT } from './spacing';
-export { default as TYPOGRAPHY_DEFAULT } from './typography';

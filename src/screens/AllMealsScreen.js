@@ -1,16 +1,14 @@
 import React, { useState, useCallback } from "react";
 import {
   View,
-  Text,
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
   Alert,
   Animated,
+  Text,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SPACING, TYPOGRAPHY } from "../shared/constants";
 import {
   getAllMeals,
@@ -18,7 +16,7 @@ import {
   toggleMealFavorite,
 } from "../services/database";
 import { EditMealDetailsModal } from "../components/modals";
-import { SearchFilterSort } from "../components/meals";
+import { SearchFilterSort, AllMealsEmptyState } from "../components/meals";
 import MealCard from "../components/MealCard";
 
 /**
@@ -207,13 +205,6 @@ export default function AllMealsScreen({ navigation, route }) {
 
   const handleFavoritePress = async (mealId, isFavorite) => {
     try {
-      console.log(
-        "Toggling favorite for meal:",
-        mealId,
-        "isFavorite:",
-        isFavorite
-      );
-
       // Update in database
       await toggleMealFavorite(mealId, isFavorite);
 
@@ -262,34 +253,10 @@ export default function AllMealsScreen({ navigation, route }) {
 
           {/* Meals List */}
           {filteredMeals.length === 0 ? (
-            <View style={styles.emptyStateContainer}>
-              <MaterialCommunityIcons
-                name="silverware-fork-knife"
-                size={64}
-                color={COLORS.textTertiary}
-              />
-              <Text style={styles.emptyStateTitle}>
-                {meals.length === 0 ? "No Meals Created" : "No Meals Found"}
-              </Text>
-              <Text style={styles.emptyStateSubtitle}>
-                {meals.length === 0
-                  ? "Create your first meal"
-                  : "Try adjusting your search"}
-              </Text>
-              {meals.length === 0 && (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate("AddNewMeal")}
-                  style={styles.emptyStateButton}
-                >
-                  <MaterialCommunityIcons
-                    name="plus"
-                    size={20}
-                    color={COLORS.white}
-                  />
-                  <Text style={styles.emptyStateButtonText}>Create Meal</Text>
-                </TouchableOpacity>
-              )}
-            </View>
+            <AllMealsEmptyState
+              hasAnyMeals={meals.length > 0}
+              onCreatePress={() => navigation.navigate("AddNewMeal")}
+            />
           ) : (
             filteredMeals.map((meal) => {
               return (
@@ -342,39 +309,6 @@ const styles = StyleSheet.create({
   loadingText: {
     ...TYPOGRAPHY.body,
     color: COLORS.textTertiary,
-  },
-  emptyStateContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: SPACING.container * 2,
-    paddingHorizontal: SPACING.element,
-  },
-  emptyStateTitle: {
-    ...TYPOGRAPHY.sectionTitle,
-    color: COLORS.textPrimary,
-    marginTop: SPACING.small,
-    marginBottom: SPACING.xs,
-  },
-  emptyStateSubtitle: {
-    ...TYPOGRAPHY.body,
-    color: COLORS.textTertiary,
-    textAlign: "center",
-    marginBottom: SPACING.container,
-  },
-  emptyStateButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: SPACING.small,
-    backgroundColor: COLORS.primary,
-    paddingVertical: SPACING.small,
-    paddingHorizontal: SPACING.container,
-    borderRadius: SPACING.borderRadius,
-  },
-  emptyStateButtonText: {
-    ...TYPOGRAPHY.small,
-    fontWeight: TYPOGRAPHY.weights.bold,
-    color: COLORS.white,
   },
   mealCardWrapper: {
     marginHorizontal: SPACING.element,

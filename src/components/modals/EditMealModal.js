@@ -11,10 +11,10 @@ import {
   Alert,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { updateMealLog, getMealLogsForDate, getDailyTotals } from '../../../services/database';
-import { modalStyles, formStyles, buttonStyles, COLORS } from '../../../styles';
-import { STRINGS } from '../../../constants/strings';
-import { COLORS as SHARED_COLORS, SPACING, TYPOGRAPHY } from '../../../shared/constants';
+import { updateMealLog, getMealLogsForDate, getDailyTotals } from '../../services/database';
+import { modalStyles, formStyles, buttonStyles, COLORS } from '../../styles';
+import { STRINGS } from '../../constants/strings';
+import { COLORS as SHARED_COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
 
 const EditMealModal = ({
   visible,

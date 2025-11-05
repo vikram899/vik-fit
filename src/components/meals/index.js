@@ -5,6 +5,7 @@ export { default as TodaysMealsList } from "./TodaysMealsList";
 // Container and state components
 export { default as EmptyState } from "./EmptyState";
 export { default as MealsListContainer } from "./MealsListContainer";
+export { default as AllMealsEmptyState } from "./AllMealsEmptyState";
 
 // Search, Filter, Sort components
 export { default as SearchBar } from "./SearchBar";

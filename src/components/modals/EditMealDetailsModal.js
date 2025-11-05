@@ -14,10 +14,10 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   updateMeal,
   getAllMeals,
-} from "../../../services/database";
-import { buttonStyles, COLORS } from "../../../styles";
-import { COLORS as SHARED_COLORS, SPACING } from "../../../shared/constants";
-import MealForm from "../meals/MealForm";
+} from "../../services/database";
+import { buttonStyles, COLORS } from "../../styles";
+import { COLORS as SHARED_COLORS, SPACING } from "../../shared/constants";
+import MealForm from "../MealForm";
 
 const screenHeight = Dimensions.get("window").height;
 const bottomSheetHeight = screenHeight * 0.9;

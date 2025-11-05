@@ -11,14 +11,14 @@ import {
   Alert,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS } from '../../../styles';
-import { COLORS as SHARED_COLORS, SPACING, TYPOGRAPHY } from '../../../shared/constants';
+import { COLORS } from '../../styles';
+import { COLORS as SHARED_COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
 import {
   getGoalPreferences,
   updateGoalPreference,
   getUserSetting,
   updateUserSetting,
-} from '../../../services/database';
+} from '../../services/database';
 
 /**
  * GoalSettingsModal Component
