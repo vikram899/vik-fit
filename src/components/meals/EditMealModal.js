@@ -14,6 +14,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { updateMealLog, getMealLogsForDate, getDailyTotals } from '../../services/database';
 import { modalStyles, formStyles, buttonStyles, COLORS } from '../../styles';
 import { STRINGS } from '../../constants/strings';
+import { COLORS as SHARED_COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
 
 const EditMealModal = ({
   visible,
@@ -147,28 +148,28 @@ const EditMealModal = ({
                 {/* Meal Type Selection */}
                 <View style={formStyles.formGroup}>
                   <Text style={formStyles.label}>Meal Type</Text>
-                  <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+                  <View style={{ flexDirection: 'row', gap: SPACING.small, flexWrap: 'wrap' }}>
                     {MEAL_TYPES.map((type) => (
                       <TouchableOpacity
                         key={type}
                         style={{
                           flex: 1,
                           minWidth: '48%',
-                          paddingVertical: 10,
-                          paddingHorizontal: 12,
-                          borderRadius: 8,
+                          paddingVertical: SPACING.small,
+                          paddingHorizontal: SPACING.small,
+                          borderRadius: SPACING.borderRadius,
                           borderWidth: 2,
-                          borderColor: form.mealType === type ? COLORS.primary : '#ddd',
-                          backgroundColor: form.mealType === type ? COLORS.primary : '#f5f5f5',
+                          borderColor: form.mealType === type ? COLORS.primary : SHARED_COLORS.mediumGray,
+                          backgroundColor: form.mealType === type ? COLORS.primary : SHARED_COLORS.lightGray,
                           alignItems: 'center',
                         }}
                         onPress={() => setForm({ ...form, mealType: type })}
                       >
                         <Text
                           style={{
-                            fontSize: 12,
-                            fontWeight: '600',
-                            color: form.mealType === type ? '#fff' : '#333',
+                            fontSize: TYPOGRAPHY.small.fontSize,
+                            fontWeight: TYPOGRAPHY.weights.semibold,
+                            color: form.mealType === type ? SHARED_COLORS.white : SHARED_COLORS.textPrimary,
                           }}
                         >
                           {type}

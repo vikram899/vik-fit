@@ -1,7 +1,7 @@
 import React from "react";
 import { TouchableOpacity, Alert, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { COLORS } from "../../styles";
+import { COLORS, SPACING } from "../../shared/constants";
 
 /**
  * FilterButton Component
@@ -78,7 +78,7 @@ export default function FilterButton({
       <MaterialCommunityIcons
         name="filter"
         size={18}
-        color={hasActiveFilters ? "#fff" : COLORS.primary}
+        color={hasActiveFilters ? COLORS.white : COLORS.primary}
       />
     </TouchableOpacity>
   );
@@ -86,12 +86,12 @@ export default function FilterButton({
 
 const styles = StyleSheet.create({
   controlButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
+    paddingVertical: SPACING.small,
+    paddingHorizontal: SPACING.small,
+    backgroundColor: COLORS.gray,
+    borderRadius: SPACING.borderRadius,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor: COLORS.mediumGray,
     alignItems: "center",
     justifyContent: "center",
   },

@@ -65,6 +65,59 @@ export const COLORS = {
   protein: "#FF9800", // Orange - protein tracking
   carbs: "#4CAF50", // Green - carbohydrates tracking
   fats: "#FF6B6B", // Red - fats tracking
+
+  // ============================================================================
+  // MEAL TYPE COLORS (for meal category indicators)
+  // ============================================================================
+  // VEG meal type
+  vegIcon: "#4CAF50", // Green icon for veg meals
+  vegBackground: "#E8F5E9", // Light green background for veg badge
+  vegBorder: "#81C784", // Green border for veg indicator
+
+  // NON-VEG meal type
+  nonVegIcon: "#D32F2F", // Red icon for non-veg meals
+  nonVegBackground: "#FFEBEE", // Light red background for non-veg badge
+  nonVegBorder: "#EF5350", // Red border for non-veg indicator
+
+  // EGG meal type
+  eggIcon: "#FF9800", // Orange icon for egg meals
+  eggBackground: "#FFF3E0", // Light orange background for egg badge
+  eggBorder: "#FFB74D", // Orange border for egg indicator
+
+  // VEGAN meal type
+  veganIcon: "#7CB342", // Light green icon for vegan meals
+  veganBackground: "#F1F8E9", // Very light green background for vegan badge
+  veganBorder: "#9CCC65", // Light green border for vegan indicator
+
+  // ============================================================================
+  // MEAL CATEGORY COLORS (for meal type badges like Breakfast, Lunch, etc.)
+  // ============================================================================
+  breakfast: "#FF9800", // Orange - breakfast meals
+  lunch: "#2196F3", // Blue - lunch meals
+  snacks: "#FF5722", // Deep orange - snack meals
+  dinner: "#7C4DFF", // Purple - dinner meals
+
+  // ============================================================================
+  // MACRO BADGE COLORS (for nutrition stat badges in meal cards)
+  // ============================================================================
+  caloriesBadge: "#FFE5D9", // Light orange/peach background for calories badge
+  proteinBadge: "#D4F4DD", // Light green background for protein badge
+  carbsBadge: "#FFE4B5", // Light orange/moccasin background for carbs badge
+  fatsBadge: "#E8D4C0", // Light tan/beige background for fats badge
+
+  // ============================================================================
+  // FAVORITE/STAR COLORS
+  // ============================================================================
+  favorite: "#FFD700", // Gold - for favorited items (star icon)
+  unfavorite: "#CCCCCC", // Light gray - for unfavorited items (outline star)
+
+  // ============================================================================
+  // MACRO ICON COLORS (for nutrition icons)
+  // ============================================================================
+  caloriesIcon: "#FF6B35", // Orange-red for calories icon (fire)
+  proteinIcon: "#00A86B", // Green for protein icon (dumbbell)
+  carbsIcon: "#D2691E", // Brown for carbs icon (bread)
+  fatsIcon: "#8B4513", // Dark brown for fats icon (water droplet)
 };
 
 export default COLORS;

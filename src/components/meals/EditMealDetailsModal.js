@@ -16,6 +16,7 @@ import {
   getAllMeals,
 } from "../../services/database";
 import { buttonStyles, COLORS } from "../../styles";
+import { COLORS as SHARED_COLORS, SPACING } from "../../shared/constants";
 import MealForm from "../MealForm";
 
 const screenHeight = Dimensions.get("window").height;
@@ -190,9 +191,9 @@ const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
             left: 0,
             right: 0,
             height: bottomSheetHeight,
-            backgroundColor: "#fff",
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
+            backgroundColor: SHARED_COLORS.white,
+            borderTopLeftRadius: SPACING.borderRadiusXL,
+            borderTopRightRadius: SPACING.borderRadiusXL,
             overflow: "hidden",
             zIndex: 1000,
           },
@@ -206,15 +207,15 @@ const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
         <View
           style={{
             alignItems: "center",
-            paddingTop: 8,
-            paddingBottom: 4,
+            paddingTop: SPACING.xs,
+            paddingBottom: SPACING.xs,
           }}
         >
           <View
             style={{
               width: 40,
               height: 4,
-              backgroundColor: "#ddd",
+              backgroundColor: SHARED_COLORS.mediumGray,
               borderRadius: 2,
             }}
           />
@@ -223,16 +224,16 @@ const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
         {/* Header */}
         <View
           style={{
-            paddingHorizontal: 16,
-            paddingVertical: 12,
+            paddingHorizontal: SPACING.element,
+            paddingVertical: SPACING.small,
             borderBottomWidth: 1,
-            borderBottomColor: "#f0f0f0",
+            borderBottomColor: SHARED_COLORS.mediumGray,
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",
           }}
         >
-          <Text style={{ fontSize: 18, fontWeight: "700", color: "#333" }}>
+          <Text style={{ fontSize: 18, fontWeight: "700", color: SHARED_COLORS.textPrimary }}>
             Edit Meal
           </Text>
           <TouchableOpacity
@@ -258,12 +259,12 @@ const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
         <View
           style={{
             flexDirection: "row",
-            padding: 12,
-            paddingBottom: 24,
-            backgroundColor: "#fff",
-            gap: 12,
+            padding: SPACING.small,
+            paddingBottom: SPACING.element,
+            backgroundColor: SHARED_COLORS.white,
+            gap: SPACING.small,
             borderTopWidth: 1,
-            borderTopColor: "#f0f0f0",
+            borderTopColor: SHARED_COLORS.mediumGray,
           }}
         >
           <TouchableOpacity
@@ -274,7 +275,7 @@ const EditMealDetailsModal = ({ visible, meal, onClose, onMealUpdated }) => {
             ]}
             onPress={handleSaveMeal}
           >
-            <MaterialCommunityIcons name="check" size={20} color="#fff" />
+            <MaterialCommunityIcons name="check" size={20} color={SHARED_COLORS.white} />
             <Text style={buttonStyles.buttonText}>Save</Text>
           </TouchableOpacity>
 

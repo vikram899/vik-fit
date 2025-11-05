@@ -20,6 +20,7 @@ import {
 } from "../../services/database";
 import { modalStyles, formStyles, buttonStyles, COLORS } from "../../styles";
 import { STRINGS } from "../../constants/strings";
+import { COLORS as SHARED_COLORS, SPACING, TYPOGRAPHY } from "../../shared/constants";
 import MealCard from "../MealCard";
 
 const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
@@ -114,7 +115,7 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
                     </Text>
                   ) : (
                     localMeals.map((meal) => (
-                      <View key={meal.id} style={{ position: 'relative', marginHorizontal: 0, marginBottom: 12 }}>
+                      <View key={meal.id} style={{ position: 'relative', marginHorizontal: 0, marginBottom: SPACING.small }}>
                         <MealCard
                           meal={meal}
                         />
@@ -122,8 +123,8 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
                         <View
                           style={{
                             position: 'absolute',
-                            right: 16,
-                            top: 14,
+                            right: SPACING.element,
+                            top: SPACING.small,
                             zIndex: 10,
                           }}
                         >
@@ -140,14 +141,14 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
                               style={{
                                 backgroundColor: COLORS.success,
                                 borderRadius: 50,
-                                padding: 8,
+                                padding: SPACING.xs,
                               }}
                               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                             >
                               <MaterialCommunityIcons
                                 name="plus"
                                 size={24}
-                                color="#fff"
+                                color={SHARED_COLORS.white}
                               />
                             </TouchableOpacity>
                           )}
@@ -217,28 +218,28 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
 
                   {/* Meal Type Selection */}
                   <View style={formStyles.formGroup}>
-                    <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+                    <View style={{ flexDirection: 'row', gap: SPACING.small, flexWrap: 'wrap' }}>
                       {MEAL_TYPES.map((type) => (
                         <TouchableOpacity
                           key={type}
                           style={{
                             flex: 1,
                             minWidth: '48%',
-                            paddingVertical: 10,
-                            paddingHorizontal: 12,
-                            borderRadius: 8,
+                            paddingVertical: SPACING.small,
+                            paddingHorizontal: SPACING.small,
+                            borderRadius: SPACING.borderRadius,
                             borderWidth: 2,
-                            borderColor: selectedMealType === type ? COLORS.primary : '#ddd',
-                            backgroundColor: selectedMealType === type ? COLORS.primary : '#f5f5f5',
+                            borderColor: selectedMealType === type ? COLORS.primary : SHARED_COLORS.mediumGray,
+                            backgroundColor: selectedMealType === type ? COLORS.primary : SHARED_COLORS.lightGray,
                             alignItems: 'center',
                           }}
                           onPress={() => setSelectedMealType(type)}
                         >
                           <Text
                             style={{
-                              fontSize: 12,
-                              fontWeight: '600',
-                              color: selectedMealType === type ? '#fff' : '#333',
+                              fontSize: TYPOGRAPHY.small.fontSize,
+                              fontWeight: TYPOGRAPHY.weights.semibold,
+                              color: selectedMealType === type ? SHARED_COLORS.white : SHARED_COLORS.textPrimary,
                             }}
                           >
                             {type}
@@ -256,7 +257,7 @@ const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
                         handleAddMealToday(mealTypeSelectMeal, selectedMealType);
                       }}
                     >
-                      <MaterialCommunityIcons name="check" size={20} color={COLORS.white} />
+                      <MaterialCommunityIcons name="check" size={20} color={SHARED_COLORS.white} />
                       <Text style={buttonStyles.buttonText}>Add</Text>
                     </TouchableOpacity>
 

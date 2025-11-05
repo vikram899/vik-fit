@@ -1,6 +1,7 @@
 import React from "react";
 import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { COLORS, SPACING, TYPOGRAPHY } from "../../shared/constants";
 
 /**
  * SearchBar Component
@@ -16,7 +17,7 @@ export default function SearchBar({
       <MaterialCommunityIcons
         name="magnify"
         size={20}
-        color="#999"
+        color={COLORS.textTertiary}
         style={styles.searchIcon}
       />
       <TextInput
@@ -24,14 +25,14 @@ export default function SearchBar({
         placeholder={placeholder}
         value={searchText}
         onChangeText={onSearchChange}
-        placeholderTextColor="#999"
+        placeholderTextColor={COLORS.textTertiary}
       />
       {searchText.length > 0 && (
         <TouchableOpacity
           onPress={() => onSearchChange("")}
           style={styles.clearButton}
         >
-          <MaterialCommunityIcons name="close" size={18} color="#999" />
+          <MaterialCommunityIcons name="close" size={18} color={COLORS.textTertiary} />
         </TouchableOpacity>
       )}
     </View>
@@ -43,18 +44,18 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 12,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
+    paddingHorizontal: SPACING.small,
+    backgroundColor: COLORS.gray,
+    borderRadius: SPACING.borderRadius,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor: COLORS.mediumGray,
   },
-  searchIcon: { marginRight: 8 },
+  searchIcon: { marginRight: SPACING.xs },
   searchInput: {
     flex: 1,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: "#333",
+    paddingVertical: SPACING.small,
+    ...TYPOGRAPHY.body,
+    color: COLORS.textPrimary,
   },
-  clearButton: { padding: 4 },
+  clearButton: { padding: SPACING.xs },
 });

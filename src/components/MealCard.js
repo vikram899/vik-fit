@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { COLORS } from "../styles";
+import { COLORS, SPACING, TYPOGRAPHY } from "../shared/constants";
 
 /**
  * MealCard Component - Modern Trendy Design
@@ -15,9 +15,16 @@ import { COLORS } from "../styles";
  * - onFavoritePress: function (callback when star is tapped)
  * - isEditableStar: boolean (whether star can be toggled, default false)
  */
-export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress, showPlusIcon = false, isAdded = false, isEditableStar = false }) {
+export default function MealCard({
+  meal,
+  onPress,
+  onMenuPress,
+  onFavoritePress,
+  showPlusIcon = false,
+  isAdded = false,
+  isEditableStar = false,
+}) {
   const [isFavorite, setIsFavorite] = React.useState(meal.isFavorite || false);
-
 
   // Update local state when meal prop changes
   React.useEffect(() => {
@@ -28,31 +35,31 @@ export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress, 
     const mealTypes = {
       veg: {
         icon: "leaf",
-        color: "#4CAF50",
-        backgroundColor: "#E8F5E9",
+        color: COLORS.vegIcon,
+        backgroundColor: COLORS.vegBackground,
         label: "Veg",
-        borderColor: "#81C784",
+        borderColor: COLORS.vegBorder,
       },
       "non-veg": {
         icon: "chicken",
-        color: "#D32F2F",
-        backgroundColor: "#FFEBEE",
+        color: COLORS.nonVegIcon,
+        backgroundColor: COLORS.nonVegBackground,
         label: "Non-Veg",
-        borderColor: "#EF5350",
+        borderColor: COLORS.nonVegBorder,
       },
       egg: {
         icon: "egg",
-        color: "#FF9800",
-        backgroundColor: "#FFF3E0",
+        color: COLORS.eggIcon,
+        backgroundColor: COLORS.eggBackground,
         label: "Egg",
-        borderColor: "#FFB74D",
+        borderColor: COLORS.eggBorder,
       },
       vegan: {
         icon: "sprout",
-        color: "#7CB342",
-        backgroundColor: "#F1F8E9",
+        color: COLORS.veganIcon,
+        backgroundColor: COLORS.veganBackground,
         label: "Vegan",
-        borderColor: "#9CCC65",
+        borderColor: COLORS.veganBorder,
       },
     };
     return mealTypes[type] || mealTypes.veg;
@@ -81,7 +88,6 @@ export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress, 
     >
       {/* Top Row: Meal Name + Star + Menu */}
       <View style={styles.topRow}>
-
         <Text style={styles.mealName} numberOfLines={1}>
           {meal.name}
         </Text>
@@ -96,14 +102,14 @@ export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress, 
               <MaterialCommunityIcons
                 name={isFavorite ? "star" : "star-outline"}
                 size={22}
-                color={isFavorite ? "#FFD700" : "#ccc"}
+                color={isFavorite ? COLORS.favorite : COLORS.unfavorite}
               />
             </TouchableOpacity>
           ) : isFavorite ? (
             <MaterialCommunityIcons
               name="star"
               size={22}
-              color="#FFD700"
+              color={COLORS.favorite}
               style={styles.starButton}
             />
           ) : null}
@@ -153,7 +159,7 @@ export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress, 
       <View style={styles.bottomRow}>
         {/* Calories Badge */}
         <View style={[styles.statBadge, styles.caloriesBadge]}>
-          <MaterialCommunityIcons name="fire" size={13} color="#FF6B35" />
+          <MaterialCommunityIcons name="fire" size={13} color={COLORS.caloriesIcon} />
           <View style={styles.badgeContent}>
             <Text style={styles.statBadgeLabel}>cal</Text>
             <Text style={styles.statBadgeValue}>
@@ -164,7 +170,7 @@ export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress, 
 
         {/* Protein Badge */}
         <View style={[styles.statBadge, styles.proteinBadge]}>
-          <MaterialCommunityIcons name="dumbbell" size={13} color="#00A86B" />
+          <MaterialCommunityIcons name="dumbbell" size={13} color={COLORS.proteinIcon} />
           <View style={styles.badgeContent}>
             <Text style={styles.statBadgeLabel}>protein</Text>
             <Text style={styles.statBadgeValue}>
@@ -175,7 +181,11 @@ export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress, 
 
         {/* Carbs Badge */}
         <View style={[styles.statBadge, styles.carbsBadge]}>
-          <MaterialCommunityIcons name="bread-slice" size={13} color="#D2691E" />
+          <MaterialCommunityIcons
+            name="bread-slice"
+            size={13}
+            color={COLORS.carbsIcon}
+          />
           <View style={styles.badgeContent}>
             <Text style={styles.statBadgeLabel}>carbs</Text>
             <Text style={styles.statBadgeValue}>
@@ -186,7 +196,11 @@ export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress, 
 
         {/* Fats Badge */}
         <View style={[styles.statBadge, styles.fatsBadge]}>
-          <MaterialCommunityIcons name="water-percent" size={13} color="#8B4513" />
+          <MaterialCommunityIcons
+            name="water-percent"
+            size={13}
+            color={COLORS.fatsIcon}
+          />
           <View style={styles.badgeContent}>
             <Text style={styles.statBadgeLabel}>fats</Text>
             <Text style={styles.statBadgeValue}>
@@ -202,30 +216,29 @@ export default function MealCard({ meal, onPress, onMenuPress, onFavoritePress, 
 const styles = StyleSheet.create({
   mealCard: {
     flexDirection: "column",
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginBottom: 12,
+    backgroundColor: COLORS.white,
+    borderRadius: SPACING.borderRadiusXL,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.small,
+    marginBottom: SPACING.small,
     borderWidth: 1,
     borderColor: "#f0f0f0",
-    shadowColor: "#000",
+    shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
-    gap: 12,
+    gap: SPACING.small,
   },
   topRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 10,
+    gap: SPACING.small,
   },
   mealName: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: "#1a1a1a",
+    ...TYPOGRAPHY.sectionTitle,
+    color: COLORS.textPrimary,
     lineHeight: 22,
     letterSpacing: 0.3,
     flex: 1,
@@ -233,25 +246,25 @@ const styles = StyleSheet.create({
   topRowActions: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: SPACING.xs,
   },
   starButton: {
-    padding: 8,
+    padding: SPACING.xs,
     marginRight: -4,
   },
   bottomRow: {
     flexDirection: "row",
-    gap: 10,
+    gap: SPACING.small,
     alignItems: "center",
     justifyContent: "flex-start",
   },
   statBadge: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 10,
-    gap: 6,
+    paddingHorizontal: SPACING.small,
+    paddingVertical: SPACING.small,
+    borderRadius: SPACING.borderRadiusLarge,
+    gap: SPACING.xs,
     flex: 1,
     borderWidth: 1,
     borderColor: "rgba(0, 0, 0, 0.08)",
@@ -259,33 +272,33 @@ const styles = StyleSheet.create({
   badgeContent: {
     flexDirection: "column",
     alignItems: "flex-start",
-    gap: 2,
+    gap: SPACING.xs,
   },
   caloriesBadge: {
-    backgroundColor: "#FFE5D9",
+    backgroundColor: COLORS.caloriesBadge,
   },
   proteinBadge: {
-    backgroundColor: "#D4F4DD",
+    backgroundColor: COLORS.proteinBadge,
   },
   carbsBadge: {
-    backgroundColor: "#FFE4B5",
+    backgroundColor: COLORS.carbsBadge,
   },
   fatsBadge: {
-    backgroundColor: "#E8D4C0",
+    backgroundColor: COLORS.fatsBadge,
   },
   statBadgeLabel: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: "#666",
+    ...TYPOGRAPHY.tiny,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.textSecondary,
     textTransform: "capitalize",
   },
   statBadgeValue: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#1a1a1a",
+    ...TYPOGRAPHY.small,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.textPrimary,
   },
   menuButton: {
-    padding: 8,
+    padding: SPACING.xs,
     marginRight: -8,
   },
 });

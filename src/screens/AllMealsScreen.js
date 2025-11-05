@@ -6,17 +6,14 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
   Alert,
   Animated,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { COLORS } from "../styles";
+import { COLORS, SPACING, TYPOGRAPHY } from "../shared/constants";
 import {
   getAllMeals,
-  getDailyTotals,
-  getMacroGoals,
   deleteMeal,
   toggleMealFavorite,
 } from "../services/database";
@@ -39,7 +36,7 @@ export default function AllMealsScreen({ navigation, route }) {
     "non-veg": false,
     egg: false,
     vegan: false,
-  }); // Filter by meal type and starred
+  });
   const [fadeAnim] = useState(new Animated.Value(0));
   const [editMealModalVisible, setEditMealModalVisible] = useState(false);
   const [selectedMealForEdit, setSelectedMealForEdit] = useState(null);
@@ -268,7 +265,7 @@ export default function AllMealsScreen({ navigation, route }) {
               <MaterialCommunityIcons
                 name="silverware-fork-knife"
                 size={64}
-                color="#ccc"
+                color={COLORS.textTertiary}
               />
               <Text style={styles.emptyStateTitle}>
                 {meals.length === 0 ? "No Meals Created" : "No Meals Found"}
@@ -283,7 +280,11 @@ export default function AllMealsScreen({ navigation, route }) {
                   onPress={() => navigation.navigate("AddNewMeal")}
                   style={styles.emptyStateButton}
                 >
-                  <MaterialCommunityIcons name="plus" size={20} color="#fff" />
+                  <MaterialCommunityIcons
+                    name="plus"
+                    size={20}
+                    color={COLORS.white}
+                  />
                   <Text style={styles.emptyStateButtonText}>Create Meal</Text>
                 </TouchableOpacity>
               )}
@@ -322,45 +323,60 @@ export default function AllMealsScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
-  scrollView: { flex: 1 },
-  scrollContent: { paddingBottom: 20 },
-  centerContent: { flex: 1, justifyContent: "center", alignItems: "center" },
-  loadingText: { fontSize: 16, color: "#999" },
-
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: SPACING.container,
+  },
+  centerContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    ...TYPOGRAPHY.body,
+    color: COLORS.textTertiary,
+  },
   emptyStateContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 60,
-    paddingHorizontal: 16,
+    paddingVertical: SPACING.container * 2,
+    paddingHorizontal: SPACING.element,
   },
   emptyStateTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#333",
-    marginTop: 16,
-    marginBottom: 8,
+    ...TYPOGRAPHY.sectionTitle,
+    color: COLORS.textPrimary,
+    marginTop: SPACING.small,
+    marginBottom: SPACING.xs,
   },
   emptyStateSubtitle: {
-    fontSize: 14,
-    color: "#999",
+    ...TYPOGRAPHY.body,
+    color: COLORS.textTertiary,
     textAlign: "center",
-    marginBottom: 24,
+    marginBottom: SPACING.container,
   },
   emptyStateButton: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: SPACING.small,
     backgroundColor: COLORS.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
+    paddingVertical: SPACING.small,
+    paddingHorizontal: SPACING.container,
+    borderRadius: SPACING.borderRadius,
   },
-  emptyStateButtonText: { fontSize: 14, fontWeight: "600", color: "#fff" },
-
+  emptyStateButtonText: {
+    ...TYPOGRAPHY.small,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.white,
+  },
   mealCardWrapper: {
-    marginHorizontal: 16,
-    marginBottom: 10,
+    marginHorizontal: SPACING.element,
+    marginBottom: SPACING.small,
   },
 });

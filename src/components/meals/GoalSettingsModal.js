@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '../../styles';
+import { COLORS as SHARED_COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
 import {
   getGoalPreferences,
   updateGoalPreference,
@@ -29,10 +30,10 @@ const GoalSettingsModal = ({ visible, onClose, onSettingsSaved }) => {
   const [streakTrackingMetric, setStreakTrackingMetric] = useState('calories');
 
   const trackingMetricOptions = {
-    calories: { label: 'Calories', icon: 'fire', color: '#FF6B6B' },
-    protein: { label: 'Protein', icon: 'flash', color: '#2196F3' },
-    carbs: { label: 'Carbs', icon: 'bread-slice', color: '#FF9800' },
-    fats: { label: 'Fats', icon: 'water', color: '#9C27B0' },
+    calories: { label: 'Calories', icon: 'fire', color: SHARED_COLORS.caloriesIcon },
+    protein: { label: 'Protein', icon: 'flash', color: SHARED_COLORS.proteinIcon },
+    carbs: { label: 'Carbs', icon: 'bread-slice', color: SHARED_COLORS.carbsIcon },
+    fats: { label: 'Fats', icon: 'water', color: SHARED_COLORS.fatsIcon },
   };
 
   const statLabels = {
@@ -40,31 +41,31 @@ const GoalSettingsModal = ({ visible, onClose, onSettingsSaved }) => {
       label: 'Calorie Target',
       description: 'Show days you hit calorie goal + trend',
       icon: 'fire',
-      iconColor: '#FF6B6B',
+      iconColor: SHARED_COLORS.caloriesIcon,
     },
     proteinIntake: {
       label: 'Protein Intake',
       description: 'Show protein change vs last week',
       icon: 'flash',
-      iconColor: '#2196F3',
+      iconColor: SHARED_COLORS.proteinIcon,
     },
     carbsIntake: {
       label: 'Carbs Intake',
       description: 'Show carbs change vs last week',
       icon: 'bread-slice',
-      iconColor: '#FF9800',
+      iconColor: SHARED_COLORS.carbsIcon,
     },
     fatsIntake: {
       label: 'Fats Intake',
       description: 'Show fats change vs last week',
       icon: 'water',
-      iconColor: '#9C27B0',
+      iconColor: SHARED_COLORS.fatsIcon,
     },
     mealPrepTips: {
       label: 'Meal Prep Tips',
       description: 'Show actionable meal prep suggestions',
       icon: 'lightbulb-on',
-      iconColor: '#FF9800',
+      iconColor: SHARED_COLORS.caloriesIcon,
     },
   };
 
@@ -229,8 +230,8 @@ const GoalSettingsModal = ({ visible, onClose, onSettingsSaved }) => {
                     onValueChange={() =>
                       handleToggleStat(pref.statName, pref.isEnabled === 1)
                     }
-                    trackColor={{ false: '#e0e0e0', true: '#c8e6c9' }}
-                    thumbColor={pref.isEnabled === 1 ? '#4CAF50' : '#f0f0f0'}
+                    trackColor={{ false: SHARED_COLORS.mediumGray, true: SHARED_COLORS.success }}
+                    thumbColor={pref.isEnabled === 1 ? SHARED_COLORS.success : SHARED_COLORS.gray}
                   />
                 </View>
               );
@@ -255,59 +256,59 @@ const GoalSettingsModal = ({ visible, onClose, onSettingsSaved }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: SHARED_COLORS.white,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.small,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: SHARED_COLORS.mediumGray,
   },
   closeButton: {
-    padding: 8,
+    padding: SPACING.xs,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#000',
+    color: SHARED_COLORS.textPrimary,
   },
   descriptionContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#f5f5f5',
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.small,
+    backgroundColor: SHARED_COLORS.lightGray,
   },
   description: {
     fontSize: 13,
-    color: '#666',
+    color: SHARED_COLORS.textSecondary,
     fontWeight: '500',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 12,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.small,
+    gap: SPACING.small,
   },
   settingItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
+    paddingVertical: SPACING.element,
+    paddingHorizontal: SPACING.small,
+    backgroundColor: SHARED_COLORS.lightGray,
+    borderRadius: SPACING.borderRadiusLarge,
     borderWidth: 1,
-    borderColor: '#e8e8e8',
+    borderColor: SHARED_COLORS.mediumGray,
   },
   settingContent: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: SPACING.small,
   },
   iconSection: {
     justifyContent: 'center',
@@ -319,63 +320,63 @@ const styles = StyleSheet.create({
   settingLabel: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#333',
+    color: SHARED_COLORS.textPrimary,
     marginBottom: 4,
   },
   settingDescription: {
     fontSize: 12,
-    color: '#999',
+    color: SHARED_COLORS.textTertiary,
     fontWeight: '500',
   },
   footer: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.element,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    backgroundColor: '#fff',
+    borderTopColor: SHARED_COLORS.mediumGray,
+    backgroundColor: SHARED_COLORS.white,
   },
   doneButton: {
     backgroundColor: COLORS.primary,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: SPACING.small,
+    borderRadius: SPACING.borderRadius,
     alignItems: 'center',
   },
   doneButtonText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#fff',
+    color: SHARED_COLORS.white,
   },
   sectionContainer: {
-    marginBottom: 8,
+    marginBottom: SPACING.xs,
   },
   sectionTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#333',
+    color: SHARED_COLORS.textPrimary,
     marginBottom: 6,
   },
   sectionDescription: {
     fontSize: 12,
-    color: '#999',
+    color: SHARED_COLORS.textTertiary,
     fontWeight: '500',
-    marginBottom: 10,
+    marginBottom: SPACING.element,
   },
   metricOptionsContainer: {
     flexDirection: 'row',
-    gap: 10,
+    gap: SPACING.small,
     justifyContent: 'space-between',
   },
   metricOption: {
     flex: 1,
     flexDirection: 'column',
     alignItems: 'center',
-    gap: 6,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
+    gap: SPACING.xs,
+    paddingVertical: SPACING.small,
+    paddingHorizontal: SPACING.xs,
+    backgroundColor: SHARED_COLORS.lightGray,
+    borderRadius: SPACING.borderRadiusLarge,
     borderWidth: 2,
-    borderColor: '#e0e0e0',
+    borderColor: SHARED_COLORS.mediumGray,
   },
   metricOptionSelected: {
     backgroundColor: COLORS.primary,
@@ -384,15 +385,15 @@ const styles = StyleSheet.create({
   metricOptionText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#333',
+    color: SHARED_COLORS.textPrimary,
   },
   metricOptionTextSelected: {
-    color: '#fff',
+    color: SHARED_COLORS.white,
   },
   divider: {
     height: 1,
-    backgroundColor: '#e0e0e0',
-    marginVertical: 12,
+    backgroundColor: SHARED_COLORS.mediumGray,
+    marginVertical: SPACING.small,
   },
 });
 

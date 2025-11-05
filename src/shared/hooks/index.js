@@ -10,6 +10,7 @@
 
 // Data loading hooks
 export { useMealData } from './useMealData';
+export { useMealsData } from './useMealsData';
 export { useWorkoutData } from './useWorkoutData';
 export { useWeightData } from './useWeightData';
 

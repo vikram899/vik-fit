@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { todaysMealsStyles, COLORS } from '../../styles';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
 import { STRINGS } from '../../constants/strings';
 import MealCard from '../MealCard';
 
@@ -20,12 +20,12 @@ const TodaysMealsList = ({ meals = [], onMealPress, onMealEdit, onMealDelete }) 
   // Get meal type icon and color
   const getMealTypeIcon = (type) => {
     const icons = {
-      'Breakfast': { icon: 'coffee', color: '#FF9800' },
-      'Lunch': { icon: 'food', color: '#2196F3' },
-      'Snacks': { icon: 'popcorn', color: '#FF5722' },
-      'Dinner': { icon: 'moon-waning-crescent', color: '#7C4DFF' },
+      'Breakfast': { icon: 'coffee', color: COLORS.breakfast },
+      'Lunch': { icon: 'food', color: COLORS.lunch },
+      'Snacks': { icon: 'popcorn', color: COLORS.snacks },
+      'Dinner': { icon: 'moon-waning-crescent', color: COLORS.dinner },
     };
-    return icons[type] || { icon: 'food', color: '#999' };
+    return icons[type] || { icon: 'food', color: COLORS.textTertiary };
   };
 
   // Toggle collapse for meal type
@@ -39,18 +39,18 @@ const TodaysMealsList = ({ meals = [], onMealPress, onMealEdit, onMealDelete }) 
   return (
     <>
       {/* Title - Fixed */}
-      <View style={todaysMealsStyles.titleContainer}>
-        <Text style={todaysMealsStyles.title}>{STRINGS.todaysMealsList.title}</Text>
+      <View style={styles.titleContainer}>
+        <Text style={styles.title}>{STRINGS.todaysMealsList.title}</Text>
       </View>
 
       {/* Scrollable Meals List */}
       <ScrollView
-        style={todaysMealsStyles.scrollView}
+        style={styles.scrollView}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={todaysMealsStyles.contentContainer}
+        contentContainerStyle={styles.contentContainer}
       >
         {meals.length === 0 ? (
-          <Text style={todaysMealsStyles.emptyText}>{STRINGS.todaysMealsList.emptyState}</Text>
+          <Text style={styles.emptyText}>{STRINGS.todaysMealsList.emptyState}</Text>
         ) : (
           MEAL_TYPES.map((mealType) => {
             const mealsOfType = mealsByType[mealType];
@@ -63,11 +63,11 @@ const TodaysMealsList = ({ meals = [], onMealPress, onMealEdit, onMealDelete }) 
             const isCollapsed = collapsedMeals[mealType];
 
             return (
-              <View key={mealType} style={{ marginBottom: 16 }}>
+              <View key={mealType} style={styles.mealTypeSection}>
                 {/* Meal Type Header with Toggle */}
                 <TouchableOpacity
                   onPress={() => toggleMealTypeCollapse(mealType)}
-                  style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 8, gap: 8 }}
+                  style={styles.mealTypeHeader}
                 >
                   <MaterialCommunityIcons
                     name={isCollapsed ? 'chevron-right' : 'chevron-down'}
@@ -75,10 +75,10 @@ const TodaysMealsList = ({ meals = [], onMealPress, onMealEdit, onMealDelete }) 
                     color={COLORS.primary}
                   />
                   <MaterialCommunityIcons name={typeInfo.icon} size={20} color={typeInfo.color} />
-                  <Text style={{ fontSize: 14, fontWeight: '700', color: '#333', flex: 1 }}>
+                  <Text style={styles.mealTypeName}>
                     {mealType}
                   </Text>
-                  <Text style={{ fontSize: 12, fontWeight: '600', color: '#999' }}>
+                  <Text style={styles.mealTypeCalories}>
                     {Math.round(totalCalories)} cal
                   </Text>
                 </TouchableOpacity>
@@ -91,7 +91,7 @@ const TodaysMealsList = ({ meals = [], onMealPress, onMealEdit, onMealDelete }) 
                     mealType: meal.foodType || 'veg', // Use foodType as mealType for MealCard
                   };
                   return (
-                    <View key={meal.id} style={{ marginHorizontal: 16, marginBottom: 12 }}>
+                    <View key={meal.id} style={styles.mealCardContainer}>
                       <MealCard
                         meal={mealCardData}
                         onMenuPress={() => onMealPress?.(meal)}
@@ -107,5 +107,54 @@ const TodaysMealsList = ({ meals = [], onMealPress, onMealEdit, onMealDelete }) 
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  titleContainer: {
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.small,
+    backgroundColor: COLORS.background,
+  },
+  title: {
+    ...TYPOGRAPHY.sectionTitle,
+    color: COLORS.textPrimary,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  contentContainer: {
+    paddingHorizontal: 0,
+    paddingVertical: SPACING.small,
+  },
+  emptyText: {
+    ...TYPOGRAPHY.body,
+    color: COLORS.textTertiary,
+    textAlign: 'center',
+    paddingVertical: SPACING.container,
+  },
+  mealTypeSection: {
+    marginBottom: SPACING.element,
+  },
+  mealTypeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.element,
+    marginBottom: SPACING.xs,
+    gap: SPACING.small,
+  },
+  mealTypeName: {
+    ...TYPOGRAPHY.sectionTitle,
+    color: COLORS.textPrimary,
+    flex: 1,
+  },
+  mealTypeCalories: {
+    ...TYPOGRAPHY.small,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.textSecondary,
+  },
+  mealCardContainer: {
+    marginHorizontal: SPACING.element,
+    marginBottom: SPACING.small,
+  },
+});
 
 export default TodaysMealsList;

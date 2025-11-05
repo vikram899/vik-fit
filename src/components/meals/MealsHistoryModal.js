@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '../../styles';
+import { COLORS as SHARED_COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
 import { getWeeklyDailyBreakdown, getMondayOfWeek } from '../../services/mealStats';
 
 /**
@@ -145,7 +146,7 @@ const MealsHistoryModal = ({ visible, onClose }) => {
             onPress={handleTodayWeek}
             style={styles.todayButton}
           >
-            <MaterialCommunityIcons name="calendar-today" size={14} color="#fff" />
+            <MaterialCommunityIcons name="calendar-today" size={14} color={SHARED_COLORS.white} />
             <Text style={styles.todayButtonText}>Today</Text>
           </TouchableOpacity>
         </View>
@@ -193,7 +194,7 @@ const MealsHistoryModal = ({ visible, onClose }) => {
                     <MaterialCommunityIcons
                       name="flash"
                       size={16}
-                      color="#2196F3"
+                      color={SHARED_COLORS.proteinIcon}
                     />
                     <Text style={styles.macroLabel}>Protein</Text>
                     <Text style={styles.macroValue}>{Math.round(day.totalProtein)}g</Text>
@@ -203,7 +204,7 @@ const MealsHistoryModal = ({ visible, onClose }) => {
                     <MaterialCommunityIcons
                       name="bread-slice"
                       size={16}
-                      color="#FF9800"
+                      color={SHARED_COLORS.carbsIcon}
                     />
                     <Text style={styles.macroLabel}>Carbs</Text>
                     <Text style={styles.macroValue}>{Math.round(day.totalCarbs)}g</Text>
@@ -213,7 +214,7 @@ const MealsHistoryModal = ({ visible, onClose }) => {
                     <MaterialCommunityIcons
                       name="water"
                       size={16}
-                      color="#9C27B0"
+                      color={SHARED_COLORS.fatsIcon}
                     />
                     <Text style={styles.macroLabel}>Fats</Text>
                     <Text style={styles.macroValue}>{Math.round(day.totalFats)}g</Text>
@@ -241,37 +242,37 @@ const MealsHistoryModal = ({ visible, onClose }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: SHARED_COLORS.white,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.small,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: SHARED_COLORS.mediumGray,
   },
   closeButton: {
-    padding: 8,
+    padding: SPACING.xs,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#000',
+    color: SHARED_COLORS.textPrimary,
   },
   weekNavigation: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#f9f9f9',
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.small,
+    backgroundColor: SHARED_COLORS.lightGray,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: SHARED_COLORS.mediumGray,
   },
   navButton: {
-    padding: 8,
+    padding: SPACING.xs,
   },
   weekLabelContainer: {
     flex: 1,
@@ -280,34 +281,34 @@ const styles = StyleSheet.create({
   weekLabelText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#333',
+    color: SHARED_COLORS.textPrimary,
   },
   todayButtonContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.small,
   },
   todayButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    backgroundColor: '#2196F3',
-    borderRadius: 8,
+    gap: SPACING.xs,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.element,
+    backgroundColor: COLORS.primary,
+    borderRadius: SPACING.borderRadius,
   },
   todayButtonText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#fff',
+    color: SHARED_COLORS.white,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 12,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.small,
+    gap: SPACING.small,
   },
   loadingContainer: {
     flex: 1,
@@ -317,40 +318,40 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 14,
-    color: '#999',
+    color: SHARED_COLORS.textTertiary,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 80,
-    gap: 12,
+    gap: SPACING.small,
   },
   emptyText: {
     fontSize: 14,
-    color: '#999',
+    color: SHARED_COLORS.textTertiary,
   },
   dayCard: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-    padding: 12,
+    backgroundColor: SHARED_COLORS.lightGray,
+    borderRadius: SPACING.borderRadiusLarge,
+    padding: SPACING.small,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: SHARED_COLORS.mediumGray,
   },
   dayHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: SPACING.small,
   },
   dayName: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#333',
+    color: SHARED_COLORS.textPrimary,
   },
   dayDate: {
     fontSize: 11,
-    color: '#999',
+    color: SHARED_COLORS.textTertiary,
     marginTop: 2,
   },
   dayCalories: {
@@ -361,41 +362,41 @@ const styles = StyleSheet.create({
   macrosContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingTop: 8,
+    paddingTop: SPACING.xs,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: SHARED_COLORS.mediumGray,
   },
   macroItem: {
     alignItems: 'center',
-    gap: 4,
+    gap: SPACING.xs,
   },
   macroLabel: {
     fontSize: 11,
-    color: '#999',
+    color: SHARED_COLORS.textTertiary,
     fontWeight: '500',
   },
   macroValue: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#333',
+    color: SHARED_COLORS.textPrimary,
   },
   footer: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.element,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    backgroundColor: '#fff',
+    borderTopColor: SHARED_COLORS.mediumGray,
+    backgroundColor: SHARED_COLORS.white,
   },
   doneButton: {
     backgroundColor: COLORS.primary,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: SPACING.small,
+    borderRadius: SPACING.borderRadius,
     alignItems: 'center',
   },
   doneButtonText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#fff',
+    color: SHARED_COLORS.white,
   },
 });
 
