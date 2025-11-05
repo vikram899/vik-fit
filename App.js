@@ -35,6 +35,11 @@ import { COLORS, SPACING, TYPOGRAPHY } from "./src/shared/constants";
 
 // Components
 import { AddOptionsModal } from "./src/components/modals";
+import TabBarIcon from "./src/navigation/TabBarIcon";
+import TabBarFAB from "./src/components/TabBarFAB";
+
+// Hooks
+import { useTabBarStyles, useTabBarListeners } from "./src/shared/hooks";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -330,60 +335,25 @@ function MealsStackNavigator() {
 /**
  * MainTabNavigator
  * Bottom tab navigation with all main screens
+ * Uses modular components and hooks for tab bar configuration
  */
 function MainTabNavigator({ onAddPress }) {
+  const { screenOptions } = useTabBarStyles();
+  const { homeTabListeners } = useTabBarListeners();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-          if (route.name === "Home") {
-            iconName = focused ? "home" : "home-outline";
-          } else if (route.name === "Workouts") {
-            iconName = focused ? "dumbbell" : "dumbbell";
-          } else if (route.name === "Meals") {
-            iconName = focused
-              ? "silverware-fork-knife"
-              : "silverware-fork-knife";
-          } else if (route.name === "Progress") {
-            iconName = focused ? "chart-line" : "chart-line";
-          } else if (route.name === "Add") {
-            iconName = "plus";
-          }
-          return (
-            <MaterialCommunityIcons name={iconName} size={size} color={color} />
-          );
-        },
-        tabBarActiveTintColor: "#007AFF",
-        tabBarInactiveTintColor: "#999",
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: "500",
-        },
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: "#fff",
-          borderTopColor: "#f0f0f0",
-          borderTopWidth: 1,
-          paddingBottom: 20,
-          paddingTop: 8,
-          height: 80,
-        },
+        ...screenOptions,
+        tabBarIcon: ({ focused, color, size }) => (
+          <TabBarIcon route={route} focused={focused} color={color} size={size} />
+        ),
       })}
     >
       <Tab.Screen
         name="Home"
         component={HomeStackNavigator}
-        listeners={({ navigation }) => ({
-          tabPress: (e) => {
-            e.preventDefault();
-            // Reset the stack to show HomeScreen when Home tab is pressed
-            navigation.reset({
-              index: 0,
-              routes: [{ name: "Home" }],
-            });
-          },
-        })}
+        listeners={homeTabListeners}
         options={{
           tabBarLabel: "Home",
           tabBarItemStyle: {
@@ -407,33 +377,7 @@ function MainTabNavigator({ onAddPress }) {
         component={() => null}
         options={{
           tabBarLabel: "",
-          tabBarButton: (props) => (
-            <TouchableOpacity
-              {...props}
-              onPress={(e) => {
-                e.preventDefault?.();
-                onAddPress?.();
-              }}
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <MaterialCommunityIcons
-                name="plus-circle"
-                size={50}
-                color={COLORS.primary}
-                style={{
-                  shadowColor: "#007AFF",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 8,
-                  elevation: 8,
-                }}
-              />
-            </TouchableOpacity>
-          ),
+          tabBarButton: (props) => <TabBarFAB {...props} onPress={onAddPress} />,
         }}
       />
       <Tab.Screen

@@ -17,6 +17,10 @@ export { useWeightData } from './useWeightData';
 // Form and creation hooks
 export { useMealCreation } from './useMealCreation';
 
+// Navigation hooks
+export { useTabBarStyles } from './useTabBarStyles';
+export { useTabBarListeners } from './useTabBarListeners';
+
 // Helper functions (used by hooks)
 export {
   combineScheduledAndAdHocWorkouts,
