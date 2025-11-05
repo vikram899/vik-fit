@@ -31,7 +31,7 @@ import CreateMealScreen from "./src/screens/CreateMealScreen";
 import { initializeDatabase, seedDummyData } from "./src/services/database";
 
 // Styles
-import { COLORS } from "./src/styles";
+import { COLORS, SPACING, TYPOGRAPHY } from "./src/shared/constants";
 
 // Components
 import { AddOptionsModal } from "./src/components/modals";
@@ -49,7 +49,7 @@ function HomeStackNavigator({ navigation }) {
       screenOptions={{
         headerShown: true,
         headerBackTitleVisible: false,
-        headerTintColor: "#007AFF",
+        headerTintColor: COLORS.primary,
         animationEnabled: false,
       }}
     >
@@ -66,7 +66,7 @@ function HomeStackNavigator({ navigation }) {
                 const navState = navigation.getState();
                 navigation.navigate("Menu");
               }}
-              style={{ paddingLeft: 16 }}
+              style={{ paddingLeft: SPACING.element }}
             >
               <MaterialCommunityIcons
                 name="menu"
@@ -91,7 +91,7 @@ function HomeStackNavigator({ navigation }) {
                   navigation.navigate("HomeScreen");
                 }
               }}
-              style={{ paddingLeft: 16 }}
+              style={{ paddingLeft: SPACING.element }}
             >
               <MaterialCommunityIcons
                 name="arrow-left"
@@ -195,7 +195,7 @@ function WorkoutsStackNavigator() {
       screenOptions={{
         headerShown: true,
         headerBackTitleVisible: false,
-        headerTintColor: "#007AFF",
+        headerTintColor: COLORS.primary,
       }}
     >
       <Stack.Screen
@@ -206,7 +206,7 @@ function WorkoutsStackNavigator() {
           headerRight: () => (
             <TouchableOpacity
               onPress={() => navigation.navigate("CreatePlan")}
-              style={{ paddingRight: 16 }}
+              style={{ paddingRight: SPACING.element }}
             >
               <MaterialCommunityIcons
                 name="plus-circle"
@@ -225,7 +225,7 @@ function WorkoutsStackNavigator() {
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => navigation.goBack()}
-              style={{ paddingLeft: 16 }}
+              style={{ paddingLeft: SPACING.element }}
             >
               <MaterialCommunityIcons
                 name="arrow-left"
@@ -250,7 +250,7 @@ function ProgressStackNavigator() {
       screenOptions={{
         headerShown: true,
         headerBackTitleVisible: false,
-        headerTintColor: "#007AFF",
+        headerTintColor: COLORS.primary,
       }}
     >
       <Stack.Screen
@@ -282,7 +282,7 @@ function MealsStackNavigator() {
       screenOptions={{
         headerShown: true,
         headerBackTitleVisible: false,
-        headerTintColor: "#007AFF",
+        headerTintColor: COLORS.primary,
         animationEnabled: false,
       }}
     >
@@ -291,12 +291,16 @@ function MealsStackNavigator() {
         component={AllMealsScreen}
         options={({ navigation }) => ({
           title: "Meals",
+          headerTitleStyle: {
+            ...TYPOGRAPHY.sectionTitle,
+            color: COLORS.textPrimary,
+          },
           headerRight: () => (
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate("AddNewMeal");
               }}
-              style={{ paddingRight: 16 }}
+              style={{ paddingRight: SPACING.element }}
             >
               <MaterialCommunityIcons
                 name="plus-circle"

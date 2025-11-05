@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx babel:*)"
+      "Bash(while read f)",
+      "Bash(do if grep -q \"<Text\" \"$f\")",
+      "Bash(then echo \"$f\")"
     ],
     "deny": [],
     "ask": []

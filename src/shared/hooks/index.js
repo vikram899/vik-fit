@@ -14,6 +14,9 @@ export { useMealsData } from './useMealsData';
 export { useWorkoutData } from './useWorkoutData';
 export { useWeightData } from './useWeightData';
 
+// Form and creation hooks
+export { useMealCreation } from './useMealCreation';
+
 // Helper functions (used by hooks)
 export {
   combineScheduledAndAdHocWorkouts,

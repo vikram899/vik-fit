@@ -1,7 +1,8 @@
 import React from "react";
 import { View, Text, TextInput, ScrollView } from "react-native";
 import { TouchableOpacity } from "react-native";
-import { formStyles, COLORS } from "../styles";
+import { formStyles } from "../styles";
+import { COLORS, SPACING, TYPOGRAPHY } from "../shared/constants";
 
 const MEAL_TYPES = ["Breakfast", "Lunch", "Snacks", "Dinner"];
 const FOOD_TYPES = ["veg", "non-veg", "vegan", "egg"];
@@ -25,7 +26,7 @@ const MealForm = ({
   return (
     <ScrollView
       style={{ flex: 1 }}
-      contentContainerStyle={{ padding: 16 }}
+      contentContainerStyle={{ padding: SPACING.element }}
       showsVerticalScrollIndicator={false}
     >
       {/* Meal Name */}
@@ -34,7 +35,7 @@ const MealForm = ({
         <TextInput
           style={formStyles.input}
           placeholder="Enter meal name"
-          placeholderTextColor="#999"
+          placeholderTextColor={COLORS.textTertiary}
           value={form.name}
           onChangeText={(value) => onFormChange({ ...form, name: value })}
         />
@@ -46,7 +47,7 @@ const MealForm = ({
         <View
           style={{
             flexDirection: "row",
-            gap: 8,
+            gap: SPACING.xs,
             flexWrap: "wrap",
             justifyContent: "space-between",
           }}
@@ -56,9 +57,9 @@ const MealForm = ({
               key={type}
               style={{
                 width: "48%",
-                paddingVertical: 12,
-                paddingHorizontal: 12,
-                borderRadius: 8,
+                paddingVertical: SPACING.small,
+                paddingHorizontal: SPACING.small,
+                borderRadius: SPACING.borderRadius,
                 borderWidth: 2,
                 borderColor:
                   mealType === type ? COLORS.primary : COLORS.mediumGray,
@@ -66,14 +67,14 @@ const MealForm = ({
                   mealType === type ? COLORS.primary : COLORS.lightGray,
                 alignItems: "center",
                 justifyContent: "center",
-                marginBottom: 8,
+                marginBottom: SPACING.xs,
               }}
               onPress={() => onMealTypeChange(type)}
             >
               <Text
                 style={{
-                  fontSize: 13,
-                  fontWeight: "600",
+                  ...TYPOGRAPHY.small,
+                  fontWeight: TYPOGRAPHY.weights.semibold,
                   color: mealType === type ? COLORS.white : COLORS.textPrimary,
                 }}
               >
@@ -90,7 +91,7 @@ const MealForm = ({
         <View
           style={{
             flexDirection: "row",
-            gap: 8,
+            gap: SPACING.xs,
             flexWrap: "wrap",
             justifyContent: "space-between",
           }}
@@ -100,9 +101,9 @@ const MealForm = ({
               key={type}
               style={{
                 width: "48%",
-                paddingVertical: 12,
-                paddingHorizontal: 12,
-                borderRadius: 8,
+                paddingVertical: SPACING.small,
+                paddingHorizontal: SPACING.small,
+                borderRadius: SPACING.borderRadius,
                 borderWidth: 2,
                 borderColor:
                   foodType === type ? COLORS.primary : COLORS.mediumGray,
@@ -110,14 +111,14 @@ const MealForm = ({
                   foodType === type ? COLORS.primary : COLORS.lightGray,
                 alignItems: "center",
                 justifyContent: "center",
-                marginBottom: 8,
+                marginBottom: SPACING.xs,
               }}
               onPress={() => onFoodTypeChange(type)}
             >
               <Text
                 style={{
-                  fontSize: 13,
-                  fontWeight: "600",
+                  ...TYPOGRAPHY.small,
+                  fontWeight: TYPOGRAPHY.weights.semibold,
                   color: foodType === type ? COLORS.white : COLORS.textPrimary,
                 }}
               >
@@ -135,7 +136,7 @@ const MealForm = ({
           <TextInput
             style={formStyles.input}
             placeholder="0"
-            placeholderTextColor="#999"
+            placeholderTextColor={COLORS.textTertiary}
             value={form.calories}
             onChangeText={(value) => onFormChange({ ...form, calories: value })}
             keyboardType="decimal-pad"
@@ -147,7 +148,7 @@ const MealForm = ({
           <TextInput
             style={formStyles.input}
             placeholder="0"
-            placeholderTextColor="#999"
+            placeholderTextColor={COLORS.textTertiary}
             value={form.protein}
             onChangeText={(value) => onFormChange({ ...form, protein: value })}
             keyboardType="decimal-pad"
@@ -162,7 +163,7 @@ const MealForm = ({
           <TextInput
             style={formStyles.input}
             placeholder="0"
-            placeholderTextColor="#999"
+            placeholderTextColor={COLORS.textTertiary}
             value={form.carbs}
             onChangeText={(value) => onFormChange({ ...form, carbs: value })}
             keyboardType="decimal-pad"
@@ -174,7 +175,7 @@ const MealForm = ({
           <TextInput
             style={formStyles.input}
             placeholder="0"
-            placeholderTextColor="#999"
+            placeholderTextColor={COLORS.textTertiary}
             value={form.fats}
             onChangeText={(value) => onFormChange({ ...form, fats: value })}
             keyboardType="decimal-pad"
@@ -183,7 +184,7 @@ const MealForm = ({
       </View>
 
       {showLabels && (
-        <Text style={{ fontSize: 12, color: "#999", marginTop: 12 }}>
+        <Text style={{ ...TYPOGRAPHY.small, color: COLORS.textTertiary, marginTop: SPACING.small }}>
           * Required fields
         </Text>
       )}
