@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: SPACING.small,
     borderBottomWidth: 0,
-    borderBottomColor: COLORS.gray,
+    borderBottomColor: COLORS.workoutBackground,
   },
   title: {
     ...TYPOGRAPHY.sectionTitle,
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: COLORS.gray,
+    backgroundColor: COLORS.workoutBackground,
     justifyContent: "flex-end",
     overflow: "hidden",
     position: "absolute",

@@ -44,7 +44,7 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
         const workoutExercises = await getExercisesByWorkoutId(actualWorkoutId);
         setExercises(workoutExercises);
       } catch (error) {
-        console.error('ExecuteWorkoutScreen: Error loading exercises:', error);
+        console.error("ExecuteWorkoutScreen: Error loading exercises:", error);
       } finally {
         setLoading(false);
       }
@@ -219,7 +219,7 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
             <MaterialCommunityIcons
               name="dots-vertical"
               size={24}
-              color={COLORS.textPrimary}
+              color={COLORS.textTertiary}
             />
           </TouchableOpacity>
         )}

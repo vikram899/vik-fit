@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 1,
     borderColor: "rgba(0, 0, 0, 0.08)",
-    opacity: 0.8,
+    opacity: 0.6,
   },
   badgeContent: {
     flexDirection: "column",

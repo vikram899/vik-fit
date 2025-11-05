@@ -14,7 +14,12 @@ import { COLORS } from "../styles";
  * - onMenuPress: function (callback for menu button)
  * - onFavoritePress: function (callback when star is tapped)
  */
-export default function MealCardItem({ meal, onPress, onMenuPress, onFavoritePress }) {
+export default function MealCardItem({
+  meal,
+  onPress,
+  onMenuPress,
+  onFavoritePress,
+}) {
   const [isFavorite, setIsFavorite] = React.useState(meal.isFavorite || false);
 
   const getMealTypeInfo = (type) => {
@@ -73,7 +78,6 @@ export default function MealCardItem({ meal, onPress, onMenuPress, onFavoritePre
     >
       {/* Top Row: Meal Name + Star + Menu */}
       <View style={styles.topRow}>
-
         <Text style={styles.mealName} numberOfLines={1}>
           {meal.name}
         </Text>
@@ -101,7 +105,7 @@ export default function MealCardItem({ meal, onPress, onMenuPress, onFavoritePre
               <MaterialCommunityIcons
                 name="dots-vertical"
                 size={20}
-                color={COLORS.primary}
+                color={COLORS.textTertiary}
               />
             </TouchableOpacity>
           )}
@@ -134,7 +138,11 @@ export default function MealCardItem({ meal, onPress, onMenuPress, onFavoritePre
 
         {/* Carbs Badge */}
         <View style={[styles.statBadge, styles.carbsBadge]}>
-          <MaterialCommunityIcons name="bread-slice" size={13} color="#D2691E" />
+          <MaterialCommunityIcons
+            name="bread-slice"
+            size={13}
+            color="#D2691E"
+          />
           <View style={styles.badgeContent}>
             <Text style={styles.statBadgeLabel}>carbs</Text>
             <Text style={styles.statBadgeValue}>
@@ -145,7 +153,11 @@ export default function MealCardItem({ meal, onPress, onMenuPress, onFavoritePre
 
         {/* Fats Badge */}
         <View style={[styles.statBadge, styles.fatsBadge]}>
-          <MaterialCommunityIcons name="water-percent" size={13} color="#8B4513" />
+          <MaterialCommunityIcons
+            name="water-percent"
+            size={13}
+            color="#8B4513"
+          />
           <View style={styles.badgeContent}>
             <Text style={styles.statBadgeLabel}>fats</Text>
             <Text style={styles.statBadgeValue}>

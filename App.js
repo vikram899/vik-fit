@@ -211,6 +211,9 @@ function WorkoutsStackNavigator() {
         component={AllWorkoutsScreen}
         options={({ navigation }) => ({
           title: "Workouts",
+          headerStyle: {
+            backgroundColor: COLORS.mainBackground,
+          },
           headerRight: () => (
             <TouchableOpacity
               onPress={() => navigation.navigate("CreatePlan")}

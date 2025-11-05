@@ -302,7 +302,7 @@ export default function WorkoutDayScheduleScreen({ navigation }) {
                   <MaterialCommunityIcons
                     name="dots-vertical"
                     size={24}
-                    color={COLORS.primary}
+                    color={COLORS.textTertiary}
                   />
                 </TouchableOpacity>
               </View>

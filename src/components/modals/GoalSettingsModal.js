@@ -257,7 +257,7 @@ const GoalSettingsModal = ({ visible, onClose, onSettingsSaved }) => {
                     thumbColor={
                       pref.isEnabled === 1
                         ? SHARED_COLORS.success
-                        : SHARED_COLORS.gray
+                        : SHARED_COLORS.workoutBackground
                     }
                   />
                 </View>

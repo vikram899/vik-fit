@@ -149,7 +149,7 @@ export default function MealCard({
               <MaterialCommunityIcons
                 name="dots-vertical"
                 size={20}
-                color={COLORS.primary}
+                color={COLORS.textTertiary}
               />
             </TouchableOpacity>
           ) : null}

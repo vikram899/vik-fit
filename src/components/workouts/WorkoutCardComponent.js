@@ -61,7 +61,7 @@ const WorkoutCard = ({
           <MaterialCommunityIcons
             name="dots-vertical"
             size={24}
-            color={COLORS.primary}
+            color={COLORS.textTertiary}
           />
         </TouchableOpacity>
       </View>
@@ -88,7 +88,7 @@ const WorkoutCard = ({
         <MaterialCommunityIcons
           name="chevron-right"
           size={20}
-          color={COLORS.primary}
+          color={COLORS.workoutBackground}
         />
       </TouchableOpacity>
 
@@ -132,7 +132,7 @@ const WorkoutCard = ({
 
 const styles = StyleSheet.create({
   workoutCard: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.secondaryBackground,
     borderRadius: SPACING.borderRadiusXL,
     padding: SPACING.element,
     marginHorizontal: SPACING.element,
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.small,
   },
   dayBadge: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.workoutBackground,
     paddingVertical: SPACING.xs,
     paddingHorizontal: SPACING.small,
     borderRadius: SPACING.borderRadiusRound,
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.small,
     borderRadius: SPACING.borderRadiusRound,
     borderWidth: 1.5,
-    borderColor: COLORS.mediumGray,
+    borderColor: COLORS.tertiaryBackground,
     borderStyle: "dashed",
   },
   noDaysText: {
@@ -208,16 +208,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: SPACING.medium,
     marginBottom: SPACING.medium,
-    backgroundColor: COLORS.primaryLight,
+    backgroundColor: COLORS.tertiaryBackground,
     paddingVertical: SPACING.medium,
     paddingHorizontal: SPACING.element,
     borderRadius: SPACING.borderRadiusLarge,
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.primary,
+    borderLeftColor: COLORS.workoutBackground,
     justifyContent: "space-between",
   },
   exerciseIconBox: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.workoutBackground,
     width: 44,
     height: 44,
     borderRadius: SPACING.borderRadiusLarge,
@@ -235,12 +235,12 @@ const styles = StyleSheet.create({
   },
   exerciseCount: {
     fontSize: TYPOGRAPHY.sizes.xl,
-    color: COLORS.primary,
+    color: COLORS.textTertiary,
     fontWeight: TYPOGRAPHY.weights.bold,
   },
   exerciseLabel: {
     fontSize: TYPOGRAPHY.sizes.xs,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     fontWeight: TYPOGRAPHY.weights.semibold,
     marginTop: SPACING.xs,
     textTransform: "uppercase",
