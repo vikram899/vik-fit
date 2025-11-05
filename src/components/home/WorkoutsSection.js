@@ -1,8 +1,10 @@
 import React from "react";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import WorkoutCard from "./WorkoutCard";
 import { appStyles } from "../../styles/app.styles";
+import { COLORS, SPACING, TYPOGRAPHY } from "../../shared/constants";
+import { LogButton } from "../../shared/components/ui";
 
 export default function WorkoutsSection({
   workouts,
@@ -16,12 +18,11 @@ export default function WorkoutsSection({
     <View style={appStyles.workoutsSection}>
       <View style={styles.header}>
         <Text style={appStyles.workoutsSectionTitle}>Today's Workouts</Text>
-        <TouchableOpacity
-          style={styles.logButton}
+        <LogButton
           onPress={onLogPress}
-        >
-          <Text style={styles.logButtonText}>+ Log</Text>
-        </TouchableOpacity>
+          size="small"
+          variant="primary"
+        />
       </View>
 
       {hasWorkouts ? (
@@ -49,7 +50,7 @@ export default function WorkoutsSection({
           <MaterialCommunityIcons
             name="calendar-blank"
             size={48}
-            color="#FF9800"
+            color={COLORS.warning}
           />
           <Text style={styles.emptyStateText}>No Workouts Scheduled for Today</Text>
         </View>
@@ -63,32 +64,17 @@ const styles = {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 14,
-  },
-  logButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: "#007AFF",
-    borderRadius: 6,
-    justifyContent: "center",
-    alignItems: "center",
-    height: 28,
-  },
-  logButtonText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#fff",
-    lineHeight: 12,
+    marginBottom: SPACING.small,
   },
   emptyStateContainer: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 40,
+    paddingVertical: SPACING.container,
   },
   emptyStateText: {
-    fontSize: 14,
-    color: "#999",
-    marginTop: 12,
+    ...TYPOGRAPHY.small,
+    color: COLORS.textTertiary,
+    marginTop: SPACING.small,
     fontWeight: "500",
   },
 };

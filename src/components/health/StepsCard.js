@@ -10,6 +10,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useHealthData } from '../../services/healthKit';
 import { getUserSetting, setSetting } from '../../services/database';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
 
 const DEFAULT_STEP_GOAL = 10000;
 
@@ -124,10 +125,10 @@ const StepsCard = () => {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator size="small" color="#2196F3" />
+              <ActivityIndicator size="small" color={COLORS.primary} />
             ) : (
               <>
-                <MaterialCommunityIcons name="refresh" size={18} color="#2196F3" />
+                <MaterialCommunityIcons name="refresh" size={18} color={COLORS.primary} />
                 <Text style={styles.retryText}>Retry</Text>
               </>
             )}
@@ -150,16 +151,16 @@ const StepsCard = () => {
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator size="small" color="#2196F3" />
+            <ActivityIndicator size="small" color={COLORS.primary} />
           ) : (
-            <MaterialCommunityIcons name="refresh" size={20} color="#2196F3" />
+            <MaterialCommunityIcons name="refresh" size={20} color={COLORS.primary} />
           )}
         </TouchableOpacity>
       </View>
 
       <View style={styles.content}>
         {loadingGoal ? (
-          <ActivityIndicator size="large" color="#2196F3" style={{ marginVertical: 20 }} />
+          <ActivityIndicator size="large" color={COLORS.primary} style={{ marginVertical: 20 }} />
         ) : (
           <>
             {/* Circular Progress */}
@@ -191,7 +192,7 @@ const StepsCard = () => {
                 <Text
                   style={[
                     styles.goalValue,
-                    { color: percentageComplete >= 100 ? '#4CAF50' : '#2196F3' },
+                    { color: percentageComplete >= 100 ? COLORS.success : COLORS.primary },
                   ]}
                 >
                   {Math.round(percentageComplete)}%
@@ -202,7 +203,7 @@ const StepsCard = () => {
             {/* Status Badge */}
             {percentageComplete >= 100 ? (
               <View style={styles.completedBadge}>
-                <MaterialCommunityIcons name="check-circle" size={16} color="#4CAF50" />
+                <MaterialCommunityIcons name="check-circle" size={16} color={COLORS.success} />
                 <Text style={styles.completedText}>Goal reached!</Text>
               </View>
             ) : (
@@ -222,48 +223,46 @@ const StepsCard = () => {
 
 const styles = StyleSheet.create({
   card: {
-    marginHorizontal: 16,
-    marginBottom: 16,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    overflow: 'hidden',
+    marginHorizontal: SPACING.element,
+    marginVertical: SPACING.small,
+    backgroundColor: COLORS.lightGray,
+    borderRadius: SPACING.borderRadiusXL,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.element,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: COLORS.mediumGray,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    marginBottom: SPACING.small,
+    borderBottomWidth: 0,
+    borderBottomColor: COLORS.gray,
   },
   title: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 4,
+    ...TYPOGRAPHY.sectionTitle,
+    marginBottom: SPACING.xs,
   },
   subtitle: {
     fontSize: 12,
-    color: '#999',
+    color: COLORS.textTertiary,
     fontWeight: '500',
   },
   refreshButton: {
-    padding: 8,
+    padding: SPACING.xs,
   },
   content: {
-    padding: 16,
+    marginTop: 0,
   },
   progressContainer: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: SPACING.container,
     position: 'relative',
     height: 140,
     justifyContent: 'center',
@@ -272,14 +271,14 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: COLORS.gray,
     justifyContent: 'flex-end',
     overflow: 'hidden',
     position: 'absolute',
   },
   circleFill: {
     height: '100%',
-    backgroundColor: '#2196F3',
+    backgroundColor: COLORS.primary,
     borderRadius: 60,
   },
   stepsDisplay: {
@@ -291,20 +290,20 @@ const styles = StyleSheet.create({
   stepsCount: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#333',
+    color: COLORS.textPrimary,
   },
   stepsLabel: {
     fontSize: 12,
-    color: '#999',
-    marginTop: 4,
+    color: COLORS.textTertiary,
+    marginTop: SPACING.xs,
   },
   goalSection: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: 12,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    marginBottom: 12,
+    paddingVertical: SPACING.small,
+    backgroundColor: COLORS.lightGray,
+    borderRadius: SPACING.borderRadius,
+    marginBottom: SPACING.small,
   },
   goalInfo: {
     alignItems: 'center',
@@ -312,65 +311,65 @@ const styles = StyleSheet.create({
   },
   goalLabel: {
     fontSize: 12,
-    color: '#999',
-    marginBottom: 4,
+    color: COLORS.textTertiary,
+    marginBottom: SPACING.xs,
     fontWeight: '500',
   },
   goalValue: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#333',
+    color: COLORS.textPrimary,
   },
   completedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    backgroundColor: '#E8F5E9',
-    paddingVertical: 8,
-    borderRadius: 6,
+    gap: SPACING.xs,
+    backgroundColor: COLORS.secondaryLight,
+    paddingVertical: SPACING.xs,
+    borderRadius: SPACING.borderRadius,
   },
   completedText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#4CAF50',
+    color: COLORS.success,
   },
   incompleteBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    backgroundColor: '#FFF3E0',
-    paddingVertical: 8,
-    borderRadius: 6,
+    gap: SPACING.xs,
+    backgroundColor: '#FFF3E0',  // Light warning color - TODO: Add to centralized constants
+    paddingVertical: SPACING.xs,
+    borderRadius: SPACING.borderRadius,
   },
   incompleteText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#FF9800',
+    color: COLORS.warning,
   },
   permissionPrompt: {
     alignItems: 'center',
-    paddingVertical: 24,
-    paddingHorizontal: 16,
+    paddingVertical: SPACING.container,
+    paddingHorizontal: SPACING.element,
   },
   permissionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#333',
-    marginTop: 12,
-    marginBottom: 8,
+    color: COLORS.textPrimary,
+    marginTop: SPACING.small,
+    marginBottom: SPACING.xs,
   },
   permissionText: {
     fontSize: 13,
-    color: '#666',
+    color: COLORS.textSecondary,
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: SPACING.small,
     lineHeight: 18,
   },
   devClientNote: {
     fontSize: 11,
-    color: '#999',
+    color: COLORS.textTertiary,
     textAlign: 'center',
     marginBottom: 16,
     lineHeight: 16,
@@ -378,7 +377,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   permissionButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: COLORS.primary,
     paddingVertical: 10,
     paddingHorizontal: 24,
     borderRadius: 6,
@@ -386,45 +385,45 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   permissionButtonText: {
-    color: '#fff',
+    color: COLORS.white,
     fontSize: 14,
     fontWeight: '600',
   },
   errorContainer: {
     alignItems: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 16,
+    paddingVertical: SPACING.container,
+    paddingHorizontal: SPACING.element,
   },
   errorText: {
     fontSize: 13,
-    color: '#666',
-    marginTop: 8,
-    marginBottom: 12,
+    color: COLORS.textSecondary,
+    marginTop: SPACING.xs,
+    marginBottom: SPACING.small,
   },
   retryButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 6,
+    gap: SPACING.xs,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.element,
+    borderRadius: SPACING.borderRadius,
     borderWidth: 1,
-    borderColor: '#2196F3',
+    borderColor: COLORS.primary,
   },
   retryText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#2196F3',
+    color: COLORS.primary,
   },
   androidPlaceholder: {
     alignItems: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 16,
+    paddingVertical: SPACING.container,
+    paddingHorizontal: SPACING.element,
   },
   placeholderText: {
     fontSize: 13,
-    color: '#999',
-    marginTop: 8,
+    color: COLORS.textTertiary,
+    marginTop: SPACING.xs,
   },
 });
 

@@ -1,35 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(__NEW_LINE__ echo \"✅ SYNTAX VERIFICATION COMPLETE\")",
-      "Bash(npx expo:*)",
-      "Bash(npm start)",
-      "Bash(npm run android:*)",
-      "Bash(npx tsc:*)",
-      "Bash(node -c:*)",
-      "Read(//d/**)",
-      "Bash(npm start:*)",
-      "Bash(npm install:*)",
-      "WebFetch(domain:github.com)",
-      "WebFetch(domain:www.npmjs.com)",
-      "Bash(cd:*)",
-      "Bash(find:*)",
-      "Bash(dir:*)",
-      "Bash(findstr:*)",
-      "Bash(npm run build:*)",
-      "Bash(npm run:*)",
-      "mcp__ide__getDiagnostics",
-      "Bash(git checkout:*)",
-      "Bash(lsof:*)",
-      "Bash(xargs kill -9)",
-      "WebFetch(domain:www.notjust.dev)",
-      "WebFetch(domain:expo.dev)",
-      "Bash(eas login:*)",
-      "Bash(eas build:*)",
-      "Bash(grep:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(awk:*)"
+      "Bash(npx babel:*)"
     ],
     "deny": [],
     "ask": []

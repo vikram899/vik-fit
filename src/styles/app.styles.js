@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { COLORS } from "./index";
+import { COLORS, SPACING, TYPOGRAPHY } from "../shared/constants";
 
 export const appStyles = StyleSheet.create({
   screenContainer: {
@@ -366,14 +366,14 @@ export const appStyles = StyleSheet.create({
     marginTop: 2,
   },
   summaryCard: {
-    backgroundColor: "#fafafa",
-    marginVertical: 8,
-    marginHorizontal: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 12,
+    backgroundColor: COLORS.lightGray,
+    marginVertical: SPACING.small,
+    marginHorizontal: SPACING.element,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.element,
+    borderRadius: SPACING.borderRadiusXL,
     borderWidth: 1,
-    borderColor: "#e8e8e8",
+    borderColor: COLORS.mediumGray,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -381,21 +381,19 @@ export const appStyles = StyleSheet.create({
     elevation: 4,
   },
   summaryCardInner: {
-    backgroundColor: "#fafafa",
+    backgroundColor: COLORS.lightGray,
   },
   summaryTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#000",
+    ...TYPOGRAPHY.sectionTitle,
     marginBottom: 0,
   },
   summaryContent: {
     flexDirection: "row",
     flexWrap: "wrap",
     marginBottom: 0,
-    marginTop: 8,
+    marginTop: SPACING.small,
     justifyContent: "space-between",
-    gap: 8,
+    gap: SPACING.small,
   },
   summaryItem: {
     width: "48%",
@@ -476,14 +474,14 @@ export const appStyles = StyleSheet.create({
     color: "#666",
   },
   workoutsSection: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginVertical: 12,
-    backgroundColor: "#fafafa",
-    borderRadius: 12,
-    marginHorizontal: 16,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.element,
+    marginVertical: SPACING.small,
+    backgroundColor: COLORS.lightGray,
+    borderRadius: SPACING.borderRadiusXL,
+    marginHorizontal: SPACING.element,
     borderWidth: 1,
-    borderColor: "#e8e8e8",
+    borderColor: COLORS.mediumGray,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -491,9 +489,7 @@ export const appStyles = StyleSheet.create({
     elevation: 4,
   },
   workoutsSectionTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#000",
+    ...TYPOGRAPHY.sectionTitle,
     marginBottom: 0,
   },
   workoutsScrollView: {
