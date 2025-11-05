@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { appStyles } from "../../styles/app.styles";
+import { COLORS } from "../../shared/constants";
 
 /**
  * ExerciseFormModal
@@ -59,7 +60,7 @@ export default function ExerciseFormModal({
                   <TextInput
                     style={appStyles.input}
                     placeholder="e.g., Bench Press"
-                    placeholderTextColor="#999"
+                    placeholderTextColor={COLORS.textTertiary}
                     value={exercise.name}
                     onChangeText={(value) =>
                       onExerciseChange({ ...exercise, name: value })
@@ -74,7 +75,7 @@ export default function ExerciseFormModal({
                     <TextInput
                       style={appStyles.input}
                       placeholder="3"
-                      placeholderTextColor="#999"
+                      placeholderTextColor={COLORS.textTertiary}
                       value={exercise.sets}
                       onChangeText={(value) =>
                         onExerciseChange({ ...exercise, sets: value })
@@ -88,7 +89,7 @@ export default function ExerciseFormModal({
                     <TextInput
                       style={appStyles.input}
                       placeholder="10"
-                      placeholderTextColor="#999"
+                      placeholderTextColor={COLORS.textTertiary}
                       value={exercise.reps}
                       onChangeText={(value) =>
                         onExerciseChange({ ...exercise, reps: value })
@@ -102,7 +103,7 @@ export default function ExerciseFormModal({
                     <TextInput
                       style={appStyles.input}
                       placeholder="0"
-                      placeholderTextColor="#999"
+                      placeholderTextColor={COLORS.textTertiary}
                       value={exercise.weight}
                       onChangeText={(value) =>
                         onExerciseChange({ ...exercise, weight: value })
@@ -116,7 +117,7 @@ export default function ExerciseFormModal({
                     <TextInput
                       style={appStyles.input}
                       placeholder="0"
-                      placeholderTextColor="#999"
+                      placeholderTextColor={COLORS.textTertiary}
                       value={exercise.restTime}
                       onChangeText={(value) =>
                         onExerciseChange({ ...exercise, restTime: value })
@@ -135,7 +136,7 @@ export default function ExerciseFormModal({
                     <MaterialCommunityIcons
                       name={submitButtonIcon}
                       size={20}
-                      color="#fff"
+                      color={COLORS.white}
                     />
                     <Text style={appStyles.buttonText}>{submitButtonText}</Text>
                   </TouchableOpacity>

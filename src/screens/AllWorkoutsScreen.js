@@ -15,7 +15,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AssignDaysModal } from '../components/modals';
 import { SearchFilterSort } from '../components/meals';
 import WorkoutCard from '../components/workouts/WorkoutCardComponent';
-import { COLORS } from '../styles';
+import { AllWorkoutsEmptyState } from '../components/workouts';
+import { COLORS, SPACING, TYPOGRAPHY } from '../shared/constants';
 import {
   getAllWorkouts,
   getScheduledDaysForWorkout,
@@ -231,30 +232,10 @@ export default function AllWorkoutsScreen({ navigation }) {
 
           {/* Workouts List */}
           {filteredWorkouts.length === 0 ? (
-            <View style={styles.emptyStateContainer}>
-              <MaterialCommunityIcons
-                name="dumbbell"
-                size={64}
-                color="#ccc"
-              />
-              <Text style={styles.emptyStateTitle}>
-                {workouts.length === 0 ? 'No Workouts Created' : 'No Workouts Found'}
-              </Text>
-              <Text style={styles.emptyStateSubtitle}>
-                {workouts.length === 0
-                  ? 'Create your first workout routine'
-                  : 'Try adjusting your search or filters'}
-              </Text>
-              {workouts.length === 0 && (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('CreatePlan')}
-                  style={styles.emptyStateButton}
-                >
-                  <MaterialCommunityIcons name="plus" size={20} color="#fff" />
-                  <Text style={styles.emptyStateButtonText}>Create Workout</Text>
-                </TouchableOpacity>
-              )}
-            </View>
+            <AllWorkoutsEmptyState
+              hasAnyWorkouts={workouts.length > 0}
+              onCreatePress={() => navigation.navigate('CreatePlan')}
+            />
           ) : (
             filteredWorkouts.map(workout => (
               <WorkoutCard
@@ -288,13 +269,13 @@ export default function AllWorkoutsScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 20,
+    paddingBottom: SPACING.container,
   },
   centerContent: {
     flex: 1,
@@ -302,88 +283,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 16,
-    color: '#999',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 16,
-    marginVertical: 12,
-    paddingHorizontal: 12,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  searchIcon: {
-    marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: '#333',
-  },
-  clearButton: {
-    padding: 4,
-  },
-  controlsContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginBottom: 16,
-    gap: 8,
-  },
-  controlButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  controlButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.primary,
-  },
-  emptyStateContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: 16,
-  },
-  emptyStateTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyStateSubtitle: {
-    fontSize: 14,
-    color: '#999',
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  emptyStateButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: COLORS.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-  },
-  emptyStateButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#fff',
+    ...TYPOGRAPHY.body,
+    color: COLORS.textTertiary,
   },
 });

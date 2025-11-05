@@ -14,7 +14,7 @@ export const COLORS = {
   // ============================================================================
   // PRIMARY & SECONDARY COLORS
   // ============================================================================
-  primary: "#00ff1aff", // Electric Blue - main brand color
+  primary: "#007AFF", // Electric Blue - main brand color
   secondary: "#000000", // Black - secondary brand color
 
   // ============================================================================

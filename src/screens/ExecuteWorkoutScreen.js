@@ -4,6 +4,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ExerciseCard } from "../components/workouts";
 import { ExerciseFormModal, OptionsMenu } from "../components/modals";
 import { appStyles } from "../styles/app.styles";
+import { COLORS } from "../shared/constants";
 import {
   getExercisesByWorkoutId,
   deleteExercise,
@@ -171,19 +172,19 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
     {
       label: "Edit Exercises",
       icon: "pencil",
-      color: "#007AFF",
+      color: COLORS.info,
       onPress: handleEnableEditMode,
     },
     {
       label: "Delete Workout",
       icon: "trash-can",
-      color: "#FF3B30",
+      color: COLORS.danger,
       onPress: handleDeleteWorkout,
     },
     {
       label: "Cancel",
       icon: "close",
-      color: "#666",
+      color: COLORS.textSecondary,
       onPress: () => {},
     },
   ];
@@ -218,7 +219,7 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
             <MaterialCommunityIcons
               name="dots-vertical"
               size={24}
-              color="#000"
+              color={COLORS.textPrimary}
             />
           </TouchableOpacity>
         )}

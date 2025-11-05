@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { STRINGS } from '../../constants/strings';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
 
 const ExerciseCard = ({ exercise, onDelete, onEdit, showDeleteButton = true, showEditButton = false, disabled = false }) => {
   return (
@@ -18,7 +19,7 @@ const ExerciseCard = ({ exercise, onDelete, onEdit, showDeleteButton = true, sho
               disabled={disabled}
               activeOpacity={0.7}
             >
-              <MaterialCommunityIcons name="pencil" size={20} color="#007AFF" />
+              <MaterialCommunityIcons name="pencil" size={20} color={COLORS.info} />
             </TouchableOpacity>
           )}
           {showDeleteButton && (
@@ -27,7 +28,7 @@ const ExerciseCard = ({ exercise, onDelete, onEdit, showDeleteButton = true, sho
               disabled={disabled}
               activeOpacity={0.7}
             >
-              <MaterialCommunityIcons name="close-circle" size={20} color="#FF3B30" />
+              <MaterialCommunityIcons name="close-circle" size={20} color={COLORS.danger} />
             </TouchableOpacity>
           )}
         </View>
@@ -52,62 +53,62 @@ const ExerciseCard = ({ exercise, onDelete, onEdit, showDeleteButton = true, sho
 
 const styles = StyleSheet.create({
   exerciseDetailsCard: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: COLORS.lightGray,
+    borderRadius: SPACING.borderRadiusLarge,
+    padding: SPACING.element,
+    marginBottom: SPACING.medium,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: COLORS.mediumGray,
   },
   exerciseCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: SPACING.medium,
   },
   exerciseName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000',
+    fontSize: TYPOGRAPHY.sizes.lg,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.textPrimary,
   },
   exerciseDetails: {
     flexDirection: 'row',
-    gap: 16,
+    gap: SPACING.element,
   },
   detailItem: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
+    backgroundColor: COLORS.white,
+    paddingVertical: SPACING.small,
+    paddingHorizontal: SPACING.medium,
+    borderRadius: SPACING.borderRadius,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: COLORS.mediumGray,
   },
   detailLabel: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '500',
-    marginBottom: 4,
+    fontSize: TYPOGRAPHY.sizes.md,
+    color: COLORS.textSecondary,
+    fontWeight: TYPOGRAPHY.weights.medium,
+    marginBottom: SPACING.xs,
   },
   detailValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#007AFF',
+    fontSize: TYPOGRAPHY.sizes.lg,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.info,
   },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: SPACING.medium,
   },
   timeDisplay: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 6,
+    fontSize: TYPOGRAPHY.sizes.md,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.textSecondary,
+    backgroundColor: COLORS.lightGray,
+    paddingHorizontal: SPACING.small,
+    paddingVertical: SPACING.xs,
+    borderRadius: SPACING.borderRadiusSmall,
   },
 });
 

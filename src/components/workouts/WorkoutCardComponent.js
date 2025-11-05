@@ -6,7 +6,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS } from '../../styles';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
 
 /**
  * WorkoutCard - Reusable workout card component
@@ -50,8 +50,8 @@ const WorkoutCard = ({
                   <MaterialCommunityIcons
                     name="calendar-remove"
                     size={14}
-                    color="#999"
-                    style={{ marginRight: 4 }}
+                    color={COLORS.textTertiary}
+                    style={{ marginRight: SPACING.xs }}
                   />
                   <Text style={styles.noDaysText}>No days assigned</Text>
                 </View>
@@ -81,7 +81,7 @@ const WorkoutCard = ({
           <MaterialCommunityIcons
             name="lightning-bolt"
             size={18}
-            color="#fff"
+            color={COLORS.white}
           />
         </View>
         <View style={styles.exerciseInfo}>
@@ -111,8 +111,8 @@ const WorkoutCard = ({
               <MaterialCommunityIcons
                 name="check-circle"
                 size={18}
-                color="#fff"
-                style={{ marginRight: 6 }}
+                color={COLORS.white}
+                style={{ marginRight: SPACING.xs }}
               />
               <Text style={styles.startButtonText}>View Summary</Text>
             </TouchableOpacity>
@@ -125,8 +125,8 @@ const WorkoutCard = ({
               <MaterialCommunityIcons
                 name="play"
                 size={18}
-                color="#fff"
-                style={{ marginRight: 6 }}
+                color={COLORS.white}
+                style={{ marginRight: SPACING.xs }}
               />
               <Text style={styles.startButtonText}>Start Workout</Text>
             </TouchableOpacity>
@@ -139,14 +139,14 @@ const WorkoutCard = ({
 
 const styles = StyleSheet.create({
   workoutCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 12,
+    backgroundColor: COLORS.white,
+    borderRadius: SPACING.borderRadiusXL,
+    padding: SPACING.element,
+    marginHorizontal: SPACING.element,
+    marginBottom: SPACING.medium,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
-    shadowColor: '#000',
+    borderColor: COLORS.mediumGray,
+    shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -156,28 +156,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: SPACING.medium,
   },
   cardInfo: {
     flex: 1,
   },
   workoutName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 4,
+    fontSize: TYPOGRAPHY.sizes.lg,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.xs,
   },
   daysContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
-    marginTop: 8,
+    gap: SPACING.xs,
+    marginTop: SPACING.small,
   },
   dayBadge: {
     backgroundColor: COLORS.primary,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 12,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.small,
+    borderRadius: SPACING.borderRadiusRound,
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
@@ -185,40 +185,40 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   dayBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#fff',
+    fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.white,
     letterSpacing: 0.3,
   },
   noDaysBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 12,
+    backgroundColor: COLORS.lightBackground,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.small,
+    borderRadius: SPACING.borderRadiusRound,
     borderWidth: 1.5,
-    borderColor: '#e0e0e0',
+    borderColor: COLORS.mediumGray,
     borderStyle: 'dashed',
   },
   noDaysText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#999',
+    fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.textTertiary,
   },
   kebabButton: {
-    padding: 8,
-    marginRight: -8,
+    padding: SPACING.small,
+    marginRight: -SPACING.small,
   },
   exerciseCountContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    marginBottom: 12,
-    backgroundColor: '#EEF5FF',
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderRadius: 12,
+    gap: SPACING.medium,
+    marginBottom: SPACING.medium,
+    backgroundColor: COLORS.primaryLight,
+    paddingVertical: SPACING.medium,
+    paddingHorizontal: SPACING.element,
+    borderRadius: SPACING.borderRadiusLarge,
     borderLeftWidth: 4,
     borderLeftColor: COLORS.primary,
     justifyContent: 'space-between',
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     width: 44,
     height: 44,
-    borderRadius: 12,
+    borderRadius: SPACING.borderRadiusLarge,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: COLORS.primary,
@@ -241,15 +241,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   exerciseCount: {
-    fontSize: 18,
+    fontSize: TYPOGRAPHY.sizes.xl,
     color: COLORS.primary,
-    fontWeight: '700',
+    fontWeight: TYPOGRAPHY.weights.bold,
   },
   exerciseLabel: {
-    fontSize: 11,
-    color: '#888',
-    fontWeight: '600',
-    marginTop: 2,
+    fontSize: TYPOGRAPHY.sizes.xs,
+    color: COLORS.textSecondary,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    marginTop: SPACING.xs,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
@@ -258,10 +258,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginTop: 12,
+    paddingVertical: SPACING.medium,
+    paddingHorizontal: SPACING.element,
+    borderRadius: SPACING.borderRadiusLarge,
+    marginTop: SPACING.medium,
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
@@ -269,14 +269,14 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   startButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#fff',
+    fontSize: TYPOGRAPHY.sizes.md,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.white,
     letterSpacing: 0.3,
   },
   summaryButton: {
-    backgroundColor: '#4CAF50',
-    shadowColor: '#4CAF50',
+    backgroundColor: COLORS.success,
+    shadowColor: COLORS.success,
   },
 });
 
