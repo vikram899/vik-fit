@@ -19,7 +19,7 @@ import {
   getMacroGoals,
   deleteMeal,
 } from "../services/database";
-import { AddMealModal, EditMealDetailsModal } from "../components/meals";
+import { AddMealModal, EditMealDetailsModal } from "../components/modals";
 import MealCard from "../components/MealCard";
 
 /**

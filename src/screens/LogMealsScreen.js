@@ -10,7 +10,8 @@ import {
   deleteMealLog,
   getMacroGoals,
 } from "../services/database";
-import { EditMealModal, TodaysMealsList } from "../components/meals";
+import { EditMealModal } from "../components/modals";
+import { TodaysMealsList } from "../components/meals";
 import { SummaryCard } from "../components/home";
 
 const LogMealsScreen = ({ navigation }) => {

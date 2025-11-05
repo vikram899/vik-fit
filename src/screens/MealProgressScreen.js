@@ -13,7 +13,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { WeeklySummaryCards } from '../components/layouts';
-import { MealsHistoryModal } from '../components/meals';
+import { MealsHistoryModal } from '../components/modals';
 import { GoalSettingsModal, Toast, StreakCard, BottomSheet, SectionHeader } from '../components/common';
 import { COLORS } from '../styles';
 import {

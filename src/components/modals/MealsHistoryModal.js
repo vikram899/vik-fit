@@ -11,9 +11,9 @@ import {
   RefreshControl,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS } from '../../styles';
-import { COLORS as SHARED_COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
-import { getWeeklyDailyBreakdown, getMondayOfWeek } from '../../services/mealStats';
+import { COLORS } from '../../../styles';
+import { COLORS as SHARED_COLORS, SPACING, TYPOGRAPHY } from '../../../shared/constants';
+import { getWeeklyDailyBreakdown, getMondayOfWeek } from '../../../services/mealStats';
 
 /**
  * MealsHistoryModal Component

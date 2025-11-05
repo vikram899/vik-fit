@@ -17,7 +17,8 @@ import {
   deleteMeal,
   toggleMealFavorite,
 } from "../services/database";
-import { EditMealDetailsModal, SearchFilterSort } from "../components/meals";
+import { EditMealDetailsModal } from "../components/modals";
+import { SearchFilterSort } from "../components/meals";
 import MealCard from "../components/MealCard";
 
 /**

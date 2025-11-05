@@ -15,9 +15,9 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   addMeal,
   logMeal,
-} from "../../services/database";
-import { modalStyles, formStyles, buttonStyles, COLORS } from "../../styles";
-import { STRINGS } from "../../constants/strings";
+} from "../../../services/database";
+import { modalStyles, formStyles, buttonStyles, COLORS } from "../../../styles";
+import { STRINGS } from "../../../constants/strings";
 
 const AddMealModal = ({ visible, onClose, onMealAdded, showMealType = false, selectedMealType = null }) => {
   const MEAL_TYPES = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];

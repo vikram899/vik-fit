@@ -17,10 +17,10 @@ import {
   logMeal,
   getMealLogsForDate,
   getDailyTotals,
-} from "../../services/database";
-import { modalStyles, formStyles, buttonStyles, COLORS } from "../../styles";
-import { STRINGS } from "../../constants/strings";
-import { COLORS as SHARED_COLORS, SPACING, TYPOGRAPHY } from "../../shared/constants";
+} from "../../../services/database";
+import { modalStyles, formStyles, buttonStyles, COLORS } from "../../../styles";
+import { STRINGS } from "../../../constants/strings";
+import { COLORS as SHARED_COLORS, SPACING, TYPOGRAPHY } from "../../../shared/constants";
 import MealCard from "../MealCard";
 
 const ExistingMealsModal = ({ visible, meals = [], onClose, onMealAdded }) => {
