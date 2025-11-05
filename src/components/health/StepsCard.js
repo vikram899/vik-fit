@@ -93,7 +93,7 @@ const StepsCard = () => {
           <Text style={styles.subtitle}>Apple Health</Text>
         </View>
         <View style={styles.permissionPrompt}>
-          <MaterialCommunityIcons name="lock" size={28} color="#FF6B6B" />
+          <MaterialCommunityIcons name="lock" size={38} color="#FF6B6B" />
           <Text style={styles.permissionTitle}>Permission Required</Text>
           <Text style={styles.permissionText}>
             Allow access to Apple Health to sync your step count
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
   permissionTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: COLORS.textPrimary,
+    color: COLORS.textTertiary,
     marginTop: SPACING.small,
     marginBottom: SPACING.xs,
   },

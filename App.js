@@ -303,6 +303,9 @@ function MealsStackNavigator() {
             ...TYPOGRAPHY.sectionTitle,
             color: COLORS.textPrimary,
           },
+          headerStyle: {
+            backgroundColor: COLORS.mainBackground,
+          },
           headerRight: () => (
             <TouchableOpacity
               onPress={() => {

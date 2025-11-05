@@ -32,7 +32,11 @@ export default function SearchBar({
           onPress={() => onSearchChange("")}
           style={styles.clearButton}
         >
-          <MaterialCommunityIcons name="close" size={18} color={COLORS.textTertiary} />
+          <MaterialCommunityIcons
+            name="close"
+            size={18}
+            color={COLORS.textTertiary}
+          />
         </TouchableOpacity>
       )}
     </View>
@@ -45,10 +49,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: SPACING.small,
-    backgroundColor: COLORS.gray,
+    backgroundColor: COLORS.secondaryBackground,
     borderRadius: SPACING.borderRadius,
     borderWidth: 1,
-    borderColor: COLORS.mediumGray,
+    borderColor: COLORS.secondaryBackground,
   },
   searchIcon: { marginRight: SPACING.xs },
   searchInput: {

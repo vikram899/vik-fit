@@ -15,7 +15,7 @@ export default function SortButton({
   sortOption,
   onSortChange,
   sortOptions = null,
-  alertTitle = "Sort"
+  alertTitle = "Sort",
 }) {
   // Default meal sort options
   const getDefaultSortOptions = () => [
@@ -38,15 +38,8 @@ export default function SortButton({
   };
 
   return (
-    <TouchableOpacity
-      style={styles.controlButton}
-      onPress={handleSortPress}
-    >
-      <MaterialCommunityIcons
-        name="sort"
-        size={18}
-        color={COLORS.primary}
-      />
+    <TouchableOpacity style={styles.controlButton} onPress={handleSortPress}>
+      <MaterialCommunityIcons name="sort" size={18} color={COLORS.primary} />
     </TouchableOpacity>
   );
 }
@@ -55,10 +48,10 @@ const styles = StyleSheet.create({
   controlButton: {
     paddingVertical: SPACING.small,
     paddingHorizontal: SPACING.small,
-    backgroundColor: COLORS.gray,
+    backgroundColor: COLORS.secondaryBackground,
     borderRadius: SPACING.borderRadius,
     borderWidth: 1,
-    borderColor: COLORS.mediumGray,
+    borderColor: COLORS.secondaryBackground,
     alignItems: "center",
     justifyContent: "center",
   },

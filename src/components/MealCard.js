@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SPACING, TYPOGRAPHY } from "../shared/constants";
+import StatBadge from "./StatBadge";
 
 /**
  * MealCard Component - Modern Trendy Design
@@ -157,57 +158,38 @@ export default function MealCard({
 
       {/* Bottom Row: Stats Badges */}
       <View style={styles.bottomRow}>
-        {/* Calories Badge */}
-        <View style={[styles.statBadge, styles.caloriesBadge]}>
-          <MaterialCommunityIcons name="fire" size={13} color={COLORS.caloriesIcon} />
-          <View style={styles.badgeContent}>
-            <Text style={styles.statBadgeLabel}>cal</Text>
-            <Text style={styles.statBadgeValue}>
-              {Math.round(meal.calories || 0)}
-            </Text>
-          </View>
-        </View>
-
-        {/* Protein Badge */}
-        <View style={[styles.statBadge, styles.proteinBadge]}>
-          <MaterialCommunityIcons name="dumbbell" size={13} color={COLORS.proteinIcon} />
-          <View style={styles.badgeContent}>
-            <Text style={styles.statBadgeLabel}>protein</Text>
-            <Text style={styles.statBadgeValue}>
-              {Math.round(meal.protein || 0)}g
-            </Text>
-          </View>
-        </View>
-
-        {/* Carbs Badge */}
-        <View style={[styles.statBadge, styles.carbsBadge]}>
-          <MaterialCommunityIcons
-            name="bread-slice"
-            size={13}
-            color={COLORS.carbsIcon}
-          />
-          <View style={styles.badgeContent}>
-            <Text style={styles.statBadgeLabel}>carbs</Text>
-            <Text style={styles.statBadgeValue}>
-              {Math.round(meal.carbs || 0)}g
-            </Text>
-          </View>
-        </View>
-
-        {/* Fats Badge */}
-        <View style={[styles.statBadge, styles.fatsBadge]}>
-          <MaterialCommunityIcons
-            name="water-percent"
-            size={13}
-            color={COLORS.fatsIcon}
-          />
-          <View style={styles.badgeContent}>
-            <Text style={styles.statBadgeLabel}>fats</Text>
-            <Text style={styles.statBadgeValue}>
-              {Math.round(meal.fats || 0)}g
-            </Text>
-          </View>
-        </View>
+        <StatBadge
+          icon="fire"
+          label="cal"
+          value={meal.calories}
+          unit=""
+          iconColor={COLORS.caloriesIcon}
+          backgroundColor={COLORS.calories}
+        />
+        <StatBadge
+          icon="dumbbell"
+          label="protein"
+          value={meal.protein}
+          unit="g"
+          iconColor={COLORS.proteinIcon}
+          backgroundColor={COLORS.protein}
+        />
+        <StatBadge
+          icon="bread-slice"
+          label="carbs"
+          value={meal.carbs}
+          unit="g"
+          iconColor={COLORS.carbsIcon}
+          backgroundColor={COLORS.carbs}
+        />
+        <StatBadge
+          icon="water-percent"
+          label="fats"
+          value={meal.fats}
+          unit="g"
+          iconColor={COLORS.fatsIcon}
+          backgroundColor={COLORS.fats}
+        />
       </View>
     </TouchableOpacity>
   );
@@ -216,13 +198,13 @@ export default function MealCard({
 const styles = StyleSheet.create({
   mealCard: {
     flexDirection: "column",
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.secondaryBackground,
     borderRadius: SPACING.borderRadiusXL,
     paddingHorizontal: SPACING.element,
     paddingVertical: SPACING.small,
     marginBottom: SPACING.small,
     borderWidth: 1,
-    borderColor: "#f0f0f0",
+    borderColor: COLORS.secondaryBackground,
     shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
@@ -257,45 +239,6 @@ const styles = StyleSheet.create({
     gap: SPACING.small,
     alignItems: "center",
     justifyContent: "flex-start",
-  },
-  statBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: SPACING.small,
-    paddingVertical: SPACING.small,
-    borderRadius: SPACING.borderRadiusLarge,
-    gap: SPACING.xs,
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "rgba(0, 0, 0, 0.08)",
-  },
-  badgeContent: {
-    flexDirection: "column",
-    alignItems: "flex-start",
-    gap: SPACING.xs,
-  },
-  caloriesBadge: {
-    backgroundColor: COLORS.caloriesBadge,
-  },
-  proteinBadge: {
-    backgroundColor: COLORS.proteinBadge,
-  },
-  carbsBadge: {
-    backgroundColor: COLORS.carbsBadge,
-  },
-  fatsBadge: {
-    backgroundColor: COLORS.fatsBadge,
-  },
-  statBadgeLabel: {
-    ...TYPOGRAPHY.tiny,
-    fontWeight: TYPOGRAPHY.weights.semibold,
-    color: COLORS.textSecondary,
-    textTransform: "capitalize",
-  },
-  statBadgeValue: {
-    ...TYPOGRAPHY.small,
-    fontWeight: TYPOGRAPHY.weights.bold,
-    color: COLORS.textPrimary,
   },
   menuButton: {
     padding: SPACING.xs,

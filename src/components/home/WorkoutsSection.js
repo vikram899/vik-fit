@@ -18,11 +18,7 @@ export default function WorkoutsSection({
     <View style={appStyles.workoutsSection}>
       <View style={styles.header}>
         <Text style={appStyles.workoutsSectionTitle}>Today's Workouts</Text>
-        <LogButton
-          onPress={onLogPress}
-          size="small"
-          variant="primary"
-        />
+        <LogButton onPress={onLogPress} size="small" variant="primary" />
       </View>
 
       {hasWorkouts ? (
@@ -33,7 +29,8 @@ export default function WorkoutsSection({
           contentContainerStyle={appStyles.workoutsScrollContent}
         >
           {workouts.map((workout) => {
-            const isCompleted = workoutLogs?.[workout.id]?.status === "completed";
+            const isCompleted =
+              workoutLogs?.[workout.id]?.status === "completed";
 
             return (
               <WorkoutCard
@@ -49,10 +46,12 @@ export default function WorkoutsSection({
         <View style={styles.emptyStateContainer}>
           <MaterialCommunityIcons
             name="calendar-blank"
-            size={48}
+            size={38}
             color={COLORS.warning}
           />
-          <Text style={styles.emptyStateText}>No Workouts Scheduled for Today</Text>
+          <Text style={styles.emptyStateText}>
+            No Workouts Scheduled for Today
+          </Text>
         </View>
       )}
     </View>

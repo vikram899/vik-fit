@@ -14,7 +14,7 @@ export default function FilterButton({
   filterOptions,
   onFilterChange,
   filterLabels = null,
-  alertTitle = "Filter Meals"
+  alertTitle = "Filter Meals",
 }) {
   // Generate filter labels dynamically if not provided
   const getFilterLabels = () => {
@@ -88,10 +88,10 @@ const styles = StyleSheet.create({
   controlButton: {
     paddingVertical: SPACING.small,
     paddingHorizontal: SPACING.small,
-    backgroundColor: COLORS.gray,
+    backgroundColor: COLORS.secondaryBackground,
     borderRadius: SPACING.borderRadius,
     borderWidth: 1,
-    borderColor: COLORS.mediumGray,
+    borderColor: COLORS.secondaryBackground,
     alignItems: "center",
     justifyContent: "center",
   },
