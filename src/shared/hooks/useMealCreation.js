@@ -1,9 +1,6 @@
-import { useState, useRef, useCallback, useEffect } from "react";
-import { Animated, Alert, Dimensions } from "react-native";
+import { useState, useCallback } from "react";
+import { Alert } from "react-native";
 import { addMeal, logMeal } from "../../services/database";
-
-const screenHeight = Dimensions.get("window").height;
-const bottomSheetHeight = screenHeight * 0.9;
 
 /**
  * useMealCreation
@@ -16,11 +13,8 @@ const bottomSheetHeight = screenHeight * 0.9;
  * - setMealType: Function to update meal type
  * - foodType: Selected food type
  * - setFoodType: Function to update food type
- * - slideAnim: Animated value for slide animation
- * - panResponder: Pan responder for drag gesture
  * - handleAddMeal: Function to add meal
- * - handleCloseBottomSheet: Function to close bottom sheet
- * - handleClose: Wrapper for close handler
+ * - handleClose: Function to close bottom sheet
  * - isLoading: Loading state during submission
  */
 export const useMealCreation = (navigation) => {
@@ -38,52 +32,10 @@ export const useMealCreation = (navigation) => {
   const [foodType, setFoodType] = useState("veg");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Animation
-  const slideAnim = useRef(new Animated.Value(bottomSheetHeight)).current;
-
-  // Initialize animation
-  useEffect(() => {
-    Animated.timing(slideAnim, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  }, [slideAnim]);
-
-  // Close bottom sheet with animation
-  const handleCloseBottomSheet = useCallback(() => {
-    Animated.timing(slideAnim, {
-      toValue: bottomSheetHeight,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
-      navigation.goBack();
-    });
-  }, [slideAnim, navigation]);
-
-  // Pan responder for drag gesture
-  const panResponder = useRef(
-    require("react-native").PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, { dy }) => Math.abs(dy) > 10,
-      onPanResponderMove: (_, { dy }) => {
-        if (dy > 0) {
-          slideAnim.setValue(dy);
-        }
-      },
-      onPanResponderRelease: (_, { dy }) => {
-        if (dy > 50) {
-          handleCloseBottomSheet();
-        } else {
-          Animated.timing(slideAnim, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }).start();
-        }
-      },
-    })
-  ).current;
+  // Close handler
+  const handleClose = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
 
   // Validate form
   const validateForm = useCallback(() => {
@@ -143,7 +95,7 @@ export const useMealCreation = (navigation) => {
           {
             text: "OK",
             onPress: () => {
-              handleCloseBottomSheet();
+              handleClose();
             },
           },
         ]
@@ -153,12 +105,7 @@ export const useMealCreation = (navigation) => {
     } finally {
       setIsLoading(false);
     }
-  }, [form, foodType, mealType, today, validateForm, handleCloseBottomSheet]);
-
-  // Close wrapper
-  const handleClose = useCallback(() => {
-    handleCloseBottomSheet();
-  }, [handleCloseBottomSheet]);
+  }, [form, foodType, mealType, today, validateForm, handleClose]);
 
   return {
     form,
@@ -167,12 +114,8 @@ export const useMealCreation = (navigation) => {
     setMealType,
     foodType,
     setFoodType,
-    slideAnim,
-    panResponder,
     handleAddMeal,
-    handleCloseBottomSheet,
     handleClose,
     isLoading,
-    bottomSheetHeight,
   };
 };

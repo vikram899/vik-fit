@@ -830,6 +830,69 @@ export const logMealsScreenStyles = StyleSheet.create({
   },
 });
 
+// ============================================================================
+// FORM STYLES (For MealForm and other forms)
+// ============================================================================
+
+export const formStyles = StyleSheet.create({
+  formGroup: {
+    marginBottom: SPACING.container,
+  },
+  label: {
+    ...TYPOGRAPHY.label,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.small,
+  },
+  input: {
+    backgroundColor: COLORS.secondaryBackground,
+    borderRadius: SPACING.borderRadius,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.medium,
+    fontSize: TYPOGRAPHY.sizes.lg,
+    color: COLORS.textPrimary,
+    borderWidth: 1,
+    borderColor: COLORS.mediumGray,
+  },
+  rowGroup: {
+    flexDirection: "row",
+    gap: SPACING.medium,
+    marginBottom: SPACING.container,
+  },
+  mealTypeButton: {
+    width: "48%",
+    paddingVertical: SPACING.small,
+    paddingHorizontal: SPACING.small,
+    borderRadius: SPACING.borderRadius,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: SPACING.xs,
+  },
+  mealTypeButtonActive: {
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.primary,
+  },
+  mealTypeButtonInactive: {
+    borderColor: COLORS.mediumGray,
+    backgroundColor: COLORS.secondaryBackground,
+  },
+  mealTypeButtonText: {
+    ...TYPOGRAPHY.small,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+  },
+  mealTypeButtonTextActive: {
+    color: COLORS.white,
+  },
+  mealTypeButtonTextInactive: {
+    color: COLORS.textPrimary,
+  },
+  helperText: {
+    ...TYPOGRAPHY.small,
+    color: COLORS.textSecondary,
+    marginTop: SPACING.small,
+  },
+});
+
 // FAB styles
 export const fabStyles = StyleSheet.create({
   tabBarIconContainer: {

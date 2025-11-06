@@ -1,20 +1,21 @@
 import React from "react";
-import { Modal } from "react-native";
+import { View, ScrollView } from "react-native";
 import { useMealCreation } from "../shared/hooks";
-import CreateMealBottomSheet from "../components/CreateMealBottomSheet";
+import { BottomSheet } from "../shared/components/ui";
 import CreateMealHeader from "../components/CreateMealHeader";
 import CreateMealButtons from "../components/CreateMealButtons";
 import MealForm from "../components/MealForm";
+import { SPACING } from "../shared/constants";
 
 /**
  * CreateMealScreen
  * Screen for creating and logging new meals
  *
- * Uses modular components:
- * - CreateMealBottomSheet: Animated bottom sheet container
+ * Uses generic BottomSheet wrapper with modular components:
+ * - BottomSheet: Animated bottom sheet container (shared)
  * - CreateMealHeader: Header with title and close button
- * - MealForm: Form inputs for meal details
- * - CreateMealButtons: Action buttons (Add/Cancel)
+ * - MealForm: Form inputs for meal details (scrollable)
+ * - CreateMealButtons: Action buttons (fixed at bottom)
  */
 const CreateMealScreen = ({ navigation }) => {
   const {
@@ -24,30 +25,25 @@ const CreateMealScreen = ({ navigation }) => {
     setMealType,
     foodType,
     setFoodType,
-    slideAnim,
-    panResponder,
     handleAddMeal,
-    handleCloseBottomSheet,
     handleClose,
     isLoading,
-    bottomSheetHeight,
   } = useMealCreation(navigation);
 
   return (
-    <Modal
+    <BottomSheet
       visible={true}
-      transparent={true}
-      animationType="none"
-      onRequestClose={handleCloseBottomSheet}
+      title="Add New Meal"
+      onClose={handleClose}
+      heightPercent={0.9}
+      hasFixedFooter={true}
     >
-      <CreateMealBottomSheet
-        slideAnim={slideAnim}
-        panResponder={panResponder}
-        bottomSheetHeight={bottomSheetHeight}
-        onOverlayPress={handleCloseBottomSheet}
+      {/* Scrollable Form Content */}
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: SPACING.element }}
+        showsVerticalScrollIndicator={false}
       >
-        <CreateMealHeader title="Add New Meal" onClose={handleClose} />
-
         <MealForm
           form={form}
           onFormChange={setForm}
@@ -56,14 +52,17 @@ const CreateMealScreen = ({ navigation }) => {
           foodType={foodType}
           onFoodTypeChange={setFoodType}
         />
+      </ScrollView>
 
+      {/* Fixed Footer with Buttons */}
+      <View style={{ paddingHorizontal: SPACING.element, paddingVertical: SPACING.element }}>
         <CreateMealButtons
           onAdd={handleAddMeal}
           onCancel={handleClose}
           isLoading={isLoading}
         />
-      </CreateMealBottomSheet>
-    </Modal>
+      </View>
+    </BottomSheet>
   );
 };
 

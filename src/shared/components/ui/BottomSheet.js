@@ -52,8 +52,9 @@ const BottomSheet = ({
   heightPercent = 0.9, // 90% of screen height by default
 
   // Appearance
-  showDragHandle = true,
-  draggable = true,
+  showDragHandle = false, // Hidden by default since dragging is disabled
+  draggable = false, // Disabled by default to prevent conflicts with scrollable content (use close button instead)
+  hasFixedFooter = false, // Whether the last child should be fixed at bottom
 }) => {
   const bottomSheetHeight = screenHeight * heightPercent;
   const slideAnim = React.useRef(new Animated.Value(bottomSheetHeight)).current;
@@ -86,10 +87,35 @@ const BottomSheet = ({
     });
   };
 
+  // Pan responder for general drag (disabled by default)
   const panResponder = React.useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => draggable,
       onMoveShouldSetPanResponder: (_, { dy }) => draggable && Math.abs(dy) > 10,
+      onPanResponderMove: (_, { dy }) => {
+        if (dy > 0) {
+          slideAnim.setValue(dy);
+        }
+      },
+      onPanResponderRelease: (_, { dy }) => {
+        if (dy > 50) {
+          handleCloseBottomSheet();
+        } else {
+          Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
+  // Pan responder for header drag (always enabled to allow closing from header)
+  const headerPanResponder = React.useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, { dy }) => Math.abs(dy) > 10,
       onPanResponderMove: (_, { dy }) => {
         if (dy > 0) {
           slideAnim.setValue(dy);
@@ -153,6 +179,7 @@ const BottomSheet = ({
             borderTopRightRadius: SPACING.borderRadiusXL,
             overflow: "hidden",
             zIndex: 1000,
+            flexDirection: "column",
           },
           {
             transform: [{ translateY: slideAnim }],
@@ -167,9 +194,12 @@ const BottomSheet = ({
           </View>
         )}
 
-        {/* Header with title and close button */}
+        {/* Header with title and close button - draggable to dismiss */}
         {title && (
-          <View style={styles.header}>
+          <View
+            style={styles.header}
+            {...headerPanResponder.panHandlers}
+          >
             <Text style={styles.title}>{title}</Text>
             <TouchableOpacity
               onPress={handleCloseBottomSheet}
@@ -184,8 +214,23 @@ const BottomSheet = ({
           </View>
         )}
 
-        {/* Content */}
-        {children}
+        {/* Content wrapper - handles both scrollable content and fixed footer */}
+        {hasFixedFooter ? (
+          <>
+            {/* Get all children except the last one for scrollable area */}
+            <View style={styles.scrollableContent}>
+              {React.Children.toArray(children).slice(0, -1)}
+            </View>
+            {/* Last child (footer) is fixed at bottom with padding for iPhone safe area */}
+            <View style={{ paddingBottom: SPACING.xxxl }}>
+              {React.Children.toArray(children)[React.Children.count(children) - 1]}
+            </View>
+          </>
+        ) : (
+          <View style={[styles.contentWrapper, { paddingBottom: SPACING.xxxl }]}>
+            {children}
+          </View>
+        )}
       </Animated.View>
     </Modal>
   );
@@ -218,6 +263,16 @@ const styles = StyleSheet.create({
   title: {
     ...TYPOGRAPHY.compactTitle,
     color: COLORS.textPrimary,
+  },
+
+  contentWrapper: {
+    flex: 1,
+    width: "100%",
+  },
+
+  scrollableContent: {
+    flex: 1,
+    width: "100%",
   },
 });
 

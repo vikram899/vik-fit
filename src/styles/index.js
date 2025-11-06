@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from "react-native";
 
 /**
  * CENTRALIZED STYLES FOR VIKFIT APP
@@ -12,31 +12,31 @@ import { StyleSheet } from 'react-native';
 
 export const COLORS = {
   // Primary & Secondary
-  primary: '#007AFF',
-  secondary: '#34C759',
-  danger: '#FF3B30',
+  primary: "#007AFF",
+  secondary: "#34C759",
+  danger: "#FF3B30",
 
   // Grayscale
-  white: '#ffffff',
-  background: '#fff',
-  lightGray: '#f9f9f9',
-  gray: '#f0f0f0',
-  mediumGray: '#e0e0e0',
-  darkGray: '#999',
-  textPrimary: '#000',
-  textSecondary: '#666',
-  textTertiary: '#999',
+  white: "#ffffff",
+  background: "#fff",
+  lightGray: "#f9f9f9",
+  gray: "#f0f0f0",
+  mediumGray: "#e0e0e0",
+  darkGray: "#999",
+  textPrimary: "#000",
+  textSecondary: "#666",
+  textTertiary: "#999",
 
   // Status Colors
-  success: '#4CAF50',
-  warning: '#FF9500',
-  error: '#FF3B30',
-  info: '#007AFF',
+  success: "#4CAF50",
+  warning: "#FF9500",
+  error: "#FF3B30",
+  info: "#007AFF",
 
   // Background variants
-  primaryLight: '#E8F4FF',
-  secondaryLight: '#E8F5E9',
-  dangerLight: '#FFEBEE',
+  primaryLight: "#E8F4FF",
+  secondaryLight: "#E8F5E9",
+  dangerLight: "#FFEBEE",
 };
 
 // ============================================================================
@@ -46,67 +46,67 @@ export const COLORS = {
 export const TYPOGRAPHY = {
   screenTitle: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.textPrimary,
   },
   pageTitle: {
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.textPrimary,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textPrimary,
   },
   compactTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.textPrimary,
   },
   cardTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textPrimary,
   },
   body: {
     fontSize: 16,
-    fontWeight: '400',
+    fontWeight: "400",
     color: COLORS.textPrimary,
   },
   bodyBold: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textPrimary,
   },
   subtitle: {
     fontSize: 14,
-    fontWeight: '400',
+    fontWeight: "400",
     color: COLORS.textSecondary,
   },
   caption: {
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: "500",
     color: COLORS.textSecondary,
   },
   button: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.white,
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textPrimary,
   },
   small: {
     fontSize: 12,
-    fontWeight: '400',
+    fontWeight: "400",
     color: COLORS.textSecondary,
   },
   tiny: {
     fontSize: 11,
-    fontWeight: '500',
+    fontWeight: "500",
     color: COLORS.textTertiary,
   },
 };
@@ -142,44 +142,44 @@ export const globalStyles = StyleSheet.create({
   // Screen containers
   screenContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: COLORS.background,
     paddingHorizontal: SPACING.container,
   },
   screenContainerStart: {
     flex: 1,
-    justifyContent: 'flex-start',
+    justifyContent: "flex-start",
     paddingTop: 0,
     backgroundColor: COLORS.background,
     paddingHorizontal: 0,
-    alignItems: 'stretch',
+    alignItems: "stretch",
   },
   flexContainer: {
     flex: 1,
   },
   centerContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   // Common flex utilities
   row: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   rowCenter: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   rowBetween: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   rowWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
   },
   spacer: {
     flex: 1,
@@ -217,14 +217,14 @@ export const globalStyles = StyleSheet.create({
 
   // Shadows
   cardShadow: {
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,
   },
   toastShadow: {
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -233,20 +233,20 @@ export const globalStyles = StyleSheet.create({
 
   // Empty/Loading states
   emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 40,
   },
   emptyText: {
     fontSize: 16,
     color: COLORS.darkGray,
     marginTop: SPACING.element,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   loadingText: {
     fontSize: 16,
     color: COLORS.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: SPACING.element,
   },
 });
@@ -260,9 +260,9 @@ export const buttonStyles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: SPACING.borderRadiusLarge,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
     gap: SPACING.small,
   },
   buttonSmall: {
@@ -289,20 +289,20 @@ export const buttonStyles = StyleSheet.create({
     opacity: 0.6,
   },
   buttonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: SPACING.small,
   },
   buttonText: {
     color: COLORS.white,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   buttonTextSmall: {
     color: COLORS.white,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   buttonIcon: {
     marginRight: 4,
@@ -311,15 +311,15 @@ export const buttonStyles = StyleSheet.create({
     flex: 1,
   },
   buttonFull: {
-    width: '100%',
+    width: "100%",
   },
   buttonGroup: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: SPACING.element,
     marginTop: SPACING.small,
   },
   buttonGroupFixed: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: SPACING.element,
     paddingHorizontal: SPACING.container,
     paddingVertical: SPACING.element,
@@ -356,16 +356,16 @@ export const cardStyles = StyleSheet.create({
     borderColor: COLORS.primary,
   },
   cardRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   cardContent: {
     flex: 1,
   },
   cardTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textPrimary,
     marginBottom: SPACING.xs,
   },
@@ -378,66 +378,15 @@ export const cardStyles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: SPACING.borderRadius,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
 // ============================================================================
 // INPUT & FORM STYLES
+// NOTE: Form styles have been migrated to app.styles.js
 // ============================================================================
-
-export const formStyles = StyleSheet.create({
-  formGroup: {
-    marginBottom: SPACING.small,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    marginBottom: 4,
-  },
-  input: {
-    backgroundColor: COLORS.lightGray,
-    borderRadius: SPACING.borderRadius,
-    paddingHorizontal: SPACING.element,
-    paddingVertical: SPACING.small,
-    fontSize: 14,
-    color: COLORS.textPrimary,
-    borderWidth: 1,
-    borderColor: COLORS.mediumGray,
-  },
-  inputFocused: {
-    borderColor: COLORS.primary,
-    borderWidth: 2,
-  },
-  inputError: {
-    borderColor: COLORS.danger,
-  },
-  textArea: {
-    textAlignVertical: 'top',
-    paddingVertical: SPACING.element,
-    minHeight: 100,
-  },
-  rowGroup: {
-    flexDirection: 'row',
-    gap: SPACING.element,
-    marginBottom: SPACING.small,
-  },
-  rowGroupHalf: {
-    flex: 1,
-  },
-  helperText: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginTop: SPACING.xs,
-  },
-  errorText: {
-    fontSize: 12,
-    color: COLORS.danger,
-    marginTop: SPACING.xs,
-  },
-});
 
 // ============================================================================
 // MODAL STYLES
@@ -446,23 +395,23 @@ export const formStyles = StyleSheet.create({
 export const modalStyles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'stretch',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "stretch",
   },
   overlayBottom: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
     padding: 0,
   },
   content: {
     backgroundColor: COLORS.white,
     borderRadius: 12,
     padding: 16,
-    width: '90%',
-    maxHeight: '95%',
-    marginHorizontal: '5%',
+    width: "90%",
+    maxHeight: "95%",
+    marginHorizontal: "5%",
   },
   mealNameLabel: {
     fontSize: 14,
@@ -482,18 +431,18 @@ export const modalStyles = StyleSheet.create({
   },
   mealItemWrapper: {
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: "#f0f0f0",
   },
   mealItemContent: {
     paddingVertical: 12,
     paddingHorizontal: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   mealName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textPrimary,
     marginBottom: 4,
   },
@@ -502,13 +451,13 @@ export const modalStyles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
   buttonsGroup: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
-    alignItems: 'center',
+    alignItems: "center",
     marginLeft: 12,
   },
   emptyText: {
-    textAlign: 'center',
+    textAlign: "center",
     color: COLORS.textSecondary,
     marginVertical: SPACING.element,
   },
@@ -517,30 +466,30 @@ export const modalStyles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: SPACING.container,
-    width: '100%',
+    width: "100%",
     paddingBottom: 40,
   },
   title: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.textPrimary,
     marginBottom: SPACING.element,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: SPACING.element,
   },
   closeButton: {
     padding: SPACING.xs,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: SPACING.element,
     paddingHorizontal: 20,
     paddingTop: 20,
@@ -564,28 +513,28 @@ export const modalStyles = StyleSheet.create({
 export const menuStyles = StyleSheet.create({
   menuOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   menuContent: {
     backgroundColor: COLORS.white,
     borderRadius: SPACING.borderRadiusXL,
     padding: 0,
-    width: '80%',
-    overflow: 'hidden',
+    width: "80%",
+    overflow: "hidden",
   },
   menuTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.textPrimary,
     padding: SPACING.element,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.lightGray,
   },
   menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: SPACING.element,
     padding: SPACING.element,
     borderBottomWidth: 1,
@@ -597,7 +546,7 @@ export const menuStyles = StyleSheet.create({
   menuItemText: {
     fontSize: 16,
     color: COLORS.textPrimary,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   menuItemDanger: {
     color: COLORS.danger,
@@ -617,17 +566,17 @@ export const macroStyles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   gridContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: SPACING.element,
   },
   macroGridContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
   card: {
-    width: '48%',
+    width: "48%",
     backgroundColor: COLORS.lightGray,
     borderRadius: SPACING.borderRadiusLarge,
     padding: SPACING.element,
@@ -636,7 +585,7 @@ export const macroStyles = StyleSheet.create({
     marginBottom: SPACING.element,
   },
   macroCard: {
-    width: '48%',
+    width: "48%",
     backgroundColor: COLORS.lightGray,
     borderRadius: SPACING.borderRadiusLarge,
     padding: SPACING.element,
@@ -646,45 +595,45 @@ export const macroStyles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textSecondary,
     marginBottom: SPACING.xs,
   },
   macroLabel: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textSecondary,
     marginBottom: SPACING.xs,
   },
   value: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.primary,
   },
   macroValue: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.primary,
   },
   goal: {
     fontSize: 12,
     color: COLORS.darkGray,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   macroGoal: {
     fontSize: 12,
     color: COLORS.darkGray,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   progressBar: {
     height: 8,
     backgroundColor: COLORS.mediumGray,
     borderRadius: 4,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginVertical: SPACING.xs,
   },
   progressFill: {
-    height: '100%',
+    height: "100%",
     borderRadius: 4,
   },
 });
@@ -699,12 +648,12 @@ export const badgeStyles = StyleSheet.create({
     paddingHorizontal: SPACING.small,
     paddingVertical: SPACING.xs,
     borderRadius: SPACING.borderRadius,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   badgeText: {
     fontSize: 12,
     color: COLORS.primary,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   badgePrimary: {
     backgroundColor: COLORS.primaryLight,
@@ -736,9 +685,9 @@ export const listItemStyles = StyleSheet.create({
     borderColor: COLORS.mediumGray,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: SPACING.element,
   },
   content: {
@@ -746,7 +695,7 @@ export const listItemStyles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textPrimary,
     marginBottom: SPACING.xs,
   },
@@ -756,9 +705,9 @@ export const listItemStyles = StyleSheet.create({
     marginTop: SPACING.xs,
   },
   actions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: SPACING.element,
-    alignItems: 'center',
+    alignItems: "center",
   },
 });
 
@@ -773,18 +722,18 @@ export const progressBadgeStyles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textPrimary,
     marginBottom: SPACING.element,
   },
   badgesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: SPACING.element,
   },
   badgeContainer: {
     flex: 1,
-    minWidth: '48%',
+    minWidth: "48%",
   },
   badgeContent: {
     backgroundColor: COLORS.lightGray,
@@ -795,7 +744,7 @@ export const progressBadgeStyles = StyleSheet.create({
   },
   badgeLabel: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textSecondary,
     marginBottom: SPACING.element,
   },
@@ -803,11 +752,11 @@ export const progressBadgeStyles = StyleSheet.create({
     height: 8,
     backgroundColor: COLORS.mediumGray,
     borderRadius: 4,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginBottom: SPACING.element,
   },
   progressBar: {
-    height: '100%',
+    height: "100%",
     borderRadius: 4,
   },
   badgeValue: {
@@ -817,7 +766,7 @@ export const progressBadgeStyles = StyleSheet.create({
   },
   progressPercentage: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   noBadgesContainer: {
     paddingHorizontal: SPACING.element,
@@ -825,12 +774,12 @@ export const progressBadgeStyles = StyleSheet.create({
     backgroundColor: COLORS.gray,
     borderRadius: SPACING.borderRadiusLarge,
     padding: SPACING.element,
-    alignItems: 'center',
+    alignItems: "center",
   },
   noBadgesText: {
     fontSize: 14,
     color: COLORS.darkGray,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });
 
@@ -841,24 +790,24 @@ export const progressBadgeStyles = StyleSheet.create({
 export const toastStyles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    justifyContent: "flex-end",
+    alignItems: "center",
     paddingBottom: 40,
     paddingHorizontal: SPACING.element,
   },
   toast: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 14,
     paddingHorizontal: SPACING.element,
     borderRadius: SPACING.borderRadiusLarge,
     gap: SPACING.small,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 10,
-    maxWidth: '90%',
+    maxWidth: "90%",
   },
   toastSuccess: {
     backgroundColor: COLORS.success,
@@ -875,7 +824,7 @@ export const toastStyles = StyleSheet.create({
   toastText: {
     color: COLORS.white,
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
     flex: 1,
   },
 });
@@ -894,23 +843,23 @@ export const exerciseCardStyles = StyleSheet.create({
     borderColor: COLORS.mediumGray,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: SPACING.element,
   },
   title: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textPrimary,
   },
   detailsGrid: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: SPACING.element,
   },
   detailItem: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: COLORS.white,
     paddingVertical: SPACING.xs,
     paddingHorizontal: SPACING.small,
@@ -921,22 +870,22 @@ export const exerciseCardStyles = StyleSheet.create({
   detailLabel: {
     fontSize: 12,
     color: COLORS.textSecondary,
-    fontWeight: '500',
+    fontWeight: "500",
     marginBottom: SPACING.xs,
   },
   detailValue: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.primary,
   },
   headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: SPACING.element,
   },
   timeDisplay: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textSecondary,
     backgroundColor: COLORS.gray,
     paddingHorizontal: SPACING.small,
@@ -959,14 +908,14 @@ export const mealCardStyles = StyleSheet.create({
     borderColor: COLORS.mediumGray,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: SPACING.element,
   },
   title: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textPrimary,
     marginBottom: SPACING.xs,
   },
@@ -975,20 +924,20 @@ export const mealCardStyles = StyleSheet.create({
     paddingHorizontal: SPACING.small,
     paddingVertical: SPACING.xs,
     borderRadius: SPACING.borderRadius,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   categoryText: {
     fontSize: 12,
     color: COLORS.primary,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   actions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: SPACING.element,
-    alignItems: 'center',
+    alignItems: "center",
   },
   nutritionGrid: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: SPACING.element,
   },
   nutritionItem: {
@@ -999,17 +948,17 @@ export const mealCardStyles = StyleSheet.create({
     borderRadius: SPACING.borderRadius,
     borderWidth: 1,
     borderColor: COLORS.mediumGray,
-    alignItems: 'center',
+    alignItems: "center",
   },
   nutritionLabel: {
     fontSize: 11,
     color: COLORS.textSecondary,
-    fontWeight: '500',
+    fontWeight: "500",
     marginBottom: SPACING.xs,
   },
   nutritionValue: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.primary,
   },
 });
@@ -1026,12 +975,12 @@ export const todaysMealsStyles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textPrimary,
   },
   scrollView: {
     flex: 1,
-    width: '100%',
+    width: "100%",
   },
   contentContainer: {
     paddingBottom: SPACING.element,
@@ -1044,16 +993,16 @@ export const todaysMealsStyles = StyleSheet.create({
     borderColor: COLORS.mediumGray,
     marginBottom: SPACING.element,
     marginHorizontal: SPACING.element,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
   },
   mealContent: {
     flex: 1,
   },
   mealName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textPrimary,
     marginBottom: SPACING.xs,
   },
@@ -1063,9 +1012,8 @@ export const todaysMealsStyles = StyleSheet.create({
     marginTop: SPACING.xs,
   },
   emptyText: {
-    textAlign: 'center',
+    textAlign: "center",
     color: COLORS.darkGray,
     marginVertical: SPACING.element,
   },
 });
-

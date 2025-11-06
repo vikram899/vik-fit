@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TextInput, ScrollView } from "react-native";
 import { TouchableOpacity } from "react-native";
-import { formStyles } from "../styles";
+import { formStyles } from "../styles/app.styles";
 import { COLORS, SPACING, TYPOGRAPHY } from "../shared/constants";
 
 const MEAL_TYPES = ["Breakfast", "Lunch", "Snacks", "Dinner"];
@@ -55,30 +55,21 @@ const MealForm = ({
           {MEAL_TYPES.map((type) => (
             <TouchableOpacity
               key={type}
-              style={{
-                width: "48%",
-                paddingVertical: SPACING.small,
-                paddingHorizontal: SPACING.small,
-                borderRadius: SPACING.borderRadius,
-                borderWidth: 2,
-                borderColor:
-                  mealType === type ? COLORS.primary : COLORS.mediumGray,
-                backgroundColor:
-                  mealType === type
-                    ? COLORS.primary
-                    : COLORS.secondaryBackground,
-                alignItems: "center",
-                justifyContent: "center",
-                marginBottom: SPACING.xs,
-              }}
+              style={[
+                formStyles.mealTypeButton,
+                mealType === type
+                  ? formStyles.mealTypeButtonActive
+                  : formStyles.mealTypeButtonInactive,
+              ]}
               onPress={() => onMealTypeChange(type)}
             >
               <Text
-                style={{
-                  ...TYPOGRAPHY.small,
-                  fontWeight: TYPOGRAPHY.weights.semibold,
-                  color: mealType === type ? COLORS.white : COLORS.textPrimary,
-                }}
+                style={[
+                  formStyles.mealTypeButtonText,
+                  mealType === type
+                    ? formStyles.mealTypeButtonTextActive
+                    : formStyles.mealTypeButtonTextInactive,
+                ]}
               >
                 {type}
               </Text>
@@ -101,30 +92,21 @@ const MealForm = ({
           {FOOD_TYPES.map((type) => (
             <TouchableOpacity
               key={type}
-              style={{
-                width: "48%",
-                paddingVertical: SPACING.small,
-                paddingHorizontal: SPACING.small,
-                borderRadius: SPACING.borderRadius,
-                borderWidth: 2,
-                borderColor:
-                  foodType === type ? COLORS.primary : COLORS.mediumGray,
-                backgroundColor:
-                  foodType === type
-                    ? COLORS.primary
-                    : COLORS.secondaryBackground,
-                alignItems: "center",
-                justifyContent: "center",
-                marginBottom: SPACING.xs,
-              }}
+              style={[
+                formStyles.mealTypeButton,
+                foodType === type
+                  ? formStyles.mealTypeButtonActive
+                  : formStyles.mealTypeButtonInactive,
+              ]}
               onPress={() => onFoodTypeChange(type)}
             >
               <Text
-                style={{
-                  ...TYPOGRAPHY.small,
-                  fontWeight: TYPOGRAPHY.weights.semibold,
-                  color: foodType === type ? COLORS.white : COLORS.textPrimary,
-                }}
+                style={[
+                  formStyles.mealTypeButtonText,
+                  foodType === type
+                    ? formStyles.mealTypeButtonTextActive
+                    : formStyles.mealTypeButtonTextInactive,
+                ]}
               >
                 {FOOD_TYPE_LABELS[type]}
               </Text>
@@ -188,13 +170,7 @@ const MealForm = ({
       </View>
 
       {showLabels && (
-        <Text
-          style={{
-            ...TYPOGRAPHY.small,
-            color: COLORS.textSecondary,
-            marginTop: SPACING.small,
-          }}
-        >
+        <Text style={formStyles.helperText}>
           * Required fields
         </Text>
       )}
