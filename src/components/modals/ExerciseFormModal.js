@@ -60,7 +60,7 @@ export default function ExerciseFormModal({
                   <TextInput
                     style={appStyles.input}
                     placeholder="e.g., Bench Press"
-                    placeholderTextColor={COLORS.textTertiary}
+                    placeholderTextColor={COLORS.textSecondary}
                     value={exercise.name}
                     onChangeText={(value) =>
                       onExerciseChange({ ...exercise, name: value })
@@ -75,7 +75,7 @@ export default function ExerciseFormModal({
                     <TextInput
                       style={appStyles.input}
                       placeholder="3"
-                      placeholderTextColor={COLORS.textTertiary}
+                      placeholderTextColor={COLORS.textSecondary}
                       value={exercise.sets}
                       onChangeText={(value) =>
                         onExerciseChange({ ...exercise, sets: value })
@@ -89,7 +89,7 @@ export default function ExerciseFormModal({
                     <TextInput
                       style={appStyles.input}
                       placeholder="10"
-                      placeholderTextColor={COLORS.textTertiary}
+                      placeholderTextColor={COLORS.textSecondary}
                       value={exercise.reps}
                       onChangeText={(value) =>
                         onExerciseChange({ ...exercise, reps: value })
@@ -103,7 +103,7 @@ export default function ExerciseFormModal({
                     <TextInput
                       style={appStyles.input}
                       placeholder="0"
-                      placeholderTextColor={COLORS.textTertiary}
+                      placeholderTextColor={COLORS.textSecondary}
                       value={exercise.weight}
                       onChangeText={(value) =>
                         onExerciseChange({ ...exercise, weight: value })
@@ -117,7 +117,7 @@ export default function ExerciseFormModal({
                     <TextInput
                       style={appStyles.input}
                       placeholder="0"
-                      placeholderTextColor={COLORS.textTertiary}
+                      placeholderTextColor={COLORS.textSecondary}
                       value={exercise.restTime}
                       onChangeText={(value) =>
                         onExerciseChange({ ...exercise, restTime: value })

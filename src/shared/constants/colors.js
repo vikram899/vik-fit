@@ -14,7 +14,7 @@ export const COLORS = {
   // ============================================================================
   // PRIMARY & SECONDARY COLORS
   // ============================================================================
-  primary: "#007AFF", // Electric Blue - main brand color
+  primary: "#2a90fcff", // Electric Blue - main brand color
   secondary: "#ffffffff", // Black - secondary brand color
   tertiary: "#00C853",
   // ============================================================================
@@ -30,9 +30,9 @@ export const COLORS = {
   // BACKGROUND COLORS
   // ============================================================================
   mainBackground: "#030303ff", // Main background - white
-  tertiaryBackground: "#3d3d3dff", // Alternative light background
   secondaryBackground: "#202021ff", // Light gray for subtle backgrounds
-  workoutBackground: "#e58f1fff", // Standard gray background
+  tertiaryBackground: "#3d3d3dff", // Alternative light background
+  workoutBackground: "#fb7832ff",
   mediumGray: "#202021ff", // Medium gray - borders and dividers
 
   // ============================================================================
@@ -40,8 +40,9 @@ export const COLORS = {
   // ============================================================================
   text: "#000000", // Default text
   textPrimary: "#FFFFFF", // Primary text - strong contrast
-  textSecondary: "#e04040ff", // Secondary text - medium contrast
-  textTertiary: "#d4d4d4ff", // Tertiary text - weak contrast
+  textSecondary: "#d4d4d4ff", // Secondary text - medium contrast
+  textTertiary: "#e04040ff", // Tertiary text - weak contrast
+
   darkGray: "#999999", // Alias for tertiary text
 
   // ============================================================================
@@ -65,6 +66,11 @@ export const COLORS = {
   protein: "#FF9800", // Orange - protein tracking
   carbs: "#4CAF50", // Green - carbohydrates tracking
   fats: "#FF6B6B", // Red - fats tracking
+
+  calories60: "#00eeff99",
+  protein60: "#ff980099",
+  carbs60: "#4caf5099",
+  fats60: "#ff6b6b99",
 
   // ============================================================================
   // MEAL TYPE COLORS (for meal category indicators)

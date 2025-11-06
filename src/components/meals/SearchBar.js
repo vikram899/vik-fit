@@ -17,7 +17,7 @@ export default function SearchBar({
       <MaterialCommunityIcons
         name="magnify"
         size={20}
-        color={COLORS.textTertiary}
+        color={COLORS.textSecondary}
         style={styles.searchIcon}
       />
       <TextInput
@@ -25,7 +25,7 @@ export default function SearchBar({
         placeholder={placeholder}
         value={searchText}
         onChangeText={onSearchChange}
-        placeholderTextColor={COLORS.textTertiary}
+        placeholderTextColor={COLORS.textSecondary}
       />
       {searchText.length > 0 && (
         <TouchableOpacity
@@ -35,7 +35,7 @@ export default function SearchBar({
           <MaterialCommunityIcons
             name="close"
             size={18}
-            color={COLORS.textTertiary}
+            color={COLORS.textSecondary}
           />
         </TouchableOpacity>
       )}

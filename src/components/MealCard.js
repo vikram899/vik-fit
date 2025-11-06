@@ -149,7 +149,7 @@ export default function MealCard({
               <MaterialCommunityIcons
                 name="dots-vertical"
                 size={20}
-                color={COLORS.textTertiary}
+                color={COLORS.textSecondary}
               />
             </TouchableOpacity>
           ) : null}
@@ -163,32 +163,32 @@ export default function MealCard({
           label="cal"
           value={meal.calories}
           unit=""
-          iconColor={COLORS.caloriesIcon}
-          backgroundColor={COLORS.calories}
+          iconColor={COLORS.calories}
+          backgroundColor={COLORS.calories60}
         />
         <StatBadge
           icon="dumbbell"
           label="protein"
           value={meal.protein}
           unit="g"
-          iconColor={COLORS.proteinIcon}
-          backgroundColor={COLORS.protein}
+          iconColor={COLORS.protein}
+          backgroundColor={COLORS.protein60}
         />
         <StatBadge
           icon="bread-slice"
           label="carbs"
           value={meal.carbs}
           unit="g"
-          iconColor={COLORS.carbsIcon}
-          backgroundColor={COLORS.carbs}
+          iconColor={COLORS.carbs}
+          backgroundColor={COLORS.carbs60}
         />
         <StatBadge
           icon="water-percent"
           label="fats"
           value={meal.fats}
           unit="g"
-          iconColor={COLORS.fatsIcon}
-          backgroundColor={COLORS.fats}
+          iconColor={COLORS.fats}
+          backgroundColor={COLORS.fats60}
         />
       </View>
     </TouchableOpacity>

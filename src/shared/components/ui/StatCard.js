@@ -29,12 +29,12 @@
  * />
  */
 
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import ProgressBar from './ProgressBar';
-import { getProgressColor } from '../../../shared/utils';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../../shared/constants';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import ProgressBar from "./ProgressBar";
+import { getProgressColor } from "../../../shared/utils";
+import { COLORS, SPACING, TYPOGRAPHY } from "../../../shared/constants";
 
 const StatCard = ({
   // Content
@@ -46,7 +46,7 @@ const StatCard = ({
   progress,
 
   // Appearance
-  variant = 'default', // 'default', 'highlighted'
+  variant = "default", // 'default', 'highlighted'
   showProgress = false,
 }) => {
   // Determine if progress should be shown
@@ -62,7 +62,7 @@ const StatCard = ({
     <View
       style={[
         styles.container,
-        variant === 'highlighted' && styles.containerHighlighted,
+        variant === "highlighted" && styles.containerHighlighted,
       ]}
     >
       {/* Icon and Label Row */}
@@ -92,11 +92,7 @@ const StatCard = ({
       {/* Progress bar */}
       {shouldShowProgress && (
         <View style={styles.progressContainer}>
-          <ProgressBar
-            percentage={progress}
-            animated
-            height={6}
-          />
+          <ProgressBar percentage={progress} animated height={6} />
           <Text style={styles.progressText}>{Math.round(progress)}%</Text>
         </View>
       )}
@@ -112,7 +108,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.mediumGray,
     marginBottom: SPACING.element,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -126,8 +122,8 @@ const styles = StyleSheet.create({
   },
 
   headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: SPACING.small,
   },
 
@@ -137,14 +133,14 @@ const styles = StyleSheet.create({
 
   label: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     fontWeight: TYPOGRAPHY.weights.semibold,
     flex: 1,
   },
 
   valueRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
+    flexDirection: "row",
+    alignItems: "baseline",
     marginBottom: SPACING.small,
   },
 
@@ -156,13 +152,13 @@ const styles = StyleSheet.create({
 
   unit: {
     ...TYPOGRAPHY.small,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     marginLeft: SPACING.xs,
   },
 
   goal: {
     ...TYPOGRAPHY.tiny,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
   },
 
   progressContainer: {
@@ -171,9 +167,9 @@ const styles = StyleSheet.create({
 
   progressText: {
     ...TYPOGRAPHY.tiny,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     marginTop: SPACING.xs,
-    textAlign: 'right',
+    textAlign: "right",
   },
 });
 

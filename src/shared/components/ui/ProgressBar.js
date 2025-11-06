@@ -25,10 +25,10 @@
  * />
  */
 
-import React, { useEffect, useRef } from 'react';
-import { View, Text, Animated, StyleSheet } from 'react-native';
-import { getProgressColor } from '../../../shared/utils';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../../shared/constants';
+import React, { useEffect, useRef } from "react";
+import { View, Text, Animated, StyleSheet } from "react-native";
+import { getProgressColor } from "../../../shared/utils";
+import { COLORS, SPACING, TYPOGRAPHY } from "../../../shared/constants";
 
 const ProgressBar = ({
   // Content
@@ -67,7 +67,7 @@ const ProgressBar = ({
 
   const widthInterpolation = animatedValue.interpolate({
     inputRange: [0, 100],
-    outputRange: ['0%', '100%'],
+    outputRange: ["0%", "100%"],
   });
 
   return (
@@ -77,7 +77,9 @@ const ProgressBar = ({
         <View style={styles.labelContainer}>
           {label && <Text style={styles.labelText}>{label}</Text>}
           {showPercentage && (
-            <Text style={styles.percentageText}>{Math.round(clampedPercentage)}%</Text>
+            <Text style={styles.percentageText}>
+              {Math.round(clampedPercentage)}%
+            </Text>
           )}
         </View>
       )}
@@ -101,26 +103,26 @@ const ProgressBar = ({
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
+    width: "100%",
     backgroundColor: COLORS.mediumGray,
     borderRadius: 4,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
 
   fill: {
-    height: '100%',
+    height: "100%",
   },
 
   labelContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: SPACING.xs,
   },
 
   labelText: {
     ...TYPOGRAPHY.small,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     fontWeight: TYPOGRAPHY.weights.semibold,
   },
 

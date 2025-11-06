@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
   },
   graphContainer: {
     flexDirection: "row",
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   gridLine: {
     position: "absolute",
     height: 1,
-    backgroundColor: COLORS.textTertiary,
+    backgroundColor: COLORS.textSecondary,
   },
   targetLine: {
     position: "absolute",
@@ -301,14 +301,14 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 8,
     fontSize: 11,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     width: 25,
   },
   xLabel: {
     position: "absolute",
     bottom: 5,
     fontSize: 11,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     width: 40,
   },
   legend: {

@@ -279,6 +279,6 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     ...TYPOGRAPHY.body,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
   },
 });

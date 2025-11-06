@@ -11,31 +11,28 @@
  * />
  */
 
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { COLORS, SPACING, TYPOGRAPHY } from "../../shared/constants";
 
 const EmptyState = ({
   showCreateButton = false,
   onCreatePress,
-  title = 'No Meals Found',
-  subtitle = 'Try adjusting your search',
+  title = "No Meals Found",
+  subtitle = "Try adjusting your search",
 }) => {
   return (
     <View style={styles.container}>
       <MaterialCommunityIcons
         name="silverware-fork-knife"
         size={64}
-        color={COLORS.textTertiary}
+        color={COLORS.textSecondary}
       />
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>
       {showCreateButton && (
-        <TouchableOpacity
-          style={styles.button}
-          onPress={onCreatePress}
-        >
+        <TouchableOpacity style={styles.button} onPress={onCreatePress}>
           <MaterialCommunityIcons name="plus" size={20} color={COLORS.white} />
           <Text style={styles.buttonText}>Create Meal</Text>
         </TouchableOpacity>
@@ -47,8 +44,8 @@ const EmptyState = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: SPACING.container * 2,
     paddingHorizontal: SPACING.element,
   },
@@ -60,13 +57,13 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     ...TYPOGRAPHY.body,
-    color: COLORS.textTertiary,
-    textAlign: 'center',
+    color: COLORS.textSecondary,
+    textAlign: "center",
     marginBottom: SPACING.container,
   },
   button: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: SPACING.small,
     backgroundColor: COLORS.primary,
     paddingVertical: SPACING.small,

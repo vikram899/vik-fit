@@ -16,7 +16,7 @@ export const appStyles = StyleSheet.create({
   },
   subtitle: {
     fontSize: TYPOGRAPHY.sizes.lg,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     marginBottom: SPACING.xxxl,
   },
   buttonContainer: {
@@ -84,7 +84,7 @@ export const appStyles = StyleSheet.create({
   },
   planExercises: {
     fontSize: TYPOGRAPHY.sizes.md,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
   },
   headerWithButton: {
     width: "100%",
@@ -121,7 +121,7 @@ export const appStyles = StyleSheet.create({
   },
   compactSubtitle: {
     fontSize: TYPOGRAPHY.sizes.xs,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     fontWeight: TYPOGRAPHY.weights.medium,
     marginTop: SPACING.xs,
   },
@@ -141,13 +141,13 @@ export const appStyles = StyleSheet.create({
   },
   loadingText: {
     fontSize: TYPOGRAPHY.sizes.lg,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     textAlign: "center",
     marginTop: SPACING.container,
   },
   emptyText: {
     fontSize: TYPOGRAPHY.sizes.lg,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     textAlign: "center",
     marginTop: SPACING.container,
     fontStyle: "italic",
@@ -224,7 +224,7 @@ export const appStyles = StyleSheet.create({
     flex: 1,
   },
   cancelButton: {
-    backgroundColor: COLORS.textTertiary,
+    backgroundColor: COLORS.textSecondary,
   },
   buttonDisabled: {
     opacity: 0.6,
@@ -251,7 +251,7 @@ export const appStyles = StyleSheet.create({
   },
   emptyExercisesText: {
     fontSize: TYPOGRAPHY.sizes.md,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     fontStyle: "italic",
     marginVertical: SPACING.element,
   },
@@ -351,7 +351,7 @@ export const appStyles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: TYPOGRAPHY.sizes.xs,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     fontWeight: TYPOGRAPHY.weights.medium,
     marginBottom: SPACING.xs,
   },
@@ -362,7 +362,7 @@ export const appStyles = StyleSheet.create({
   },
   goalText: {
     fontSize: TYPOGRAPHY.sizes.xs,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     marginTop: SPACING.xs,
   },
   summaryCard: {
@@ -439,7 +439,7 @@ export const appStyles = StyleSheet.create({
   },
   summaryGoalSmall: {
     fontSize: TYPOGRAPHY.sizes.xs,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     fontWeight: TYPOGRAPHY.weights.medium,
   },
   progressContainer: {
@@ -471,7 +471,7 @@ export const appStyles = StyleSheet.create({
   progressText: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontWeight: TYPOGRAPHY.weights.bold,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
   },
   workoutsSection: {
     paddingHorizontal: SPACING.element,
@@ -503,11 +503,11 @@ export const appStyles = StyleSheet.create({
   },
   workoutCard: {
     width: 160,
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.tertiaryBackground,
     borderRadius: SPACING.borderRadiusXL,
     padding: SPACING.medium,
     borderWidth: 1.5,
-    borderColor: "#e8e8e8",
+    borderColor: COLORS.tertiaryBackground,
     justifyContent: "space-between",
     shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 2 },
@@ -523,7 +523,7 @@ export const appStyles = StyleSheet.create({
   },
   workoutCardIcon: {
     padding: SPACING.small,
-    backgroundColor: "rgba(0, 122, 255, 0.1)",
+    backgroundColor: COLORS.tertiaryBackground,
     borderRadius: SPACING.borderRadiusLarge,
   },
   workoutCardName: {
@@ -550,12 +550,14 @@ export const appStyles = StyleSheet.create({
     borderColor: COLORS.carbs,
   },
   workoutCardStatusText: {
-    color: COLORS.textSecondary,
+    color: COLORS.warning,
     fontSize: TYPOGRAPHY.sizes.sm,
     fontWeight: TYPOGRAPHY.weights.semibold,
   },
   workoutCardStatusTextCompleted: {
-    color: "#2E7D32",
+    color: COLORS.success,
+    fontSize: TYPOGRAPHY.sizes.sm,
+    fontWeight: TYPOGRAPHY.weights.semibold,
   },
   mealsListContent: {
     paddingHorizontal: SPACING.container,
@@ -582,7 +584,7 @@ export const appStyles = StyleSheet.create({
   categoryButtonText: {
     fontSize: TYPOGRAPHY.sizes.sm,
     fontWeight: TYPOGRAPHY.weights.medium,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
   },
   categoryButtonTextActive: {
     color: COLORS.white,
@@ -609,7 +611,7 @@ export const appStyles = StyleSheet.create({
   },
   existingMealCategory: {
     fontSize: TYPOGRAPHY.sizes.md,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     fontWeight: TYPOGRAPHY.weights.medium,
   },
   existingMealNutrition: {
@@ -691,7 +693,7 @@ export const appStyles = StyleSheet.create({
   },
   confirmNutritionLabel: {
     fontSize: TYPOGRAPHY.sizes.md,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     fontWeight: TYPOGRAPHY.weights.medium,
     marginBottom: SPACING.xs,
   },
@@ -724,7 +726,7 @@ export const appStyles = StyleSheet.create({
   },
   mealItemMacros: {
     fontSize: TYPOGRAPHY.sizes.md,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     fontWeight: TYPOGRAPHY.weights.regular,
   },
   macroGridContainer: {
@@ -744,7 +746,7 @@ export const appStyles = StyleSheet.create({
   },
   macroLabel: {
     fontSize: TYPOGRAPHY.sizes.md,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     fontWeight: TYPOGRAPHY.weights.medium,
     marginBottom: SPACING.xs,
   },
@@ -756,13 +758,13 @@ export const appStyles = StyleSheet.create({
   },
   macroGoal: {
     fontSize: TYPOGRAPHY.sizes.xs,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     fontWeight: TYPOGRAPHY.weights.regular,
   },
   dateHeader: {
     fontSize: TYPOGRAPHY.sizes.lg,
     fontWeight: TYPOGRAPHY.weights.medium,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
   },
   progressTabsContainer: {
     flexDirection: "row",
@@ -785,7 +787,7 @@ export const appStyles = StyleSheet.create({
   progressTabText: {
     fontSize: TYPOGRAPHY.sizes.lg,
     fontWeight: TYPOGRAPHY.weights.semibold,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
   },
   progressTabTextActive: {
     color: COLORS.info,

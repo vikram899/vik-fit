@@ -47,8 +47,7 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
     flex: 1,
     borderWidth: 1,
-    borderColor: "rgba(0, 0, 0, 0.08)",
-    opacity: 0.6,
+    //borderColor: "rgba(0, 0, 0, 0.08)",
   },
   badgeContent: {
     flexDirection: "column",
@@ -58,13 +57,13 @@ const styles = StyleSheet.create({
   statBadgeLabel: {
     ...TYPOGRAPHY.tiny,
     fontWeight: TYPOGRAPHY.weights.semibold,
-    color: COLORS.text,
+    color: COLORS.textPrimary,
     textTransform: "capitalize",
   },
   statBadgeValue: {
     ...TYPOGRAPHY.small,
     fontWeight: TYPOGRAPHY.weights.bold,
-    color: COLORS.text,
+    color: COLORS.textPrimary,
   },
 });
 

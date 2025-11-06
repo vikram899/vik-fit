@@ -15,7 +15,7 @@ export const useTabBarStyles = () => {
 
   const screenOptions = {
     tabBarActiveTintColor: COLORS.primary,
-    tabBarInactiveTintColor: COLORS.textTertiary,
+    tabBarInactiveTintColor: COLORS.textSecondary,
     tabBarLabelStyle: {
       fontSize: TYPOGRAPHY.small.fontSize,
       fontWeight: TYPOGRAPHY.weights.medium,

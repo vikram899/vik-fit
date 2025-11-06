@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 14,
-    color: SHARED_COLORS.textTertiary,
+    color: SHARED_COLORS.textSecondary,
   },
   emptyContainer: {
     flex: 1,
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: SHARED_COLORS.textTertiary,
+    color: SHARED_COLORS.textSecondary,
   },
   dayCard: {
     backgroundColor: SHARED_COLORS.secondaryBackground,
@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
   },
   dayDate: {
     fontSize: 11,
-    color: SHARED_COLORS.textTertiary,
+    color: SHARED_COLORS.textSecondary,
     marginTop: 2,
   },
   dayCalories: {
@@ -392,7 +392,7 @@ const styles = StyleSheet.create({
   },
   macroLabel: {
     fontSize: 11,
-    color: SHARED_COLORS.textTertiary,
+    color: SHARED_COLORS.textSecondary,
     fontWeight: "500",
   },
   macroValue: {

@@ -72,7 +72,7 @@ const styles = {
   },
   emptyStateText: {
     ...TYPOGRAPHY.small,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     marginTop: SPACING.small,
     fontWeight: "500",
   },

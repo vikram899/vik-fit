@@ -45,7 +45,7 @@ const WorkoutCard = ({
                   <MaterialCommunityIcons
                     name="calendar-remove"
                     size={14}
-                    color={COLORS.textTertiary}
+                    color={COLORS.textSecondary}
                     style={{ marginRight: SPACING.xs }}
                   />
                   <Text style={styles.noDaysText}>No days assigned</Text>
@@ -61,7 +61,7 @@ const WorkoutCard = ({
           <MaterialCommunityIcons
             name="dots-vertical"
             size={24}
-            color={COLORS.textTertiary}
+            color={COLORS.textSecondary}
           />
         </TouchableOpacity>
       </View>
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
   noDaysText: {
     fontSize: TYPOGRAPHY.sizes.xs,
     fontWeight: TYPOGRAPHY.weights.semibold,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
   },
   kebabButton: {
     padding: SPACING.small,
@@ -235,12 +235,12 @@ const styles = StyleSheet.create({
   },
   exerciseCount: {
     fontSize: TYPOGRAPHY.sizes.xl,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     fontWeight: TYPOGRAPHY.weights.bold,
   },
   exerciseLabel: {
     fontSize: TYPOGRAPHY.sizes.xs,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     fontWeight: TYPOGRAPHY.weights.semibold,
     marginTop: SPACING.xs,
     textTransform: "uppercase",

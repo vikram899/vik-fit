@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
 
   subtitle: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
   },
 
   actionButton: {

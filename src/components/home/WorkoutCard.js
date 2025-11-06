@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { COLORS } from "../../styles";
+import { COLORS } from "../../shared/constants";
 import { appStyles } from "../../styles/app.styles";
 
 export default function WorkoutCard({ workout, isCompleted, onPress }) {
@@ -16,7 +16,7 @@ export default function WorkoutCard({ workout, isCompleted, onPress }) {
           <MaterialCommunityIcons
             name="dumbbell"
             size={20}
-            color={COLORS.primary}
+            color={COLORS.secondary}
           />
         </View>
         <Text style={appStyles.workoutCardName} numberOfLines={1}>
@@ -33,7 +33,7 @@ export default function WorkoutCard({ workout, isCompleted, onPress }) {
         <MaterialCommunityIcons
           name={isCompleted ? "check-circle" : "clock-outline"}
           size={14}
-          color={isCompleted ? "#fff" : "#666"}
+          color={isCompleted ? COLORS.success : COLORS.warning}
         />
         <Text
           style={[

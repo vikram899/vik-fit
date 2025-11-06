@@ -39,7 +39,7 @@ const TodaysMealsList = ({
       Snacks: { icon: "popcorn", color: COLORS.snacks },
       Dinner: { icon: "moon-waning-crescent", color: COLORS.dinner },
     };
-    return icons[type] || { icon: "food", color: COLORS.textTertiary };
+    return icons[type] || { icon: "food", color: COLORS.textSecondary };
   };
 
   // Toggle collapse for meal type
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     ...TYPOGRAPHY.body,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     textAlign: "center",
     paddingVertical: SPACING.container,
   },
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   mealTypeCalories: {
     ...TYPOGRAPHY.small,
     fontWeight: TYPOGRAPHY.weights.semibold,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
   },
   mealCardContainer: {
     marginHorizontal: SPACING.element,

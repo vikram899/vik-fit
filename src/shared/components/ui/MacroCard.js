@@ -32,37 +32,37 @@
  * />
  */
 
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import ProgressBar from './ProgressBar';
-import { calculatePercentageCapped } from '../../../shared/utils';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../../shared/constants';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import ProgressBar from "./ProgressBar";
+import { calculatePercentageCapped } from "../../../shared/utils";
+import { COLORS, SPACING, TYPOGRAPHY } from "../../../shared/constants";
 
 // Macro type configurations
 const MACRO_CONFIG = {
   calories: {
-    label: 'Calories',
-    unit: 'kcal',
+    label: "Calories",
+    unit: "kcal",
     color: COLORS.calories,
-    icon: 'flame',
+    icon: "flame",
   },
   protein: {
-    label: 'Protein',
-    unit: 'g',
+    label: "Protein",
+    unit: "g",
     color: COLORS.protein,
-    icon: 'dumbbell',
+    icon: "dumbbell",
   },
   carbs: {
-    label: 'Carbs',
-    unit: 'g',
+    label: "Carbs",
+    unit: "g",
     color: COLORS.carbs,
-    icon: 'bread-slice',
+    icon: "bread-slice",
   },
   fats: {
-    label: 'Fats',
-    unit: 'g',
+    label: "Fats",
+    unit: "g",
     color: COLORS.fats,
-    icon: 'water',
+    icon: "water",
   },
 };
 
@@ -73,7 +73,7 @@ const MacroCard = ({
   goal,
 
   // Multi macro display
-  layout = 'single', // 'single', 'grid'
+  layout = "single", // 'single', 'grid'
   macros, // { calories: {...}, protein: {...}, ... }
 
   // Options
@@ -82,7 +82,7 @@ const MacroCard = ({
   showValue = true,
 }) => {
   // Single macro card
-  if (layout === 'single' && macroType) {
+  if (layout === "single" && macroType) {
     const config = MACRO_CONFIG[macroType];
     const percentage = calculatePercentageCapped(actual, goal);
 
@@ -119,7 +119,7 @@ const MacroCard = ({
   }
 
   // Grid layout with multiple macros
-  if (layout === 'grid' && macros) {
+  if (layout === "grid" && macros) {
     return (
       <View style={styles.gridContainer}>
         {Object.entries(macros).map(([macroType, data]) => {
@@ -139,7 +139,7 @@ const MacroCard = ({
               {/* Unit and goal */}
               <Text style={styles.gridUnit}>
                 {config.unit}
-                {showGoal ? ` / ${Math.round(data.goal)}` : ''}
+                {showGoal ? ` / ${Math.round(data.goal)}` : ""}
               </Text>
 
               {/* Progress bar */}
@@ -175,21 +175,21 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: SPACING.small,
   },
 
   label: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     fontWeight: TYPOGRAPHY.weights.semibold,
   },
 
   goalText: {
     ...TYPOGRAPHY.tiny,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
   },
 
   value: {
@@ -200,14 +200,14 @@ const styles = StyleSheet.create({
 
   // Grid layout
   gridContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: SPACING.element,
   },
 
   gridItem: {
     flex: 1,
-    minWidth: '48%',
+    minWidth: "48%",
     backgroundColor: COLORS.white,
     borderRadius: SPACING.borderRadiusLarge,
     padding: SPACING.element,
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
 
   gridLabel: {
     ...TYPOGRAPHY.small,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     fontWeight: TYPOGRAPHY.weights.semibold,
     marginBottom: SPACING.xs,
   },
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
 
   gridUnit: {
     ...TYPOGRAPHY.tiny,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     marginBottom: SPACING.small,
   },
 

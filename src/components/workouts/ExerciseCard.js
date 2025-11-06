@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: TYPOGRAPHY.sizes.md,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     fontWeight: TYPOGRAPHY.weights.medium,
     marginBottom: SPACING.xs,
   },
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   timeDisplay: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontWeight: TYPOGRAPHY.weights.semibold,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     backgroundColor: COLORS.secondaryBackground,
     paddingHorizontal: SPACING.small,
     paddingVertical: SPACING.xs,

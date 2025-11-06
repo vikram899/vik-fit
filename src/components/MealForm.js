@@ -35,7 +35,7 @@ const MealForm = ({
         <TextInput
           style={formStyles.input}
           placeholder="Enter meal name"
-          placeholderTextColor={COLORS.textTertiary}
+          placeholderTextColor={COLORS.textSecondary}
           value={form.name}
           onChangeText={(value) => onFormChange({ ...form, name: value })}
         />
@@ -140,7 +140,7 @@ const MealForm = ({
           <TextInput
             style={formStyles.input}
             placeholder="0"
-            placeholderTextColor={COLORS.textTertiary}
+            placeholderTextColor={COLORS.textSecondary}
             value={form.calories}
             onChangeText={(value) => onFormChange({ ...form, calories: value })}
             keyboardType="decimal-pad"
@@ -152,7 +152,7 @@ const MealForm = ({
           <TextInput
             style={formStyles.input}
             placeholder="0"
-            placeholderTextColor={COLORS.textTertiary}
+            placeholderTextColor={COLORS.textSecondary}
             value={form.protein}
             onChangeText={(value) => onFormChange({ ...form, protein: value })}
             keyboardType="decimal-pad"
@@ -167,7 +167,7 @@ const MealForm = ({
           <TextInput
             style={formStyles.input}
             placeholder="0"
-            placeholderTextColor={COLORS.textTertiary}
+            placeholderTextColor={COLORS.textSecondary}
             value={form.carbs}
             onChangeText={(value) => onFormChange({ ...form, carbs: value })}
             keyboardType="decimal-pad"
@@ -179,7 +179,7 @@ const MealForm = ({
           <TextInput
             style={formStyles.input}
             placeholder="0"
-            placeholderTextColor={COLORS.textTertiary}
+            placeholderTextColor={COLORS.textSecondary}
             value={form.fats}
             onChangeText={(value) => onFormChange({ ...form, fats: value })}
             keyboardType="decimal-pad"
@@ -191,7 +191,7 @@ const MealForm = ({
         <Text
           style={{
             ...TYPOGRAPHY.small,
-            color: COLORS.textTertiary,
+            color: COLORS.textSecondary,
             marginTop: SPACING.small,
           }}
         >

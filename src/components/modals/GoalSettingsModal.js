@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 13,
-    color: SHARED_COLORS.textSecondary,
+    color: SHARED_COLORS.textTertiary,
     fontWeight: "500",
   },
   scrollView: {
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
   },
   settingDescription: {
     fontSize: 12,
-    color: SHARED_COLORS.textTertiary,
+    color: SHARED_COLORS.textSecondary,
     fontWeight: "500",
   },
   footer: {
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
   },
   sectionDescription: {
     fontSize: 12,
-    color: SHARED_COLORS.textTertiary,
+    color: SHARED_COLORS.textSecondary,
     fontWeight: "500",
     marginBottom: SPACING.element,
   },

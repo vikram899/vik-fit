@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { COLORS, SPACING, TYPOGRAPHY } from "../../shared/constants";
 
 /**
  * AllMealsEmptyState Component
@@ -19,24 +19,19 @@ const AllMealsEmptyState = ({ hasAnyMeals = false, onCreatePress }) => {
       <MaterialCommunityIcons
         name="silverware-fork-knife"
         size={64}
-        color={COLORS.textTertiary}
+        color={COLORS.textSecondary}
       />
       <Text style={styles.title}>
-        {isNoMealsAtAll ? 'No Meals Created' : 'No Meals Found'}
+        {isNoMealsAtAll ? "No Meals Created" : "No Meals Found"}
       </Text>
       <Text style={styles.subtitle}>
-        {isNoMealsAtAll ? 'Create your first meal' : 'Try adjusting your search'}
+        {isNoMealsAtAll
+          ? "Create your first meal"
+          : "Try adjusting your search"}
       </Text>
       {isNoMealsAtAll && (
-        <TouchableOpacity
-          onPress={onCreatePress}
-          style={styles.button}
-        >
-          <MaterialCommunityIcons
-            name="plus"
-            size={20}
-            color={COLORS.white}
-          />
+        <TouchableOpacity onPress={onCreatePress} style={styles.button}>
+          <MaterialCommunityIcons name="plus" size={20} color={COLORS.white} />
           <Text style={styles.buttonText}>Create Meal</Text>
         </TouchableOpacity>
       )}
@@ -47,8 +42,8 @@ const AllMealsEmptyState = ({ hasAnyMeals = false, onCreatePress }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: SPACING.container * 2,
     paddingHorizontal: SPACING.element,
   },
@@ -60,13 +55,13 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     ...TYPOGRAPHY.body,
-    color: COLORS.textTertiary,
-    textAlign: 'center',
+    color: COLORS.textSecondary,
+    textAlign: "center",
     marginBottom: SPACING.container,
   },
   button: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: SPACING.small,
     backgroundColor: COLORS.primary,
     paddingVertical: SPACING.small,

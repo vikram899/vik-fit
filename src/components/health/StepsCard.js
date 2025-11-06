@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 12,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     fontWeight: "500",
   },
   refreshButton: {
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   },
   stepsLabel: {
     fontSize: 12,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     marginTop: SPACING.xs,
   },
   goalSection: {
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
   },
   goalLabel: {
     fontSize: 12,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     marginBottom: SPACING.xs,
     fontWeight: "500",
   },
@@ -393,20 +393,20 @@ const styles = StyleSheet.create({
   permissionTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     marginTop: SPACING.small,
     marginBottom: SPACING.xs,
   },
   permissionText: {
     fontSize: 13,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     textAlign: "center",
     marginBottom: SPACING.small,
     lineHeight: 18,
   },
   devClientNote: {
     fontSize: 11,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     textAlign: "center",
     marginBottom: 16,
     lineHeight: 16,
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 13,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     marginTop: SPACING.xs,
     marginBottom: SPACING.small,
   },
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
   },
   placeholderText: {
     fontSize: 13,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
     marginTop: SPACING.xs,
   },
 });

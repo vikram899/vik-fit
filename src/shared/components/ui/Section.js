@@ -22,10 +22,10 @@
  * </Section>
  */
 
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../../shared/constants';
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { COLORS, SPACING, TYPOGRAPHY } from "../../../shared/constants";
 
 const Section = ({
   // Content
@@ -43,7 +43,7 @@ const Section = ({
   isLoading = false,
 
   // Appearance
-  variant = 'default', // 'default', 'elevated'
+  variant = "default", // 'default', 'elevated'
 }) => {
   const [collapsed, setCollapsed] = useState(isCollapsed);
 
@@ -58,24 +58,34 @@ const Section = ({
   };
 
   return (
-    <View style={[styles.container, variant === 'elevated' && styles.containerElevated]}>
+    <View
+      style={[
+        styles.container,
+        variant === "elevated" && styles.containerElevated,
+      ]}
+    >
       {/* Section Header */}
       <View style={styles.header}>
         <TouchableOpacity
-          style={[styles.titleContainer, isCollapsible && styles.titleClickable]}
+          style={[
+            styles.titleContainer,
+            isCollapsible && styles.titleClickable,
+          ]}
           onPress={isCollapsible ? toggleCollapse : undefined}
           disabled={!isCollapsible}
         >
           <View style={styles.titleContent}>
             <Text style={styles.title}>{title}</Text>
-            {description && <Text style={styles.description}>{description}</Text>}
+            {description && (
+              <Text style={styles.description}>{description}</Text>
+            )}
           </View>
 
           {isCollapsible && (
             <MaterialCommunityIcons
-              name={collapsed ? 'chevron-down' : 'chevron-up'}
+              name={collapsed ? "chevron-down" : "chevron-up"}
               size={24}
-              color={COLORS.textSecondary}
+              color={COLORS.textTertiary}
             />
           )}
         </TouchableOpacity>
@@ -124,7 +134,7 @@ const styles = StyleSheet.create({
     borderRadius: SPACING.borderRadiusLarge,
     borderWidth: 1,
     borderColor: COLORS.mediumGray,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -132,9 +142,9 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: SPACING.element,
   },
 
@@ -143,9 +153,9 @@ const styles = StyleSheet.create({
   },
 
   titleClickable: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 
   titleContent: {
@@ -159,12 +169,12 @@ const styles = StyleSheet.create({
 
   description: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
   },
 
   actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: SPACING.xs,
     paddingHorizontal: SPACING.small,
     borderRadius: SPACING.borderRadius,
@@ -182,17 +192,17 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    width: '100%',
+    width: "100%",
   },
 
   emptyState: {
     paddingVertical: SPACING.container,
-    alignItems: 'center',
+    alignItems: "center",
   },
 
   emptyStateText: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
   },
 });
 

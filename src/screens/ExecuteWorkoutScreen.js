@@ -184,7 +184,7 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
     {
       label: "Cancel",
       icon: "close",
-      color: COLORS.textSecondary,
+      color: COLORS.textTertiary,
       onPress: () => {},
     },
   ];
@@ -219,7 +219,7 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
             <MaterialCommunityIcons
               name="dots-vertical"
               size={24}
-              color={COLORS.textTertiary}
+              color={COLORS.textSecondary}
             />
           </TouchableOpacity>
         )}

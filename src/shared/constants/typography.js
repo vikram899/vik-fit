@@ -116,7 +116,7 @@ export const TYPOGRAPHY = {
     fontSize: 14,
     fontWeight: "400",
     lineHeight: 20,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
   },
 
   // Caption - small descriptive text
@@ -124,7 +124,7 @@ export const TYPOGRAPHY = {
     fontSize: 13,
     fontWeight: "500",
     lineHeight: 18,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
   },
 
   // Button text - text within buttons
@@ -148,7 +148,7 @@ export const TYPOGRAPHY = {
     fontSize: 12,
     fontWeight: "400",
     lineHeight: 16,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
   },
 
   // Tiny - smallest text
@@ -156,7 +156,7 @@ export const TYPOGRAPHY = {
     fontSize: 11,
     fontWeight: "500",
     lineHeight: 14,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
   },
 };
 

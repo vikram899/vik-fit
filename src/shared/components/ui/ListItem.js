@@ -33,10 +33,16 @@
  * />
  */
 
-import React from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../../shared/constants';
+import React from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { COLORS, SPACING, TYPOGRAPHY } from "../../../shared/constants";
 
 const ListItem = ({
   // Content
@@ -138,7 +144,7 @@ const ListItem = ({
           <MaterialCommunityIcons
             name="chevron-right"
             size={20}
-            color={COLORS.textSecondary}
+            color={COLORS.textTertiary}
           />
         )}
       </TouchableOpacity>
@@ -151,8 +157,8 @@ const ListItem = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: SPACING.element,
     paddingHorizontal: SPACING.element,
     backgroundColor: COLORS.white,
@@ -183,26 +189,26 @@ const styles = StyleSheet.create({
 
   subtitle: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
   },
 
   value: {
     ...TYPOGRAPHY.small,
-    color: COLORS.textSecondary,
+    color: COLORS.textTertiary,
     fontWeight: TYPOGRAPHY.weights.semibold,
     marginHorizontal: SPACING.small,
   },
 
   actionsContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: SPACING.small,
     marginLeft: SPACING.small,
   },
 
   actionButton: {
     padding: SPACING.small,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   divider: {

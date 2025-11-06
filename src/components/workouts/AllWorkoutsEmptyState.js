@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { COLORS, SPACING, TYPOGRAPHY } from "../../shared/constants";
 
 /**
  * AllWorkoutsEmptyState Component
@@ -19,26 +19,19 @@ const AllWorkoutsEmptyState = ({ hasAnyWorkouts = false, onCreatePress }) => {
       <MaterialCommunityIcons
         name="dumbbell"
         size={64}
-        color={COLORS.textTertiary}
+        color={COLORS.textSecondary}
       />
       <Text style={styles.title}>
-        {isNoWorkoutsAtAll ? 'No Workouts Created' : 'No Workouts Found'}
+        {isNoWorkoutsAtAll ? "No Workouts Created" : "No Workouts Found"}
       </Text>
       <Text style={styles.subtitle}>
         {isNoWorkoutsAtAll
-          ? 'Create your first workout routine'
-          : 'Try adjusting your search or filters'}
+          ? "Create your first workout routine"
+          : "Try adjusting your search or filters"}
       </Text>
       {isNoWorkoutsAtAll && (
-        <TouchableOpacity
-          onPress={onCreatePress}
-          style={styles.button}
-        >
-          <MaterialCommunityIcons
-            name="plus"
-            size={20}
-            color={COLORS.white}
-          />
+        <TouchableOpacity onPress={onCreatePress} style={styles.button}>
+          <MaterialCommunityIcons name="plus" size={20} color={COLORS.white} />
           <Text style={styles.buttonText}>Create Workout</Text>
         </TouchableOpacity>
       )}
@@ -49,8 +42,8 @@ const AllWorkoutsEmptyState = ({ hasAnyWorkouts = false, onCreatePress }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: SPACING.container * 2,
     paddingHorizontal: SPACING.element,
   },
@@ -62,13 +55,13 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     ...TYPOGRAPHY.body,
-    color: COLORS.textTertiary,
-    textAlign: 'center',
+    color: COLORS.textSecondary,
+    textAlign: "center",
     marginBottom: SPACING.container,
   },
   button: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: SPACING.small,
     backgroundColor: COLORS.primary,
     paddingVertical: SPACING.small,
