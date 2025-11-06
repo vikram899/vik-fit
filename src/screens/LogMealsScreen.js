@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, Alert, ScrollView } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { logMealsScreenStyles, COLORS } from "../styles";
+import { logMealsScreenStyles } from "../styles";
 import { STRINGS } from "../constants/strings";
 import {
   getMealLogsForDate,
@@ -13,6 +13,7 @@ import {
 import { EditMealModal } from "../components/modals";
 import { TodaysMealsList } from "../components/meals";
 import { SummaryCard } from "../components/home";
+import { COLORS } from "../shared/constants";
 
 const LogMealsScreen = ({ navigation }) => {
   const today = new Date().toISOString().split("T")[0];
@@ -51,8 +52,7 @@ const LogMealsScreen = ({ navigation }) => {
           // Load macro goals to ensure they're always up-to-date
           const goals = await getMacroGoals(todayDate);
           setMacroGoals(goals);
-        } catch (error) {
-        }
+        } catch (error) {}
       };
 
       fetchData();
@@ -73,8 +73,7 @@ const LogMealsScreen = ({ navigation }) => {
         const meals = await getAllMeals();
         setExistingMeals(meals);
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   const handleOpenAddNewScreen = () => {

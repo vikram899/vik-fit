@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   statBadgeLabel: {
     ...TYPOGRAPHY.tiny,
     fontWeight: TYPOGRAPHY.weights.semibold,
-    color: COLORS.textPrimary,
+    color: COLORS.textSecondary,
     textTransform: "capitalize",
   },
   statBadgeValue: {
