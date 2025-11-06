@@ -797,6 +797,39 @@ export const appStyles = StyleSheet.create({
   },
 });
 
+// ============================================================================
+// LOG MEALS SCREEN STYLES
+// ============================================================================
+
+export const logMealsScreenStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "flex-start",
+    paddingTop: 0,
+    backgroundColor: COLORS.mainBackground,
+  },
+  dateHeader: {
+    paddingHorizontal: SPACING.element,
+    paddingBottom: SPACING.xs,
+  },
+  dateText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    fontWeight: "500",
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.element,
+    backgroundColor: COLORS.mainBackground,
+    gap: SPACING.element,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.mediumGray,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
+
 // FAB styles
 export const fabStyles = StyleSheet.create({
   tabBarIconContainer: {

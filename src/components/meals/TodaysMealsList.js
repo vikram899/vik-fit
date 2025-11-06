@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   mealTypeCalories: {
     ...TYPOGRAPHY.small,
     fontWeight: TYPOGRAPHY.weights.semibold,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
   },
   mealCardContainer: {
     marginHorizontal: SPACING.element,

@@ -1,8 +1,7 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Alert, ScrollView } from "react-native";
+import { View, Alert, ScrollView } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { logMealsScreenStyles } from "../styles";
+import { logMealsScreenStyles } from "../styles/app.styles";
 import { STRINGS } from "../constants/strings";
 import {
   getMealLogsForDate,
@@ -13,7 +12,8 @@ import {
 import { EditMealModal } from "../components/modals";
 import { TodaysMealsList } from "../components/meals";
 import { SummaryCard } from "../components/home";
-import { COLORS } from "../shared/constants";
+import { COLORS, SPACING, TYPOGRAPHY } from "../shared/constants";
+import { Button } from "../shared/components/ui";
 
 const LogMealsScreen = ({ navigation }) => {
   const today = new Date().toISOString().split("T")[0];
@@ -188,24 +188,20 @@ const LogMealsScreen = ({ navigation }) => {
 
       {/* Add Meal Buttons - Fixed at Bottom */}
       <View style={logMealsScreenStyles.buttonsContainer}>
-        <TouchableOpacity
-          style={logMealsScreenStyles.buttonPrimary}
+        <Button
+          label={STRINGS.logMealsScreen.buttons.addNewMeal}
+          icon="plus"
+          variant="primary"
+          size="medium"
           onPress={handleOpenAddNewScreen}
-        >
-          <MaterialCommunityIcons name="plus" size={24} color={COLORS.white} />
-          <Text style={logMealsScreenStyles.buttonText}>
-            {STRINGS.logMealsScreen.buttons.addNewMeal}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={logMealsScreenStyles.buttonSecondary}
+        />
+        <Button
+          label={STRINGS.logMealsScreen.buttons.addExistingMeal}
+          icon="check"
+          variant="primary"
+          size="medium"
           onPress={handleOpenAddExistingScreen}
-        >
-          <MaterialCommunityIcons name="check" size={24} color={COLORS.white} />
-          <Text style={logMealsScreenStyles.buttonText}>
-            {STRINGS.logMealsScreen.buttons.addExistingMeal}
-          </Text>
-        </TouchableOpacity>
+        />
       </View>
 
       {/* Modals */}

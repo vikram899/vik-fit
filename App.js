@@ -139,6 +139,7 @@ function HomeStackNavigator({ navigation }) {
         options={{
           title: "Log Meals",
           animationEnabled: false,
+          headerStyle: { backgroundColor: COLORS.mainBackground },
         }}
       />
       <Stack.Screen
