@@ -3,7 +3,10 @@
     "allow": [
       "Bash(while read f)",
       "Bash(do if grep -q \"<Text\" \"$f\")",
-      "Bash(then echo \"$f\")"
+      "Bash(then echo \"$f\")",
+      "Bash(npm run build:*)",
+      "Bash(npm run:*)",
+      "Bash(node -c:*)"
     ],
     "deny": [],
     "ask": []

@@ -4,7 +4,7 @@
  * Centralized export of all reusable UI components.
  *
  * Imports:
- * import { Card, Button, Section, Badge, ProgressBar, StatCard, MacroCard, ListItem } from '@shared/components/ui'
+ * import { Card, Button, Section, Badge, ProgressBar, StatCard, MacroCard, ListItem, BottomSheet } from '@shared/components/ui'
  */
 
 export { default as Card } from './Card';
@@ -16,3 +16,4 @@ export { default as ProgressBar } from './ProgressBar';
 export { default as StatCard } from './StatCard';
 export { default as MacroCard } from './MacroCard';
 export { default as ListItem } from './ListItem';
+export { default as BottomSheet } from './BottomSheet';
