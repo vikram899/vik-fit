@@ -1,8 +1,7 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { buttonStyles } from "../styles";
+import { View } from "react-native";
 import { COLORS, SPACING } from "../shared/constants";
+import Button from "../shared/components/ui/Button";
 
 /**
  * CreateMealButtons
@@ -26,32 +25,30 @@ const CreateMealButtons = ({ onAdd, onCancel, isLoading = false }) => {
         borderTopColor: COLORS.secondaryBackground,
       }}
     >
-      <TouchableOpacity
-        style={[
-          buttonStyles.button,
-          buttonStyles.buttonHalf,
-          buttonStyles.buttonPrimary,
-          isLoading && { opacity: 0.6 },
-        ]}
-        onPress={onAdd}
-        disabled={isLoading}
-      >
-        <MaterialCommunityIcons name="check" size={20} color={COLORS.white} />
-        <Text style={buttonStyles.buttonText}>Add</Text>
-      </TouchableOpacity>
+      <View style={{ flex: 1 }}>
+        <Button
+          label="Add"
+          icon="check"
+          iconPosition="left"
+          variant="primary"
+          size="medium"
+          onPress={onAdd}
+          isLoading={isLoading}
+          isDisabled={isLoading}
+          fullWidth
+        />
+      </View>
 
-      <TouchableOpacity
-        style={[
-          buttonStyles.button,
-          buttonStyles.buttonHalf,
-          buttonStyles.cancelButton,
-          isLoading && { opacity: 0.6 },
-        ]}
-        onPress={onCancel}
-        disabled={isLoading}
-      >
-        <Text style={buttonStyles.buttonText}>Cancel</Text>
-      </TouchableOpacity>
+      <View style={{ flex: 1 }}>
+        <Button
+          label="Cancel"
+          variant="cancel"
+          size="medium"
+          onPress={onCancel}
+          isDisabled={isLoading}
+          fullWidth
+        />
+      </View>
     </View>
   );
 };

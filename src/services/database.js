@@ -525,6 +525,50 @@ export const seedDummyData = async () => {
         await setMacroGoals(today, 2500, 120, 300, 80);
       }
 
+      // Check if default meals already exist
+      const existingMeals = await getAllMeals();
+      const hasDefaultMeals = existingMeals.length > 0;
+
+      // Only seed meals if they don't exist
+      if (!hasDefaultMeals) {
+        // Add default meals for each food type
+        // ============================================================================
+        // VEGETARIAN MEALS
+        // ============================================================================
+        await addMeal('Spinach Salad', 'Vegetables', 150, 8, 12, 6, 'veg', 200);
+        await addMeal('Paneer Curry', 'Indian', 320, 22, 15, 18, 'veg', 250);
+        await addMeal('Vegetable Biryani', 'Indian', 280, 12, 45, 8, 'veg', 300);
+        await addMeal('Dal Makhani', 'Indian', 250, 16, 28, 10, 'veg', 280);
+        await addMeal('Broccoli Pasta', 'Italian', 380, 14, 55, 12, 'veg', 320);
+
+        // ============================================================================
+        // NON-VEGETARIAN MEALS
+        // ============================================================================
+        await addMeal('Grilled Chicken Breast', 'Protein', 320, 42, 0, 16, 'non-veg', 200);
+        await addMeal('Butter Chicken', 'Indian', 420, 28, 18, 24, 'non-veg', 300);
+        await addMeal('Fish Curry', 'Indian', 380, 35, 12, 20, 'non-veg', 280);
+        await addMeal('Tandoori Chicken', 'Indian', 350, 45, 8, 15, 'non-veg', 250);
+        await addMeal('Mutton Biryani', 'Indian', 450, 32, 48, 18, 'non-veg', 350);
+
+        // ============================================================================
+        // EGG MEALS
+        // ============================================================================
+        await addMeal('Scrambled Eggs', 'Breakfast', 180, 14, 2, 14, 'egg', 100);
+        await addMeal('Omelet with Vegetables', 'Breakfast', 220, 16, 8, 16, 'egg', 150);
+        await addMeal('Boiled Eggs', 'Protein', 160, 13, 1, 12, 'egg', 100);
+        await addMeal('Egg Fried Rice', 'Asian', 340, 12, 48, 12, 'egg', 300);
+        await addMeal('Masala Eggs', 'Indian', 260, 18, 12, 16, 'egg', 180);
+
+        // ============================================================================
+        // VEGAN MEALS
+        // ============================================================================
+        await addMeal('Chickpea Salad', 'Vegan', 240, 12, 32, 6, 'vegan', 250);
+        await addMeal('Tofu Stir Fry', 'Asian', 280, 18, 22, 14, 'vegan', 280);
+        await addMeal('Lentil Soup', 'Vegan', 180, 14, 26, 2, 'vegan', 300);
+        await addMeal('Quinoa Buddha Bowl', 'Vegan', 320, 12, 48, 8, 'vegan', 320);
+        await addMeal('Vegetable Stew', 'Vegan', 160, 8, 28, 2, 'vegan', 350);
+      }
+
       // Always reseed weight data with dummy data
       await db.runAsync('DELETE FROM weight_tracking');
 
@@ -652,6 +696,42 @@ export const seedDummyData = async () => {
       await addWeightEntry(dateStr, dataPoint.weight, targetWeightValue);
     }
 
+    // Add default meals for each food type
+    // ============================================================================
+    // VEGETARIAN MEALS
+    // ============================================================================
+    await addMeal('Spinach Salad', 'Vegetables', 150, 8, 12, 6, 'veg', 200);
+    await addMeal('Paneer Curry', 'Indian', 320, 22, 15, 18, 'veg', 250);
+    await addMeal('Vegetable Biryani', 'Indian', 280, 12, 45, 8, 'veg', 300);
+    await addMeal('Dal Makhani', 'Indian', 250, 16, 28, 10, 'veg', 280);
+    await addMeal('Broccoli Pasta', 'Italian', 380, 14, 55, 12, 'veg', 320);
+
+    // ============================================================================
+    // NON-VEGETARIAN MEALS
+    // ============================================================================
+    await addMeal('Grilled Chicken Breast', 'Protein', 320, 42, 0, 16, 'non-veg', 200);
+    await addMeal('Butter Chicken', 'Indian', 420, 28, 18, 24, 'non-veg', 300);
+    await addMeal('Fish Curry', 'Indian', 380, 35, 12, 20, 'non-veg', 280);
+    await addMeal('Tandoori Chicken', 'Indian', 350, 45, 8, 15, 'non-veg', 250);
+    await addMeal('Mutton Biryani', 'Indian', 450, 32, 48, 18, 'non-veg', 350);
+
+    // ============================================================================
+    // EGG MEALS
+    // ============================================================================
+    await addMeal('Scrambled Eggs', 'Breakfast', 180, 14, 2, 14, 'egg', 100);
+    await addMeal('Omelet with Vegetables', 'Breakfast', 220, 16, 8, 16, 'egg', 150);
+    await addMeal('Boiled Eggs', 'Protein', 160, 13, 1, 12, 'egg', 100);
+    await addMeal('Egg Fried Rice', 'Asian', 340, 12, 48, 12, 'egg', 300);
+    await addMeal('Masala Eggs', 'Indian', 260, 18, 12, 16, 'egg', 180);
+
+    // ============================================================================
+    // VEGAN MEALS
+    // ============================================================================
+    await addMeal('Chickpea Salad', 'Vegan', 240, 12, 32, 6, 'vegan', 250);
+    await addMeal('Tofu Stir Fry', 'Asian', 280, 18, 22, 14, 'vegan', 280);
+    await addMeal('Lentil Soup', 'Vegan', 180, 14, 26, 2, 'vegan', 300);
+    await addMeal('Quinoa Buddha Bowl', 'Vegan', 320, 12, 48, 8, 'vegan', 320);
+    await addMeal('Vegetable Stew', 'Vegan', 160, 8, 28, 2, 'vegan', 350);
 
   } catch (error) {
     throw error;

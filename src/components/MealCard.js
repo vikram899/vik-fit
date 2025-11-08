@@ -2,7 +2,6 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SPACING, TYPOGRAPHY } from "../shared/constants";
-import StatBadge from "./StatBadge";
 
 /**
  * MealCard Component - Modern Trendy Design
@@ -75,8 +74,11 @@ export default function MealCard({
     onFavoritePress && onFavoritePress(newFavoriteState);
   };
 
+  const CardWrapper = showPlusIcon ? View : TouchableOpacity;
+  const cardProps = showPlusIcon ? {} : { onPress, activeOpacity: 0.85 };
+
   return (
-    <TouchableOpacity
+    <CardWrapper
       style={[
         styles.mealCard,
         {
@@ -84,8 +86,7 @@ export default function MealCard({
           borderLeftColor: mealTypeInfo.color,
         },
       ]}
-      onPress={onPress}
-      activeOpacity={0.85}
+      {...cardProps}
     >
       {/* Top Row: Meal Name + Star + Menu */}
       <View style={styles.topRow}>
@@ -123,8 +124,7 @@ export default function MealCard({
               />
             ) : (
               <TouchableOpacity
-                onPress={(e) => {
-                  e.stopPropagation();
+                onPress={() => {
                   onMenuPress();
                 }}
                 style={styles.menuButton}
@@ -156,42 +156,17 @@ export default function MealCard({
         </View>
       </View>
 
-      {/* Bottom Row: Stats Badges */}
-      <View style={styles.bottomRow}>
-        <StatBadge
-          icon="fire"
-          label="cal"
-          value={meal.calories}
-          unit=""
-          iconColor={COLORS.calories}
-          backgroundColor={COLORS.calories60}
-        />
-        <StatBadge
-          icon="dumbbell"
-          label="protein"
-          value={meal.protein}
-          unit="g"
-          iconColor={COLORS.protein}
-          backgroundColor={COLORS.protein60}
-        />
-        <StatBadge
-          icon="bread-slice"
-          label="carbs"
-          value={meal.carbs}
-          unit="g"
-          iconColor={COLORS.carbs}
-          backgroundColor={COLORS.carbs60}
-        />
-        <StatBadge
-          icon="water-percent"
-          label="fats"
-          value={meal.fats}
-          unit="g"
-          iconColor={COLORS.fats}
-          backgroundColor={COLORS.fats60}
-        />
+      {/* Bottom Row: Simple Text Stats */}
+      <View style={styles.nutritionRow}>
+        <Text style={styles.macroItem}>Cal: {meal.calories}</Text>
+        <Text style={styles.dot}>·</Text>
+        <Text style={styles.macroItem}>Protein: {meal.protein}g</Text>
+        <Text style={styles.dot}>·</Text>
+        <Text style={styles.macroItem}>Carbs: {meal.carbs}g</Text>
+        <Text style={styles.dot}>·</Text>
+        <Text style={styles.macroItem}>Fats: {meal.fats}g</Text>
       </View>
-    </TouchableOpacity>
+    </CardWrapper>
   );
 }
 
@@ -234,11 +209,19 @@ const styles = StyleSheet.create({
     padding: SPACING.xs,
     marginRight: -4,
   },
-  bottomRow: {
+  nutritionRow: {
     flexDirection: "row",
-    gap: SPACING.small,
-    alignItems: "center",
-    justifyContent: "flex-start",
+  },
+  macroItem: {
+    ...TYPOGRAPHY.small,
+    color: COLORS.textSecondary,
+  },
+  dot: {
+    marginHorizontal: 6,
+    fontSize: TYPOGRAPHY.small.fontSize + 4,
+    fontWeight: "700",
+    color: COLORS.textSecondary,
+    lineHeight: TYPOGRAPHY.small.lineHeight,
   },
   menuButton: {
     padding: SPACING.xs,

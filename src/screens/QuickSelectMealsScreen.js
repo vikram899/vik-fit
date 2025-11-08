@@ -73,6 +73,20 @@ const QuickSelectMealsScreen = ({ navigation, route }) => {
 
   return (
     <>
+      <SelectMealTimePopup
+        visible={mealTypeSelectVisible}
+        mealName={mealTypeSelectMeal?.name}
+        selectedMealType={selectedMealType}
+        onMealTypeChange={setSelectedMealType}
+        onConfirm={(mealType) => {
+          handleAddMealToday(mealTypeSelectMeal, mealType);
+        }}
+        onCancel={() => {
+          setMealTypeSelectVisible(false);
+          setMealTypeSelectMeal(null);
+        }}
+      />
+
       <BottomSheet
         visible={true}
         title="Quick Add Meals"
@@ -141,10 +155,9 @@ const QuickSelectMealsScreen = ({ navigation, route }) => {
                       showPlusIcon={true}
                       isAdded={addedMealIds.has(meal.id)}
                       onMenuPress={() => {
-                        if (addedMealIds.has(meal.id)) {
-                          return; // Don't do anything if already added
+                        if (!addedMealIds.has(meal.id)) {
+                          handleShowMealTypeSelector(meal);
                         }
-                        handleShowMealTypeSelector(meal);
                       }}
                     />
                   </View>
@@ -153,21 +166,6 @@ const QuickSelectMealsScreen = ({ navigation, route }) => {
           </ScrollView>
         )}
       </BottomSheet>
-
-      {/* Meal Type Selection Modal */}
-      <SelectMealTimePopup
-        visible={mealTypeSelectVisible}
-        mealName={mealTypeSelectMeal?.name}
-        selectedMealType={selectedMealType}
-        onMealTypeChange={setSelectedMealType}
-        onConfirm={() => {
-          handleAddMealToday(mealTypeSelectMeal, selectedMealType);
-        }}
-        onCancel={() => {
-          setMealTypeSelectVisible(false);
-          setMealTypeSelectMeal(null);
-        }}
-      />
     </>
   );
 };

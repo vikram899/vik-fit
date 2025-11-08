@@ -44,7 +44,7 @@ const Button = ({
   onPress,
 
   // Appearance
-  variant = 'primary', // 'primary', 'secondary', 'danger', 'outline'
+  variant = 'primary', // 'primary', 'secondary', 'danger', 'outline', 'cancel'
   size = 'medium', // 'small', 'medium', 'large'
   fullWidth = false,
 
@@ -67,6 +67,8 @@ const Button = ({
         return COLORS.secondary;
       case 'danger':
         return COLORS.danger;
+      case 'cancel':
+        return COLORS.mediumGray;
       case 'outline':
         return 'transparent';
       default:
@@ -76,11 +78,13 @@ const Button = ({
 
   const getTextColor = () => {
     if (variant === 'outline') return COLORS.primary;
+    if (variant === 'cancel') return COLORS.textPrimary;
     return COLORS.white;
   };
 
   const getBorderColor = () => {
     if (variant === 'outline') return COLORS.primary;
+    if (variant === 'cancel') return COLORS.mediumGray;
     return 'transparent';
   };
 
