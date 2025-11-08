@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { STRINGS } from "../../constants/strings";
 import { COLORS, SPACING, TYPOGRAPHY } from "../../shared/constants";
+import ExerciseDetailCard from "./ExerciseDetailCard";
 
 const ExerciseCard = ({
   exercise,
@@ -51,26 +52,19 @@ const ExerciseCard = ({
         </View>
       </View>
       <View style={styles.exerciseDetails}>
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>
-            {STRINGS.exerciseCard.detailLabels.sets}
-          </Text>
-          <Text style={styles.detailValue}>{exercise.sets}</Text>
-        </View>
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>
-            {STRINGS.exerciseCard.detailLabels.reps}
-          </Text>
-          <Text style={styles.detailValue}>{exercise.reps}</Text>
-        </View>
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>
-            {STRINGS.exerciseCard.detailLabels.weight}
-          </Text>
-          <Text style={styles.detailValue}>
-            {exercise.weight || "0"} {STRINGS.exerciseCard.units.kilograms}
-          </Text>
-        </View>
+        <ExerciseDetailCard
+          label={STRINGS.exerciseCard.detailLabels.sets}
+          value={exercise.sets}
+        />
+        <ExerciseDetailCard
+          label={STRINGS.exerciseCard.detailLabels.reps}
+          value={exercise.reps}
+        />
+        <ExerciseDetailCard
+          label={STRINGS.exerciseCard.detailLabels.weight}
+          value={exercise.weight || "0"}
+          unit={STRINGS.exerciseCard.units.kilograms}
+        />
       </View>
     </View>
   );
@@ -80,7 +74,8 @@ const styles = StyleSheet.create({
   exerciseDetailsCard: {
     backgroundColor: COLORS.secondaryBackground,
     borderRadius: SPACING.borderRadiusLarge,
-    padding: SPACING.element,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.small,
     marginBottom: SPACING.medium,
     borderWidth: 1,
     borderColor: COLORS.mediumGray,
@@ -99,27 +94,6 @@ const styles = StyleSheet.create({
   exerciseDetails: {
     flexDirection: "row",
     gap: SPACING.element,
-  },
-  detailItem: {
-    flex: 1,
-    alignItems: "center",
-    backgroundColor: COLORS.white,
-    paddingVertical: SPACING.small,
-    paddingHorizontal: SPACING.medium,
-    borderRadius: SPACING.borderRadius,
-    borderWidth: 1,
-    borderColor: COLORS.mediumGray,
-  },
-  detailLabel: {
-    fontSize: TYPOGRAPHY.sizes.md,
-    color: COLORS.textTertiary,
-    fontWeight: TYPOGRAPHY.weights.medium,
-    marginBottom: SPACING.xs,
-  },
-  detailValue: {
-    fontSize: TYPOGRAPHY.sizes.lg,
-    fontWeight: TYPOGRAPHY.weights.semibold,
-    color: COLORS.info,
   },
   headerRight: {
     flexDirection: "row",

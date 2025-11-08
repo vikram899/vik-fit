@@ -6,21 +6,22 @@ import {
   Keyboard,
   ScrollView,
   TextInput,
-  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
 } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Toast } from "../components/common";
-import { ExerciseCard } from "../components/workouts";
 import { ExerciseFormModal } from "../components/modals";
-import { appStyles } from "../styles/app.styles";
+import { ExercisesSection, Button, FormInput } from "../shared/components/ui";
+import { COLORS, SPACING, TYPOGRAPHY } from "../shared/constants";
 import { addWorkout, addExercise } from "../services/database";
 
 /**
- * CreatePlanScreen
- * Screen for creating new workout plans with exercises
+ * CreateWorkoutScreen
+ * Page screen for creating new workout plans with exercises
+ * Uses modular components and shared design system
  */
-export default function CreatePlanScreen({ navigation }) {
-  const [planName, setPlanName] = React.useState("");
+export default function CreateWorkoutScreen({ navigation }) {
+  const [workoutName, setWorkoutName] = React.useState("");
   const [exercises, setExercises] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [toastVisible, setToastVisible] = React.useState(false);
@@ -44,8 +45,8 @@ export default function CreatePlanScreen({ navigation }) {
   };
 
   const openAddExerciseModal = () => {
-    if (!planName.trim()) {
-      showToast("Please enter a plan name first", "warning");
+    if (!workoutName.trim()) {
+      showToast("Please enter a workout name first", "warning");
       return;
     }
     setModalExercise({ name: "", sets: "3", reps: "10", weight: "", time: "" });
@@ -79,19 +80,19 @@ export default function CreatePlanScreen({ navigation }) {
     setModalExercise({ name: "", sets: "3", reps: "10", weight: "", restTime: "" });
   };
 
-  const removeExercise = (id) => {
+  const handleDeleteExercise = (id) => {
     setExercises(exercises.filter((ex) => ex.id !== id));
   };
 
-  const handleCreatePlan = async () => {
-    if (!planName.trim()) {
+  const handleCreateWorkout = async () => {
+    if (!workoutName.trim()) {
       showToast("Please enter a workout name", "error");
       return;
     }
 
     try {
       setLoading(true);
-      const workoutId = await addWorkout(planName.trim(), "");
+      const workoutId = await addWorkout(workoutName.trim(), "");
 
       // Add all exercises to the workout
       for (const exercise of exercises) {
@@ -110,7 +111,7 @@ export default function CreatePlanScreen({ navigation }) {
 
       showToast("Workout created successfully!", "success");
       setTimeout(() => {
-        setPlanName("");
+        setWorkoutName("");
         setExercises([]);
         navigation.goBack();
       }, 1500);
@@ -123,90 +124,63 @@ export default function CreatePlanScreen({ navigation }) {
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <View
-        style={[
-          appStyles.screenContainer,
-          { justifyContent: "flex-start", paddingTop: 0, paddingBottom: 0 },
-        ]}
-      >
+      <SafeAreaView style={styles.container}>
         <ScrollView
-          style={{ flex: 1, width: "100%" }}
-          contentContainerStyle={appStyles.formContainer}
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={true}
           keyboardShouldPersistTaps="handled"
           scrollEventThrottle={16}
           nestedScrollEnabled={true}
         >
-          <View style={appStyles.formGroup}>
-            <Text style={appStyles.label}>Plan Name</Text>
-            <TextInput
-              style={appStyles.input}
-              placeholder="e.g., Upper Body, Lower Body"
-              placeholderTextColor="#999"
-              value={planName}
-              onChangeText={setPlanName}
-              editable={!loading}
+          {/* Workout Name Input */}
+          <FormInput
+            label="Workout Name"
+            placeholder="e.g., Upper Body, Lower Body"
+            value={workoutName}
+            onChangeText={setWorkoutName}
+            editable={!loading}
+          />
+
+          {/* Exercises Section */}
+          <ExercisesSection
+            exercises={exercises}
+            onAddExercise={openAddExerciseModal}
+            onDeleteExercise={handleDeleteExercise}
+            loading={loading}
+            emptyMessage="No exercises yet. Tap + to add one."
+          />
+        </ScrollView>
+
+        {/* Action Buttons */}
+        <View style={styles.buttonContainer}>
+          <View style={styles.buttonWrapper}>
+            <Button
+              label={loading ? "Creating..." : "Create"}
+              icon="check"
+              iconPosition="left"
+              variant="primary"
+              size="medium"
+              onPress={handleCreateWorkout}
+              isLoading={loading}
+              isDisabled={loading}
+              fullWidth
             />
           </View>
 
-          <View style={appStyles.exercisesSection}>
-            <View style={appStyles.sectionHeader}>
-              <Text style={appStyles.sectionTitle}>Exercises</Text>
-              <TouchableOpacity
-                onPress={openAddExerciseModal}
-                disabled={loading}
-              >
-                <MaterialCommunityIcons
-                  name="plus-circle"
-                  size={24}
-                  color={loading ? "#ccc" : "#007AFF"}
-                />
-              </TouchableOpacity>
-            </View>
-
-            {exercises.length === 0 ? (
-              <Text style={appStyles.emptyExercisesText}>
-                No exercises yet. Tap + to add one.
-              </Text>
-            ) : (
-              exercises.map((exercise) => (
-                <ExerciseCard
-                  key={exercise.id}
-                  exercise={exercise}
-                  onDelete={() => removeExercise(exercise.id)}
-                  showDeleteButton={true}
-                  disabled={loading}
-                />
-              ))
-            )}
+          <View style={styles.buttonWrapper}>
+            <Button
+              label="Cancel"
+              variant="cancel"
+              size="medium"
+              onPress={() => navigation.goBack()}
+              isDisabled={loading}
+              fullWidth
+            />
           </View>
-        </ScrollView>
-
-        <View style={appStyles.buttonGroupFixed}>
-          <TouchableOpacity
-            style={[
-              appStyles.button,
-              appStyles.buttonHalf,
-              loading && appStyles.buttonDisabled,
-            ]}
-            onPress={handleCreatePlan}
-            disabled={loading}
-          >
-            <MaterialCommunityIcons name="check" size={20} color="#fff" />
-            <Text style={appStyles.buttonText}>
-              {loading ? "Creating..." : "Create"}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[appStyles.button, appStyles.buttonHalf, appStyles.cancelButton]}
-            onPress={() => navigation.goBack()}
-            disabled={loading}
-          >
-            <Text style={appStyles.buttonText}>Cancel</Text>
-          </TouchableOpacity>
         </View>
 
+        {/* Exercise Form Modal */}
         <ExerciseFormModal
           visible={modalVisible}
           title="Add Exercise"
@@ -218,13 +192,44 @@ export default function CreatePlanScreen({ navigation }) {
           submitButtonIcon="plus"
         />
 
+        {/* Toast Notification */}
         <Toast
           message={toastMessage}
           type={toastType}
           visible={toastVisible}
           onHide={() => setToastVisible(false)}
         />
-      </View>
+      </SafeAreaView>
     </TouchableWithoutFeedback>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.mainBackground,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: SPACING.element,
+    paddingBottom: SPACING.container,
+  },
+  buttonContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    padding: SPACING.element,
+    paddingBottom: SPACING.container,
+    backgroundColor: COLORS.mainBackground,
+    gap: SPACING.small,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.secondaryBackground,
+  },
+  buttonWrapper: {
+    flex: 1,
+  },
+});

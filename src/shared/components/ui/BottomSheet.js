@@ -91,7 +91,8 @@ const BottomSheet = ({
   const panResponder = React.useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => draggable,
-      onMoveShouldSetPanResponder: (_, { dy }) => draggable && Math.abs(dy) > 10,
+      onMoveShouldSetPanResponder: (_, { dy }) =>
+        draggable && Math.abs(dy) > 10,
       onPanResponderMove: (_, { dy }) => {
         if (dy > 0) {
           slideAnim.setValue(dy);
@@ -151,7 +152,7 @@ const BottomSheet = ({
         style={[
           StyleSheet.absoluteFill,
           {
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            backgroundColor: COLORS.mainBackground,
             opacity: slideAnim.interpolate({
               inputRange: [0, bottomSheetHeight],
               outputRange: [1, 0],
@@ -174,7 +175,7 @@ const BottomSheet = ({
             left: 0,
             right: 0,
             height: bottomSheetHeight,
-            backgroundColor: COLORS.mainBackground,
+            backgroundColor: COLORS.secondaryBackground,
             borderTopLeftRadius: SPACING.borderRadiusXL,
             borderTopRightRadius: SPACING.borderRadiusXL,
             overflow: "hidden",
@@ -196,10 +197,7 @@ const BottomSheet = ({
 
         {/* Header with title and close button - draggable to dismiss */}
         {title && (
-          <View
-            style={styles.header}
-            {...headerPanResponder.panHandlers}
-          >
+          <View style={styles.header} {...headerPanResponder.panHandlers}>
             <Text style={styles.title}>{title}</Text>
             <TouchableOpacity
               onPress={handleCloseBottomSheet}
@@ -222,12 +220,23 @@ const BottomSheet = ({
               {React.Children.toArray(children).slice(0, -1)}
             </View>
             {/* Last child (footer) is fixed at bottom with padding for iPhone safe area */}
-            <View style={{ paddingBottom: SPACING.xxxl }}>
-              {React.Children.toArray(children)[React.Children.count(children) - 1]}
+            <View
+              style={{
+                paddingBottom: SPACING.xxxl,
+                backgroundColor: COLORS.tertiaryBackground,
+              }}
+            >
+              {
+                React.Children.toArray(children)[
+                  React.Children.count(children) - 1
+                ]
+              }
             </View>
           </>
         ) : (
-          <View style={[styles.contentWrapper, { paddingBottom: SPACING.xxxl }]}>
+          <View
+            style={[styles.contentWrapper, { paddingBottom: SPACING.xxxl }]}
+          >
             {children}
           </View>
         )}
@@ -258,6 +267,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    backgroundColor: COLORS.tertiaryBackground,
   },
 
   title: {
@@ -268,11 +278,13 @@ const styles = StyleSheet.create({
   contentWrapper: {
     flex: 1,
     width: "100%",
+    backgroundColor: COLORS.tertiaryBackground,
   },
 
   scrollableContent: {
     flex: 1,
     width: "100%",
+    backgroundColor: COLORS.tertiaryBackground,
   },
 });
 

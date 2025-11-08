@@ -1,10 +1,15 @@
 import React from "react";
-import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { ExerciseCard } from "../components/workouts";
-import { ExerciseFormModal, OptionsMenu } from "../components/modals";
-import { appStyles } from "../styles/app.styles";
-import { COLORS } from "../shared/constants";
+import {
+  View,
+  Text,
+  ScrollView,
+  SafeAreaView,
+  StyleSheet,
+  Alert,
+} from "react-native";
+import { ExerciseCard, WorkoutHeader } from "../components/workouts";
+import { ExerciseFormModal } from "../components/modals";
+import { COLORS, SPACING, TYPOGRAPHY } from "../shared/constants";
 import {
   getExercisesByWorkoutId,
   deleteExercise,
@@ -15,6 +20,7 @@ import {
 /**
  * ExecuteWorkoutScreen
  * Screen for viewing, editing, and executing workout plans
+ * Uses modular components and shared design system
  */
 export default function ExecuteWorkoutScreen({ navigation, route }) {
   const { workoutId, workoutName, planId, planName } = route.params;
@@ -27,7 +33,6 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
   const [isEditMode, setIsEditMode] = React.useState(false);
   const [editingExerciseId, setEditingExerciseId] = React.useState(null);
   const [editModalVisible, setEditModalVisible] = React.useState(false);
-  const [menuVisible, setMenuVisible] = React.useState(false);
   const [editExercise, setEditExercise] = React.useState({
     name: "",
     sets: "3",
@@ -55,7 +60,6 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
 
   // Handle enable edit mode
   const handleEnableEditMode = () => {
-    setMenuVisible(false);
     setIsEditMode(true);
   };
 
@@ -167,93 +171,60 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
     }
   };
 
-  // Menu options
-  const menuOptions = [
-    {
-      label: "Edit Exercises",
-      icon: "pencil",
-      color: COLORS.info,
-      onPress: handleEnableEditMode,
-    },
-    {
-      label: "Delete Workout",
-      icon: "trash-can",
-      color: COLORS.danger,
-      onPress: handleDeleteWorkout,
-    },
-    {
-      label: "Cancel",
-      icon: "close",
-      color: COLORS.textTertiary,
-      onPress: () => {},
-    },
-  ];
-
   return (
-    <View
-      style={[
-        appStyles.screenContainer,
-        { justifyContent: "flex-start", paddingTop: 0, paddingBottom: 0 },
-      ]}
-    >
-      <View style={appStyles.compactHeader}>
-        <View style={{ flex: 1 }}>
-          <Text style={appStyles.compactTitle}>{actualWorkoutName}</Text>
-          <Text style={appStyles.compactSubtitle}>
-            {exercises.length} exercises
-          </Text>
-        </View>
-        {isEditMode && (
-          <TouchableOpacity
-            onPress={handleDisableEditMode}
-            style={appStyles.kebabButton}
-          >
-            <Text style={appStyles.doneButtonText}>Done</Text>
-          </TouchableOpacity>
-        )}
-        {!isEditMode && (
-          <TouchableOpacity
-            onPress={() => setMenuVisible(true)}
-            style={appStyles.kebabButton}
-          >
-            <MaterialCommunityIcons
-              name="dots-vertical"
-              size={24}
-              color={COLORS.textSecondary}
-            />
-          </TouchableOpacity>
-        )}
-      </View>
+    <SafeAreaView style={styles.container}>
+      <WorkoutHeader
+        title={actualWorkoutName}
+        subtitle={`${exercises.length} exercises`}
+        isEditMode={isEditMode}
+        onEditModeToggle={handleDisableEditMode}
+        onMenuPress={() => {
+          Alert.alert("Options", "What would you like to do?", [
+            {
+              text: "Edit Exercises",
+              onPress: handleEnableEditMode,
+            },
+            {
+              text: "Delete Workout",
+              onPress: handleDeleteWorkout,
+              style: "destructive",
+            },
+            {
+              text: "Cancel",
+              style: "cancel",
+            },
+          ]);
+        }}
+      />
 
       <ScrollView
-        style={appStyles.plansList}
-        contentContainerStyle={appStyles.plansListContent}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={true}
       >
         {loading ? (
-          <Text style={appStyles.loadingText}>Loading exercises...</Text>
+          <View style={styles.centerContent}>
+            <Text style={styles.loadingText}>Loading exercises...</Text>
+          </View>
         ) : exercises.length === 0 ? (
-          <Text style={appStyles.emptyText}>No exercises in this plan</Text>
+          <View style={styles.centerContent}>
+            <Text style={styles.emptyText}>No exercises in this plan</Text>
+          </View>
         ) : (
           exercises.map((exercise) => (
-            <ExerciseCard
-              key={exercise.id}
-              exercise={exercise}
-              showDeleteButton={isEditMode}
-              showEditButton={isEditMode}
-              onDelete={() => handleDeleteExercise(exercise.id, exercise.name)}
-              onEdit={() => handleEditExercise(exercise)}
-            />
+            <View key={exercise.id} style={styles.exerciseCardWrapper}>
+              <ExerciseCard
+                exercise={exercise}
+                showDeleteButton={isEditMode}
+                showEditButton={isEditMode}
+                onDelete={() => handleDeleteExercise(exercise.id, exercise.name)}
+                onEdit={() => handleEditExercise(exercise)}
+              />
+            </View>
           ))
         )}
       </ScrollView>
 
-      <OptionsMenu
-        visible={menuVisible}
-        onClose={() => setMenuVisible(false)}
-        options={menuOptions}
-        title="Options"
-      />
 
       <ExerciseFormModal
         visible={editModalVisible}
@@ -265,6 +236,40 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
         submitButtonText="Save"
         submitButtonIcon="check"
       />
-    </View>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.mainBackground,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.element,
+    paddingBottom: SPACING.container,
+  },
+  centerContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    fontSize: TYPOGRAPHY.sizes.lg,
+    color: COLORS.textSecondary,
+    textAlign: "center",
+  },
+  emptyText: {
+    fontSize: TYPOGRAPHY.sizes.lg,
+    color: COLORS.textSecondary,
+    textAlign: "center",
+    fontStyle: "italic",
+  },
+  exerciseCardWrapper: {
+    marginBottom: SPACING.element,
+  },
+});

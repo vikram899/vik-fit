@@ -17,3 +17,5 @@ export { default as StatCard } from './StatCard';
 export { default as MacroCard } from './MacroCard';
 export { default as ListItem } from './ListItem';
 export { default as BottomSheet } from './BottomSheet';
+export { default as ExercisesSection } from './ExercisesSection';
+export { default as FormInput } from './FormInput';

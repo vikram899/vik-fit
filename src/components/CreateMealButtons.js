@@ -17,12 +17,7 @@ const CreateMealButtons = ({ onAdd, onCancel, isLoading = false }) => {
     <View
       style={{
         flexDirection: "row",
-        padding: SPACING.element,
-        paddingBottom: SPACING.container,
-        backgroundColor: COLORS.mainBackground,
         gap: SPACING.small,
-        borderTopWidth: 1,
-        borderTopColor: COLORS.secondaryBackground,
       }}
     >
       <View style={{ flex: 1 }}>

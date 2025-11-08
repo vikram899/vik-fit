@@ -75,7 +75,7 @@ const WorkoutCard = ({
         <View style={styles.exerciseIconBox}>
           <MaterialCommunityIcons
             name="lightning-bolt"
-            size={18}
+            size={24}
             color={COLORS.white}
           />
         </View>
@@ -88,7 +88,7 @@ const WorkoutCard = ({
         <MaterialCommunityIcons
           name="chevron-right"
           size={20}
-          color={COLORS.workoutBackground}
+          color={COLORS.textSecondary}
         />
       </TouchableOpacity>
 
@@ -134,7 +134,8 @@ const styles = StyleSheet.create({
   workoutCard: {
     backgroundColor: COLORS.secondaryBackground,
     borderRadius: SPACING.borderRadiusXL,
-    padding: SPACING.element,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.small,
     marginHorizontal: SPACING.element,
     marginBottom: SPACING.medium,
     borderWidth: 1,
@@ -167,11 +168,11 @@ const styles = StyleSheet.create({
     marginTop: SPACING.small,
   },
   dayBadge: {
-    backgroundColor: COLORS.workoutBackground,
+    backgroundColor: COLORS.tertiaryBackground,
     paddingVertical: SPACING.xs,
     paddingHorizontal: SPACING.small,
     borderRadius: SPACING.borderRadiusRound,
-    shadowColor: COLORS.primary,
+    shadowColor: COLORS.textSecondary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
@@ -207,27 +208,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: SPACING.medium,
-    marginBottom: SPACING.medium,
     backgroundColor: COLORS.tertiaryBackground,
-    paddingVertical: SPACING.medium,
-    paddingHorizontal: SPACING.element,
+    paddingHorizontal: SPACING.xs,
+    paddingVertical: SPACING.small,
     borderRadius: SPACING.borderRadiusLarge,
     borderLeftWidth: 4,
     borderLeftColor: COLORS.workoutBackground,
     justifyContent: "space-between",
   },
   exerciseIconBox: {
-    backgroundColor: COLORS.workoutBackground,
+    backgroundColor: COLORS.tertiaryBackground,
     width: 44,
     height: 44,
-    borderRadius: SPACING.borderRadiusLarge,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 4,
   },
   exerciseInfo: {
     flex: 1,

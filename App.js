@@ -8,7 +8,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 // Screens
 import HomeScreen from "./src/screens/HomeScreen";
-import CreatePlanScreen from "./src/screens/CreatePlanScreen";
+import CreateWorkoutScreen from "./src/screens/CreateWorkoutScreen";
 import ExecuteWorkoutScreen from "./src/screens/ExecuteWorkoutScreen";
 import ProgressScreen from "./src/screens/ProgressScreen";
 import LogMealsScreen from "./src/screens/LogMealsScreen";
@@ -43,6 +43,17 @@ import { useTabBarStyles, useTabBarListeners } from "./src/shared/hooks";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+
+// Common header style for all screens
+const defaultHeaderOptions = {
+  headerTitleStyle: {
+    ...TYPOGRAPHY.sectionTitle,
+    color: COLORS.textPrimary,
+  },
+  headerStyle: {
+    backgroundColor: COLORS.mainBackground,
+  },
+};
 
 /**
  * HomeStackNavigator
@@ -90,6 +101,7 @@ function HomeStackNavigator({ navigation }) {
         component={LogWorkoutScreen}
         options={({ navigation }) => ({
           title: "Log Workouts",
+          ...defaultHeaderOptions,
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => {
@@ -112,16 +124,21 @@ function HomeStackNavigator({ navigation }) {
       />
       <Stack.Screen
         name="CreatePlan"
-        component={CreatePlanScreen}
+        component={CreateWorkoutScreen}
         options={{
           title: "Create Workout",
-          headerTitleStyle: { fontSize: 18, fontWeight: "700" },
+          ...defaultHeaderOptions,
+          animationEnabled: false,
         }}
       />
       <Stack.Screen
         name="ExecuteWorkout"
         component={ExecuteWorkoutScreen}
-        options={{ title: "Execute Workout" }}
+        options={{
+          title: "Execute Workout",
+          ...defaultHeaderOptions,
+          animationEnabled: false,
+        }}
       />
       <Stack.Screen
         name="StartWorkout"
@@ -138,8 +155,8 @@ function HomeStackNavigator({ navigation }) {
         component={LogMealsScreen}
         options={{
           title: "Log Meals",
+          ...defaultHeaderOptions,
           animationEnabled: false,
-          headerStyle: { backgroundColor: COLORS.mainBackground },
         }}
       />
       <Stack.Screen
@@ -163,6 +180,7 @@ function HomeStackNavigator({ navigation }) {
         component={MenuScreen}
         options={{
           title: "Menu",
+          ...defaultHeaderOptions,
           headerBackTitleVisible: false,
         }}
       />
@@ -171,6 +189,7 @@ function HomeStackNavigator({ navigation }) {
         component={MacroGoalsScreen}
         options={{
           title: "Macro Goals",
+          ...defaultHeaderOptions,
           headerBackTitleVisible: false,
         }}
       />
@@ -179,6 +198,7 @@ function HomeStackNavigator({ navigation }) {
         component={WeightTrackingScreen}
         options={{
           title: "Weight Tracking",
+          ...defaultHeaderOptions,
           headerBackTitleVisible: false,
         }}
       />
@@ -187,6 +207,7 @@ function HomeStackNavigator({ navigation }) {
         component={ComponentsShowcaseScreen}
         options={{
           title: "Components Showcase",
+          ...defaultHeaderOptions,
           headerBackTitleVisible: false,
         }}
       />
@@ -212,9 +233,7 @@ function WorkoutsStackNavigator() {
         component={AllWorkoutsScreen}
         options={({ navigation }) => ({
           title: "Workouts",
-          headerStyle: {
-            backgroundColor: COLORS.mainBackground,
-          },
+          ...defaultHeaderOptions,
           headerRight: () => (
             <TouchableOpacity
               onPress={() => navigation.navigate("CreatePlan")}
@@ -231,9 +250,10 @@ function WorkoutsStackNavigator() {
       />
       <Stack.Screen
         name="CreatePlan"
-        component={CreatePlanScreen}
+        component={CreateWorkoutScreen}
         options={({ navigation }) => ({
           title: "Create Workout",
+          ...defaultHeaderOptions,
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => navigation.goBack()}
@@ -246,6 +266,7 @@ function WorkoutsStackNavigator() {
               />
             </TouchableOpacity>
           ),
+          animationEnabled: false,
         })}
       />
     </Stack.Navigator>
@@ -270,6 +291,7 @@ function ProgressStackNavigator() {
         component={ProgressScreen}
         options={{
           title: "Progress",
+          ...defaultHeaderOptions,
           headerLeft: () => null,
         }}
       />
@@ -278,6 +300,7 @@ function ProgressStackNavigator() {
         component={MealProgressScreen}
         options={{
           title: "Meal Progress",
+          ...defaultHeaderOptions,
         }}
       />
     </Stack.Navigator>
@@ -303,13 +326,7 @@ function MealsStackNavigator() {
         component={AllMealsScreen}
         options={({ navigation }) => ({
           title: "Meals",
-          headerTitleStyle: {
-            ...TYPOGRAPHY.sectionTitle,
-            color: COLORS.textPrimary,
-          },
-          headerStyle: {
-            backgroundColor: COLORS.mainBackground,
-          },
+          ...defaultHeaderOptions,
           headerRight: () => (
             <TouchableOpacity
               onPress={() => {
@@ -330,7 +347,9 @@ function MealsStackNavigator() {
         name="AddNewMeal"
         component={CreateMealScreen}
         options={{
-          headerShown: false,
+          title: "Add New Meal",
+          ...defaultHeaderOptions,
+          headerBackTitleVisible: false,
           animationEnabled: false,
         }}
       />

@@ -1,21 +1,19 @@
 import React from "react";
 import {
-  Modal,
   View,
-  Text,
-  TextInput,
-  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Platform,
 } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { appStyles } from "../../styles/app.styles";
-import { COLORS } from "../../shared/constants";
+import { BottomSheet, FormInput, Button } from "../../shared/components/ui";
+import { COLORS, SPACING } from "../../shared/constants";
 
 /**
  * ExerciseFormModal
- * Reusable modal for adding/editing exercises
+ * Reusable bottom sheet modal for adding/editing exercises
+ * Uses shared design system and modular components
  *
  * Props:
  * - visible: boolean - whether modal is visible
@@ -38,125 +36,144 @@ export default function ExerciseFormModal({
   submitButtonIcon = "plus",
 }) {
   return (
-    <Modal
-      visible={visible}
-      transparent={true}
-      animationType="fade"
-      onRequestClose={onCancel}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.keyboardView}
     >
-      <KeyboardAvoidingView
-        style={appStyles.modalOverlay}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      <BottomSheet
+        visible={visible}
+        title={title}
+        onClose={onCancel}
+        heightPercent={0.7}
+        hasFixedFooter={true}
       >
-        <TouchableWithoutFeedback onPress={onCancel}>
-          <View style={appStyles.modalOverlay}>
-            <TouchableWithoutFeedback onPress={() => {}}>
-              <View style={appStyles.modalContent}>
-                <Text style={appStyles.modalTitle}>{title}</Text>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={true}
+          keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled={true}
+        >
+          {/* Exercise Name */}
+          <FormInput
+            label="Exercise Name"
+            placeholder="e.g., Bench Press"
+            value={exercise.name}
+            onChangeText={(value) =>
+              onExerciseChange({ ...exercise, name: value })
+            }
+          />
 
-                {/* Exercise Name */}
-                <View style={appStyles.formGroup}>
-                  <Text style={appStyles.label}>Exercise Name</Text>
-                  <TextInput
-                    style={appStyles.input}
-                    placeholder="e.g., Bench Press"
-                    placeholderTextColor={COLORS.textSecondary}
-                    value={exercise.name}
-                    onChangeText={(value) =>
-                      onExerciseChange({ ...exercise, name: value })
-                    }
-                  />
-                </View>
+          {/* Sets, Reps, Weight, Rest Time in a row */}
+          <View style={styles.rowContainer}>
+            <View style={styles.inputWrapper}>
+              <FormInput
+                label="Sets"
+                placeholder="3"
+                value={exercise.sets}
+                onChangeText={(value) =>
+                  onExerciseChange({ ...exercise, sets: value })
+                }
+                keyboardType="numeric"
+              />
+            </View>
 
-                {/* Sets, Reps, Weight, Rest Time */}
-                <View style={appStyles.rowGroup}>
-                  <View style={[appStyles.formGroup, { flex: 1 }]}>
-                    <Text style={appStyles.label}>Sets</Text>
-                    <TextInput
-                      style={appStyles.input}
-                      placeholder="3"
-                      placeholderTextColor={COLORS.textSecondary}
-                      value={exercise.sets}
-                      onChangeText={(value) =>
-                        onExerciseChange({ ...exercise, sets: value })
-                      }
-                      keyboardType="numeric"
-                    />
-                  </View>
+            <View style={styles.inputWrapper}>
+              <FormInput
+                label="Reps"
+                placeholder="10"
+                value={exercise.reps}
+                onChangeText={(value) =>
+                  onExerciseChange({ ...exercise, reps: value })
+                }
+                keyboardType="numeric"
+              />
+            </View>
 
-                  <View style={[appStyles.formGroup, { flex: 1 }]}>
-                    <Text style={appStyles.label}>Reps</Text>
-                    <TextInput
-                      style={appStyles.input}
-                      placeholder="10"
-                      placeholderTextColor={COLORS.textSecondary}
-                      value={exercise.reps}
-                      onChangeText={(value) =>
-                        onExerciseChange({ ...exercise, reps: value })
-                      }
-                      keyboardType="numeric"
-                    />
-                  </View>
+            <View style={styles.inputWrapper}>
+              <FormInput
+                label="Weight"
+                placeholder="0"
+                value={exercise.weight}
+                onChangeText={(value) =>
+                  onExerciseChange({ ...exercise, weight: value })
+                }
+                keyboardType="decimal-pad"
+              />
+            </View>
 
-                  <View style={[appStyles.formGroup, { flex: 1 }]}>
-                    <Text style={appStyles.label}>Weight</Text>
-                    <TextInput
-                      style={appStyles.input}
-                      placeholder="0"
-                      placeholderTextColor={COLORS.textSecondary}
-                      value={exercise.weight}
-                      onChangeText={(value) =>
-                        onExerciseChange({ ...exercise, weight: value })
-                      }
-                      keyboardType="decimal-pad"
-                    />
-                  </View>
-
-                  <View style={[appStyles.formGroup, { flex: 1 }]}>
-                    <Text style={appStyles.label}>Rest Time</Text>
-                    <TextInput
-                      style={appStyles.input}
-                      placeholder="0"
-                      placeholderTextColor={COLORS.textSecondary}
-                      value={exercise.restTime}
-                      onChangeText={(value) =>
-                        onExerciseChange({ ...exercise, restTime: value })
-                      }
-                      keyboardType="numeric"
-                    />
-                  </View>
-                </View>
-
-                {/* Buttons */}
-                <View style={appStyles.modalButtonGroup}>
-                  <TouchableOpacity
-                    style={[appStyles.button, appStyles.buttonHalf]}
-                    onPress={onSubmit}
-                  >
-                    <MaterialCommunityIcons
-                      name={submitButtonIcon}
-                      size={20}
-                      color={COLORS.white}
-                    />
-                    <Text style={appStyles.buttonText}>{submitButtonText}</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[
-                      appStyles.button,
-                      appStyles.buttonHalf,
-                      appStyles.cancelButton,
-                    ]}
-                    onPress={onCancel}
-                  >
-                    <Text style={appStyles.buttonText}>Cancel</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </TouchableWithoutFeedback>
+            <View style={styles.inputWrapper}>
+              <FormInput
+                label="Rest Time"
+                placeholder="0"
+                value={exercise.restTime}
+                onChangeText={(value) =>
+                  onExerciseChange({ ...exercise, restTime: value })
+                }
+                keyboardType="numeric"
+              />
+            </View>
           </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </Modal>
+        </ScrollView>
+
+        {/* Buttons */}
+        <View style={styles.buttonContainer}>
+          <View style={styles.buttonWrapper}>
+            <Button
+              label={submitButtonText}
+              icon={submitButtonIcon}
+              iconPosition="left"
+              variant="primary"
+              size="medium"
+              onPress={onSubmit}
+              fullWidth
+            />
+          </View>
+
+          <View style={styles.buttonWrapper}>
+            <Button
+              label="Cancel"
+              variant="cancel"
+              size="medium"
+              onPress={onCancel}
+              fullWidth
+            />
+          </View>
+        </View>
+      </BottomSheet>
+    </KeyboardAvoidingView>
   );
 }
+
+const styles = StyleSheet.create({
+  keyboardView: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: SPACING.element,
+    paddingBottom: SPACING.container,
+  },
+  rowContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: SPACING.small,
+  },
+  inputWrapper: {
+    flex: 1,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    padding: SPACING.element,
+    paddingBottom: SPACING.container,
+    backgroundColor: COLORS.tertiaryBackground,
+    gap: SPACING.small,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.secondaryBackground,
+  },
+  buttonWrapper: {
+    flex: 1,
+  },
+});
