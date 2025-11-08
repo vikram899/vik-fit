@@ -15,7 +15,11 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AssignDaysModal } from '../components/modals';
 import { SearchFilterSort } from '../components/meals';
 import WorkoutCard from '../components/workouts/WorkoutCardComponent';
-import { COLORS } from '../styles';
+import {
+  WorkoutTabNavigation,
+  WorkoutEmptyState,
+} from '../components/workouts';
+import { COLORS, SPACING, TYPOGRAPHY } from '../shared/constants';
 import {
   getAllWorkouts,
   getScheduledDaysForWorkout,
@@ -399,29 +403,11 @@ export default function LogWorkoutScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
         {/* Tab Navigation */}
-        <View style={styles.tabContainer}>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'today' && styles.tabActive]}
-            onPress={() => setActiveTab('today')}
-          >
-            <Text style={[styles.tabText, activeTab === 'today' && styles.tabTextActive]}>
-              Today
-            </Text>
-            {todaysWorkouts.length > 0 && (
-              <View style={styles.tabBadge}>
-                <Text style={styles.tabBadgeText}>{todaysWorkouts.length}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'all' && styles.tabActive]}
-            onPress={() => setActiveTab('all')}
-          >
-            <Text style={[styles.tabText, activeTab === 'all' && styles.tabTextActive]}>
-              All Workouts
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <WorkoutTabNavigation
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          todayWorkoutCount={todaysWorkouts.length}
+        />
 
         <ScrollView
           style={styles.scrollView}
@@ -453,14 +439,7 @@ export default function LogWorkoutScreen({ navigation }) {
                 );
               })
             ) : (
-              <View style={styles.noWorkoutAssignedContainer}>
-                <MaterialCommunityIcons
-                  name="calendar-blank"
-                  size={48}
-                  color="#FF9800"
-                />
-                <Text style={styles.noWorkoutAssignedText}>No Workouts Assigned for Today</Text>
-              </View>
+              <WorkoutEmptyState type="no-assigned" />
             )}
           </View>
 
@@ -495,21 +474,9 @@ export default function LogWorkoutScreen({ navigation }) {
               {/* All Workouts Section */}
               <View style={styles.allWorkoutsSection}>
                 {filteredWorkouts.length === 0 ? (
-                  <View style={styles.emptyStateContainer}>
-                    <MaterialCommunityIcons
-                      name="dumbbell"
-                      size={64}
-                      color="#ccc"
-                    />
-                    <Text style={styles.emptyStateTitle}>
-                      {workouts.length === 0 ? 'No Workouts Created' : 'No Workouts Found'}
-                    </Text>
-                    <Text style={styles.emptyStateSubtitle}>
-                      {workouts.length === 0
-                        ? 'Create your first workout routine'
-                        : 'Try adjusting your search or filters'}
-                    </Text>
-                  </View>
+                  <WorkoutEmptyState
+                    type={workouts.length === 0 ? "no-created" : "no-found"}
+                  />
                 ) : (
                   filteredWorkouts.map(workout => (
                     <WorkoutCard
@@ -546,94 +513,13 @@ export default function LogWorkoutScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    paddingHorizontal: 16,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-    flexDirection: 'row',
-    gap: 6,
-  },
-  tabActive: {
-    borderBottomColor: COLORS.primary,
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#999',
-  },
-  tabTextActive: {
-    color: COLORS.primary,
-  },
-  tabBadge: {
-    backgroundColor: '#FF9800',
-    borderRadius: 8,
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-    minWidth: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tabBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#fff',
-  },
-  optionsContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    gap: 16,
-  },
-  optionButton: {
-    width: '100%',
-    backgroundColor: '#f9f9f9',
-    borderRadius: 16,
-    padding: 24,
-    alignItems: 'center',
-    gap: 12,
-    borderWidth: 2,
-    borderColor: '#e0e0e0',
-  },
-  optionButtonTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
-  },
-  optionButtonSubtitle: {
-    fontSize: 13,
-    color: '#999',
-    fontWeight: '500',
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  backButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#2196F3',
+    backgroundColor: COLORS.mainBackground,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 20,
+    paddingBottom: SPACING.container,
   },
   centerContent: {
     flex: 1,
@@ -641,143 +527,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 16,
-    color: '#999',
+    fontSize: TYPOGRAPHY.sizes.lg,
+    color: COLORS.textSecondary,
   },
   todaySection: {
-    paddingVertical: 12,
-    marginBottom: 16,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    gap: 8,
-    paddingHorizontal: 16,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
-    flex: 1,
-  },
-  badge: {
-    backgroundColor: '#FF9800',
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  noWorkoutAssignedContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 32,
-    paddingHorizontal: 16,
-    gap: 12,
-  },
-  noWorkoutAssignedText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FF9800',
-  },
-  todayWorkoutCard: {
-    backgroundColor: '#fff',
-    borderLeftWidth: 4,
-    borderLeftColor: '#FF9800',
-    marginBottom: 8,
-  },
-  todayBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#FF9800',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-    marginBottom: 6,
-    alignSelf: 'flex-start',
-  },
-  todayBadgeText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 16,
-    marginVertical: 12,
-    paddingHorizontal: 12,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  searchIcon: {
-    marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: '#333',
-  },
-  clearButton: {
-    padding: 4,
-  },
-  controlsContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginBottom: 16,
-    gap: 8,
-  },
-  controlButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  controlButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.primary,
+    paddingVertical: SPACING.medium,
+    marginBottom: SPACING.medium,
   },
   allWorkoutsSection: {
     paddingHorizontal: 0,
-  },
-  allWorkoutsTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 12,
-  },
-  emptyStateContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 40,
-    paddingHorizontal: 16,
-  },
-  emptyStateTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyStateSubtitle: {
-    fontSize: 14,
-    color: '#999',
-    textAlign: 'center',
   },
 });

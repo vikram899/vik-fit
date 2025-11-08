@@ -6,3 +6,5 @@ export { default as WorkoutHistoryModal } from "./WorkoutHistoryModal";
 export { default as WorkoutGoalSettingsModal } from "./WorkoutGoalSettingsModal";
 export { default as AllWorkoutsEmptyState } from "./AllWorkoutsEmptyState";
 export { default as WorkoutHeader } from "./WorkoutHeader";
+export { default as WorkoutTabNavigation } from "./WorkoutTabNavigation";
+export { default as WorkoutEmptyState } from "./WorkoutEmptyState";
