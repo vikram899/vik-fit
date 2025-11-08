@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getWeeklyWorkoutBreakdown, getMondayOfWeek } from '../../services/workoutStats';
-import { COLORS } from '../../styles';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
 
 const WorkoutHistoryModal = ({ visible, onClose }) => {
   const [currentMonday, setCurrentSunday] = useState(
@@ -167,7 +167,7 @@ const WorkoutHistoryModal = ({ visible, onClose }) => {
               <MaterialCommunityIcons
                 name="dumbbell"
                 size={48}
-                color="#ccc"
+                color={COLORS.mediumGray}
               />
               <Text style={styles.emptyText}>No workouts logged this week</Text>
             </View>
@@ -189,7 +189,7 @@ const WorkoutHistoryModal = ({ visible, onClose }) => {
                     <MaterialCommunityIcons
                       name="dumbbell"
                       size={16}
-                      color="#2196F3"
+                      color={COLORS.primary}
                     />
                     <Text style={styles.statLabel}>Workouts</Text>
                     <Text style={styles.statValue}>{day.totalWorkoutsCompleted}</Text>
@@ -199,7 +199,7 @@ const WorkoutHistoryModal = ({ visible, onClose }) => {
                     <MaterialCommunityIcons
                       name="lightning-bolt"
                       size={16}
-                      color="#FF9800"
+                      color={COLORS.warning}
                     />
                     <Text style={styles.statLabel}>Exercises</Text>
                     <Text style={styles.statValue}>{day.totalExercisesCompleted}</Text>
@@ -215,7 +215,7 @@ const WorkoutHistoryModal = ({ visible, onClose }) => {
                         <MaterialCommunityIcons
                           name="check-circle"
                           size={16}
-                          color="#4CAF50"
+                          color={COLORS.success}
                         />
                         <View style={styles.workoutInfo}>
                           <Text style={styles.workoutName}>{workout.name}</Text>
@@ -242,7 +242,7 @@ const WorkoutHistoryModal = ({ visible, onClose }) => {
                           <MaterialCommunityIcons
                             name="circle-outline"
                             size={16}
-                            color="#ccc"
+                            color={COLORS.mediumGray}
                           />
                           <Text style={styles.missedName}>{workout.name}</Text>
                         </View>
@@ -271,65 +271,65 @@ const WorkoutHistoryModal = ({ visible, onClose }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.mainBackground,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.medium,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: COLORS.mediumGray,
   },
   closeButton: {
-    padding: 8,
+    padding: SPACING.small,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#000',
+    fontSize: TYPOGRAPHY.sizes.lg,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.textPrimary,
   },
   weekNavigation: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#f9f9f9',
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.medium,
+    backgroundColor: COLORS.secondaryBackground,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: COLORS.mediumGray,
   },
   navButton: {
-    padding: 8,
+    padding: SPACING.small,
   },
   weekLabelContainer: {
     flex: 1,
     alignItems: 'center',
   },
   weekLabelText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: TYPOGRAPHY.sizes.sm,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.textPrimary,
   },
   todayButtonContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.medium,
   },
   todayButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    backgroundColor: '#2196F3',
-    borderRadius: 8,
+    gap: SPACING.xs,
+    paddingVertical: SPACING.small,
+    paddingHorizontal: SPACING.element,
+    backgroundColor: COLORS.primary,
+    borderRadius: SPACING.borderRadiusSmall,
   },
   todayButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#fff',
+    fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.white,
   },
   scrollView: {
     flex: 1,
@@ -340,145 +340,145 @@ const styles = StyleSheet.create({
   loadingContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 40,
+    paddingVertical: SPACING.container,
   },
   loadingText: {
-    fontSize: 14,
-    color: '#999',
+    fontSize: TYPOGRAPHY.sizes.md,
+    color: COLORS.textSecondary,
   },
   emptyContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 60,
+    paddingVertical: SPACING.container,
   },
   emptyText: {
-    fontSize: 14,
-    color: '#999',
-    marginTop: 12,
+    fontSize: TYPOGRAPHY.sizes.md,
+    color: COLORS.textSecondary,
+    marginTop: SPACING.medium,
   },
   dayCard: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.element,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: COLORS.mediumGray,
   },
   dayHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: SPACING.medium,
   },
   dayName: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#000',
+    fontSize: TYPOGRAPHY.sizes.md,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.textPrimary,
   },
   dayDate: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 2,
+    fontSize: TYPOGRAPHY.sizes.xs,
+    color: COLORS.textSecondary,
+    marginTop: SPACING.xs,
   },
   dayWorkouts: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#2196F3',
+    fontSize: TYPOGRAPHY.sizes.lg,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.primary,
   },
   statsContainer: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 12,
+    gap: SPACING.medium,
+    marginBottom: SPACING.medium,
   },
   statItem: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
+    paddingVertical: SPACING.small,
+    paddingHorizontal: SPACING.medium,
+    backgroundColor: COLORS.secondaryBackground,
+    borderRadius: SPACING.borderRadiusSmall,
   },
   statLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#999',
-    marginTop: 4,
+    fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.textSecondary,
+    marginTop: SPACING.xs,
   },
   statValue: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#333',
-    marginTop: 2,
+    fontSize: TYPOGRAPHY.sizes.md,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.textPrimary,
+    marginTop: SPACING.xs,
   },
   workoutsList: {
-    paddingTop: 8,
+    paddingTop: SPACING.small,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: COLORS.mediumGray,
   },
   workoutsLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#4CAF50',
-    marginBottom: 8,
+    fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.success,
+    marginBottom: SPACING.small,
   },
   workoutItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 6,
-    gap: 8,
+    paddingVertical: SPACING.xs,
+    gap: SPACING.small,
   },
   workoutInfo: {
     flex: 1,
   },
   workoutName: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.textPrimary,
   },
   workoutExercises: {
-    fontSize: 10,
-    color: '#999',
-    marginTop: 2,
+    fontSize: TYPOGRAPHY.sizes.xs,
+    color: COLORS.textSecondary,
+    marginTop: SPACING.xs,
   },
   missedList: {
-    paddingTop: 8,
+    paddingTop: SPACING.small,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: COLORS.mediumGray,
   },
   missedLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#FF6B6B',
-    marginBottom: 8,
+    fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.error,
+    marginBottom: SPACING.small,
   },
   missedItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 6,
-    gap: 8,
+    paddingVertical: SPACING.xs,
+    gap: SPACING.small,
   },
   missedName: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#999',
+    fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: TYPOGRAPHY.weights.medium,
+    color: COLORS.textSecondary,
     flex: 1,
   },
   footer: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.element,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: COLORS.mediumGray,
   },
   doneButton: {
-    backgroundColor: '#2196F3',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.medium,
+    paddingHorizontal: SPACING.element,
+    borderRadius: SPACING.borderRadiusSmall,
     justifyContent: 'center',
     alignItems: 'center',
   },
   doneButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#fff',
+    fontSize: TYPOGRAPHY.sizes.md,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.white,
   },
 });
 

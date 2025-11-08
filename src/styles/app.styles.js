@@ -771,8 +771,6 @@ export const appStyles = StyleSheet.create({
     backgroundColor: COLORS.tertiaryBackground,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.mediumGray,
-    marginTop: SPACING.medium,
-    marginBottom: SPACING.medium,
   },
   progressTab: {
     flex: 1,

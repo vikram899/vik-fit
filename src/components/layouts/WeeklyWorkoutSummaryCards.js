@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { StatCard } from "../common";
-import { COLORS } from "../../styles";
+import { COLORS, SPACING, TYPOGRAPHY } from "../../shared/constants";
 
 /**
  * WeeklyWorkoutSummaryCards Component
@@ -42,27 +42,27 @@ const WeeklyWorkoutSummaryCards = ({ currentWeekData, lastWeekData, scheduledGoa
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
-    marginBottom: 20,
+    paddingHorizontal: SPACING.element,
+    marginBottom: SPACING.container,
   },
   titleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: SPACING.element,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#000",
+    fontSize: TYPOGRAPHY.sizes.lg,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.textPrimary,
   },
   subtitle: {
-    fontSize: 12,
-    color: "#999",
+    fontSize: TYPOGRAPHY.sizes.xs,
+    color: COLORS.textSecondary,
   },
   cardsGrid: {
     flexDirection: "row",
-    gap: 12,
+    gap: SPACING.medium,
   },
 });
 

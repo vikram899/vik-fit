@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
 import BottomSheet from './BottomSheet';
 import SectionHeader from './SectionHeader';
 
@@ -71,7 +72,7 @@ const StreakCard = ({
       >
         <View style={styles.legendContent}>
           <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: '#4CAF50' }]} />
+            <View style={[styles.legendColor, { backgroundColor: COLORS.success }]} />
             <View style={styles.legendText}>
               <Text style={styles.legendTitle}>Green (80%+)</Text>
               <Text style={styles.legendDescription}>
@@ -81,7 +82,7 @@ const StreakCard = ({
           </View>
 
           <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: '#FF9800' }]} />
+            <View style={[styles.legendColor, { backgroundColor: COLORS.warning }]} />
             <View style={styles.legendText}>
               <Text style={styles.legendTitle}>Orange (50-79%)</Text>
               <Text style={styles.legendDescription}>
@@ -91,7 +92,7 @@ const StreakCard = ({
           </View>
 
           <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: '#FF6B6B' }]} />
+            <View style={[styles.legendColor, { backgroundColor: COLORS.error }]} />
             <View style={styles.legendText}>
               <Text style={styles.legendTitle}>Red (&lt;50%)</Text>
               <Text style={styles.legendDescription}>
@@ -101,7 +102,7 @@ const StreakCard = ({
           </View>
 
           <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: '#e0e0e0' }]} />
+            <View style={[styles.legendColor, { backgroundColor: COLORS.mediumGray }]} />
             <View style={styles.legendText}>
               <Text style={styles.legendTitle}>Gray</Text>
               <Text style={styles.legendDescription}>
@@ -117,14 +118,14 @@ const StreakCard = ({
 
 const styles = StyleSheet.create({
   streakCard: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginHorizontal: 16,
-    marginBottom: 16,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.medium,
+    marginHorizontal: SPACING.element,
+    marginBottom: SPACING.element,
+    backgroundColor: COLORS.secondaryBackground,
+    borderRadius: SPACING.borderRadius,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: COLORS.mediumGray,
   },
   contentRow: {
     paddingTop: 0,
@@ -135,17 +136,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   streakMinimalText: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '500',
+    fontSize: TYPOGRAPHY.sizes.xs,
+    color: COLORS.textSecondary,
+    fontWeight: TYPOGRAPHY.weights.medium,
   },
   streakBold: {
-    fontWeight: '700',
-    color: '#000',
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.textPrimary,
   },
   checkmarkRowMinimal: {
     flexDirection: 'row',
-    gap: 4,
+    gap: SPACING.xs,
   },
   checkmarkMinimal: {
     width: 18,
@@ -154,10 +155,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   streakMetricLabel: {
-    fontSize: 10,
-    color: '#999',
-    fontWeight: '500',
-    marginTop: 2,
+    fontSize: TYPOGRAPHY.sizes.xs,
+    color: COLORS.textSecondary,
+    fontWeight: TYPOGRAPHY.weights.medium,
+    marginTop: SPACING.xs,
   },
   streakLabelContainer: {
     flex: 1,
@@ -168,40 +169,40 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   helpButton: {
-    padding: 4,
-    marginLeft: 8,
+    padding: SPACING.xs,
+    marginLeft: SPACING.small,
   },
   legendContent: {
-    gap: 16,
-    paddingBottom: 20,
+    gap: SPACING.element,
+    paddingBottom: SPACING.container,
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
+    gap: SPACING.medium,
+    paddingVertical: SPACING.medium,
+    paddingHorizontal: SPACING.medium,
+    backgroundColor: COLORS.secondaryBackground,
+    borderRadius: SPACING.borderRadiusSmall,
   },
   legendColor: {
     width: 40,
     height: 40,
-    borderRadius: 6,
-    marginTop: 2,
+    borderRadius: SPACING.borderRadiusSmall,
+    marginTop: SPACING.xs,
   },
   legendText: {
     flex: 1,
   },
   legendTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 4,
+    fontSize: TYPOGRAPHY.sizes.md,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.xs,
   },
   legendDescription: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: TYPOGRAPHY.sizes.xs,
+    color: COLORS.textSecondary,
     lineHeight: 18,
   },
 });

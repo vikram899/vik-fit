@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS } from '../../styles';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../shared/constants';
 
 /**
  * StatCard Component - Reusable card for displaying statistics
@@ -35,9 +35,9 @@ const StatCard = ({
 
   // Get trend color based on percentage change
   const getTrendColor = (percentage) => {
-    if (percentage > 5) return '#4CAF50'; // Green for increase
-    if (percentage < -5) return '#FF6B6B'; // Red for decrease
-    return '#999'; // Gray for stable
+    if (percentage > 5) return COLORS.success; // Green for increase
+    if (percentage < -5) return COLORS.error; // Red for decrease
+    return COLORS.textSecondary; // Gray for stable
   };
 
   // Calculate progress percentage for goal
@@ -45,9 +45,9 @@ const StatCard = ({
 
   // Get progress bar color based on completion percentage
   const getProgressColor = (percentage) => {
-    if (percentage >= 90) return '#4CAF50'; // Green
-    if (percentage >= 70) return '#FFC107'; // Yellow/Orange
-    return '#FF6B6B'; // Red
+    if (percentage >= 90) return COLORS.success; // Green
+    if (percentage >= 70) return COLORS.warning; // Yellow/Orange
+    return COLORS.error; // Red
   };
 
   const percentageChange = calculateChange(currentValue, previousValue);
@@ -128,66 +128,66 @@ const StatCard = ({
 const styles = StyleSheet.create({
   card: {
     width: '48%',
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-    paddingLeft: 5,
-    paddingRight: 5,
-    paddingTop: 12,
-    paddingBottom: 12,
+    backgroundColor: COLORS.secondaryBackground,
+    borderRadius: SPACING.borderRadius,
+    paddingLeft: SPACING.xs,
+    paddingRight: SPACING.xs,
+    paddingTop: SPACING.medium,
+    paddingBottom: SPACING.medium,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: COLORS.mediumGray,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: SPACING.medium,
   },
   labelSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: SPACING.xs,
     flex: 1,
   },
   label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: TYPOGRAPHY.sizes.sm,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.textPrimary,
   },
   trendSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: SPACING.xs,
   },
   percentageChange: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: TYPOGRAPHY.weights.bold,
   },
   cardBody: {
-    gap: 8,
+    gap: SPACING.small,
   },
   valueRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: 4,
+    gap: SPACING.xs,
   },
   currentValue: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#000',
+    fontSize: TYPOGRAPHY.sizes.lg,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.textPrimary,
   },
   totalValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#999',
+    fontSize: TYPOGRAPHY.sizes.md,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.textSecondary,
   },
   goalText: {
-    fontSize: 11,
-    color: '#999',
+    fontSize: TYPOGRAPHY.sizes.xs,
+    color: COLORS.textSecondary,
   },
   progressBar: {
     height: 6,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: COLORS.mediumGray,
     borderRadius: 3,
     overflow: 'hidden',
   },
@@ -196,8 +196,8 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   previousValue: {
-    fontSize: 10,
-    color: '#999',
+    fontSize: TYPOGRAPHY.sizes.xs,
+    color: COLORS.textSecondary,
     fontStyle: 'italic',
   },
 });

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { macroStyles, COLORS } from '../../styles';
+import { macroStyles } from '../../styles';
+import { COLORS } from '../../shared/constants';
 import { STRINGS } from '../../constants/strings';
 
 const MealMacroCards = ({ dailyTotals, macroGoals = {} }) => {

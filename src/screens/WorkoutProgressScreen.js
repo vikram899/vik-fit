@@ -14,7 +14,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { WeeklyWorkoutSummaryCards } from '../components/layouts';
 import { WorkoutHistoryModal } from '../components/workouts';
 import { StreakCard, GoalSettingsModal, BottomSheet, SectionHeader } from '../components/common';
-import { COLORS } from '../styles';
+import { COLORS, SPACING, TYPOGRAPHY } from '../shared/constants';
 import { getEnabledGoalPreferences, getUserSetting } from '../services/database';
 import {
   getWeeklyWorkoutStats,
@@ -57,43 +57,43 @@ export default function WorkoutProgressScreen({ navigation }) {
       label: 'Workout Target',
       description: 'Shows completed vs scheduled workouts and tracks your progress toward weekly goals.',
       icon: 'target',
-      iconColor: '#2196F3',
+      iconColor: COLORS.primary,
     },
     exercisesCompleted: {
       label: 'Exercises',
       description: 'Shows completed vs scheduled exercises to track exercise variety and volume.',
       icon: 'check-circle',
-      iconColor: '#4CAF50',
+      iconColor: COLORS.success,
     },
     consistency: {
       label: 'Consistency',
       description: 'Shows how many days you logged workouts to track your workout frequency.',
       icon: 'calendar-check',
-      iconColor: '#FF9800',
+      iconColor: COLORS.warning,
     },
     strengthStats: {
       label: 'Strength',
       description: 'Displays strength progress and personal records for key lifts.',
       icon: 'dumbbell',
-      iconColor: '#FF6B6B',
+      iconColor: COLORS.error,
     },
     volumeStats: {
       label: 'Volume',
       description: 'Shows total training volume and reps completed to track workout intensity.',
       icon: 'chart-box',
-      iconColor: '#9C27B0',
+      iconColor: COLORS.accent,
     },
     restTimeStats: {
       label: 'Rest Time',
       description: 'Shows average rest time between sets to monitor recovery pacing.',
       icon: 'timer',
-      iconColor: '#00BCD4',
+      iconColor: COLORS.info,
     },
     recoveryStats: {
       label: 'Recovery',
       description: 'Shows recovery status and rest day metrics for optimal performance.',
       icon: 'heart-pulse',
-      iconColor: '#E91E63',
+      iconColor: COLORS.danger,
     },
   };
 
@@ -240,7 +240,7 @@ export default function WorkoutProgressScreen({ navigation }) {
     const hasActivity = day.totalWorkoutsCompleted > 0;
 
     if (!hasActivity) {
-      return { background: '#e0e0e0', border: '#ccc' }; // Gray for no workouts
+      return { background: COLORS.mediumGray, border: COLORS.mediumGray }; // Gray for no workouts
     }
 
     // Calculate percentage based on selected tracking metric
@@ -264,11 +264,11 @@ export default function WorkoutProgressScreen({ navigation }) {
     }
 
     if (percentage >= 80) {
-      return { background: '#4CAF50', border: '#4CAF50' }; // Green
+      return { background: COLORS.success, border: COLORS.success }; // Green
     } else if (percentage >= 50) {
-      return { background: '#FF9800', border: '#FF9800' }; // Orange
+      return { background: COLORS.warning, border: COLORS.warning }; // Orange
     } else {
-      return { background: '#FF6B6B', border: '#FF6B6B' }; // Red
+      return { background: COLORS.error, border: COLORS.error }; // Red
     }
   };
 
@@ -557,27 +557,27 @@ export default function WorkoutProgressScreen({ navigation }) {
         }}
         title="About Stats"
       >
-        <View style={{ gap: 16 }}>
-          <Text style={{ fontSize: 14, color: '#666', lineHeight: 22 }}>
+        <View style={{ gap: SPACING.element }}>
+          <Text style={{ fontSize: TYPOGRAPHY.sizes.md, color: COLORS.textSecondary, lineHeight: 22 }}>
             Your stats show actionable insights about your workout patterns. Each stat compares your current performance to previous weeks and highlights trends.
           </Text>
-          <View style={{ backgroundColor: '#f5f5f5', borderRadius: 8, padding: 12, gap: 12 }}>
+          <View style={{ backgroundColor: COLORS.secondaryBackground, borderRadius: SPACING.borderRadiusSmall, padding: SPACING.medium, gap: SPACING.medium }}>
             {enabledGoalPreferences.map(pref => {
               const stat = statLabels[pref.statName];
               if (!stat) return null;
               return (
-                <View key={pref.statName} style={{ gap: 8 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <View key={pref.statName} style={{ gap: SPACING.small }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.small }}>
                     <MaterialCommunityIcons
                       name={stat.icon}
                       size={18}
                       color={stat.iconColor}
                     />
-                    <Text style={{ fontWeight: '700', color: '#333', fontSize: 13 }}>
+                    <Text style={{ fontWeight: TYPOGRAPHY.weights.bold, color: COLORS.textPrimary, fontSize: TYPOGRAPHY.sizes.sm }}>
                       {stat.label}
                     </Text>
                   </View>
-                  <Text style={{ fontSize: 12, color: '#666', marginLeft: 26 }}>
+                  <Text style={{ fontSize: TYPOGRAPHY.sizes.xs, color: COLORS.textSecondary, marginLeft: 26 }}>
                     {stat.description}
                   </Text>
                 </View>
@@ -593,13 +593,13 @@ export default function WorkoutProgressScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.mainBackground,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 20,
+    paddingBottom: SPACING.container,
   },
   centerContent: {
     flex: 1,
@@ -607,41 +607,41 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 16,
-    color: '#999',
+    fontSize: TYPOGRAPHY.sizes.md,
+    color: COLORS.textSecondary,
   },
   header: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 12,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.medium,
+    gap: SPACING.medium,
   },
   weekNavigation: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 12,
+    backgroundColor: COLORS.secondaryBackground,
+    borderRadius: SPACING.borderRadius,
+    paddingHorizontal: SPACING.small,
+    paddingVertical: SPACING.medium,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: COLORS.mediumGray,
   },
   navButton: {
-    padding: 8,
+    padding: SPACING.small,
   },
   weekLabel: {
     flex: 1,
     alignItems: 'center',
-    gap: 4,
+    gap: SPACING.xs,
   },
   weekLabelText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: TYPOGRAPHY.sizes.sm,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.textPrimary,
   },
   actionButtonsRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: SPACING.small,
     justifyContent: 'space-between',
   },
   actionButton: {
@@ -649,33 +649,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
+    gap: SPACING.xs,
+    paddingVertical: SPACING.small,
+    paddingHorizontal: SPACING.medium,
+    borderRadius: SPACING.borderRadiusSmall,
   },
   todayButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: COLORS.primary,
   },
   goalButton: {
-    backgroundColor: '#FF9800',
+    backgroundColor: COLORS.warning,
   },
   logButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: COLORS.success,
   },
   actionButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#fff',
+    fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.white,
   },
   quickStatsContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#f5f5f5',
-    marginHorizontal: 16,
-    marginVertical: 12,
-    borderRadius: 10,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.medium,
+    backgroundColor: COLORS.secondaryBackground,
+    marginHorizontal: SPACING.element,
+    marginVertical: SPACING.medium,
+    borderRadius: SPACING.borderRadius,
     alignItems: 'center',
   },
   quickStat: {
@@ -683,122 +683,122 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   quickStatLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#999',
-    marginBottom: 4,
+    fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.xs,
   },
   quickStatValue: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 2,
+    fontSize: TYPOGRAPHY.sizes.xl,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.xs,
   },
   quickStatUnit: {
-    fontSize: 9,
-    fontWeight: '500',
-    color: '#999',
+    fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: TYPOGRAPHY.weights.medium,
+    color: COLORS.textSecondary,
   },
   quickStatDivider: {
     width: 1,
     height: 40,
-    backgroundColor: '#e0e0e0',
-    marginHorizontal: 8,
+    backgroundColor: COLORS.mediumGray,
+    marginHorizontal: SPACING.small,
   },
   sectionToggleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 12,
-    marginTop: 8,
+    paddingHorizontal: SPACING.element,
+    marginBottom: SPACING.medium,
+    marginTop: SPACING.small,
   },
   sectionToggleLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: TYPOGRAPHY.sizes.md,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.textPrimary,
   },
   toggleSwitch: {
     width: 50,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: COLORS.mediumGray,
     justifyContent: 'center',
     paddingHorizontal: 2,
   },
   toggleSwitchActive: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: COLORS.success,
   },
   toggleSwitchKnob: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.white,
     alignSelf: 'flex-start',
   },
   toggleSwitchKnobActive: {
     alignSelf: 'flex-end',
   },
   historyButton: {
-    backgroundColor: '#9C27B0',
+    backgroundColor: COLORS.accent,
   },
   statItem: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 10,
-    padding: 16,
+    backgroundColor: COLORS.secondaryBackground,
+    borderRadius: SPACING.borderRadius,
+    padding: SPACING.element,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
-    marginHorizontal: 16,
-    marginBottom: 16,
+    borderColor: COLORS.mediumGray,
+    marginHorizontal: SPACING.element,
+    marginBottom: SPACING.element,
   },
   statsInsightsContainer: {
-    gap: 12,
+    gap: SPACING.medium,
   },
   statInsight: {
-    paddingVertical: 10,
+    paddingVertical: SPACING.small,
     paddingHorizontal: 0,
   },
   insightRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    gap: 8,
+    gap: SPACING.small,
   },
   insightText: {
     flex: 1,
-    fontSize: 13,
-    color: '#666',
-    fontWeight: '500',
+    fontSize: TYPOGRAPHY.sizes.sm,
+    color: COLORS.textSecondary,
+    fontWeight: TYPOGRAPHY.weights.medium,
     lineHeight: 18,
   },
   insightBold: {
-    fontWeight: '700',
-    color: '#000',
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.textPrimary,
   },
   trendBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#E8F5E9',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    gap: SPACING.xs,
+    backgroundColor: COLORS.tertiaryBackground,
+    paddingHorizontal: SPACING.small,
+    paddingVertical: SPACING.xs,
+    borderRadius: SPACING.borderRadiusSmall,
   },
   trendBadgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#4CAF50',
+    fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.success,
   },
   emptyStatsContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 24,
-    gap: 8,
+    paddingVertical: SPACING.container,
+    gap: SPACING.small,
   },
   emptyStatsText: {
-    fontSize: 13,
-    color: '#999',
-    fontWeight: '500',
+    fontSize: TYPOGRAPHY.sizes.sm,
+    color: COLORS.textSecondary,
+    fontWeight: TYPOGRAPHY.weights.medium,
     textAlign: 'center',
   },
 });

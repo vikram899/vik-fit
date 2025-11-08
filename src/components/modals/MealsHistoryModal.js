@@ -11,12 +11,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { COLORS } from "../../styles";
-import {
-  COLORS as SHARED_COLORS,
-  SPACING,
-  TYPOGRAPHY,
-} from "../../shared/constants";
+import { COLORS, SPACING, TYPOGRAPHY } from "../../shared/constants";
 import {
   getWeeklyDailyBreakdown,
   getMondayOfWeek,
@@ -166,7 +161,7 @@ const MealsHistoryModal = ({ visible, onClose }) => {
             <MaterialCommunityIcons
               name="calendar-today"
               size={14}
-              color={SHARED_COLORS.white}
+              color={COLORS.white}
             />
             <Text style={styles.todayButtonText}>Today</Text>
           </TouchableOpacity>
@@ -211,7 +206,7 @@ const MealsHistoryModal = ({ visible, onClose }) => {
                     <MaterialCommunityIcons
                       name="flash"
                       size={16}
-                      color={SHARED_COLORS.proteinIcon}
+                      color={COLORS.primary}
                     />
                     <Text style={styles.macroLabel}>Protein</Text>
                     <Text style={styles.macroValue}>
@@ -223,7 +218,7 @@ const MealsHistoryModal = ({ visible, onClose }) => {
                     <MaterialCommunityIcons
                       name="bread-slice"
                       size={16}
-                      color={SHARED_COLORS.carbsIcon}
+                      color={COLORS.warning}
                     />
                     <Text style={styles.macroLabel}>Carbs</Text>
                     <Text style={styles.macroValue}>
@@ -235,7 +230,7 @@ const MealsHistoryModal = ({ visible, onClose }) => {
                     <MaterialCommunityIcons
                       name="water"
                       size={16}
-                      color={SHARED_COLORS.fatsIcon}
+                      color={COLORS.accent}
                     />
                     <Text style={styles.macroLabel}>Fats</Text>
                     <Text style={styles.macroValue}>
@@ -262,161 +257,161 @@ const MealsHistoryModal = ({ visible, onClose }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: SHARED_COLORS.white,
+    backgroundColor: COLORS.mainBackground,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: SPACING.element,
-    paddingVertical: SPACING.small,
+    paddingVertical: SPACING.medium,
     borderBottomWidth: 1,
-    borderBottomColor: SHARED_COLORS.mediumGray,
+    borderBottomColor: COLORS.mediumGray,
   },
   closeButton: {
-    padding: SPACING.xs,
+    padding: SPACING.small,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: SHARED_COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.sizes.lg,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.textPrimary,
   },
   weekNavigation: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: SPACING.element,
-    paddingVertical: SPACING.small,
-    backgroundColor: SHARED_COLORS.secondaryBackground,
+    paddingVertical: SPACING.medium,
+    backgroundColor: COLORS.secondaryBackground,
     borderBottomWidth: 1,
-    borderBottomColor: SHARED_COLORS.mediumGray,
+    borderBottomColor: COLORS.mediumGray,
   },
   navButton: {
-    padding: SPACING.xs,
+    padding: SPACING.small,
   },
   weekLabelContainer: {
     flex: 1,
     alignItems: "center",
   },
   weekLabelText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: SHARED_COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.sizes.sm,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.textPrimary,
   },
   todayButtonContainer: {
     paddingHorizontal: SPACING.element,
-    paddingVertical: SPACING.small,
+    paddingVertical: SPACING.medium,
   },
   todayButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: SPACING.xs,
-    paddingVertical: SPACING.xs,
+    paddingVertical: SPACING.small,
     paddingHorizontal: SPACING.element,
     backgroundColor: COLORS.primary,
-    borderRadius: SPACING.borderRadius,
+    borderRadius: SPACING.borderRadiusSmall,
   },
   todayButtonText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: SHARED_COLORS.white,
+    fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.white,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: SPACING.element,
-    paddingVertical: SPACING.small,
+    paddingVertical: SPACING.medium,
     gap: SPACING.small,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 60,
+    paddingVertical: SPACING.container,
   },
   loadingText: {
-    fontSize: 14,
-    color: SHARED_COLORS.textSecondary,
+    fontSize: TYPOGRAPHY.sizes.md,
+    color: COLORS.textSecondary,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 80,
+    paddingVertical: SPACING.container,
     gap: SPACING.small,
   },
   emptyText: {
-    fontSize: 14,
-    color: SHARED_COLORS.textSecondary,
+    fontSize: TYPOGRAPHY.sizes.md,
+    color: COLORS.textSecondary,
   },
   dayCard: {
-    backgroundColor: SHARED_COLORS.secondaryBackground,
-    borderRadius: SPACING.borderRadiusLarge,
-    padding: SPACING.small,
+    backgroundColor: COLORS.secondaryBackground,
+    borderRadius: SPACING.borderRadius,
+    padding: SPACING.medium,
     borderWidth: 1,
-    borderColor: SHARED_COLORS.mediumGray,
+    borderColor: COLORS.mediumGray,
   },
   dayHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: SPACING.small,
+    marginBottom: SPACING.medium,
   },
   dayName: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: SHARED_COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.sizes.md,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.textPrimary,
   },
   dayDate: {
-    fontSize: 11,
-    color: SHARED_COLORS.textSecondary,
-    marginTop: 2,
+    fontSize: TYPOGRAPHY.sizes.xs,
+    color: COLORS.textSecondary,
+    marginTop: SPACING.xs,
   },
   dayCalories: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontSize: TYPOGRAPHY.sizes.lg,
+    fontWeight: TYPOGRAPHY.weights.bold,
     color: COLORS.primary,
   },
   macrosContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
-    paddingTop: SPACING.xs,
+    paddingTop: SPACING.small,
     borderTopWidth: 1,
-    borderTopColor: SHARED_COLORS.mediumGray,
+    borderTopColor: COLORS.mediumGray,
   },
   macroItem: {
     alignItems: "center",
     gap: SPACING.xs,
   },
   macroLabel: {
-    fontSize: 11,
-    color: SHARED_COLORS.textSecondary,
-    fontWeight: "500",
+    fontSize: TYPOGRAPHY.sizes.xs,
+    color: COLORS.textSecondary,
+    fontWeight: TYPOGRAPHY.weights.medium,
   },
   macroValue: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: SHARED_COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.sizes.sm,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.textPrimary,
   },
   footer: {
     paddingHorizontal: SPACING.element,
     paddingVertical: SPACING.element,
     borderTopWidth: 1,
-    borderTopColor: SHARED_COLORS.mediumGray,
-    backgroundColor: SHARED_COLORS.white,
+    borderTopColor: COLORS.mediumGray,
+    backgroundColor: COLORS.mainBackground,
   },
   doneButton: {
     backgroundColor: COLORS.primary,
-    paddingVertical: SPACING.small,
-    borderRadius: SPACING.borderRadius,
+    paddingVertical: SPACING.medium,
+    borderRadius: SPACING.borderRadiusSmall,
     alignItems: "center",
   },
   doneButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: SHARED_COLORS.white,
+    fontSize: TYPOGRAPHY.sizes.md,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.white,
   },
 });
 
