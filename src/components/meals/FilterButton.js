@@ -78,7 +78,7 @@ export default function FilterButton({
       <MaterialCommunityIcons
         name="filter"
         size={18}
-        color={hasActiveFilters ? COLORS.white : COLORS.primary}
+        color={hasActiveFilters ? COLORS.primary : COLORS.textSecondary}
       />
     </TouchableOpacity>
   );

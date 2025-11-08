@@ -39,7 +39,11 @@ export default function SortButton({
 
   return (
     <TouchableOpacity style={styles.controlButton} onPress={handleSortPress}>
-      <MaterialCommunityIcons name="sort" size={18} color={COLORS.primary} />
+      <MaterialCommunityIcons
+        name="sort"
+        size={18}
+        color={COLORS.textSecondary}
+      />
     </TouchableOpacity>
   );
 }
