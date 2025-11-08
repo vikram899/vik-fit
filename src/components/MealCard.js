@@ -35,31 +35,27 @@ export default function MealCard({
     const mealTypes = {
       veg: {
         icon: "leaf",
-        color: COLORS.vegIcon,
-        backgroundColor: COLORS.vegBackground,
+        color: "#008300",
+        backgroundColor: "rgba(0, 131, 0, 0.1)",
         label: "Veg",
-        borderColor: COLORS.vegBorder,
       },
       "non-veg": {
-        icon: "chicken",
-        color: COLORS.nonVegIcon,
-        backgroundColor: COLORS.nonVegBackground,
+        icon: "triangle",
+        color: "#B00020",
+        backgroundColor: "rgba(176, 0, 32, 0.1)",
         label: "Non-Veg",
-        borderColor: COLORS.nonVegBorder,
       },
       egg: {
         icon: "egg",
-        color: COLORS.eggIcon,
-        backgroundColor: COLORS.eggBackground,
+        color: "#E0B000",
+        backgroundColor: "rgba(224, 176, 0, 0.1)",
         label: "Egg",
-        borderColor: COLORS.eggBorder,
       },
       vegan: {
-        icon: "sprout",
-        color: COLORS.veganIcon,
-        backgroundColor: COLORS.veganBackground,
+        icon: "leaf",
+        color: "#00A86B",
+        backgroundColor: "rgba(0, 168, 107, 0.1)",
         label: "Vegan",
-        borderColor: COLORS.veganBorder,
       },
     };
     return mealTypes[type] || mealTypes.veg;
@@ -78,16 +74,7 @@ export default function MealCard({
   const cardProps = showPlusIcon ? {} : { onPress, activeOpacity: 0.85 };
 
   return (
-    <CardWrapper
-      style={[
-        styles.mealCard,
-        {
-          borderLeftWidth: 4,
-          borderLeftColor: mealTypeInfo.color,
-        },
-      ]}
-      {...cardProps}
-    >
+    <CardWrapper style={styles.mealCard} {...cardProps}>
       {/* Top Row: Meal Name + Star + Menu */}
       <View style={styles.topRow}>
         <Text style={styles.mealName} numberOfLines={1}>
@@ -156,8 +143,15 @@ export default function MealCard({
         </View>
       </View>
 
-      {/* Bottom Row: Simple Text Stats */}
+      {/* Bottom Row: Meal Type Badge + Simple Text Stats */}
       <View style={styles.nutritionRow}>
+        <View style={[styles.mealTypeBadge, { backgroundColor: mealTypeInfo.backgroundColor }]}>
+          <MaterialCommunityIcons
+            name={mealTypeInfo.icon}
+            size={14}
+            color={mealTypeInfo.color}
+          />
+        </View>
         <Text style={styles.macroItem}>Cal: {meal.calories}</Text>
         <Text style={styles.dot}>·</Text>
         <Text style={styles.macroItem}>Protein: {meal.protein}g</Text>
@@ -187,6 +181,15 @@ const styles = StyleSheet.create({
     elevation: 3,
     gap: SPACING.small,
   },
+  mealTypeBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    marginRight: SPACING.xs,
+  },
   topRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -211,6 +214,7 @@ const styles = StyleSheet.create({
   },
   nutritionRow: {
     flexDirection: "row",
+    alignItems: "center",
   },
   macroItem: {
     ...TYPOGRAPHY.small,
