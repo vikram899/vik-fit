@@ -454,7 +454,6 @@ export default function StartWorkoutScreen({ navigation, route }) {
                     keyboardType="number-pad"
                     value={repsInput}
                     onChangeText={setRepsInput}
-                    autoFocus
                     returnKeyType="next"
                     blurOnSubmit={false}
                   />
