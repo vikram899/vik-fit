@@ -104,11 +104,81 @@ export const initializeDatabase = async () => {
       // Column already exists, no need to add it
     }
 
+    // Migration: Add targetBodyParts column to exercises table if it doesn't exist
+    try {
+      await db.execAsync('ALTER TABLE exercises ADD COLUMN targetBodyParts TEXT;');
+    } catch (error) {
+      // Column already exists, no need to add it
+    }
+
     // Migration: Add mealType column to meals table if it doesn't exist
     try {
       await db.execAsync('ALTER TABLE meals ADD COLUMN mealType TEXT DEFAULT "veg";');
     } catch (error) {
       // Column already exists, no need to add it
+    }
+
+    // Migration: Update default workout exercises with target body parts
+    try {
+      // Chest Day exercises
+      await db.runAsync(
+        'UPDATE exercises SET targetBodyParts = ? WHERE name = ? AND targetBodyParts IS NULL',
+        [JSON.stringify(['Chest', 'Triceps']), 'Bench Press']
+      );
+      await db.runAsync(
+        'UPDATE exercises SET targetBodyParts = ? WHERE name = ? AND targetBodyParts IS NULL',
+        [JSON.stringify(['Chest', 'Shoulders']), 'Incline Dumbbell Press']
+      );
+      await db.runAsync(
+        'UPDATE exercises SET targetBodyParts = ? WHERE name = ? AND targetBodyParts IS NULL',
+        [JSON.stringify(['Triceps', 'Chest']), 'Tricep Dips']
+      );
+      await db.runAsync(
+        'UPDATE exercises SET targetBodyParts = ? WHERE name = ? AND targetBodyParts IS NULL',
+        [JSON.stringify(['Chest']), 'Chest Fly']
+      );
+
+      // Leg Day exercises
+      await db.runAsync(
+        'UPDATE exercises SET targetBodyParts = ? WHERE name = ? AND targetBodyParts IS NULL',
+        [JSON.stringify(['Quadriceps', 'Hamstrings', 'Glutes']), 'Squats']
+      );
+      await db.runAsync(
+        'UPDATE exercises SET targetBodyParts = ? WHERE name = ? AND targetBodyParts IS NULL',
+        [JSON.stringify(['Quadriceps', 'Glutes']), 'Leg Press']
+      );
+      await db.runAsync(
+        'UPDATE exercises SET targetBodyParts = ? WHERE name = ? AND targetBodyParts IS NULL',
+        [JSON.stringify(['Hamstrings']), 'Leg Curl']
+      );
+      await db.runAsync(
+        'UPDATE exercises SET targetBodyParts = ? WHERE name = ? AND targetBodyParts IS NULL',
+        [JSON.stringify(['Quadriceps']), 'Leg Extension']
+      );
+      await db.runAsync(
+        'UPDATE exercises SET targetBodyParts = ? WHERE name = ? AND targetBodyParts IS NULL',
+        [JSON.stringify(['Calves']), 'Calf Raises']
+      );
+
+      // Back & Biceps exercises
+      await db.runAsync(
+        'UPDATE exercises SET targetBodyParts = ? WHERE name = ? AND targetBodyParts IS NULL',
+        [JSON.stringify(['Back', 'Hamstrings', 'Glutes']), 'Deadlift']
+      );
+      await db.runAsync(
+        'UPDATE exercises SET targetBodyParts = ? WHERE name = ? AND targetBodyParts IS NULL',
+        [JSON.stringify(['Back', 'Biceps']), 'Barbell Row']
+      );
+      await db.runAsync(
+        'UPDATE exercises SET targetBodyParts = ? WHERE name = ? AND targetBodyParts IS NULL',
+        [JSON.stringify(['Biceps']), 'Barbell Curl']
+      );
+      await db.runAsync(
+        'UPDATE exercises SET targetBodyParts = ? WHERE name = ? AND targetBodyParts IS NULL',
+        [JSON.stringify(['Back', 'Biceps']), 'Lat Pulldown']
+      );
+    } catch (error) {
+      // Migration already applied or exercises don't exist
     }
 
     // Migration: Add weight column to meals table if it doesn't exist
@@ -436,12 +506,23 @@ export const deleteWorkout = async (workoutId) => {
 
 /**
  * Add an exercise to a workout
+ * @param {number} workoutId - Workout ID
+ * @param {string} name - Exercise name
+ * @param {number} sets - Number of sets
+ * @param {number} reps - Reps per set
+ * @param {number} weight - Weight used (default 0)
+ * @param {number} restTime - Rest time in seconds (default 0)
+ * @param {string} notes - Exercise notes (default '')
+ * @param {string|Array} targetBodyParts - Target body parts as JSON string or array (default '')
  */
-export const addExercise = async (workoutId, name, sets, reps, weight = 0, restTime = 0, notes = '') => {
+export const addExercise = async (workoutId, name, sets, reps, weight = 0, restTime = 0, notes = '', targetBodyParts = '') => {
   try {
+    // Convert array to JSON string if needed
+    const bodyPartsStr = Array.isArray(targetBodyParts) ? JSON.stringify(targetBodyParts) : (targetBodyParts || '');
+
     await db.runAsync(
-      'INSERT INTO exercises (workoutId, name, sets, reps, weight, restTime, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [workoutId, name, sets, reps, weight, restTime, notes]
+      'INSERT INTO exercises (workoutId, name, sets, reps, weight, restTime, notes, targetBodyParts) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [workoutId, name, sets, reps, weight, restTime, notes, bodyPartsStr]
     );
 
     // Fetch the last inserted exercise to get its ID
@@ -464,8 +545,45 @@ export const getExercisesByWorkoutId = async (workoutId) => {
       'SELECT * FROM exercises WHERE workoutId = ? ORDER BY createdAt ASC',
       [workoutId]
     );
-    return result || [];
+    // Parse targetBodyParts JSON for each exercise
+    return (result || []).map(exercise => ({
+      ...exercise,
+      targetBodyParts: exercise.targetBodyParts ? JSON.parse(exercise.targetBodyParts) : []
+    }));
   } catch (error) {
+    return [];
+  }
+};
+
+/**
+ * Get all distinct target body parts for a workout
+ * Returns an array of unique body part names targeted by all exercises in the workout
+ */
+export const getWorkoutTargetBodyParts = async (workoutId) => {
+  try {
+    const result = await db.getAllAsync(
+      'SELECT targetBodyParts FROM exercises WHERE workoutId = ? AND targetBodyParts IS NOT NULL AND targetBodyParts != ""',
+      [workoutId]
+    );
+
+    const bodyPartsSet = new Set();
+
+    result?.forEach(row => {
+      try {
+        if (row.targetBodyParts) {
+          const parts = JSON.parse(row.targetBodyParts);
+          if (Array.isArray(parts)) {
+            parts.forEach(part => bodyPartsSet.add(part));
+          }
+        }
+      } catch (parseError) {
+        // Skip rows that can't be parsed
+      }
+    });
+
+    return Array.from(bodyPartsSet);
+  } catch (error) {
+    console.error('Error getting workout target body parts:', error);
     return [];
   }
 };
@@ -487,12 +605,23 @@ export const getExerciseCount = async (workoutId) => {
 
 /**
  * Update an exercise
+ * @param {number} exerciseId - Exercise ID
+ * @param {string} name - Exercise name
+ * @param {number} sets - Number of sets
+ * @param {number} reps - Reps per set
+ * @param {number} weight - Weight used (default 0)
+ * @param {number} restTime - Rest time in seconds (default 0)
+ * @param {string} notes - Exercise notes (default '')
+ * @param {string|Array} targetBodyParts - Target body parts as JSON string or array (default '')
  */
-export const updateExercise = async (exerciseId, name, sets, reps, weight = 0, restTime = 0, notes = '') => {
+export const updateExercise = async (exerciseId, name, sets, reps, weight = 0, restTime = 0, notes = '', targetBodyParts = '') => {
   try {
+    // Convert array to JSON string if needed
+    const bodyPartsStr = Array.isArray(targetBodyParts) ? JSON.stringify(targetBodyParts) : (targetBodyParts || '');
+
     await db.runAsync(
-      'UPDATE exercises SET name = ?, sets = ?, reps = ?, weight = ?, restTime = ?, notes = ? WHERE id = ?',
-      [name, sets, reps, weight, restTime, notes, exerciseId]
+      'UPDATE exercises SET name = ?, sets = ?, reps = ?, weight = ?, restTime = ?, notes = ?, targetBodyParts = ? WHERE id = ?',
+      [name, sets, reps, weight, restTime, notes, bodyPartsStr, exerciseId]
     );
   } catch (error) {
     throw error;
@@ -629,23 +758,23 @@ export const seedDummyData = async () => {
     const plan3Id = await addWorkout('Back & Biceps', 'Focus on back and biceps');
 
     // Add exercises for Chest Day
-    await addExercise(plan1Id, 'Bench Press', 4, 8, 185, 'Explosive');
-    await addExercise(plan1Id, 'Incline Dumbbell Press', 3, 10, 60, '');
-    await addExercise(plan1Id, 'Tricep Dips', 3, 12, 0, 'Bodyweight');
-    await addExercise(plan1Id, 'Chest Fly', 3, 12, 50, '');
+    await addExercise(plan1Id, 'Bench Press', 4, 8, 185, 60, 'Explosive', ['Chest', 'Triceps']);
+    await addExercise(plan1Id, 'Incline Dumbbell Press', 3, 10, 60, 0, '', ['Chest', 'Shoulders']);
+    await addExercise(plan1Id, 'Tricep Dips', 3, 12, 0, 0, 'Bodyweight', ['Triceps', 'Chest']);
+    await addExercise(plan1Id, 'Chest Fly', 3, 12, 50, 0, '', ['Chest']);
 
     // Add exercises for Leg Day
-    await addExercise(plan2Id, 'Squats', 4, 6, 225, 'Heavy');
-    await addExercise(plan2Id, 'Leg Press', 3, 10, 450, '');
-    await addExercise(plan2Id, 'Leg Curl', 3, 12, 150, '');
-    await addExercise(plan2Id, 'Leg Extension', 3, 12, 160, '');
-    await addExercise(plan2Id, 'Calf Raises', 3, 15, 200, '');
+    await addExercise(plan2Id, 'Squats', 4, 6, 225, 90, 'Heavy', ['Quadriceps', 'Hamstrings', 'Glutes']);
+    await addExercise(plan2Id, 'Leg Press', 3, 10, 450, 60, '', ['Quadriceps', 'Glutes']);
+    await addExercise(plan2Id, 'Leg Curl', 3, 12, 150, 0, '', ['Hamstrings']);
+    await addExercise(plan2Id, 'Leg Extension', 3, 12, 160, 0, '', ['Quadriceps']);
+    await addExercise(plan2Id, 'Calf Raises', 3, 15, 200, 0, '', ['Calves']);
 
     // Add exercises for Back & Biceps
-    await addExercise(plan3Id, 'Deadlift', 3, 5, 315, 'Heavy');
-    await addExercise(plan3Id, 'Barbell Row', 4, 8, 225, '');
-    await addExercise(plan3Id, 'Barbell Curl', 3, 8, 85, '');
-    await addExercise(plan3Id, 'Lat Pulldown', 3, 12, 180, '');
+    await addExercise(plan3Id, 'Deadlift', 3, 5, 315, 180, 'Heavy', ['Back', 'Hamstrings', 'Glutes']);
+    await addExercise(plan3Id, 'Barbell Row', 4, 8, 225, 90, '', ['Back', 'Biceps']);
+    await addExercise(plan3Id, 'Barbell Curl', 3, 8, 85, 60, '', ['Biceps']);
+    await addExercise(plan3Id, 'Lat Pulldown', 3, 12, 180, 60, '', ['Back', 'Biceps']);
 
     // Seed dummy weight tracking data for the last 2 months
     const todayDate = new Date();

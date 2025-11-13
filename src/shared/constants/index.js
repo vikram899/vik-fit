@@ -30,3 +30,10 @@ export { TYPOGRAPHY } from './typography';
 // App-wide configuration, feature flags, and settings
 export { APP_CONFIG } from './config';
 
+// ============================================================================
+// DOMAIN DATA
+// ============================================================================
+
+// Body parts for exercise targeting
+export { BODY_PARTS, BODY_PARTS_LIST } from './bodyParts';
+

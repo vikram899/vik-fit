@@ -16,7 +16,7 @@ export const COLORS = {
   // ============================================================================
   primary: "#2a90fcff", // Electric Blue - main brand color
   secondary: "#ffffffff", // Black - secondary brand color
-  tertiary: "#00C853",
+  tertiary: "#d4d4d4ff",
   // ============================================================================
   // STATUS COLORS
   // ============================================================================
@@ -33,7 +33,7 @@ export const COLORS = {
   secondaryBackground: "#202021ff", // Light gray for subtle backgrounds
   tertiaryBackground: "#3d3d3dff", // Alternative light background
   workoutBackground: "#fb7832ff",
-  mediumGray: "#202021ff", // Medium gray - borders and dividers
+  mediumGray: "#353536ff", // Medium gray - borders and dividers
 
   // ============================================================================
   // TEXT COLORS
@@ -41,7 +41,6 @@ export const COLORS = {
   text: "#000000", // Default text
   textPrimary: "#FFFFFF", // Primary text - strong contrast
   textSecondary: "#d4d4d4ff", // Secondary text - medium contrast
-  textTertiary: "#e04040ff", // Tertiary text - weak contrast
 
   darkGray: "#999999", // Alias for tertiary text
 

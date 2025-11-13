@@ -6,11 +6,25 @@ import { COLORS, SPACING, TYPOGRAPHY } from "../../shared/constants";
 /**
  * WorkoutCard - Reusable workout card component
  * Used in both AllWorkoutsScreen and LogWorkoutScreen
+ *
+ * Props:
+ * - workout: object - workout data
+ * - exerciseCount: number - number of exercises in workout
+ * - scheduledDays: array - days workout is scheduled
+ * - targetBodyParts: array - target body parts from exercises
+ * - onViewExercises: function - callback to view exercises
+ * - onMenuPress: function - callback for menu
+ * - onStart: function - callback to start workout (optional)
+ * - onViewSummary: function - callback to view summary (optional)
+ * - showStartButton: boolean - whether to show start button
+ * - isCompleted: boolean - whether workout is completed
+ * - showDayTags: boolean - whether to show day tags
  */
 const WorkoutCard = ({
   workout,
   exerciseCount = 0,
   scheduledDays = [],
+  targetBodyParts = [],
   onViewExercises,
   onMenuPress,
   onStart = null,
@@ -76,14 +90,27 @@ const WorkoutCard = ({
           <MaterialCommunityIcons
             name="lightning-bolt"
             size={24}
-            color={COLORS.white}
+            color={COLORS.tertiary}
           />
         </View>
         <View style={styles.exerciseInfo}>
-          <Text style={styles.exerciseCount}>{exerciseCount}</Text>
-          <Text style={styles.exerciseLabel}>
-            {exerciseCount === 1 ? "Exercise" : "Exercises"}
-          </Text>
+          <View style={styles.exerciseHeader}>
+            <Text style={styles.exerciseCount}>{exerciseCount}</Text>
+            <Text style={styles.exerciseLabel}>
+              {exerciseCount === 1 ? " Exercise" : " Exercises"}
+            </Text>
+          </View>
+          {/* Target Body Parts Tags */}
+          {targetBodyParts.length > 0 && (
+            <View style={styles.bodyPartsContainer}>
+              {targetBodyParts.map((bodyPart, index) => (
+                <Text style={styles.bodyPartTagText} key={index}>
+                  {bodyPart}
+                  {index !== targetBodyParts.length - 1 ? " · " : ""}
+                </Text>
+              ))}
+            </View>
+          )}
         </View>
         <MaterialCommunityIcons
           name="chevron-right"
@@ -138,8 +165,6 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.small,
     marginHorizontal: SPACING.element,
     marginBottom: SPACING.medium,
-    borderWidth: 1,
-    borderColor: COLORS.mediumGray,
     shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
@@ -166,6 +191,24 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: SPACING.xs,
     marginTop: SPACING.small,
+  },
+  bodyPartsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: SPACING.xs,
+    marginTop: SPACING.small,
+  },
+  bodyPartTag: {
+    backgroundColor: COLORS.mediumGray,
+    paddingVertical: 4,
+    paddingHorizontal: SPACING.small,
+    borderRadius: SPACING.borderRadiusRound,
+  },
+  bodyPartTagText: {
+    fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: TYPOGRAPHY.weights.medium,
+    color: COLORS.white,
+    letterSpacing: 0.2,
   },
   dayBadge: {
     backgroundColor: COLORS.tertiaryBackground,
@@ -212,8 +255,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.xs,
     paddingVertical: SPACING.small,
     borderRadius: SPACING.borderRadiusLarge,
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.workoutBackground,
     justifyContent: "space-between",
   },
   exerciseIconBox: {
@@ -227,6 +268,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
   },
+  exerciseHeader: {
+    flexDirection: "row", // puts count + label in one line
+    alignItems: "center",
+  },
   exerciseCount: {
     fontSize: TYPOGRAPHY.sizes.xl,
     color: COLORS.textSecondary,
@@ -237,6 +282,7 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontWeight: TYPOGRAPHY.weights.semibold,
     marginTop: SPACING.xs,
+    marginLeft: SPACING.small,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },

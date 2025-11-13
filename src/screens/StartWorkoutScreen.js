@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,10 +9,10 @@ import {
   Alert,
   TextInput,
   Keyboard,
-} from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPOGRAPHY } from '../shared/constants';
+} from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { COLORS, SPACING, TYPOGRAPHY } from "../shared/constants";
 import {
   getWorkoutById,
   getExercisesByWorkoutId,
@@ -20,7 +20,8 @@ import {
   getActiveWorkoutLog,
   logExerciseSet,
   completeWorkoutLog,
-} from '../services/database';
+} from "../services/database";
+import { Button } from "../shared/components";
 
 /**
  * StartWorkoutScreen
@@ -40,8 +41,8 @@ export default function StartWorkoutScreen({ navigation, route }) {
   const [currentSetNumber, setCurrentSetNumber] = useState(1);
 
   // Form inputs
-  const [repsInput, setRepsInput] = useState('');
-  const [weightInput, setWeightInput] = useState('');
+  const [repsInput, setRepsInput] = useState("");
+  const [weightInput, setWeightInput] = useState("");
 
   // Rest timer state
   const [isResting, setIsResting] = useState(false);
@@ -50,7 +51,7 @@ export default function StartWorkoutScreen({ navigation, route }) {
 
   // Workout timing
   const [workoutStartTime] = useState(new Date());
-  const [elapsedTime, setElapsedTime] = useState('00:00');
+  const [elapsedTime, setElapsedTime] = useState("00:00");
 
   // Logged sets for current exercise
   const [currentExerciseSets, setCurrentExerciseSets] = useState([]);
@@ -93,7 +94,7 @@ export default function StartWorkoutScreen({ navigation, route }) {
             initializeExercise(exercisesData[0]);
           }
         } catch (error) {
-          Alert.alert('Error', 'Failed to load workout');
+          Alert.alert("Error", "Failed to load workout");
         } finally {
           setLoading(false);
         }
@@ -106,8 +107,8 @@ export default function StartWorkoutScreen({ navigation, route }) {
   // Initialize exercise with pre-filled values
   const initializeExercise = (exercise) => {
     // Pre-fill with exercise defaults
-    setRepsInput(exercise.reps?.toString() || '');
-    setWeightInput(exercise.weight?.toString() || '');
+    setRepsInput(exercise.reps?.toString() || "");
+    setWeightInput(exercise.weight?.toString() || "");
     setCurrentExerciseSets([]);
     setSetStartTime(new Date()); // Start timing for this set
   };
@@ -121,7 +122,9 @@ export default function StartWorkoutScreen({ navigation, route }) {
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = totalSeconds % 60;
 
-      const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      const formattedTime = `${minutes.toString().padStart(2, "0")}:${seconds
+        .toString()
+        .padStart(2, "0")}`;
       setElapsedTime(formattedTime);
     }, 1000);
 
@@ -162,7 +165,10 @@ export default function StartWorkoutScreen({ navigation, route }) {
       const cardWidth = 160;
       const gap = 10;
       const totalCardWidth = cardWidth + gap;
-      const scrollPosition = Math.max(0, currentExerciseIndex * totalCardWidth - (cardWidth / 2));
+      const scrollPosition = Math.max(
+        0,
+        currentExerciseIndex * totalCardWidth - cardWidth / 2
+      );
 
       setTimeout(() => {
         upcomingExercisesScrollRef.current?.scrollTo({
@@ -202,12 +208,12 @@ export default function StartWorkoutScreen({ navigation, route }) {
     try {
       // Validate workoutLogId first
       if (!workoutLogId) {
-        Alert.alert('Error', 'Workout not initialized. Please try again.');
+        Alert.alert("Error", "Workout not initialized. Please try again.");
         return;
       }
 
       if (!repsInput.trim()) {
-        Alert.alert('Error', 'Please enter reps');
+        Alert.alert("Error", "Please enter reps");
         return;
       }
 
@@ -215,12 +221,14 @@ export default function StartWorkoutScreen({ navigation, route }) {
       const weight = weightInput ? parseFloat(weightInput) : 0;
 
       if (reps <= 0) {
-        Alert.alert('Error', 'Reps must be greater than 0');
+        Alert.alert("Error", "Reps must be greater than 0");
         return;
       }
 
       // Calculate set duration
-      const setDuration = setStartTime ? Math.floor((new Date() - setStartTime) / 1000) : 0;
+      const setDuration = setStartTime
+        ? Math.floor((new Date() - setStartTime) / 1000)
+        : 0;
 
       // Save to database with timing
       await logExerciseSet(
@@ -230,7 +238,7 @@ export default function StartWorkoutScreen({ navigation, route }) {
         reps,
         weight,
         null,
-        '',
+        "",
         setDuration,
         0 // rest time will be updated when rest completes
       );
@@ -257,7 +265,7 @@ export default function StartWorkoutScreen({ navigation, route }) {
       setRepsInput(weight.toString());
       setWeightInput(weight.toString());
     } catch (error) {
-      Alert.alert('Error', 'Failed to log set');
+      Alert.alert("Error", "Failed to log set");
     } finally {
       // Re-enable the button after operation completes
       setIsLoggingSet(false);
@@ -293,12 +301,12 @@ export default function StartWorkoutScreen({ navigation, route }) {
     Keyboard.dismiss();
 
     Alert.alert(
-      'Complete Exercise',
+      "Complete Exercise",
       `Skip remaining sets for ${currentExercise.name}?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Skip Exercise',
+          text: "Skip Exercise",
           onPress: async () => {
             if (currentExerciseIndex < exercises.length - 1) {
               setCurrentExerciseIndex(currentExerciseIndex + 1);
@@ -310,7 +318,7 @@ export default function StartWorkoutScreen({ navigation, route }) {
               await completeWorkout();
             }
           },
-          style: 'destructive',
+          style: "destructive",
         },
       ]
     );
@@ -322,9 +330,9 @@ export default function StartWorkoutScreen({ navigation, route }) {
       await completeWorkoutLog(workoutLogId, duration);
 
       // Navigate to summary screen instead of showing alert
-      navigation.navigate('WorkoutSummary', { workoutLogId });
+      navigation.navigate("WorkoutSummary", { workoutLogId });
     } catch (error) {
-      Alert.alert('Error', 'Failed to complete workout');
+      Alert.alert("Error", "Failed to complete workout");
     }
   };
 
@@ -333,11 +341,15 @@ export default function StartWorkoutScreen({ navigation, route }) {
     Keyboard.dismiss();
 
     Alert.alert(
-      'Exit Workout',
-      'Are you sure? Your logged sets will be saved.',
+      "Exit Workout",
+      "Are you sure? Your logged sets will be saved.",
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Exit', onPress: () => navigation.goBack(), style: 'destructive' },
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Exit",
+          onPress: () => navigation.goBack(),
+          style: "destructive",
+        },
       ]
     );
   };
@@ -367,7 +379,11 @@ export default function StartWorkoutScreen({ navigation, route }) {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleExit} activeOpacity={0.7}>
-          <MaterialCommunityIcons name="close" size={24} color={COLORS.primary} />
+          <MaterialCommunityIcons
+            name="close"
+            size={24}
+            color={COLORS.tertiary}
+          />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>{plan?.name}</Text>
@@ -376,7 +392,11 @@ export default function StartWorkoutScreen({ navigation, route }) {
           </Text>
         </View>
         <View style={styles.timerContainer}>
-          <MaterialCommunityIcons name="clock" size={16} color={COLORS.primary} />
+          <MaterialCommunityIcons
+            name="clock"
+            size={16}
+            color={COLORS.tertiary}
+          />
           <Text style={styles.timerText}>{elapsedTime}</Text>
         </View>
       </View>
@@ -388,18 +408,27 @@ export default function StartWorkoutScreen({ navigation, route }) {
         </View>
       </View>
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* Current Exercise Card */}
         <View style={styles.exerciseCard}>
           {/* Card Header with Rest Timer */}
           <View style={styles.cardHeader}>
             <View>
               <Text style={styles.exerciseName}>{currentExercise.name}</Text>
-              <Text style={styles.setLabel}>Set {currentSetNumber} of {currentExercise.sets}</Text>
+              <Text style={styles.setLabel}>
+                Set {currentSetNumber} of {currentExercise.sets}
+              </Text>
             </View>
             {isResting && (
               <View style={styles.restTimerBox}>
-                <MaterialCommunityIcons name="pause-circle" size={14} color="#FF9800" />
+                <MaterialCommunityIcons
+                  name="pause-circle"
+                  size={14}
+                  color={COLORS.tertiary}
+                />
                 <Text style={styles.restTimerText}>{restTimeLeft}s</Text>
               </View>
             )}
@@ -408,7 +437,8 @@ export default function StartWorkoutScreen({ navigation, route }) {
           {/* Target Info */}
           <View style={styles.targetBox}>
             <Text style={styles.targetLabel}>
-              Target: {currentExercise.reps} reps {currentExercise.weight ? `@ ${currentExercise.weight}kg` : ''}
+              Target: {currentExercise.reps} reps{" "}
+              {currentExercise.weight ? `@ ${currentExercise.weight}kg` : ""}
             </Text>
           </View>
 
@@ -420,7 +450,7 @@ export default function StartWorkoutScreen({ navigation, route }) {
                   <Text style={styles.inputLabel}>Reps</Text>
                   <TextInput
                     style={styles.input}
-                    placeholder={currentExercise.reps?.toString() || '0'}
+                    placeholder={currentExercise.reps?.toString() || "0"}
                     keyboardType="number-pad"
                     value={repsInput}
                     onChangeText={setRepsInput}
@@ -433,7 +463,7 @@ export default function StartWorkoutScreen({ navigation, route }) {
                   <Text style={styles.inputLabel}>Weight (kg)</Text>
                   <TextInput
                     style={styles.input}
-                    placeholder={currentExercise.weight?.toString() || '0'}
+                    placeholder={currentExercise.weight?.toString() || "0"}
                     keyboardType="decimal-pad"
                     value={weightInput}
                     onChangeText={setWeightInput}
@@ -460,7 +490,10 @@ export default function StartWorkoutScreen({ navigation, route }) {
                 }}
               >
                 <TouchableOpacity
-                  style={[styles.logButton, (!workoutLogId || isLoggingSet) && styles.logButtonDisabled]}
+                  style={[
+                    styles.logButton,
+                    (!workoutLogId || isLoggingSet) && styles.logButtonDisabled,
+                  ]}
                   activeOpacity={0.7}
                   delayPressIn={0}
                   delayPressOut={0}
@@ -472,7 +505,11 @@ export default function StartWorkoutScreen({ navigation, route }) {
                     style={isLoggingSet ? styles.loadingIcon : {}}
                   />
                   <Text style={styles.logButtonText}>
-                    {!workoutLogId ? 'Initializing...' : isLoggingSet ? 'Logging...' : 'Log Set'}
+                    {!workoutLogId
+                      ? "Initializing..."
+                      : isLoggingSet
+                      ? "Logging..."
+                      : "Log Set"}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -480,22 +517,35 @@ export default function StartWorkoutScreen({ navigation, route }) {
           ) : (
             /* Rest Timer Active */
             <View style={styles.restingContainer}>
-              <Text style={styles.restingText}>Rest {restTimeLeft}s</Text>
+              {/* <Text style={styles.restingText}>Rest {restTimeLeft}s</Text> */}
               <View style={styles.restButtonRow}>
-                <TouchableOpacity
+                <Button
+                  label="+10"
+                  variant="cancel"
+                  size="medium"
+                  onPress={() => setRestTimeLeft(restTimeLeft + 10)}
+                  //isDisabled={isLoading}
+                  //fullWidth
+                />
+
+                {/* <TouchableOpacity
                   style={[styles.restActionButton, styles.addTimeButton]}
                   onPress={() => setRestTimeLeft(restTimeLeft + 10)}
                   activeOpacity={0.7}
                 >
                   <MaterialCommunityIcons name="plus" size={18} color="#fff" />
-                  <Text style={styles.restActionButtonText}>+10s</Text>
-                </TouchableOpacity>
+                  <Text style={styles.restActionButtonText}>10s</Text>
+                </TouchableOpacity> */}
                 <TouchableOpacity
                   style={[styles.restActionButton, styles.skipButton]}
                   onPress={handleSkipRestAndContinue}
                   activeOpacity={0.7}
                 >
-                  <MaterialCommunityIcons name="skip-next" size={18} color="#fff" />
+                  <MaterialCommunityIcons
+                    name="skip-next"
+                    size={18}
+                    color="#fff"
+                  />
                   <Text style={styles.restActionButtonText}>Skip</Text>
                 </TouchableOpacity>
               </View>
@@ -509,7 +559,8 @@ export default function StartWorkoutScreen({ navigation, route }) {
               {currentExerciseSets.map((set) => (
                 <View key={set.id} style={styles.loggedSetRow}>
                   <Text style={styles.loggedSetText}>
-                    Set {set.set}: {set.reps} reps {set.weight > 0 ? `@ ${set.weight}kg` : ''}
+                    Set {set.set}: {set.reps} reps{" "}
+                    {set.weight > 0 ? `@ ${set.weight}kg` : ""}
                   </Text>
                 </View>
               ))}
@@ -545,28 +596,43 @@ export default function StartWorkoutScreen({ navigation, route }) {
                   key={exercise.id}
                   style={[
                     styles.upcomingExerciseCard,
-                    index === currentExerciseIndex && styles.currentExerciseIndicator,
-                    index < currentExerciseIndex && styles.completedExerciseIndicator,
+                    index === currentExerciseIndex &&
+                      styles.currentExerciseIndicator,
+                    index < currentExerciseIndex &&
+                      styles.completedExerciseIndicator,
                   ]}
                 >
                   <View style={styles.exerciseIndexBadge}>
                     <Text style={styles.exerciseIndexText}>{index + 1}</Text>
                   </View>
                   <View style={styles.upcomingExerciseHeader}>
-                    <Text style={styles.upcomingExerciseName}>{exercise.name}</Text>
+                    <Text style={styles.upcomingExerciseName}>
+                      {exercise.name}
+                    </Text>
                   </View>
-                  <Text style={styles.upcomingExerciseSets}>{exercise.sets} sets</Text>
+                  <Text style={styles.upcomingExerciseSets}>
+                    {exercise.sets} sets
+                  </Text>
                   <Text style={styles.upcomingExerciseTarget}>
-                    {exercise.reps} reps {exercise.weight ? `@ ${exercise.weight}kg` : ''}
+                    {exercise.reps} reps{" "}
+                    {exercise.weight ? `@ ${exercise.weight}kg` : ""}
                   </Text>
                   {index < currentExerciseIndex && (
                     <View style={styles.completedBadge}>
-                      <MaterialCommunityIcons name="check-circle" size={16} color="#4CAF50" />
+                      <MaterialCommunityIcons
+                        name="check-circle"
+                        size={16}
+                        color={COLORS.tertiary}
+                      />
                     </View>
                   )}
                   {index === currentExerciseIndex && (
                     <View style={styles.currentBadge}>
-                      <MaterialCommunityIcons name="play-circle" size={16} color={COLORS.primary} />
+                      <MaterialCommunityIcons
+                        name="play-circle"
+                        size={16}
+                        color={COLORS.primary}
+                      />
                     </View>
                   )}
                 </View>
@@ -586,13 +652,13 @@ const styles = StyleSheet.create({
   },
   centerContent: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: SPACING.element,
     paddingVertical: SPACING.medium,
     borderBottomWidth: 1,
@@ -600,21 +666,21 @@ const styles = StyleSheet.create({
   },
   headerCenter: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: TYPOGRAPHY.sizes.lg,
     fontWeight: TYPOGRAPHY.weights.bold,
-    textAlign: 'center',
-    color: COLORS.textPrimary,
+    textAlign: "center",
+    color: COLORS.textSecondary,
   },
   headerSubtitle: {
     fontSize: TYPOGRAPHY.sizes.sm,
     color: COLORS.textSecondary,
   },
   timerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: SPACING.xs,
     backgroundColor: COLORS.secondaryBackground,
     paddingHorizontal: SPACING.medium,
@@ -624,8 +690,8 @@ const styles = StyleSheet.create({
   timerText: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontWeight: TYPOGRAPHY.weights.bold,
-    color: COLORS.primary,
-    fontFamily: 'monospace',
+    color: COLORS.textSecondary,
+    fontFamily: "monospace",
   },
   progressBarContainer: {
     paddingHorizontal: SPACING.element,
@@ -635,11 +701,11 @@ const styles = StyleSheet.create({
     height: 4,
     backgroundColor: COLORS.secondaryBackground,
     borderRadius: 2,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   progressFill: {
-    height: '100%',
-    backgroundColor: COLORS.primary,
+    height: "100%",
+    backgroundColor: COLORS.tertiary,
   },
   scrollView: {
     flex: 1,
@@ -656,9 +722,9 @@ const styles = StyleSheet.create({
     borderColor: COLORS.mediumGray,
   },
   cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: SPACING.medium,
   },
   exerciseName: {
@@ -670,11 +736,11 @@ const styles = StyleSheet.create({
   setLabel: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontWeight: TYPOGRAPHY.weights.semibold,
-    color: COLORS.primary,
+    color: COLORS.textSecondary,
   },
   restTimerBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: SPACING.xs,
     backgroundColor: COLORS.tertiaryBackground,
     paddingHorizontal: SPACING.medium,
@@ -686,7 +752,7 @@ const styles = StyleSheet.create({
   restTimerText: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontWeight: TYPOGRAPHY.weights.bold,
-    color: COLORS.primary,
+    color: COLORS.textSecondary,
   },
   targetBox: {
     backgroundColor: COLORS.tertiaryBackground,
@@ -699,11 +765,11 @@ const styles = StyleSheet.create({
   },
   targetLabel: {
     fontSize: TYPOGRAPHY.sizes.sm,
-    color: COLORS.textPrimary,
+    color: COLORS.textSecondary,
     fontWeight: TYPOGRAPHY.weights.semibold,
   },
   inputRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: SPACING.medium,
     marginBottom: SPACING.medium,
   },
@@ -724,16 +790,16 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.medium,
     fontSize: TYPOGRAPHY.sizes.xl,
     fontWeight: TYPOGRAPHY.weights.bold,
-    color: COLORS.textPrimary,
+    color: COLORS.textSecondary,
     backgroundColor: COLORS.mainBackground,
   },
   logButton: {
     backgroundColor: COLORS.primary,
     borderRadius: SPACING.borderRadius,
     paddingVertical: SPACING.medium,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: SPACING.small,
     marginBottom: SPACING.medium,
   },
@@ -747,34 +813,34 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
   loadingIcon: {
-    transform: [{ rotate: '0deg' }],
+    transform: [{ rotate: "0deg" }],
   },
   logButtonWrapper: {
     zIndex: 1000,
   },
   restingContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: SPACING.element,
     marginBottom: SPACING.medium,
   },
   restingText: {
     fontSize: TYPOGRAPHY.sizes.xxl,
     fontWeight: TYPOGRAPHY.weights.bold,
-    color: COLORS.primary,
+    color: COLORS.textSecondary,
     marginBottom: SPACING.medium,
   },
   restButtonRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: SPACING.small,
-    width: '100%',
+    width: "100%",
   },
   restActionButton: {
     flex: 1,
     borderRadius: SPACING.borderRadius,
     paddingVertical: SPACING.medium,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: SPACING.xs,
   },
   addTimeButton: {
@@ -796,7 +862,7 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.weights.bold,
     color: COLORS.textSecondary,
     marginBottom: SPACING.small,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   loggedSetRow: {
     paddingVertical: SPACING.small,
@@ -818,18 +884,17 @@ const styles = StyleSheet.create({
   actionButton: {
     paddingVertical: SPACING.medium,
     borderRadius: SPACING.borderRadius,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   skipExerciseButton: {
     backgroundColor: COLORS.tertiaryBackground,
-    borderWidth: 1,
-    borderColor: COLORS.danger,
+    borderColor: COLORS.textSecondary,
   },
   skipExerciseText: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontWeight: TYPOGRAPHY.weights.semibold,
-    color: COLORS.danger,
+    color: COLORS.textSecondary,
   },
   upcomingSection: {
     marginTop: SPACING.container,
@@ -840,7 +905,7 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.weights.bold,
     color: COLORS.textSecondary,
     marginBottom: SPACING.medium,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 0.5,
     paddingHorizontal: SPACING.element,
   },
@@ -856,29 +921,23 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.secondaryBackground,
     borderRadius: SPACING.borderRadius,
     padding: SPACING.medium,
-    borderLeftWidth: 3,
-    borderLeftColor: COLORS.textSecondary,
     minWidth: 140,
     maxWidth: 160,
   },
   currentExerciseIndicator: {
-    backgroundColor: COLORS.tertiaryBackground,
-    borderLeftColor: COLORS.primary,
-    borderWidth: 1.5,
-    borderLeftWidth: 3,
+    backgroundColor: COLORS.secondaryBackground,
   },
   completedExerciseIndicator: {
     backgroundColor: COLORS.secondaryBackground,
-    borderLeftColor: COLORS.success,
     opacity: 0.8,
   },
   exerciseIndexBadge: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: COLORS.tertiaryBackground,
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: SPACING.small,
   },
   exerciseIndexText: {
@@ -887,9 +946,9 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
   upcomingExerciseHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: SPACING.xs,
   },
   upcomingExerciseName: {
@@ -914,12 +973,12 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.weights.medium,
   },
   completedBadge: {
-    position: 'absolute',
+    position: "absolute",
     top: 8,
     right: 8,
   },
   currentBadge: {
-    position: 'absolute',
+    position: "absolute",
     top: 8,
     right: 8,
   },

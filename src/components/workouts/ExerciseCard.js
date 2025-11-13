@@ -77,8 +77,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.element,
     paddingVertical: SPACING.small,
     marginBottom: SPACING.medium,
-    borderWidth: 1,
-    borderColor: COLORS.mediumGray,
   },
   exerciseCardHeader: {
     flexDirection: "row",

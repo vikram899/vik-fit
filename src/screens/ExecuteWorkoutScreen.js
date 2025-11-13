@@ -148,7 +148,8 @@ export default function ExecuteWorkoutScreen({ navigation, route }) {
         parseInt(editExercise.reps) || 10,
         parseFloat(editExercise.weight) || 0,
         parseInt(editExercise.restTime) || 0,
-        ""
+        "",
+        editExercise.targetBodyParts || []
       );
 
       const updatedExercises = exercises.map((ex) =>

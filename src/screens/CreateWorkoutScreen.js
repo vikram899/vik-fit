@@ -104,7 +104,8 @@ export default function CreateWorkoutScreen({ navigation }) {
             parseInt(exercise.reps) || 10,
             parseFloat(exercise.weight) || 0,
             parseInt(exercise.restTime) || 0,
-            ""
+            "",
+            exercise.targetBodyParts || []
           );
         }
       }

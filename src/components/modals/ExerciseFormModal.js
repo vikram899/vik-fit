@@ -8,6 +8,7 @@ import {
   Platform,
 } from "react-native";
 import { BottomSheet, FormInput, Button } from "../../shared/components/ui";
+import BodyPartsPicker from "../workouts/BodyPartsPicker";
 import { COLORS, SPACING } from "../../shared/constants";
 
 /**
@@ -44,7 +45,7 @@ export default function ExerciseFormModal({
         visible={visible}
         title={title}
         onClose={onCancel}
-        heightPercent={0.7}
+        heightPercent={0.85}
         hasFixedFooter={true}
       >
         <ScrollView
@@ -114,6 +115,14 @@ export default function ExerciseFormModal({
               />
             </View>
           </View>
+
+          {/* Target Body Parts */}
+          <BodyPartsPicker
+            selectedBodyParts={exercise.targetBodyParts || []}
+            onSelectionChange={(bodyParts) =>
+              onExerciseChange({ ...exercise, targetBodyParts: bodyParts })
+            }
+          />
         </ScrollView>
 
         {/* Buttons */}

@@ -31,6 +31,7 @@ import {
   removeWorkoutFromDays,
   startWorkoutLog,
   deleteWorkoutLog,
+  getWorkoutTargetBodyParts,
 } from '../services/database';
 import {
   getPlanExerciseCount,
@@ -55,6 +56,7 @@ export default function LogWorkoutScreen({ navigation }) {
     equipment: false,
   });
   const [exerciseCounts, setExerciseCounts] = useState({});
+  const [targetBodyParts, setTargetBodyParts] = useState({});
   const [assignModalVisible, setAssignModalVisible] = useState(false);
   const [selectedWorkoutForAssign, setSelectedWorkoutForAssign] = useState(null);
   const [scheduledDays, setScheduledDays] = useState({});
@@ -132,13 +134,18 @@ export default function LogWorkoutScreen({ navigation }) {
       }
       setScheduledDays(daysMap);
 
-      // Get exercise counts for each workout
+      // Get exercise counts and target body parts for each workout
       const exerciseCountsMap = {};
+      const bodyPartsMap = {};
       for (const workout of workouts) {
         const count = await getPlanExerciseCount(workout.id);
         exerciseCountsMap[workout.id] = count;
+
+        const bodyParts = await getWorkoutTargetBodyParts(workout.id);
+        bodyPartsMap[workout.id] = bodyParts;
       }
       setExerciseCounts(exerciseCountsMap);
+      setTargetBodyParts(bodyPartsMap);
 
       // Get today's workout logs for all workouts (use already-loaded logs for today's workouts)
       const workoutLogsMap = { ...logsMapForSorting };
@@ -428,6 +435,7 @@ export default function LogWorkoutScreen({ navigation }) {
                     workout={workout}
                     exerciseCount={exerciseCounts[workout.id] || 0}
                     scheduledDays={scheduledDays[workout.id] || []}
+                    targetBodyParts={targetBodyParts[workout.id] || []}
                     onViewExercises={handleViewExercisesFromCard}
                     onMenuPress={(w) => handleWorkoutMenu(w, true)}
                     onStart={handleStartWorkout}
@@ -484,6 +492,7 @@ export default function LogWorkoutScreen({ navigation }) {
                       workout={workout}
                       exerciseCount={exerciseCounts[workout.id] || 0}
                       scheduledDays={scheduledDays[workout.id] || []}
+                      targetBodyParts={targetBodyParts[workout.id] || []}
                       onViewExercises={handleViewExercisesFromCard}
                       onMenuPress={(w) => handleWorkoutMenu(w, false)}
                     />

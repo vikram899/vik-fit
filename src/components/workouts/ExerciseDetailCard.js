@@ -32,8 +32,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.element,
     paddingVertical: SPACING.small,
     borderRadius: SPACING.borderRadius,
-    borderWidth: 1,
-    borderColor: COLORS.mediumGray,
   },
   label: {
     fontSize: TYPOGRAPHY.sizes.sm,

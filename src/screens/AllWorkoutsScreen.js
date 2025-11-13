@@ -22,6 +22,7 @@ import {
   getScheduledDaysForWorkout,
   assignWorkoutToDays,
   deleteWorkout,
+  getWorkoutTargetBodyParts,
 } from "../services/database";
 import { getPlanExerciseCount } from "../services/workoutStats";
 
@@ -42,6 +43,7 @@ export default function AllWorkoutsScreen({ navigation }) {
     equipment: false,
   });
   const [exerciseCounts, setExerciseCounts] = useState({});
+  const [targetBodyParts, setTargetBodyParts] = useState({});
   const [assignModalVisible, setAssignModalVisible] = useState(false);
   const [selectedWorkoutForAssign, setSelectedWorkoutForAssign] =
     useState(null);
@@ -63,11 +65,16 @@ export default function AllWorkoutsScreen({ navigation }) {
       setScheduledDays(daysMap);
 
       const exerciseCountsMap = {};
+      const bodyPartsMap = {};
       for (const plan of plans) {
         const count = await getPlanExerciseCount(plan.id);
         exerciseCountsMap[plan.id] = count;
+
+        const bodyParts = await getWorkoutTargetBodyParts(plan.id);
+        bodyPartsMap[plan.id] = bodyParts;
       }
       setExerciseCounts(exerciseCountsMap);
+      setTargetBodyParts(bodyPartsMap);
 
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -238,6 +245,7 @@ export default function AllWorkoutsScreen({ navigation }) {
                 workout={workout}
                 exerciseCount={exerciseCounts[workout.id] || 0}
                 scheduledDays={scheduledDays[workout.id] || []}
+                targetBodyParts={targetBodyParts[workout.id] || []}
                 onViewExercises={handleViewExercises}
                 onMenuPress={handleWorkoutMenu}
               />
