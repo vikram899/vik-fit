@@ -36,6 +36,11 @@ export default function ExerciseFormModal({
   submitButtonText = "Add",
   submitButtonIcon = "plus",
 }) {
+  // Only render modal content when visible
+  if (!visible) {
+    return null;
+  }
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}

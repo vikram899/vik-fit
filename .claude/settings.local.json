@@ -6,7 +6,8 @@
       "Bash(then echo \"$f\")",
       "Bash(npm run build:*)",
       "Bash(npm run:*)",
-      "Bash(node -c:*)"
+      "Bash(node -c:*)",
+      "Bash(find src -name \"*.js\" -type f -exec grep -l \"backgroundColor.*#0\\|backgroundColor.*black\\|position.*absolute.*backgroundColor\" {} ;)"
     ],
     "deny": [],
     "ask": []
