@@ -173,11 +173,26 @@ export function HomeStackNavigator({ navigation }) {
       <Stack.Screen
         name="WeightTracking"
         component={WeightTrackingScreen}
-        options={{
+        options={({ navigation }) => ({
           title: "Weight Tracking",
           ...defaultHeaderOptions,
           headerBackTitleVisible: false,
-        }}
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => {
+                // Trigger opening bottom sheet in the screen
+                navigation.navigate("WeightTracking", { openBottomSheet: true });
+              }}
+              style={{ paddingRight: SPACING.element }}
+            >
+              <MaterialCommunityIcons
+                name="plus-circle"
+                size={28}
+                color={COLORS.primary}
+              />
+            </TouchableOpacity>
+          ),
+        })}
       />
       <Stack.Screen
         name="ComponentsShowcase"

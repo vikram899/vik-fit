@@ -123,6 +123,13 @@ export const COLORS = {
   proteinIcon: "#00A86B", // Green for protein icon (dumbbell)
   carbsIcon: "#D2691E", // Brown for carbs icon (bread)
   fatsIcon: "#8B4513", // Dark brown for fats icon (water droplet)
+
+  // ============================================================================
+  // WEIGHT TRACKING COLORS
+  // ============================================================================
+  weightLoss: "#51CF66", // Green - for weight loss (achieving goal)
+  weightGain: "#FF6B6B", // Red - for weight gain
+  weightNeutral: "#666666", // Gray - for no change
 };
 
 export default COLORS;
