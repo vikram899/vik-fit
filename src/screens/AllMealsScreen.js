@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { COLORS, SPACING, TYPOGRAPHY } from "../shared/constants";
+import { useBottomTabPadding } from "../shared/hooks";
 import {
   getAllMeals,
   deleteMeal,
@@ -24,6 +25,7 @@ import MealCard from "../components/MealCard";
  * Shows all available meals with search, filter, and sort functionality
  */
 export default function AllMealsScreen({ navigation, route }) {
+  const bottomPadding = useBottomTabPadding();
   const [meals, setMeals] = useState([]);
   const [filteredMeals, setFilteredMeals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -238,7 +240,7 @@ export default function AllMealsScreen({ navigation, route }) {
       <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
         <ScrollView
           style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPadding }]}
           showsVerticalScrollIndicator={true}
         >
           {/* Search, Filter, Sort Combined */}
@@ -299,7 +301,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: SPACING.container,
+    paddingBottom: 0, // Dynamically set via useBottomTabPadding hook
   },
   centerContent: {
     flex: 1,

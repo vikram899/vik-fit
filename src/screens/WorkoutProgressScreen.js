@@ -15,6 +15,7 @@ import { WeeklyWorkoutSummaryCards } from '../components/layouts';
 import { WorkoutHistoryModal } from '../components/workouts';
 import { StreakCard, GoalSettingsModal, BottomSheet, SectionHeader } from '../components/common';
 import { COLORS, SPACING, TYPOGRAPHY } from '../shared/constants';
+import { useBottomTabPadding } from '../shared/hooks';
 import { getEnabledGoalPreferences, getUserSetting } from '../services/database';
 import {
   getWeeklyWorkoutStats,
@@ -28,6 +29,7 @@ import {
  * Dashboard showing weekly workout analytics
  */
 export default function WorkoutProgressScreen({ navigation }) {
+  const bottomPadding = useBottomTabPadding();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));
@@ -287,7 +289,7 @@ export default function WorkoutProgressScreen({ navigation }) {
       <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
         <ScrollView
           style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPadding }]}
           showsVerticalScrollIndicator={true}
           refreshControl={
             <RefreshControl
@@ -599,7 +601,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: SPACING.container,
+    paddingBottom: 0, // Dynamically set via useBottomTabPadding hook
   },
   centerContent: {
     flex: 1,

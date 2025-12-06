@@ -16,6 +16,7 @@ import { WeeklySummaryCards } from '../components/layouts';
 import { MealsHistoryModal } from '../components/modals';
 import { GoalSettingsModal, Toast, StreakCard, BottomSheet, SectionHeader } from '../components/common';
 import { COLORS, SPACING, TYPOGRAPHY } from '../shared/constants';
+import { useBottomTabPadding } from '../shared/hooks';
 import {
   getWeeklyMealData,
   getWeeklyDailyBreakdown,
@@ -29,6 +30,7 @@ import { getMacroGoals, getEnabledGoalPreferences, getUserSetting } from '../ser
  * Weekly meal analytics dashboard showing totals, goals, trends, and insights
  */
 export default function MealProgressScreen({ navigation }) {
+  const bottomPadding = useBottomTabPadding();
   const [currentWeekData, setCurrentWeekData] = useState({
     totalCalories: 0,
     totalProtein: 0,
@@ -297,7 +299,7 @@ export default function MealProgressScreen({ navigation }) {
       <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
         <ScrollView
           style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPadding }]}
           showsVerticalScrollIndicator={true}
           refreshControl={
             <RefreshControl
@@ -581,7 +583,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: SPACING.container,
+    paddingBottom: 0, // Dynamically set via useBottomTabPadding hook
   },
   centerContent: {
     flex: 1,

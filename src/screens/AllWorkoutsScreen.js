@@ -17,6 +17,7 @@ import { SearchFilterSort } from "../components/meals";
 import WorkoutCard from "../components/workouts/WorkoutCardComponent";
 import { AllWorkoutsEmptyState } from "../components/workouts";
 import { COLORS, SPACING, TYPOGRAPHY } from "../shared/constants";
+import { useBottomTabPadding } from "../shared/hooks";
 import {
   getAllWorkouts,
   getScheduledDaysForWorkout,
@@ -31,6 +32,7 @@ import { getPlanExerciseCount } from "../services/workoutStats";
  * Shows all available workouts with search, filter, and sort functionality
  */
 export default function AllWorkoutsScreen({ navigation }) {
+  const bottomPadding = useBottomTabPadding();
   const [workouts, setWorkouts] = useState([]);
   const [filteredWorkouts, setFilteredWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -205,7 +207,7 @@ export default function AllWorkoutsScreen({ navigation }) {
       <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
         <ScrollView
           style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPadding }]}
           showsVerticalScrollIndicator={true}
         >
           {/* Search, Filter, Sort */}
@@ -278,7 +280,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: SPACING.container,
+    paddingBottom: 0, // Dynamically set via useBottomTabPadding hook
   },
   centerContent: {
     flex: 1,

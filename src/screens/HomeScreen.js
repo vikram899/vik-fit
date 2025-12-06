@@ -5,7 +5,7 @@ import { SummaryCard, WorkoutsSection } from "../components/home";
 import { Card, LogButton } from "../shared/components";
 import WeightProgressGraph from "../components/WeightProgressGraph";
 import StepsCard from "../components/health/StepsCard";
-import { useMealData, useWorkoutData, useWeightData } from "../shared/hooks";
+import { useMealData, useWorkoutData, useWeightData, useBottomTabPadding } from "../shared/hooks";
 import { COLORS } from "../shared/constants";
 
 /**
@@ -23,6 +23,7 @@ import { COLORS } from "../shared/constants";
  */
 export default function HomeScreen({ navigation }) {
   const insets = useSafeAreaInsets();
+  const bottomPadding = useBottomTabPadding();
 
   // Load all required data using custom hooks
   const { dailyTotals, macroGoals } = useMealData();
@@ -33,7 +34,7 @@ export default function HomeScreen({ navigation }) {
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: COLORS.mainBackground }}
-      contentContainerStyle={{ paddingBottom: 20 }}
+      contentContainerStyle={{ paddingBottom: bottomPadding }}
       showsVerticalScrollIndicator={false}
     >
       {/* Today's Summary Card */}

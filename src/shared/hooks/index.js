@@ -20,6 +20,7 @@ export { useMealCreation } from './useMealCreation';
 // Navigation hooks
 export { useTabBarStyles } from './useTabBarStyles';
 export { useTabBarListeners } from './useTabBarListeners';
+export { useBottomTabPadding } from './useBottomTabPadding';
 
 // Helper functions (used by hooks)
 export {

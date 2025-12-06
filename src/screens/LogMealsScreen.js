@@ -14,9 +14,11 @@ import { TodaysMealsList } from "../components/meals";
 import { SummaryCard } from "../components/home";
 import { COLORS, SPACING, TYPOGRAPHY } from "../shared/constants";
 import { Button } from "../shared/components/ui";
+import { useBottomTabPadding } from "../shared/hooks";
 
 const LogMealsScreen = ({ navigation }) => {
   const today = new Date().toISOString().split("T")[0];
+  const bottomPadding = useBottomTabPadding();
 
   // Modals visibility
   const [editMealModalVisible, setEditMealModalVisible] = React.useState(false);
@@ -187,7 +189,7 @@ const LogMealsScreen = ({ navigation }) => {
       />
 
       {/* Add Meal Buttons - Fixed at Bottom */}
-      <View style={logMealsScreenStyles.buttonsContainer}>
+      <View style={[logMealsScreenStyles.buttonsContainer, { paddingBottom: bottomPadding }]}>
         <Button
           label={STRINGS.logMealsScreen.buttons.addNewMeal}
           icon="plus"
