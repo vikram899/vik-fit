@@ -300,9 +300,25 @@ export default function StartWorkoutScreen({ navigation, route }) {
     // Dismiss keyboard immediately
     Keyboard.dismiss();
 
+    // If sets have been logged, finish exercise without confirmation
+    if (currentExerciseSets.length > 0) {
+      if (currentExerciseIndex < exercises.length - 1) {
+        setCurrentExerciseIndex(currentExerciseIndex + 1);
+        setCurrentSetNumber(1);
+        setIsResting(false);
+        setRestTimeLeft(90);
+        setSetStartTime(new Date());
+        initializeExercise(exercises[currentExerciseIndex + 1]);
+      } else {
+        await completeWorkout();
+      }
+      return;
+    }
+
+    // If no sets logged, show confirmation to skip
     Alert.alert(
-      "Complete Exercise",
-      `Skip remaining sets for ${currentExercise.name}?`,
+      "Skip Exercise",
+      `Skip ${currentExercise.name} without logging any sets?`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -313,6 +329,7 @@ export default function StartWorkoutScreen({ navigation, route }) {
               setCurrentSetNumber(1);
               setIsResting(false);
               setRestTimeLeft(90);
+              setSetStartTime(new Date());
               initializeExercise(exercises[currentExerciseIndex + 1]);
             } else {
               await completeWorkout();
@@ -434,13 +451,33 @@ export default function StartWorkoutScreen({ navigation, route }) {
             )}
           </View>
 
-          {/* Target Info */}
-          <View style={styles.targetBox}>
-            <Text style={styles.targetLabel}>
-              Target: {currentExercise.reps} reps{" "}
-              {currentExercise.weight ? `@ ${currentExercise.weight}kg` : ""}
-            </Text>
-          </View>
+          {/* Logged Sets Summary */}
+          {currentExerciseSets.length > 0 && (
+            <View style={styles.loggedSetsContainer}>
+              {currentExerciseSets.map((set, index) => (
+                <View key={set.id} style={styles.loggedSetRow}>
+                  <View style={styles.loggedInputGroupSmall}>
+                    <Text style={styles.loggedInputLabel}>Set</Text>
+                    <View style={styles.loggedInput}>
+                      <Text style={styles.loggedInputValue}>{index + 1}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.loggedInputGroup}>
+                    <Text style={styles.loggedInputLabel}>Reps</Text>
+                    <View style={styles.loggedInput}>
+                      <Text style={styles.loggedInputValue}>{set.reps}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.loggedInputGroup}>
+                    <Text style={styles.loggedInputLabel}>Weight (kg)</Text>
+                    <View style={styles.loggedInput}>
+                      <Text style={styles.loggedInputValue}>{set.weight}</Text>
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
 
           {/* Input Row */}
           {!isResting ? (
@@ -551,29 +588,29 @@ export default function StartWorkoutScreen({ navigation, route }) {
             </View>
           )}
 
-          {/* Logged Sets Summary */}
-          {currentExerciseSets.length > 0 && (
-            <View style={styles.loggedSetsContainer}>
-              <Text style={styles.loggedSetsTitle}>Logged Sets</Text>
-              {currentExerciseSets.map((set) => (
-                <View key={set.id} style={styles.loggedSetRow}>
-                  <Text style={styles.loggedSetText}>
-                    Set {set.set}: {set.reps} reps{" "}
-                    {set.weight > 0 ? `@ ${set.weight}kg` : ""}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          )}
-
           {/* Action Buttons */}
           <View style={styles.buttonRow}>
             <TouchableOpacity
-              style={[styles.actionButton, styles.skipExerciseButton]}
+              style={[
+                styles.actionButton,
+                currentExerciseSets.length > 0
+                  ? styles.finishExerciseButton
+                  : styles.skipExerciseButton,
+              ]}
               onPress={handleCompleteExercise}
               activeOpacity={0.7}
             >
-              <Text style={styles.skipExerciseText}>Skip Exercise</Text>
+              <Text
+                style={[
+                  currentExerciseSets.length > 0
+                    ? styles.finishExerciseText
+                    : styles.skipExerciseText,
+                ]}
+              >
+                {currentExerciseSets.length > 0
+                  ? "Finish Exercise"
+                  : "Skip Exercise"}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -753,20 +790,6 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.weights.bold,
     color: COLORS.textSecondary,
   },
-  targetBox: {
-    backgroundColor: COLORS.tertiaryBackground,
-    paddingHorizontal: SPACING.medium,
-    paddingVertical: SPACING.medium,
-    borderRadius: SPACING.borderRadius,
-    marginBottom: SPACING.medium,
-    borderWidth: 1,
-    borderColor: COLORS.mediumGray,
-  },
-  targetLabel: {
-    fontSize: TYPOGRAPHY.sizes.sm,
-    color: COLORS.textSecondary,
-    fontWeight: TYPOGRAPHY.weights.semibold,
-  },
   inputRow: {
     flexDirection: "row",
     gap: SPACING.medium,
@@ -854,28 +877,38 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
   loggedSetsContainer: {
+    gap: SPACING.small,
     marginBottom: SPACING.medium,
   },
-  loggedSetsTitle: {
+  loggedSetRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: SPACING.small,
+  },
+  loggedInputGroupSmall: {
+    width: 60,
+  },
+  loggedInputGroup: {
+    flex: 1,
+  },
+  loggedInputLabel: {
     fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.xs,
+  },
+  loggedInput: {
+    borderWidth: 1,
+    borderColor: COLORS.mediumGray,
+    borderRadius: SPACING.borderRadius,
+    paddingHorizontal: SPACING.medium,
+    paddingVertical: SPACING.medium,
+    backgroundColor: COLORS.tertiaryBackground,
+  },
+  loggedInputValue: {
+    fontSize: TYPOGRAPHY.sizes.xl,
     fontWeight: TYPOGRAPHY.weights.bold,
     color: COLORS.textSecondary,
-    marginBottom: SPACING.small,
-    textTransform: "uppercase",
-  },
-  loggedSetRow: {
-    paddingVertical: SPACING.small,
-    paddingHorizontal: SPACING.medium,
-    backgroundColor: COLORS.mainBackground,
-    borderRadius: SPACING.borderRadiusSmall,
-    marginBottom: SPACING.small,
-    borderLeftWidth: 3,
-    borderLeftColor: COLORS.primary,
-  },
-  loggedSetText: {
-    fontSize: TYPOGRAPHY.sizes.sm,
-    color: COLORS.textPrimary,
-    fontWeight: TYPOGRAPHY.weights.medium,
   },
   buttonRow: {
     gap: SPACING.small,
@@ -894,6 +927,14 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.sizes.md,
     fontWeight: TYPOGRAPHY.weights.semibold,
     color: COLORS.textSecondary,
+  },
+  finishExerciseButton: {
+    backgroundColor: COLORS.success,
+  },
+  finishExerciseText: {
+    fontSize: TYPOGRAPHY.sizes.md,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+    color: COLORS.white,
   },
   upcomingSection: {
     marginTop: SPACING.container,

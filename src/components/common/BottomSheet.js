@@ -11,7 +11,7 @@ import {
   PanResponder,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { COLORS } from "../../styles";
+import { COLORS, SPACING, TYPOGRAPHY } from "../../shared/constants";
 
 const screenHeight = Dimensions.get("window").height;
 const MAX_HEIGHT = screenHeight * 0.7;
@@ -162,51 +162,51 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: BOTTOM_SHEET_HEIGHT,
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    backgroundColor: COLORS.secondaryBackground,
+    borderTopLeftRadius: SPACING.borderRadiusLarge,
+    borderTopRightRadius: SPACING.borderRadiusLarge,
     overflow: "hidden",
     zIndex: 1000,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
     elevation: 10,
   },
   handleContainer: {
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: SPACING.small,
   },
   handleBar: {
     width: 40,
     height: 4,
-    backgroundColor: "#ccc",
+    backgroundColor: COLORS.mediumGray,
     borderRadius: 2,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.medium,
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: COLORS.mediumGray,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#000",
+    fontSize: TYPOGRAPHY.sizes.lg,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.textPrimary,
   },
   closeButton: {
-    padding: 8,
+    padding: SPACING.small,
   },
   scrollView: {
     flex: 1,
   },
   content: {
-    paddingHorizontal: 16,
-    paddingVertical: 24,
-    paddingBottom: 32,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.container,
+    paddingBottom: SPACING.xxxl,
   },
 });
 

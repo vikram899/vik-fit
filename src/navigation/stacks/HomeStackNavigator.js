@@ -51,7 +51,7 @@ export function HomeStackNavigator({ navigation }) {
       <Stack.Screen
         name="HomeScreen"
         component={HomeScreen}
-        options={{
+        options={({ navigation, route }) => ({
           headerShown: true,
           headerTitle: "VikFit",
           headerStyle: {
@@ -71,7 +71,22 @@ export function HomeStackNavigator({ navigation }) {
               />
             </TouchableOpacity>
           ),
-        }}
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => {
+                // Trigger customization bottom sheet
+                navigation.setParams({ openCustomization: true });
+              }}
+              style={{ paddingRight: SPACING.element }}
+            >
+              <MaterialCommunityIcons
+                name="tune"
+                size={28}
+                color={COLORS.primary}
+              />
+            </TouchableOpacity>
+          ),
+        })}
       />
       <Stack.Screen
         name="LogWorkout"
