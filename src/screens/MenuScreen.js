@@ -11,11 +11,11 @@ import { COLORS } from "../styles";
 export default function MenuScreen({ navigation }) {
   const menuItems = [
     {
-      id: "profile",
-      label: "Profile",
-      icon: "account-circle",
+      id: "profile_setup",
+      label: "Profile Setup",
+      icon: "account-edit",
       onPress: () => {
-        // Navigate to profile screen when created
+        navigation.navigate("ProfileSetup");
       },
     },
     {

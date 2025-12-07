@@ -2,14 +2,23 @@ import React, { useEffect, useState } from "react";
 import { View, ScrollView, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { SummaryCard, WorkoutsSection } from "../components/home";
+import { SummaryCard, EnhancedSummaryCard, WorkoutsSection } from "../components/home";
 import { Card, LogButton } from "../shared/components";
 import WeightProgressGraph from "../components/WeightProgressGraph";
 import StepsCard from "../components/health/StepsCard";
 import { BottomSheet } from "../components/common";
 import { useMealData, useWorkoutData, useWeightData, useBottomTabPadding } from "../shared/hooks";
+import { useHealthData } from "../services/healthKit";
 import { COLORS, SPACING, TYPOGRAPHY } from "../shared/constants";
-import { getUserSetting, updateUserSetting } from "../services/database";
+import {
+  getUserSetting,
+  updateUserSetting,
+  getCaloriesBurnedForDate,
+  getDailyTotals,
+  getMacroGoals,
+  saveManualSteps,
+  getManualSteps
+} from "../services/database";
 
 // Default card visibility settings
 const DEFAULT_CARD_SETTINGS = {
@@ -40,11 +49,32 @@ export default function HomeScreen({ navigation, route }) {
   const [customizationVisible, setCustomizationVisible] = useState(false);
   const [cardSettings, setCardSettings] = useState(DEFAULT_CARD_SETTINGS);
 
+  // Date selection state
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+
+  // Enhanced summary data
+  const [dailyTotals, setDailyTotals] = useState({
+    totalCalories: 0,
+    totalProtein: 0,
+    totalCarbs: 0,
+    totalFats: 0,
+  });
+  const [macroGoals, setMacroGoals] = useState({
+    calorieGoal: 2500,
+    proteinGoal: 150,
+    carbsGoal: 300,
+    fatsGoal: 85,
+  });
+  const [caloriesBurned, setCaloriesBurned] = useState(0);
+  const [stepGoal, setStepGoal] = useState(10000);
+  const [manualSteps, setManualSteps] = useState(0);
+  const [displaySteps, setDisplaySteps] = useState(0);
+
   // Load all required data using custom hooks
-  const { dailyTotals, macroGoals } = useMealData();
   const { workouts: todayWorkouts, workoutLogs: todayWorkoutLogs } =
     useWorkoutData();
   const { weightData, targetWeight } = useWeightData();
+  const { steps: healthKitSteps } = useHealthData();
 
   // Load saved card preferences
   useEffect(() => {
@@ -60,6 +90,55 @@ export default function HomeScreen({ navigation, route }) {
     };
     loadCardSettings();
   }, []);
+
+  // Load daily data for selected date
+  useEffect(() => {
+    const loadDailyData = async () => {
+      try {
+        // Load meal totals
+        const totals = await getDailyTotals(selectedDate);
+        setDailyTotals(totals);
+
+        // Load macro goals
+        const goals = await getMacroGoals(selectedDate);
+        setMacroGoals(goals);
+
+        // Load calories burned from workouts
+        const burned = await getCaloriesBurnedForDate(selectedDate);
+        setCaloriesBurned(burned);
+
+        // Load manual steps for selected date
+        const savedManualSteps = await getManualSteps(selectedDate);
+        setManualSteps(savedManualSteps);
+
+        // Load step goal
+        const savedStepGoal = await getUserSetting("stepGoal");
+        if (savedStepGoal) {
+          setStepGoal(parseInt(savedStepGoal, 10));
+        }
+      } catch (error) {
+        console.error("Failed to load daily data:", error);
+      }
+    };
+
+    loadDailyData();
+  }, [selectedDate]);
+
+  // Combine HealthKit steps and manual steps (prioritize manual if set)
+  useEffect(() => {
+    const isToday = selectedDate === new Date().toISOString().split("T")[0];
+
+    if (manualSteps > 0) {
+      // Use manual steps if user has entered them
+      setDisplaySteps(manualSteps);
+    } else if (isToday && healthKitSteps > 0) {
+      // Use HealthKit steps for today if available and no manual entry
+      setDisplaySteps(healthKitSteps);
+    } else {
+      // Default to 0
+      setDisplaySteps(0);
+    }
+  }, [selectedDate, manualSteps, healthKitSteps]);
 
   // Handle customization button press from navigation
   useEffect(() => {
@@ -88,6 +167,17 @@ export default function HomeScreen({ navigation, route }) {
     }
   };
 
+  // Handle manual steps update
+  const handleStepsUpdate = async (steps) => {
+    try {
+      await saveManualSteps(selectedDate, steps);
+      setManualSteps(steps);
+      setDisplaySteps(steps);
+    } catch (error) {
+      console.error("Failed to save manual steps:", error);
+    }
+  };
+
   return (
     <>
       <ScrollView
@@ -97,12 +187,16 @@ export default function HomeScreen({ navigation, route }) {
       >
         {/* Today's Summary Card */}
         {cardSettings.summary && (
-          <SummaryCard
+          <EnhancedSummaryCard
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
             dailyTotals={dailyTotals}
             macroGoals={macroGoals}
+            caloriesBurned={caloriesBurned}
+            steps={displaySteps}
+            stepGoal={stepGoal}
             onLogPress={() => navigation.navigate("LogMeals")}
-            onEditMacrosPress={() => navigation.navigate("MacroGoals")}
-            compactView={true}
+            onStepsUpdate={handleStepsUpdate}
           />
         )}
 

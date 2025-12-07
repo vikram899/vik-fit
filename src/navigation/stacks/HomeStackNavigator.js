@@ -14,6 +14,7 @@ import WorkoutSummaryScreen from "../../screens/WorkoutSummaryScreen";
 import MenuScreen from "../../screens/MenuScreen";
 import MacroGoalsScreen from "../../screens/MacroGoalsScreen";
 import WeightTrackingScreen from "../../screens/WeightTrackingScreen";
+import ProfileSetupScreen from "../../screens/ProfileSetupScreen";
 import ComponentsShowcaseScreen from "../../screens/ComponentsShowcaseScreen";
 import QuickSelectMealsScreen from "../../screens/QuickSelectMealsScreen";
 import CreateMealScreen from "../../screens/CreateMealScreen";
@@ -208,6 +209,15 @@ export function HomeStackNavigator({ navigation }) {
             </TouchableOpacity>
           ),
         })}
+      />
+      <Stack.Screen
+        name="ProfileSetup"
+        component={ProfileSetupScreen}
+        options={{
+          title: "Profile Setup",
+          ...defaultHeaderOptions,
+          headerBackTitleVisible: false,
+        }}
       />
       <Stack.Screen
         name="ComponentsShowcase"

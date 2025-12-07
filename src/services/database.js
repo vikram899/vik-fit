@@ -1860,3 +1860,187 @@ export const deleteWorkoutLog = async (workoutId, logDate = new Date().toISOStri
     throw error;
   }
 };
+
+/**
+ * Get total calories burned for a specific date
+ * Calculates calories from completed workouts
+ * Estimation: ~6-8 calories per minute of strength training
+ * @param {string} date - Date in YYYY-MM-DD format
+ * @returns {Promise<number>} Total calories burned
+ */
+export const getCaloriesBurnedForDate = async (date) => {
+  try {
+    const result = await db.getFirstAsync(
+      `SELECT SUM(totalDurationSeconds) as totalSeconds
+       FROM workout_logs
+       WHERE logDate = ? AND status = 'completed'`,
+      [date]
+    );
+
+    const totalMinutes = (result?.totalSeconds || 0) / 60;
+
+    // Estimate 7 calories per minute for moderate-intensity strength training
+    const CALORIES_PER_MINUTE = 7;
+    const caloriesBurned = Math.round(totalMinutes * CALORIES_PER_MINUTE);
+
+    return caloriesBurned;
+  } catch (error) {
+    console.error('Error calculating calories burned:', error);
+    return 0;
+  }
+};
+
+/**
+ * Save manual step count for a specific date
+ * @param {string} date - Date in YYYY-MM-DD format
+ * @param {number} steps - Step count
+ */
+export const saveManualSteps = async (date, steps) => {
+  try {
+    await db.runAsync(
+      `INSERT OR REPLACE INTO user_settings (settingKey, settingValue, updatedAt)
+       VALUES (?, ?, CURRENT_TIMESTAMP)`,
+      [`manual_steps_${date}`, steps.toString()]
+    );
+  } catch (error) {
+    console.error('Error saving manual steps:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get manual step count for a specific date
+ * @param {string} date - Date in YYYY-MM-DD format
+ * @returns {Promise<number>} Step count
+ */
+export const getManualSteps = async (date) => {
+  try {
+    const result = await db.getFirstAsync(
+      `SELECT settingValue FROM user_settings WHERE settingKey = ?`,
+      [`manual_steps_${date}`]
+    );
+    return result ? parseInt(result.settingValue, 10) : 0;
+  } catch (error) {
+    console.error('Error getting manual steps:', error);
+    return 0;
+  }
+};
+
+/**
+ * Get user profile data (height, age, gender)
+ * @returns {Promise<Object>} User profile with defaults if not set
+ */
+export const getUserProfile = async () => {
+  try {
+    const height = await getUserSetting('userHeight');
+    const age = await getUserSetting('userAge');
+    const gender = await getUserSetting('userGender');
+
+    return {
+      height: height ? parseInt(height, 10) : 170, // default 170cm
+      age: age ? parseInt(age, 10) : 30, // default 30 years
+      gender: gender || 'male', // default male
+    };
+  } catch (error) {
+    console.error('Error getting user profile:', error);
+    return { height: 170, age: 30, gender: 'male' };
+  }
+};
+
+/**
+ * Update user profile data
+ * @param {number} height - Height in cm
+ * @param {number} age - Age in years
+ * @param {string} gender - 'male' or 'female'
+ */
+export const updateUserProfile = async (height, age, gender) => {
+  try {
+    await updateUserSetting('userHeight', height.toString());
+    await updateUserSetting('userAge', age.toString());
+    await updateUserSetting('userGender', gender);
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    throw error;
+  }
+};
+
+/**
+ * Calculate BMR (Basal Metabolic Rate) using Mifflin-St Jeor equation
+ * @param {number} weight - Weight in kg
+ * @param {number} height - Height in cm
+ * @param {number} age - Age in years
+ * @param {string} gender - 'male' or 'female'
+ * @returns {number} BMR in calories
+ */
+export const calculateBMR = (weight, height, age, gender) => {
+  try {
+    // Mifflin-St Jeor equation
+    const baseBMR = (10 * weight) + (6.25 * height) - (5 * age);
+    const bmr = gender === 'male' ? baseBMR + 5 : baseBMR - 161;
+    return Math.round(bmr);
+  } catch (error) {
+    console.error('Error calculating BMR:', error);
+    return 1700; // default fallback
+  }
+};
+
+/**
+ * Calculate calories burned from steps
+ * @param {number} steps - Number of steps
+ * @param {number} weight - Weight in kg
+ * @param {number} height - Height in cm
+ * @returns {number} Calories burned from steps
+ */
+export const calculateStepCalories = (steps, weight, height) => {
+  try {
+    // Calculate stride length (height × 0.414)
+    const strideLength = height * 0.414;
+
+    // Calculate distance in km
+    const distanceKm = (steps * strideLength) / 100000;
+
+    // Calculate calories (distance × weight × 0.57)
+    const calories = distanceKm * weight * 0.57;
+
+    return Math.round(calories);
+  } catch (error) {
+    console.error('Error calculating step calories:', error);
+    return 0;
+  }
+};
+
+/**
+ * Save manual calories burned for a specific date
+ * @param {string} date - Date in YYYY-MM-DD format
+ * @param {number} calories - Calories burned
+ */
+export const saveManualCaloriesBurned = async (date, calories) => {
+  try {
+    await db.runAsync(
+      `INSERT OR REPLACE INTO user_settings (settingKey, settingValue, updatedAt)
+       VALUES (?, ?, CURRENT_TIMESTAMP)`,
+      [`manual_calories_burned_${date}`, calories.toString()]
+    );
+  } catch (error) {
+    console.error('Error saving manual calories burned:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get manual calories burned for a specific date
+ * @param {string} date - Date in YYYY-MM-DD format
+ * @returns {Promise<number|null>} Calories burned or null if not set
+ */
+export const getManualCaloriesBurned = async (date) => {
+  try {
+    const result = await db.getFirstAsync(
+      `SELECT settingValue FROM user_settings WHERE settingKey = ?`,
+      [`manual_calories_burned_${date}`]
+    );
+    return result ? parseInt(result.settingValue, 10) : null;
+  } catch (error) {
+    console.error('Error getting manual calories burned:', error);
+    return null;
+  }
+};
