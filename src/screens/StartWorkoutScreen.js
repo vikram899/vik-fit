@@ -431,7 +431,7 @@ export default function StartWorkoutScreen({ navigation, route }) {
       >
         {/* Current Exercise Card */}
         <View style={styles.exerciseCard}>
-          {/* Card Header with Rest Timer */}
+          {/* Card Header */}
           <View style={styles.cardHeader}>
             <View>
               <Text style={styles.exerciseName}>{currentExercise.name}</Text>
@@ -439,16 +439,6 @@ export default function StartWorkoutScreen({ navigation, route }) {
                 Set {currentSetNumber} of {currentExercise.sets}
               </Text>
             </View>
-            {isResting && (
-              <View style={styles.restTimerBox}>
-                <MaterialCommunityIcons
-                  name="pause-circle"
-                  size={14}
-                  color={COLORS.tertiary}
-                />
-                <Text style={styles.restTimerText}>{restTimeLeft}s</Text>
-              </View>
-            )}
           </View>
 
           {/* Logged Sets Summary */}
@@ -553,36 +543,46 @@ export default function StartWorkoutScreen({ navigation, route }) {
           ) : (
             /* Rest Timer Active */
             <View style={styles.restingContainer}>
-              {/* <Text style={styles.restingText}>Rest {restTimeLeft}s</Text> */}
               <View style={styles.restButtonRow}>
-                <Button
-                  label="+10"
-                  variant="cancel"
-                  size="medium"
-                  onPress={() => setRestTimeLeft(restTimeLeft + 10)}
-                  //isDisabled={isLoading}
-                  //fullWidth
-                />
-
-                {/* <TouchableOpacity
-                  style={[styles.restActionButton, styles.addTimeButton]}
-                  onPress={() => setRestTimeLeft(restTimeLeft + 10)}
+                <TouchableOpacity
+                  style={[styles.restActionButton, styles.timeAdjustButton]}
+                  onPress={() => setRestTimeLeft(Math.max(0, restTimeLeft - 10))}
                   activeOpacity={0.7}
                 >
-                  <MaterialCommunityIcons name="plus" size={18} color="#fff" />
+                  <MaterialCommunityIcons
+                    name="minus"
+                    size={20}
+                    color="#fff"
+                  />
                   <Text style={styles.restActionButtonText}>10s</Text>
-                </TouchableOpacity> */}
+                </TouchableOpacity>
+
                 <TouchableOpacity
-                  style={[styles.restActionButton, styles.skipButton]}
+                  style={[styles.restActionButton, styles.nextSetButton]}
                   onPress={handleSkipRestAndContinue}
                   activeOpacity={0.7}
                 >
                   <MaterialCommunityIcons
-                    name="skip-next"
-                    size={18}
+                    name="play-circle"
+                    size={20}
                     color="#fff"
                   />
-                  <Text style={styles.restActionButtonText}>Skip</Text>
+                  <Text style={styles.restActionButtonText}>
+                    Next Set ({restTimeLeft}s)
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.restActionButton, styles.timeAdjustButton]}
+                  onPress={() => setRestTimeLeft(restTimeLeft + 10)}
+                  activeOpacity={0.7}
+                >
+                  <MaterialCommunityIcons
+                    name="plus"
+                    size={20}
+                    color="#fff"
+                  />
+                  <Text style={styles.restActionButtonText}>10s</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -774,22 +774,6 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.weights.semibold,
     color: COLORS.textSecondary,
   },
-  restTimerBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: SPACING.xs,
-    backgroundColor: COLORS.tertiaryBackground,
-    paddingHorizontal: SPACING.medium,
-    paddingVertical: SPACING.small,
-    borderRadius: SPACING.borderRadius,
-    borderWidth: 1,
-    borderColor: COLORS.mediumGray,
-  },
-  restTimerText: {
-    fontSize: TYPOGRAPHY.sizes.md,
-    fontWeight: TYPOGRAPHY.weights.bold,
-    color: COLORS.textSecondary,
-  },
   inputRow: {
     flexDirection: "row",
     gap: SPACING.medium,
@@ -857,7 +841,6 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   restActionButton: {
-    flex: 1,
     borderRadius: SPACING.borderRadius,
     paddingVertical: SPACING.medium,
     flexDirection: "row",
@@ -865,10 +848,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: SPACING.xs,
   },
-  addTimeButton: {
-    backgroundColor: COLORS.success,
+  timeAdjustButton: {
+    flex: 0.8,
+    backgroundColor: COLORS.mediumGray,
   },
-  skipButton: {
+  nextSetButton: {
+    flex: 2,
     backgroundColor: COLORS.primary,
   },
   restActionButtonText: {

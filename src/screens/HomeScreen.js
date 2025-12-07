@@ -102,6 +102,7 @@ export default function HomeScreen({ navigation, route }) {
             macroGoals={macroGoals}
             onLogPress={() => navigation.navigate("LogMeals")}
             onEditMacrosPress={() => navigation.navigate("MacroGoals")}
+            compactView={true}
           />
         )}
 

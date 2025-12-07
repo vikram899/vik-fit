@@ -15,6 +15,7 @@ export default function SummaryCard({
   hideHeader = false,
   hideLogButton = false,
   showDate = false,
+  compactView = false, // Show only Calories and Protein when true
 }) {
   const today = getCurrentDate();
 
@@ -59,27 +60,31 @@ export default function SummaryCard({
           progressColor={COLORS.protein}
         />
 
-        <MacroItem
-          icon="bread-slice"
-          iconColor={COLORS.carbs}
-          label="Carbs"
-          value={Math.round(dailyTotals.totalCarbs)}
-          goal={Math.round(macroGoals.carbsGoal)}
-          unit="g"
-          progress={(dailyTotals.totalCarbs / macroGoals.carbsGoal) * 100}
-          progressColor={COLORS.carbs}
-        />
+        {!compactView && (
+          <>
+            <MacroItem
+              icon="bread-slice"
+              iconColor={COLORS.carbs}
+              label="Carbs"
+              value={Math.round(dailyTotals.totalCarbs)}
+              goal={Math.round(macroGoals.carbsGoal)}
+              unit="g"
+              progress={(dailyTotals.totalCarbs / macroGoals.carbsGoal) * 100}
+              progressColor={COLORS.carbs}
+            />
 
-        <MacroItem
-          icon="water"
-          iconColor={COLORS.fats}
-          label="Fats"
-          value={Math.round(dailyTotals.totalFats)}
-          goal={Math.round(macroGoals.fatsGoal)}
-          unit="g"
-          progress={(dailyTotals.totalFats / macroGoals.fatsGoal) * 100}
-          progressColor={COLORS.fats}
-        />
+            <MacroItem
+              icon="water"
+              iconColor={COLORS.fats}
+              label="Fats"
+              value={Math.round(dailyTotals.totalFats)}
+              goal={Math.round(macroGoals.fatsGoal)}
+              unit="g"
+              progress={(dailyTotals.totalFats / macroGoals.fatsGoal) * 100}
+              progressColor={COLORS.fats}
+            />
+          </>
+        )}
       </View>
     </View>
   );
