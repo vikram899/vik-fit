@@ -8,7 +8,7 @@ import {
   SafeAreaView,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { COLORS } from "../../styles";
+import { COLORS, SPACING, TYPOGRAPHY } from "../../shared/constants";
 
 /**
  * Custom Drawer Content
@@ -88,7 +88,7 @@ export default function DrawerContent({ navigation }) {
             <MaterialCommunityIcons
               name="chevron-right"
               size={20}
-              color="#ccc"
+              color={COLORS.mediumGray}
             />
           </TouchableOpacity>
         ))}
@@ -100,26 +100,15 @@ export default function DrawerContent({ navigation }) {
           <MaterialCommunityIcons
             name="cog-outline"
             size={24}
-            color="#666"
+            color={COLORS.textSecondary}
           />
           <Text style={styles.footerLabel}>Settings</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.footerItem}
-          onPress={() => handleNavigation("ComponentsShowcase")}
-        >
-          <MaterialCommunityIcons
-            name="puzzle-outline"
-            size={24}
-            color="#666"
-          />
-          <Text style={styles.footerLabel}>Components</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.footerItem}>
           <MaterialCommunityIcons
             name="information-outline"
             size={24}
-            color="#666"
+            color={COLORS.textSecondary}
           />
           <Text style={styles.footerLabel}>About</Text>
         </TouchableOpacity>
@@ -131,43 +120,43 @@ export default function DrawerContent({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.mainBackground,
   },
   header: {
-    paddingVertical: 30,
-    paddingHorizontal: 20,
-    backgroundColor: "#f8f9fa",
+    paddingVertical: SPACING.container,
+    paddingHorizontal: SPACING.element,
+    backgroundColor: COLORS.secondaryBackground,
     borderBottomWidth: 1,
-    borderBottomColor: "#e8e8e8",
+    borderBottomColor: COLORS.mediumGray,
     alignItems: "center",
   },
   userAvatar: {
-    marginBottom: 12,
+    marginBottom: SPACING.medium,
   },
   userName: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#000",
-    marginBottom: 4,
+    fontSize: TYPOGRAPHY.sizes.xl,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.xs,
   },
   userEmail: {
-    fontSize: 13,
-    color: "#666",
-    fontWeight: "500",
+    fontSize: TYPOGRAPHY.sizes.sm,
+    color: COLORS.textSecondary,
+    fontWeight: TYPOGRAPHY.weights.medium,
   },
   menuContainer: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: SPACING.medium,
   },
   menuItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderRadius: 12,
-    marginHorizontal: 12,
-    marginVertical: 4,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.element,
+    borderRadius: SPACING.borderRadius,
+    marginHorizontal: SPACING.medium,
+    marginVertical: SPACING.xs,
   },
   menuItemContent: {
     flexDirection: "row",
@@ -175,30 +164,30 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   menuIcon: {
-    marginRight: 16,
+    marginRight: SPACING.element,
   },
   menuLabel: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
+    fontSize: TYPOGRAPHY.sizes.md,
+    fontWeight: TYPOGRAPHY.weights.medium,
+    color: COLORS.textPrimary,
   },
   footer: {
     borderTopWidth: 1,
-    borderTopColor: "#e8e8e8",
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+    borderTopColor: COLORS.mediumGray,
+    paddingHorizontal: SPACING.medium,
+    paddingVertical: SPACING.medium,
   },
   footerItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    marginVertical: 4,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.medium,
+    marginVertical: SPACING.xs,
   },
   footerLabel: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#666",
-    marginLeft: 16,
+    fontSize: TYPOGRAPHY.sizes.sm,
+    fontWeight: TYPOGRAPHY.weights.medium,
+    color: COLORS.textSecondary,
+    marginLeft: SPACING.element,
   },
 });

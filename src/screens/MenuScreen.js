@@ -2,7 +2,7 @@ import React from "react";
 import { View, TouchableOpacity, StyleSheet, Text, ScrollView } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { appStyles } from "../styles/app.styles";
-import { COLORS } from "../styles";
+import { COLORS, SPACING, TYPOGRAPHY } from "../shared/constants";
 
 /**
  * MenuScreen
@@ -43,14 +43,6 @@ export default function MenuScreen({ navigation }) {
       },
     },
     {
-      id: "components",
-      label: "Components",
-      icon: "puzzle-outline",
-      onPress: () => {
-        navigation.navigate("ComponentsShowcase");
-      },
-    },
-    {
       id: "about",
       label: "About",
       icon: "information",
@@ -81,7 +73,7 @@ export default function MenuScreen({ navigation }) {
             <MaterialCommunityIcons
               name="chevron-right"
               size={24}
-              color="#ccc"
+              color={COLORS.mediumGray}
               style={styles.chevron}
             />
           </TouchableOpacity>
@@ -94,32 +86,32 @@ export default function MenuScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingVertical: 12,
   },
   menuItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: SPACING.element,
+    paddingVertical: SPACING.element,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: COLORS.mediumGray,
+    backgroundColor: COLORS.mainBackground,
   },
   menuIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "rgba(0, 122, 255, 0.1)",
+    backgroundColor: COLORS.secondaryBackground,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 16,
+    marginRight: SPACING.element,
   },
   menuLabel: {
     flex: 1,
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
+    fontSize: TYPOGRAPHY.sizes.md,
+    fontWeight: TYPOGRAPHY.weights.medium,
+    color: COLORS.textPrimary,
   },
   chevron: {
-    marginLeft: 8,
+    marginLeft: SPACING.small,
   },
 });

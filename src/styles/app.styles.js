@@ -6,7 +6,7 @@ export const appStyles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-start",
     alignItems: "stretch",
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.mainBackground,
   },
   title: {
     fontSize: TYPOGRAPHY.sizes.giant,
