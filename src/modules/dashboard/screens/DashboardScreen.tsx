@@ -1,0 +1,793 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  ActivityIndicator,
+  TouchableOpacity,
+  LayoutChangeEvent,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { useTheme } from '@theme/index';
+import { Plus, TrendingDown, Flame, Drumstick, Footprints, Dumbbell, Calendar, CircleCheck, CircleAlert } from 'lucide-react-native';
+import { useDashboard } from '../hooks/useDashboard';
+import TodaysWorkoutCard from '../components/TodaysWorkoutCard';
+import { dashboardStyles } from '../styles';
+import { Radius } from '@theme/radius';
+import { Card } from '@shared/components/ui/Card';
+import { ProgressBar } from '@shared/components/ui/ProgressBar';
+import { CircularProgressRing } from '@shared/components/ui/CircularProgressRing';
+
+// ─── Weight Sparkline ────────────────────────────────────────────────────────
+
+function WeightSparkline({
+  data,
+  color,
+  targetWeight,
+}: {
+  data: number[];
+  color: string;
+  targetWeight: number | null;
+}) {
+  const [width, setWidth] = useState(0);
+  const HEIGHT = 56;
+  const DOT = 5;
+
+  const allValues = targetWeight != null ? [...data, targetWeight] : data;
+  const min = Math.min(...allValues) - 1;
+  const max = Math.max(...allValues) + 1;
+  const range = max - min || 1;
+
+  const toY = (v: number) => HEIGHT - ((v - min) / range) * HEIGHT;
+  const toX = (i: number) => (i / (data.length - 1)) * width;
+  const onLayout = (e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width);
+
+  return (
+    <View style={{ height: HEIGHT + DOT, width: '100%' }} onLayout={onLayout}>
+      {width > 0 && (
+        <>
+          {targetWeight != null && (
+            <View
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                top: toY(targetWeight),
+                height: 1,
+                borderStyle: 'dashed',
+                borderWidth: 1,
+                borderColor: color + '55',
+              }}
+            />
+          )}
+          {data.slice(0, -1).map((v, i) => {
+            const x1 = toX(i);
+            const y1 = toY(v);
+            const x2 = toX(i + 1);
+            const y2 = toY(data[i + 1]);
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const len = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+            return (
+              <View
+                key={i}
+                style={{
+                  position: 'absolute',
+                  left: x1,
+                  top: y1,
+                  width: len,
+                  height: 2,
+                  backgroundColor: color,
+                  transformOrigin: '0 50%',
+                  transform: [{ rotate: `${angle}deg` }],
+                }}
+              />
+            );
+          })}
+          {data.map((v, i) => (
+            <View
+              key={`d${i}`}
+              style={{
+                position: 'absolute',
+                left: toX(i) - DOT / 2,
+                top: toY(v) - DOT / 2,
+                width: DOT,
+                height: DOT,
+                borderRadius: DOT / 2,
+                backgroundColor: color,
+              }}
+            />
+          ))}
+        </>
+      )}
+    </View>
+  );
+}
+
+// ─── Macro Ring ──────────────────────────────────────────────────────────────
+
+function MacroRing({
+  label,
+  value,
+  target,
+  unit,
+  color,
+}: {
+  label: string;
+  value: number;
+  target: number;
+  unit: string;
+  color: string;
+}) {
+  const { colors, typography } = useTheme();
+  const progress = target > 0 ? value / target : 0;
+
+  return (
+    <View style={{ alignItems: 'center', flex: 1 }}>
+      <CircularProgressRing
+        size={88}
+        strokeWidth={9}
+        progress={progress}
+        color={color}
+        trackColor={colors.border}
+      >
+        <View style={{ alignItems: 'center' }}>
+          <Text style={{ fontSize: 15, fontWeight: '700', color: colors.textPrimary, lineHeight: 18 }}>
+            {Math.round(value)}{unit}
+          </Text>
+          <Text style={{ ...typography.caption, color: colors.textTertiary, fontSize: 11 }}>
+            / {Math.round(target)}{unit}
+          </Text>
+        </View>
+      </CircularProgressRing>
+      <Text style={{ ...typography.caption, color: colors.textSecondary, marginTop: 8, fontWeight: '500' }}>
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+const GOAL_GREETING: Record<string, string> = {
+  lose_weight: 'Stay in your deficit today',
+  gain_muscle: 'Hit your protein target',
+  maintain: 'Keep it balanced',
+};
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
+
+export default function DashboardScreen() {
+  const { colors, typography, spacing } = useTheme();
+  const { data, loading, skipWorkout, logWeightEntry, setTargetWeight } = useDashboard();
+  const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
+
+  const [weightModalVisible, setWeightModalVisible] = useState(false);
+  const [weightInput, setWeightInput] = useState('');
+  const [noteInput, setNoteInput] = useState('');
+
+  const [targetModalVisible, setTargetModalVisible] = useState(false);
+  const [targetInput, setTargetInput] = useState('');
+
+  const [trendPeriod, setTrendPeriod] = useState<'7D' | '30D' | '90D'>('7D');
+
+  const openWeightModal = () => {
+    setWeightInput(data?.user ? String(data.user.weight) : '');
+    setNoteInput('');
+    setWeightModalVisible(true);
+  };
+
+  const openTargetModal = () => {
+    setTargetInput(data?.user?.targetWeight ? String(data.user.targetWeight) : '');
+    setTargetModalVisible(true);
+  };
+
+  const saveWeight = async () => {
+    const val = parseFloat(weightInput);
+    if (isNaN(val) || val <= 0) return;
+    await logWeightEntry(val, noteInput.trim() || undefined);
+    setWeightModalVisible(false);
+  };
+
+  const saveTargetWeight = async () => {
+    const val = parseFloat(targetInput);
+    if (isNaN(val) || val <= 0) return;
+    await setTargetWeight(val);
+    setTargetModalVisible(false);
+  };
+
+  const todayLabel = new Date().toLocaleDateString([], {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const initials = data?.user?.name
+    ? data.user.name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2)
+    : '?';
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.backgroundPrimary }} edges={['top']}>
+      <ScrollView
+        style={dashboardStyles.container}
+        contentContainerStyle={dashboardStyles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ── Header ── */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingTop: spacing.xl, paddingBottom: spacing.base }}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 28, fontWeight: '800', color: colors.textPrimary, lineHeight: 34 }}>
+              {data?.user ? `Welcome back,` : 'Welcome back'}
+            </Text>
+            {data?.user ? (
+              <Text style={{ fontSize: 28, fontWeight: '800', color: colors.textPrimary, lineHeight: 34 }}>
+                {data.user.name.split(' ')[0]}
+              </Text>
+            ) : null}
+          </View>
+          {/* Avatar */}
+          <View style={{
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            backgroundColor: '#7C3AED',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: 4,
+          }}>
+            <Text style={{ fontSize: 16, fontWeight: '700', color: '#FFFFFF' }}>{initials}</Text>
+          </View>
+        </View>
+
+        {loading ? (
+          <ActivityIndicator color={colors.brandPrimary} style={{ marginTop: spacing['2xl'] }} />
+        ) : data ? (
+          <>
+            {/* ── Today's Progress card ── */}
+            {data.user ? (() => {
+              const calConsumed = Math.round(data.todayMacros.calories);
+              const calGoal = Math.round(data.user.targetCalories);
+              const calProgress = calGoal > 0 ? calConsumed / calGoal : 0;
+              const calRemaining = calGoal - calConsumed;
+
+              const proteinConsumed = Math.round(data.todayMacros.protein);
+              const proteinGoal = Math.round(data.user.targetProtein);
+              const proteinProgress = proteinGoal > 0 ? proteinConsumed / proteinGoal : 0;
+              const proteinRemaining = proteinGoal - proteinConsumed;
+
+              const workoutsDone = data.todaysWorkouts.filter((w) => w.isDone).length;
+              const workoutsTotal = data.todaysWorkouts.length;
+
+              const isBalanced = calRemaining >= -50 && calRemaining <= 50;
+              const isOnTrack = isBalanced && proteinProgress >= 1;
+
+              const calBarColor = calProgress > 1 ? '#EF4444' : calProgress > 0.9 ? '#84CC16' : '#F59E0B';
+              const calStatusText = isBalanced
+                ? 'Perfect balance achieved'
+                : calRemaining > 0
+                ? "Eat more to hit today's goal"
+                : 'Burn more to reach deficit target';
+              const calStatusColor = isBalanced ? '#84CC16' : calRemaining > 0 ? '#3B82F6' : '#F59E0B';
+
+              const bannerText = isOnTrack
+                ? 'On track for today'
+                : proteinProgress < 1 && Math.abs(calRemaining) > 200
+                ? 'Protein goal still pending'
+                : calRemaining > 200
+                ? `Eat ${calRemaining} kcal more`
+                : calRemaining < -200
+                ? `Burn ${Math.abs(calRemaining)} kcal to stay in deficit`
+                : proteinProgress < 1
+                ? `${proteinRemaining}g protein remaining`
+                : 'On track for today';
+
+              const sub = 'rgba(255,255,255,0.05)';
+              const subBorder = 'rgba(255,255,255,0.1)';
+
+              return (
+                <Card style={{ marginBottom: spacing.base, overflow: 'hidden' }}>
+                  {/* Blue/purple overlay */}
+                  <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(59,130,246,0.06)' }} />
+
+                  {/* Header */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.base }}>
+                    <Text style={{ fontSize: 14, fontWeight: '500', color: 'rgba(255,255,255,0.8)' }}>Today's Progress</Text>
+                    <Calendar size={18} color="#3B82F6" />
+                  </View>
+
+                  {/* Calorie Balance — full width */}
+                  <View style={{ backgroundColor: sub, borderRadius: 12, padding: 12, borderWidth: 1, borderColor: subBorder, marginBottom: 12 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                      <Flame size={18} color="#F59E0B" />
+                      <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Balance</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
+                      <Text style={{ fontSize: 30, fontWeight: '700', color: colors.textPrimary }}>{Math.abs(calRemaining).toLocaleString()}</Text>
+                      <Text style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>kcal</Text>
+                    </View>
+                    <View style={{ height: 10, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 5, overflow: 'hidden', marginBottom: 12 }}>
+                      <View style={{ width: `${Math.min(calProgress * 100, 100)}%`, height: '100%', backgroundColor: calBarColor, borderRadius: 5 }} />
+                    </View>
+                    <Text style={{ fontSize: 14, fontWeight: '500', color: calStatusColor }}>{calStatusText}</Text>
+                  </View>
+
+                  {/* Grid: Protein (flex 2) + Burned/Steps/Workouts (flex 3) */}
+                  <View style={{ flexDirection: 'row', gap: 12, marginBottom: 12 }}>
+                    {/* Protein */}
+                    <View style={{ flex: 2, backgroundColor: sub, borderRadius: 12, padding: 12, borderWidth: 1, borderColor: subBorder }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                        <Drumstick size={16} color="#F59E0B" />
+                        <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Protein</Text>
+                      </View>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
+                          <Text style={{ fontSize: 24, fontWeight: '700', color: colors.textPrimary }}>{proteinConsumed}</Text>
+                          <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>/ {proteinGoal}g</Text>
+                        </View>
+                        {proteinProgress >= 1 && <CircleCheck size={20} color="#84CC16" />}
+                      </View>
+                      <View style={{ height: 6, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden', marginBottom: 8 }}>
+                        <View style={{ width: `${Math.min(proteinProgress * 100, 100)}%`, height: '100%', backgroundColor: proteinProgress >= 1 ? '#84CC16' : '#F59E0B', borderRadius: 3 }} />
+                      </View>
+                      <Text style={{ fontSize: 12, fontWeight: '500', color: proteinProgress >= 1 ? '#84CC16' : 'rgba(255,255,255,0.7)' }}>
+                        {proteinProgress >= 1 ? 'Goal achieved' : `${proteinRemaining}g left`}
+                      </Text>
+                    </View>
+
+                    {/* Burned + Steps + Workouts */}
+                    <View style={{ flex: 3, backgroundColor: sub, borderRadius: 12, padding: 12, borderWidth: 1, borderColor: subBorder }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                          <Flame size={16} color="#EF4444" />
+                          <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Burned</Text>
+                        </View>
+                        <Text style={{ fontSize: 24, fontWeight: '700', color: colors.textPrimary }}>—</Text>
+                      </View>
+                      {/* Steps row */}
+                      <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 8, padding: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', marginBottom: 8 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                            <Footprints size={14} color="#3B82F6" />
+                            <Text style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)' }}>Steps</Text>
+                          </View>
+                          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textPrimary }}>—</Text>
+                        </View>
+                        <View style={{ height: 4, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 2, overflow: 'hidden', marginTop: 6 }}>
+                          <View style={{ width: '0%', height: '100%', backgroundColor: '#3B82F6', borderRadius: 2 }} />
+                        </View>
+                      </View>
+                      {/* Workouts row */}
+                      <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 8, padding: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                            <Dumbbell size={14} color="#A855F7" />
+                            <Text style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)' }}>Workouts</Text>
+                          </View>
+                          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textPrimary }}>
+                            {workoutsTotal === 0 ? '—' : `${workoutsDone} / ${workoutsTotal}`}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Status banner */}
+                  <View style={{
+                    flexDirection: 'row', alignItems: 'center', gap: 8,
+                    paddingHorizontal: 12, paddingVertical: 10,
+                    borderRadius: 8,
+                    backgroundColor: isOnTrack ? 'rgba(132,204,22,0.1)' : 'rgba(245,158,11,0.1)',
+                    borderWidth: 1,
+                    borderColor: isOnTrack ? 'rgba(132,204,22,0.2)' : 'rgba(245,158,11,0.2)',
+                  }}>
+                    {isOnTrack
+                      ? <CircleCheck size={16} color="#84CC16" />
+                      : <CircleAlert size={16} color="#F59E0B" />
+                    }
+                    <Text style={{ fontSize: 12, fontWeight: '500', color: isOnTrack ? '#84CC16' : '#F59E0B' }}>
+                      {bannerText}
+                    </Text>
+                  </View>
+                </Card>
+              );
+            })() : null}
+
+            {/* ── Nutrition Overview ── */}
+            {data.user ? (
+              <Card style={{ marginBottom: spacing.xl }}>
+                <Text style={{ ...typography.label, color: colors.textPrimary, fontWeight: '600', marginBottom: spacing.base }}>
+                  Nutrition Overview
+                </Text>
+
+                {data.todayMacros.calories === 0 ? (
+                  <View style={{ alignItems: 'center', paddingVertical: spacing.base }}>
+                    <Text style={{ ...typography.body, color: colors.textSecondary, marginBottom: spacing.sm }}>
+                      No meals logged yet
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate('MealsTab', { screen: 'AddMeal' })}
+                      style={{
+                        backgroundColor: colors.brandPrimary,
+                        borderRadius: Radius.sm,
+                        paddingHorizontal: spacing.base,
+                        paddingVertical: spacing.xs,
+                      }}
+                    >
+                      <Text style={{ ...typography.caption, color: colors.white, fontWeight: '600' }}>
+                        Start tracking today →
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <>
+                    {/* 3 macro rings */}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: spacing.base }}>
+                      <MacroRing
+                        label="Protein"
+                        value={data.todayMacros.protein}
+                        target={data.user.targetProtein}
+                        unit="g"
+                        color={colors.macroProtein}
+                      />
+                      <MacroRing
+                        label="Carbs"
+                        value={data.todayMacros.carbs}
+                        target={data.user.targetCarbs}
+                        unit="g"
+                        color={colors.macroCarbs}
+                      />
+                      <MacroRing
+                        label="Fats"
+                        value={data.todayMacros.fat}
+                        target={data.user.targetFat}
+                        unit="g"
+                        color={colors.macroFat}
+                      />
+                    </View>
+
+                    {/* Divider */}
+                    <View style={{ height: 1, backgroundColor: colors.border, marginBottom: spacing.sm }} />
+
+                    {/* Total calories row */}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xs }}>
+                      <Text style={{ ...typography.caption, color: colors.textSecondary }}>Total Calories</Text>
+                      <Text style={{ ...typography.label, color: colors.textPrimary, fontWeight: '700' }}>
+                        {Math.round(data.todayMacros.calories)}
+                        <Text style={{ ...typography.caption, color: colors.textTertiary, fontWeight: '400' }}>
+                          {' '}/ {Math.round(data.user.targetCalories)}
+                        </Text>
+                      </Text>
+                    </View>
+                    <ProgressBar
+                      progress={data.user.targetCalories > 0 ? data.todayMacros.calories / data.user.targetCalories : 0}
+                      color={colors.macroCarbs}
+                      height={7}
+                    />
+                  </>
+                )}
+              </Card>
+            ) : null}
+
+            {/* ── Today's Workout cards ── */}
+            {data.todaysWorkouts.length > 0 ? (
+              <>
+                <Text style={{ ...typography.label, color: colors.textSecondary, fontWeight: '600', marginBottom: spacing.sm }}>
+                  Today's Schedule
+                </Text>
+                <TodaysWorkoutCard
+                  workouts={data.todaysWorkouts}
+                  onStart={(id) =>
+                    navigation.navigate('WorkoutsTab', {
+                      screen: 'ExecuteWorkout',
+                      params: { workoutTemplateId: id },
+                    })
+                  }
+                  onSkip={skipWorkout}
+                />
+              </>
+            ) : null}
+
+            {/* ── Weight Progress ── */}
+            {data.user ? (() => {
+              const unit = data.user.unitPreference === 'metric' ? 'kg' : 'lbs';
+              const currentWeight = data.user.weight;
+              const targetWeight = data.user.targetWeight;
+              const startWeight = data.weightLogs.length > 0 ? data.weightLogs[0] : currentWeight;
+              const isLose = data.user.goal === 'lose_weight';
+
+              // Progress %
+              let progressPct = 0;
+              if (targetWeight != null && startWeight !== targetWeight) {
+                if (isLose) {
+                  const totalToLose = startWeight - targetWeight;
+                  progressPct = totalToLose > 0 ? Math.max(0, Math.min((startWeight - currentWeight) / totalToLose, 1)) : 0;
+                } else {
+                  const totalToGain = targetWeight - startWeight;
+                  progressPct = totalToGain > 0 ? Math.max(0, Math.min((currentWeight - startWeight) / totalToGain, 1)) : 0;
+                }
+              }
+
+              // Status + diff
+              const absDiff = targetWeight != null ? Math.abs(currentWeight - targetWeight) : null;
+              let onTrack = false;
+              if (absDiff != null && absDiff >= 0.1) {
+                onTrack = isLose ? currentWeight < startWeight : currentWeight > startWeight;
+              }
+              const diffNum = absDiff != null && absDiff >= 0.1 ? `${Math.round(absDiff)} ${unit}` : null;
+              const diffDir = absDiff != null && absDiff >= 0.1 ? (isLose ? 'to lose' : 'to gain') : null;
+
+              // Last logged footer text
+              let lastLoggedText = '';
+              if (data.lastWeightLoggedAt) {
+                const logDate = new Date(data.lastWeightLoggedAt);
+                const todayStr = new Date().toDateString();
+                const yest = new Date();
+                yest.setDate(yest.getDate() - 1);
+                if (logDate.toDateString() === todayStr) {
+                  lastLoggedText = `${currentWeight} ${unit} – Today`;
+                } else if (logDate.toDateString() === yest.toDateString()) {
+                  lastLoggedText = `${currentWeight} ${unit} – Yesterday`;
+                } else {
+                  lastLoggedText = `${currentWeight} ${unit} – ${logDate.toLocaleDateString([], { month: 'short', day: 'numeric' })}`;
+                }
+              }
+
+              return (
+                <Card style={{ marginBottom: spacing.xl, overflow: 'hidden' }}>
+                  {/* Lime overlay */}
+                  <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(132,204,22,0.08)' }} />
+
+                  {/* Card header */}
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.base }}>
+                    <Text style={{ fontSize: 14, fontWeight: '500', color: 'rgba(255,255,255,0.8)' }}>
+                      Weight Progress
+                    </Text>
+                    <TouchableOpacity
+                      onPress={openWeightModal}
+                      activeOpacity={0.75}
+                      style={{
+                        backgroundColor: 'rgba(132,204,22,0.2)',
+                        borderRadius: Radius.md,
+                        borderWidth: 1,
+                        borderColor: 'rgba(132,204,22,0.3)',
+                        paddingHorizontal: 12,
+                        paddingVertical: 6,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 6,
+                      }}
+                    >
+                      <Plus size={14} color="#84CC16" strokeWidth={2.5} />
+                      <Text style={{ fontSize: 12, fontWeight: '500', color: '#84CC16' }}>Log Weight</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Stats row: current weight (left) + on-track / diff (right) */}
+                  <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: spacing.base }}>
+                    {/* Left: label + big number + target */}
+                    <View>
+                      <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>Current Weight</Text>
+                      <TouchableOpacity onPress={openWeightModal} activeOpacity={0.7}>
+                        <Text style={{ fontSize: 36, fontWeight: '800', color: colors.textPrimary, lineHeight: 42 }}>
+                          {currentWeight} {unit}
+                        </Text>
+                      </TouchableOpacity>
+                      {targetWeight != null ? (
+                        <TouchableOpacity onPress={openTargetModal} activeOpacity={0.7}>
+                          <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
+                            Target: {targetWeight} {unit}
+                          </Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity onPress={openTargetModal} activeOpacity={0.7}>
+                          <Text style={{ fontSize: 12, color: '#84CC16', fontWeight: '600', marginTop: 4 }}>Set target →</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+
+                    {/* Right: on-track status + big diff number + direction */}
+                    {diffNum && diffDir ? (
+                      <View style={{ alignItems: 'flex-end', paddingBottom: 2 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                          <TrendingDown size={16} color="#84CC16" />
+                          <Text style={{ fontSize: 12, fontWeight: '500', color: '#84CC16' }}>
+                            {onTrack ? 'On Track' : 'In Progress'}
+                          </Text>
+                        </View>
+                        <Text style={{ fontSize: 18, fontWeight: '600', color: colors.textPrimary }}>{diffNum}</Text>
+                        <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{diffDir}</Text>
+                      </View>
+                    ) : absDiff != null && absDiff < 0.1 ? (
+                      <Text style={{ fontSize: 13, fontWeight: '600', color: '#84CC16', paddingBottom: 2 }}>
+                        Target reached! 🎯
+                      </Text>
+                    ) : null}
+                  </View>
+
+                  {/* Progress bar */}
+                  {targetWeight != null ? (
+                    <View style={{ marginBottom: spacing.base }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xs }}>
+                        <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Progress</Text>
+                        <Text style={{ fontSize: 12, fontWeight: '500', color: colors.textPrimary }}>{Math.round(progressPct * 100)}%</Text>
+                      </View>
+                      <ProgressBar progress={progressPct} color="#84CC16" height={10} />
+                    </View>
+                  ) : null}
+
+                  {/* Trend selector + sparkline */}
+                  {data.weightLogs.length > 1 ? (
+                    <>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.sm, marginTop: spacing.xs }}>
+                        <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Trend</Text>
+                        <View style={{ flexDirection: 'row', gap: 6 }}>
+                          {(['7D', '30D', '90D'] as const).map((t) => (
+                            <TouchableOpacity
+                              key={t}
+                              onPress={() => setTrendPeriod(t)}
+                              style={{
+                                paddingHorizontal: 10,
+                                paddingVertical: 4,
+                                borderRadius: Radius.sm,
+                                backgroundColor: trendPeriod === t ? 'rgba(132,204,22,0.2)' : 'rgba(255,255,255,0.05)',
+                                borderWidth: trendPeriod === t ? 1 : 0,
+                                borderColor: trendPeriod === t ? 'rgba(132,204,22,0.3)' : 'transparent',
+                              }}
+                            >
+                              <Text style={{
+                                fontSize: 12,
+                                fontWeight: trendPeriod === t ? '600' : '400',
+                                color: trendPeriod === t ? '#84CC16' : 'rgba(255,255,255,0.4)',
+                              }}>{t}</Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      </View>
+                      <WeightSparkline data={data.weightLogs} color="#84CC16" targetWeight={targetWeight ?? null} />
+                    </>
+                  ) : (
+                    <TouchableOpacity onPress={openWeightModal} activeOpacity={0.7} style={{ paddingVertical: spacing.sm }}>
+                      <Text style={{ fontSize: 12, color: '#84CC16' }}>Log more weights to see your trend</Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {/* Footer */}
+                  {lastLoggedText ? (
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.base, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)' }}>
+                      <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>Last logged</Text>
+                      <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary }}>{lastLoggedText}</Text>
+                    </View>
+                  ) : null}
+                </Card>
+              );
+            })() : null}
+
+            {/* ── Streak card ── */}
+            {data.streak > 0 ? (
+              <Card
+                style={{
+                  marginBottom: spacing.xl,
+                  backgroundColor: '#1A2318',
+                  borderColor: '#2A3828',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <View>
+                  <Text style={{ ...typography.caption, color: colors.textTertiary, marginBottom: 4 }}>
+                    Current Streak
+                  </Text>
+                  <Text style={{ fontSize: 26, fontWeight: '800', color: colors.textPrimary, lineHeight: 32 }}>
+                    {data.streak} {data.streak === 1 ? 'Day' : 'Days'} {'🔥'}
+                  </Text>
+                  <Text style={{ ...typography.caption, color: colors.textTertiary, marginTop: 4 }}>
+                    {data.streak >= 7 ? 'Incredible, keep going!' : data.streak >= 3 ? 'Keep it up!' : 'Great start!'}
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 40 }}>{'💪'}</Text>
+              </Card>
+            ) : null}
+          </>
+        ) : null}
+      </ScrollView>
+
+      {/* ── Log Weight Modal ── */}
+      <Modal visible={weightModalVisible} transparent animationType="slide" onRequestClose={() => setWeightModalVisible(false)}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+          <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={() => setWeightModalVisible(false)} />
+          <View
+            style={{
+              backgroundColor: colors.backgroundSecondary,
+              borderTopLeftRadius: Radius.xl,
+              borderTopRightRadius: Radius.xl,
+              paddingHorizontal: spacing.xl,
+              paddingTop: spacing.sm,
+              paddingBottom: insets.bottom + spacing.xl,
+            }}
+          >
+            <View style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: colors.border, alignSelf: 'center', marginBottom: spacing.xl }} />
+            <Text style={{ ...typography.sectionTitle, color: colors.textPrimary, marginBottom: spacing.xl }}>Log Weight</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.backgroundPrimary, borderRadius: Radius.md, borderWidth: 1, borderColor: colors.border, paddingHorizontal: spacing.base, marginBottom: spacing.base }}>
+              <TextInput
+                value={weightInput}
+                onChangeText={setWeightInput}
+                keyboardType="decimal-pad"
+                style={{ flex: 1, ...typography.statLarge, color: colors.textPrimary, paddingVertical: spacing.base }}
+                placeholderTextColor={colors.textTertiary}
+                placeholder="0"
+                autoFocus
+              />
+              <Text style={{ ...typography.body, color: colors.textSecondary }}>
+                {data?.user?.unitPreference === 'imperial' ? 'lbs' : 'kg'}
+              </Text>
+            </View>
+            <View style={{ backgroundColor: colors.backgroundPrimary, borderRadius: Radius.md, borderWidth: 1, borderColor: colors.border, paddingHorizontal: spacing.base, marginBottom: spacing.xl }}>
+              <TextInput
+                value={noteInput}
+                onChangeText={setNoteInput}
+                style={{ ...typography.body, color: colors.textPrimary, paddingVertical: spacing.sm }}
+                placeholderTextColor={colors.textTertiary}
+                placeholder="Add a note (optional)"
+              />
+            </View>
+            <TouchableOpacity onPress={saveWeight} style={{ backgroundColor: colors.brandPrimary, borderRadius: Radius.md, paddingVertical: spacing.base, alignItems: 'center', marginBottom: spacing.sm }}>
+              <Text style={{ ...typography.buttonText, color: colors.white }}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setWeightModalVisible(false)} style={{ alignItems: 'center', paddingVertical: spacing.sm }}>
+              <Text style={{ ...typography.caption, color: colors.textTertiary }}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* ── Set Target Weight Modal ── */}
+      <Modal visible={targetModalVisible} transparent animationType="slide" onRequestClose={() => setTargetModalVisible(false)}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+          <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={() => setTargetModalVisible(false)} />
+          <View
+            style={{
+              backgroundColor: colors.backgroundSecondary,
+              borderTopLeftRadius: Radius.xl,
+              borderTopRightRadius: Radius.xl,
+              paddingHorizontal: spacing.xl,
+              paddingTop: spacing.sm,
+              paddingBottom: insets.bottom + spacing.xl,
+            }}
+          >
+            <View style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: colors.border, alignSelf: 'center', marginBottom: spacing.xl }} />
+            <Text style={{ ...typography.sectionTitle, color: colors.textPrimary, marginBottom: spacing.xl }}>Set Target Weight</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.backgroundPrimary, borderRadius: Radius.md, borderWidth: 1, borderColor: colors.border, paddingHorizontal: spacing.base, marginBottom: spacing.xl }}>
+              <TextInput
+                value={targetInput}
+                onChangeText={setTargetInput}
+                keyboardType="decimal-pad"
+                style={{ flex: 1, ...typography.statLarge, color: colors.textPrimary, paddingVertical: spacing.base }}
+                placeholderTextColor={colors.textTertiary}
+                placeholder="0"
+                autoFocus
+              />
+              <Text style={{ ...typography.body, color: colors.textSecondary }}>
+                {data?.user?.unitPreference === 'imperial' ? 'lbs' : 'kg'}
+              </Text>
+            </View>
+            <TouchableOpacity onPress={saveTargetWeight} style={{ backgroundColor: colors.brandPrimary, borderRadius: Radius.md, paddingVertical: spacing.base, alignItems: 'center', marginBottom: spacing.sm }}>
+              <Text style={{ ...typography.buttonText, color: colors.white }}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setTargetModalVisible(false)} style={{ alignItems: 'center', paddingVertical: spacing.sm }}>
+              <Text style={{ ...typography.caption, color: colors.textTertiary }}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+    </SafeAreaView>
+  );
+}

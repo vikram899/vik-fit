@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx expo start --clear)",
+      "Bash(npx expo install expo-linear-gradient)"
+    ]
+  }
+}
