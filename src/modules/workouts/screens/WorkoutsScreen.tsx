@@ -18,6 +18,11 @@ type Props = NativeStackScreenProps<WorkoutsStackParamList, 'Workouts'>;
 
 const WEEKDAY_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+function parseMeta(description: string | null | undefined): { muscleGroups?: string[]; duration?: number } {
+  if (!description) return {};
+  try { return JSON.parse(description); } catch { return {}; }
+}
+
 function formatRelativeTime(iso: string): string {
   const diffDays = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
   if (diffDays === 0) return 'Today';
@@ -188,6 +193,9 @@ export default function WorkoutsScreen({ navigation }: Props) {
                   const lastIso = lastPerformedMap.get(t.id);
                   const lastLabel = lastIso ? `Last: ${formatRelativeTime(lastIso)}` : null;
                   const dayName = t.assignedWeekday != null ? WEEKDAY_FULL[t.assignedWeekday] : null;
+                  const meta = parseMeta(t.description);
+                  const muscleGroups: string[] = meta.muscleGroups ?? [];
+                  const duration = meta.duration ?? Math.max(t.exerciseCount * 5, 10);
 
                   return (
                     <TouchableOpacity
@@ -219,16 +227,27 @@ export default function WorkoutsScreen({ navigation }: Props) {
                             <ChevronRight size={18} color="rgba(255,255,255,0.4)" />
                           </View>
 
-                          {/* Day tag */}
-                          {dayName ? (
-                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
-                              <View style={{
-                                backgroundColor: 'rgba(132,204,22,0.15)',
-                                borderRadius: 99, paddingHorizontal: 8, paddingVertical: 2,
-                                borderWidth: 1, borderColor: 'rgba(132,204,22,0.3)',
-                              }}>
-                                <Text style={{ fontSize: 11, color: '#84CC16' }}>{dayName}</Text>
-                              </View>
+                          {/* Muscle + day chips */}
+                          {(muscleGroups.length > 0 || dayName) ? (
+                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginBottom: 6 }}>
+                              {muscleGroups.map((g) => (
+                                <View key={g} style={{
+                                  backgroundColor: 'rgba(59,130,246,0.12)',
+                                  borderRadius: 99, paddingHorizontal: 8, paddingVertical: 2,
+                                  borderWidth: 1, borderColor: 'rgba(59,130,246,0.25)',
+                                }}>
+                                  <Text style={{ fontSize: 11, color: '#3B82F6' }}>{g}</Text>
+                                </View>
+                              ))}
+                              {dayName ? (
+                                <View style={{
+                                  backgroundColor: 'rgba(132,204,22,0.15)',
+                                  borderRadius: 99, paddingHorizontal: 8, paddingVertical: 2,
+                                  borderWidth: 1, borderColor: 'rgba(132,204,22,0.3)',
+                                }}>
+                                  <Text style={{ fontSize: 11, color: '#84CC16' }}>{dayName}</Text>
+                                </View>
+                              ) : null}
                             </View>
                           ) : null}
 
@@ -236,6 +255,8 @@ export default function WorkoutsScreen({ navigation }: Props) {
                           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                             <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>
                               {t.exerciseCount} {t.exerciseCount === 1 ? 'exercise' : 'exercises'}
+                              {' · '}
+                              {duration} min
                             </Text>
                             {lastLabel ? (
                               <Text style={{ fontSize: 12, color: '#84CC16' }}>{lastLabel}</Text>

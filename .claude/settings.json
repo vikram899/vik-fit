@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(npx expo start --clear)",
-      "Bash(npx expo install expo-linear-gradient)"
+      "Bash(npx expo install expo-linear-gradient)",
+      "Bash(npx expo install victory-native)",
+      "Bash(npm uninstall victory-native)",
+      "Bash(npx expo install react-native-chart-kit)",
+      "Bash(node -e \"const c = require\\(''react-native-chart-kit''\\); console.log\\(Object.keys\\(c\\)\\)\")"
     ]
   }
 }

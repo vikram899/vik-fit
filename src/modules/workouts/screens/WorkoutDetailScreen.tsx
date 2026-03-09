@@ -18,6 +18,7 @@ import {
 } from '../services/workoutTemplateService';
 import { Radius } from '@theme/radius';
 import { Layout } from '@theme/spacing';
+import AddExerciseModal from '../components/AddExerciseModal';
 
 type Props = NativeStackScreenProps<WorkoutsStackParamList, 'WorkoutDetail'>;
 type ExerciseRow = Awaited<ReturnType<typeof getTemplateExercisesWithNames>>[number];
@@ -57,6 +58,7 @@ export default function WorkoutDetailScreen({ navigation, route }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [assignedWeekday, setAssignedWeekday] = useState<number | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showAddExercise, setShowAddExercise] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -385,23 +387,21 @@ export default function WorkoutDetailScreen({ navigation, route }: Props) {
           )}
         </View>
 
-        {/* ── Add Exercise (edit mode) ── */}
-        {isEditing ? (
-          <TouchableOpacity
-            onPress={() => navigation.navigate('CreateWorkout', { workoutTemplateId })}
-            activeOpacity={0.75}
-            style={{
-              backgroundColor: 'rgba(255,255,255,0.05)',
-              borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
-              borderRadius: Radius.xl,
-              paddingVertical: 16,
-              flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
-            }}
-          >
-            <Plus size={20} color="#fff" />
-            <Text style={{ fontSize: 15, fontWeight: '500', color: '#fff' }}>Add Exercise</Text>
-          </TouchableOpacity>
-        ) : null}
+        {/* ── Add Exercise ── */}
+        <TouchableOpacity
+          onPress={() => setShowAddExercise(true)}
+          activeOpacity={0.75}
+          style={{
+            backgroundColor: 'rgba(255,255,255,0.05)',
+            borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
+            borderRadius: Radius.xl,
+            paddingVertical: 16,
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
+          }}
+        >
+          <Plus size={20} color="#fff" />
+          <Text style={{ fontSize: 15, fontWeight: '500', color: '#fff' }}>Add Exercise</Text>
+        </TouchableOpacity>
       </ScrollView>
 
       {/* ── Delete Confirmation Modal ── */}
@@ -460,6 +460,13 @@ export default function WorkoutDetailScreen({ navigation, route }: Props) {
           </View>
         </View>
       </Modal>
+
+      <AddExerciseModal
+        visible={showAddExercise}
+        onClose={() => setShowAddExercise(false)}
+        workoutTemplateId={workoutTemplateId}
+        onAdded={load}
+      />
     </SafeAreaView>
   );
 }
