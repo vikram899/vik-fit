@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { useTheme } from '@theme/index';
 import { MealLogRow } from '@database/repositories/mealRepo';
 import { createMealsStyles } from '../styles';
-import { Edit3, Trash2, Bookmark, Check, X } from 'lucide-react-native';
+import { Edit3, Trash2, Bookmark, Check, X, MoreVertical } from 'lucide-react-native';
 
 interface MealLogCardProps {
   log: MealLogRow;
@@ -16,6 +16,7 @@ export default function MealLogCard({ log, onDelete, onSave, onEdit }: MealLogCa
   const { colors } = useTheme();
   const s = useMemo(() => createMealsStyles(colors), [colors]);
 
+  const [menuOpen, setMenuOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [cal, setCal] = useState('');
   const [protein, setProtein] = useState('');
@@ -28,6 +29,7 @@ export default function MealLogCard({ log, onDelete, onSave, onEdit }: MealLogCa
     setCarbs(String(log.carbs));
     setFat(String(log.fat));
     setEditing(true);
+    setMenuOpen(false);
   };
 
   const saveEdit = () => {
@@ -46,7 +48,16 @@ export default function MealLogCard({ log, onDelete, onSave, onEdit }: MealLogCa
         <>
           <View style={s.mealItemTopRow}>
             <Text style={s.mealItemName} numberOfLines={1}>{log.name}</Text>
-            <Text style={s.mealItemCal}>{Math.round(log.calories)} cal</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Text style={s.mealItemCal}>{Math.round(log.calories)} cal</Text>
+              <TouchableOpacity
+                onPress={() => setMenuOpen(v => !v)}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                activeOpacity={0.6}
+              >
+                <MoreVertical size={16} color="rgba(255,255,255,0.4)" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={s.mealItemMacros}>
@@ -57,22 +68,32 @@ export default function MealLogCard({ log, onDelete, onSave, onEdit }: MealLogCa
             <Text style={s.mealItemMacroText}>F: {Math.round(log.fat)}g</Text>
           </View>
 
-          <View style={s.mealItemActions}>
-            <TouchableOpacity onPress={startEdit} style={s.mealActionBtn} activeOpacity={0.6}>
-              <Edit3 size={12} color="rgba(255,255,255,0.5)" />
-              <Text style={s.mealActionEdit}> Edit</Text>
-            </TouchableOpacity>
-            <Text style={s.mealActionDot}>•</Text>
-            <TouchableOpacity onPress={onDelete} style={s.mealActionBtn} activeOpacity={0.6}>
-              <Trash2 size={12} color="rgba(255,255,255,0.5)" />
-              <Text style={s.mealActionRemove}> Remove</Text>
-            </TouchableOpacity>
-            <Text style={s.mealActionDot}>•</Text>
-            <TouchableOpacity onPress={onSave} style={s.mealActionBtn} activeOpacity={0.6}>
-              <Bookmark size={12} color="rgba(255,255,255,0.5)" />
-              <Text style={s.mealActionSave}> Save</Text>
-            </TouchableOpacity>
-          </View>
+          {menuOpen && (
+            <View style={s.kebabMenu}>
+              <TouchableOpacity onPress={startEdit} style={s.kebabItem} activeOpacity={0.7}>
+                <Edit3 size={14} color="#3B82F6" />
+                <Text style={[s.kebabItemText, { color: '#3B82F6' }]}>Edit</Text>
+              </TouchableOpacity>
+              <View style={s.kebabDivider} />
+              <TouchableOpacity
+                onPress={() => { onSave(); setMenuOpen(false); }}
+                style={s.kebabItem}
+                activeOpacity={0.7}
+              >
+                <Bookmark size={14} color="#84CC16" />
+                <Text style={[s.kebabItemText, { color: '#84CC16' }]}>Save to templates</Text>
+              </TouchableOpacity>
+              <View style={s.kebabDivider} />
+              <TouchableOpacity
+                onPress={() => { onDelete(); setMenuOpen(false); }}
+                style={s.kebabItem}
+                activeOpacity={0.7}
+              >
+                <Trash2 size={14} color="#EF4444" />
+                <Text style={[s.kebabItemText, { color: '#EF4444' }]}>Remove</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </>
       ) : (
         <>
@@ -133,11 +154,11 @@ export default function MealLogCard({ log, onDelete, onSave, onEdit }: MealLogCa
           <View style={s.editActions}>
             <TouchableOpacity onPress={saveEdit} style={s.editSaveBtn} activeOpacity={0.75}>
               <Check size={14} color="#84CC16" />
-              <Text style={s.editSaveText}>Save</Text>
+              <Text style={s.editSaveText}> Save</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setEditing(false)} style={s.editCancelBtn} activeOpacity={0.75}>
               <X size={14} color="rgba(255,255,255,0.6)" />
-              <Text style={s.editCancelText}>Cancel</Text>
+              <Text style={s.editCancelText}> Cancel</Text>
             </TouchableOpacity>
           </View>
         </>

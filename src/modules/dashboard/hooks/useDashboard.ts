@@ -43,6 +43,9 @@ export function useDashboard() {
     async (weight: number, note?: string) => {
       const now = new Date().toISOString();
       await logWeight({ weight, note: note ?? null, loggedAt: now, createdAt: now });
+      // Also update users.weight so the dashboard (and picker) reflects the new value
+      const user = await getUser();
+      if (user) await updateUser(user.id, { weight });
       await refresh();
     },
     [refresh]

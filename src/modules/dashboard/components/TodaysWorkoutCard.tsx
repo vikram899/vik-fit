@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useTheme } from '@theme/index';
 import { Radius } from '@theme/radius';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Calendar, Dumbbell, CheckCircle2 } from 'lucide-react-native';
 
 interface WorkoutEntry {
   id: number;
@@ -15,100 +17,116 @@ interface TodaysWorkoutCardProps {
   workouts: WorkoutEntry[];
   onStart: (workoutTemplateId: number) => void;
   onSkip: (workoutTemplateId: number) => void;
+  onBrowse: () => void;
 }
 
-const ICON_PALETTE = [
-  { bg: '#1E3A5F', color: '#60A5FA', emoji: '🏋️' },
-  { bg: '#1A3320', color: '#4ADE80', emoji: '🏃' },
-  { bg: '#2D1B5A', color: '#C084FC', emoji: '🧘' },
-  { bg: '#3D2A10', color: '#FB923C', emoji: '🚴' },
-];
+export default function TodaysWorkoutCard({ workouts, onStart, onSkip, onBrowse }: TodaysWorkoutCardProps) {
+  const { colors, spacing } = useTheme();
 
-export default function TodaysWorkoutCard({ workouts, onStart, onSkip }: TodaysWorkoutCardProps) {
-  const { colors, typography, spacing } = useTheme();
+  const cardBase = {
+    backgroundColor: colors.backgroundSecondary,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+  };
 
+  // ── Empty state ────────────────────────────────────────────────────────────
   if (workouts.length === 0) {
-    return null;
+    return (
+      <View style={[cardBase, { marginBottom: spacing.xl }]}>
+        <View style={{ alignItems: 'center', paddingVertical: spacing['2xl'], paddingHorizontal: spacing.xl }}>
+          {/* Icon circle */}
+          <LinearGradient
+            colors={['rgba(59,130,246,0.2)', 'rgba(168,85,247,0.2)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{
+              width: 64, height: 64, borderRadius: 32,
+              alignItems: 'center', justifyContent: 'center',
+              borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
+              marginBottom: spacing.base,
+            }}
+          >
+            <Calendar size={28} color="#3B82F6" />
+          </LinearGradient>
+
+          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textPrimary, marginBottom: 6 }}>
+            No workouts today
+          </Text>
+          <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', textAlign: 'center', marginBottom: spacing.base }}>
+            Schedule a workout to stay on track with your goals
+          </Text>
+
+          {/* CTA */}
+          <TouchableOpacity onPress={onBrowse} activeOpacity={0.85} style={{ overflow: 'hidden', borderRadius: Radius.xl }}>
+            <LinearGradient
+              colors={['#3B82F6', 'rgba(59,130,246,0.8)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={{ paddingHorizontal: spacing.lg, paddingVertical: 9 }}
+            >
+              <Text style={{ fontSize: 12, fontWeight: '600', color: '#fff' }}>Browse Workouts</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
   }
 
+  // ── Scheduled workouts ─────────────────────────────────────────────────────
   return (
     <View style={{ gap: spacing.sm, marginBottom: spacing.xl }}>
-      {workouts.map((workout, index) => {
-        const palette = ICON_PALETTE[index % ICON_PALETTE.length];
-        const subtitle = workout.isDone
-          ? `${workout.exerciseCount} exercises · Done`
-          : workout.completedCount > 0
-          ? `${workout.completedCount}/${workout.exerciseCount} exercises · In progress`
-          : `${workout.exerciseCount} exercises`;
+      {workouts.map((workout) => (
+        <View key={workout.id} style={[cardBase, { padding: spacing.base }]}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            {/* Icon */}
+            <View style={{
+              width: 48, height: 48, borderRadius: Radius.xl,
+              backgroundColor: workout.isDone ? 'rgba(132,204,22,0.2)' : 'rgba(59,130,246,0.2)',
+              alignItems: 'center', justifyContent: 'center',
+            }}>
+              {workout.isDone
+                ? <CheckCircle2 size={22} color="#84CC16" />
+                : <Dumbbell size={22} color="#3B82F6" />}
+            </View>
 
-        return (
-          <View key={workout.id}>
-            <TouchableOpacity
-              activeOpacity={0.75}
-              onPress={() => onStart(workout.id)}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: colors.surface,
-                borderRadius: Radius.lg,
-                borderWidth: 1,
-                borderColor: workout.isDone ? colors.success + '33' : colors.border,
-                paddingHorizontal: spacing.base,
-                paddingVertical: spacing.base,
-              }}
-            >
-              {/* Icon circle */}
-              <View
-                style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 26,
-                  backgroundColor: palette.bg,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginRight: spacing.base,
-                }}
-              >
-                <Text style={{ fontSize: 22 }}>{palette.emoji}</Text>
-              </View>
-
-              {/* Name + subtitle */}
-              <View style={{ flex: 1 }}>
-                <Text style={{ ...typography.body, fontWeight: '700', color: colors.textPrimary, marginBottom: 2 }}>
-                  {workout.name}
-                </Text>
-                <Text style={{ ...typography.caption, color: colors.textTertiary }}>
-                  {subtitle}
-                </Text>
-              </View>
-
-              {/* Right label */}
-              <Text
-                style={{
-                  ...typography.caption,
-                  color: workout.isDone ? colors.success : colors.textTertiary,
-                  fontWeight: workout.isDone ? '600' : '400',
-                  marginLeft: spacing.sm,
-                }}
-              >
-                {workout.isDone ? 'Done ✓' : 'Today'}
+            {/* Name + subtitle */}
+            <View style={{ flex: 1 }}>
+              <Text style={{
+                fontSize: 14, fontWeight: '500',
+                color: workout.isDone ? 'rgba(255,255,255,0.5)' : colors.textPrimary,
+                textDecorationLine: workout.isDone ? 'line-through' : 'none',
+                marginBottom: 2,
+              }}>
+                {workout.name}
               </Text>
-            </TouchableOpacity>
+              <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
+                {workout.exerciseCount} exercises
+              </Text>
+            </View>
 
-            {/* Skip link */}
-            {!workout.isDone ? (
+            {/* Action */}
+            {workout.isDone ? (
+              <Text style={{ fontSize: 11, fontWeight: '600', color: '#84CC16' }}>Completed ✓</Text>
+            ) : (
               <TouchableOpacity
-                onPress={() => onSkip(workout.id)}
-                style={{ alignSelf: 'flex-end', paddingVertical: 4, paddingHorizontal: spacing.xs }}
+                onPress={() => onStart(workout.id)}
+                activeOpacity={0.85}
+                style={{ overflow: 'hidden', borderRadius: Radius.xl }}
               >
-                <Text style={{ ...typography.caption, color: colors.textTertiary }}>
-                  Skip today
-                </Text>
+                <LinearGradient
+                  colors={['#3B82F6', 'rgba(59,130,246,0.8)']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={{ paddingHorizontal: 14, paddingVertical: 8 }}
+                >
+                  <Text style={{ fontSize: 12, fontWeight: '600', color: '#fff' }}>Start</Text>
+                </LinearGradient>
               </TouchableOpacity>
-            ) : null}
+            )}
           </View>
-        );
-      })}
+        </View>
+      ))}
     </View>
   );
 }

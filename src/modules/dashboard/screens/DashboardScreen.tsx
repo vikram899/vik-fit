@@ -11,11 +11,12 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import WeightPickerModal from '../components/WeightPickerModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@theme/index';
-import { Plus, TrendingDown, TrendingUp, Check, Flame, Drumstick, Footprints, Dumbbell, Calendar, CircleCheck, CircleAlert } from 'lucide-react-native';
+import { Plus, TrendingDown, TrendingUp, Check, Flame, Drumstick, Footprints, Dumbbell, Calendar, CircleCheck, CircleAlert, UtensilsCrossed } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Defs, LinearGradient as SvgGradient, Stop, Text as SvgText } from 'react-native-svg';
 import { useDashboard } from '../hooks/useDashboard';
@@ -173,8 +174,6 @@ export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
 
   const [weightModalVisible, setWeightModalVisible] = useState(false);
-  const [weightInput, setWeightInput] = useState('');
-  const [noteInput, setNoteInput] = useState('');
 
   const [targetModalVisible, setTargetModalVisible] = useState(false);
   const [targetInput, setTargetInput] = useState('');
@@ -182,21 +181,12 @@ export default function DashboardScreen() {
   const [trendPeriod, setTrendPeriod] = useState<'7D' | '30D' | '90D'>('7D');
 
   const openWeightModal = () => {
-    setWeightInput(data?.user ? String(data.user.weight) : '');
-    setNoteInput('');
     setWeightModalVisible(true);
   };
 
   const openTargetModal = () => {
     setTargetInput(data?.user?.targetWeight ? String(data.user.targetWeight) : '');
     setTargetModalVisible(true);
-  };
-
-  const saveWeight = async () => {
-    const val = parseFloat(weightInput);
-    if (isNaN(val) || val <= 0) return;
-    await logWeightEntry(val, noteInput.trim() || undefined);
-    setWeightModalVisible(false);
   };
 
   const saveTargetWeight = async () => {
@@ -411,7 +401,7 @@ export default function DashboardScreen() {
                       <View style={{ height: 4, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden', marginBottom: 6 }}>
                         <View style={{ width: `${Math.min(proteinProgress * 100, 100)}%`, height: '100%', backgroundColor: proteinProgress >= 1 ? '#84CC16' : '#F59E0B', borderRadius: 2 }} />
                       </View>
-                      <Text style={{ fontSize: 10, color: proteinProgress >= 1 ? '#84CC16' : 'rgba(255,255,255,0.5)' }}>
+                      <Text style={{ fontSize: 10, fontWeight: '600', color: proteinProgress >= 1 ? '#84CC16' : '#F59E0B' }}>
                         {proteinProgress >= 1 ? 'Goal achieved' : 'remaining'}
                       </Text>
                     </View>
@@ -483,23 +473,57 @@ export default function DashboardScreen() {
                 </Text>
 
                 {data.todayMacros.calories === 0 ? (
-                  <View style={{ alignItems: 'center', paddingVertical: spacing.base }}>
-                    <Text style={{ ...typography.body, color: colors.textSecondary, marginBottom: spacing.sm }}>
-                      No meals logged yet
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => navigation.navigate('MealsTab', { screen: 'AddMeal' })}
+                  <View style={{ alignItems: 'center', paddingVertical: spacing['2xl'] }}>
+                    {/* Icon circle */}
+                    <LinearGradient
+                      colors={['rgba(245,158,11,0.2)', 'rgba(132,204,22,0.2)']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
                       style={{
-                        backgroundColor: colors.brandPrimary,
-                        borderRadius: Radius.sm,
-                        paddingHorizontal: spacing.base,
-                        paddingVertical: spacing.xs,
+                        width: 80, height: 80, borderRadius: 40,
+                        alignItems: 'center', justifyContent: 'center',
+                        borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
+                        marginBottom: spacing.base,
                       }}
                     >
-                      <Text style={{ ...typography.caption, color: colors.white, fontWeight: '600' }}>
-                        Start tracking today →
-                      </Text>
+                      <UtensilsCrossed size={32} color="#F59E0B" />
+                    </LinearGradient>
+
+                    <Text style={{ fontSize: 16, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 }}>
+                      No meals logged yet
+                    </Text>
+                    <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', textAlign: 'center', marginBottom: spacing.lg, paddingHorizontal: spacing.xl }}>
+                      Start tracking your nutrition to see your daily macro breakdown
+                    </Text>
+
+                    {/* CTA button */}
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate('MealsTab', { screen: 'AddMeal' })}
+                      activeOpacity={0.85}
+                      style={{ overflow: 'hidden', borderRadius: Radius.xl, marginBottom: spacing.xl }}
+                    >
+                      <LinearGradient
+                        colors={['#F59E0B', 'rgba(245,158,11,0.8)']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={{ paddingHorizontal: spacing.xl, paddingVertical: 10 }}
+                      >
+                        <Text style={{ fontSize: 14, fontWeight: '600', color: '#fff' }}>Log Your First Meal</Text>
+                      </LinearGradient>
                     </TouchableOpacity>
+
+                    {/* Daily goal footer */}
+                    <View style={{ width: '100%', paddingTop: spacing.base, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)' }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                        <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Daily Goal</Text>
+                        <Text style={{ fontSize: 11, fontWeight: '500', color: 'rgba(255,255,255,0.6)' }}>
+                          {Math.round(data.user.targetProtein)}g P · {Math.round(data.user.targetCarbs)}g C · {Math.round(data.user.targetFat)}g F
+                        </Text>
+                      </View>
+                      <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                        {Math.round(data.user.targetCalories)} calories/day
+                      </Text>
+                    </View>
                   </View>
                 ) : (
                   <>
@@ -541,34 +565,41 @@ export default function DashboardScreen() {
                         </Text>
                       </Text>
                     </View>
-                    <ProgressBar
-                      progress={data.user.targetCalories > 0 ? data.todayMacros.calories / data.user.targetCalories : 0}
-                      color={colors.macroCarbs}
-                      height={7}
-                    />
+                    {(() => {
+                      const pct = Math.min(data.user.targetCalories > 0 ? data.todayMacros.calories / data.user.targetCalories : 0, 1);
+                      return (
+                        <View style={{ height: 7, backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 4, overflow: 'hidden' }}>
+                          <LinearGradient
+                            colors={['#3B82F6', '#84CC16']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={{ height: 7, borderRadius: 4, width: `${Math.round(pct * 100)}%` as any }}
+                          />
+                        </View>
+                      );
+                    })()}
                   </>
                 )}
               </Card>
             ) : null}
 
             {/* ── Today's Workout cards ── */}
-            {data.todaysWorkouts.length > 0 ? (
-              <>
-                <Text style={{ ...typography.label, color: colors.textSecondary, fontWeight: '600', marginBottom: spacing.sm }}>
-                  Today's Schedule
-                </Text>
-                <TodaysWorkoutCard
-                  workouts={data.todaysWorkouts}
-                  onStart={(id) =>
-                    navigation.navigate('WorkoutsTab', {
-                      screen: 'ExecuteWorkout',
-                      params: { workoutTemplateId: id },
-                    })
-                  }
-                  onSkip={skipWorkout}
-                />
-              </>
-            ) : null}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm }}>
+              <Text style={{ ...typography.label, color: 'rgba(255,255,255,0.8)', fontWeight: '600' }}>
+                Today's Workouts
+              </Text>
+            </View>
+            <TodaysWorkoutCard
+              workouts={data.todaysWorkouts}
+              onStart={(id) =>
+                navigation.navigate('WorkoutsTab', {
+                  screen: 'ExecuteWorkout',
+                  params: { workoutTemplateId: id },
+                })
+              }
+              onSkip={skipWorkout}
+              onBrowse={() => navigation.navigate('WorkoutsTab')}
+            />
 
             {/* ── Weight Progress ── */}
             {data.user ? (() => {
@@ -776,53 +807,13 @@ export default function DashboardScreen() {
       </ScrollView>
 
       {/* ── Log Weight Modal ── */}
-      <Modal visible={weightModalVisible} transparent animationType="slide" onRequestClose={() => setWeightModalVisible(false)}>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-          <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={() => setWeightModalVisible(false)} />
-          <View
-            style={{
-              backgroundColor: colors.backgroundSecondary,
-              borderTopLeftRadius: Radius.xl,
-              borderTopRightRadius: Radius.xl,
-              paddingHorizontal: spacing.xl,
-              paddingTop: spacing.sm,
-              paddingBottom: insets.bottom + spacing.xl,
-            }}
-          >
-            <View style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: colors.border, alignSelf: 'center', marginBottom: spacing.xl }} />
-            <Text style={{ ...typography.sectionTitle, color: colors.textPrimary, marginBottom: spacing.xl }}>Log Weight</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.backgroundPrimary, borderRadius: Radius.md, borderWidth: 1, borderColor: colors.border, paddingHorizontal: spacing.base, marginBottom: spacing.base }}>
-              <TextInput
-                value={weightInput}
-                onChangeText={setWeightInput}
-                keyboardType="decimal-pad"
-                style={{ flex: 1, ...typography.statLarge, color: colors.textPrimary, paddingVertical: spacing.base }}
-                placeholderTextColor={colors.textTertiary}
-                placeholder="0"
-                autoFocus
-              />
-              <Text style={{ ...typography.body, color: colors.textSecondary }}>
-                {data?.user?.unitPreference === 'imperial' ? 'lbs' : 'kg'}
-              </Text>
-            </View>
-            <View style={{ backgroundColor: colors.backgroundPrimary, borderRadius: Radius.md, borderWidth: 1, borderColor: colors.border, paddingHorizontal: spacing.base, marginBottom: spacing.xl }}>
-              <TextInput
-                value={noteInput}
-                onChangeText={setNoteInput}
-                style={{ ...typography.body, color: colors.textPrimary, paddingVertical: spacing.sm }}
-                placeholderTextColor={colors.textTertiary}
-                placeholder="Add a note (optional)"
-              />
-            </View>
-            <TouchableOpacity onPress={saveWeight} style={{ backgroundColor: colors.brandPrimary, borderRadius: Radius.md, paddingVertical: spacing.base, alignItems: 'center', marginBottom: spacing.sm }}>
-              <Text style={{ ...typography.buttonText, color: colors.white }}>Save</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setWeightModalVisible(false)} style={{ alignItems: 'center', paddingVertical: spacing.sm }}>
-              <Text style={{ ...typography.caption, color: colors.textTertiary }}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
+      <WeightPickerModal
+        visible={weightModalVisible}
+        initialWeight={data?.user?.weight ?? 70}
+        imperial={data?.user?.unitPreference === 'imperial'}
+        onSave={(weight) => logWeightEntry(weight)}
+        onClose={() => setWeightModalVisible(false)}
+      />
 
       {/* ── Set Target Weight Modal ── */}
       <Modal visible={targetModalVisible} transparent animationType="slide" onRequestClose={() => setTargetModalVisible(false)}>

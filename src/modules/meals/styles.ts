@@ -149,17 +149,30 @@ export function createMealsStyles(colors: ThemeColors) {
     mealItemMacroText: { fontSize: 12, color: 'rgba(255,255,255,0.4)' },
     mealItemMacroDot: { fontSize: 12, color: 'rgba(255,255,255,0.2)', marginHorizontal: 4 },
 
-    // ── Meal Item Actions ─────────────────────────────────────────────────────
-    mealItemActions: {
+    // ── Kebab Menu ────────────────────────────────────────────────────────────
+    kebabMenu: {
+      marginTop: 8,
+      backgroundColor: 'rgba(20,20,30,0.98)' as const,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.1)' as const,
+      overflow: 'hidden' as const,
+    },
+    kebabItem: {
       flexDirection: 'row' as const,
       alignItems: 'center' as const,
-      marginTop: 8,
+      gap: 10,
+      paddingHorizontal: 14,
+      paddingVertical: 11,
     },
-    mealActionBtn: { flexDirection: 'row' as const, alignItems: 'center' as const },
-    mealActionEdit: { fontSize: 12, color: 'rgba(255,255,255,0.5)' },
-    mealActionRemove: { fontSize: 12, color: 'rgba(255,255,255,0.5)' },
-    mealActionSave: { fontSize: 12, color: 'rgba(255,255,255,0.5)' },
-    mealActionDot: { fontSize: 12, color: 'rgba(255,255,255,0.25)', marginHorizontal: 6 },
+    kebabItemText: {
+      fontSize: 14,
+      fontWeight: '500' as const,
+    },
+    kebabDivider: {
+      height: 1,
+      backgroundColor: 'rgba(255,255,255,0.06)' as const,
+    },
 
     // ── Inline Edit Form ──────────────────────────────────────────────────────
     editGrid: { marginTop: 8, gap: 6 },

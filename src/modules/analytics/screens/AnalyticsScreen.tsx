@@ -1,70 +1,66 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, Dimensions,
+  View, Text, ScrollView, TouchableOpacity, Dimensions, ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme } from '@theme/index';
 import { Radius } from '@theme/radius';
 import { Layout } from '@theme/spacing';
-import { TrendingUp, TrendingDown, Activity, Trophy } from 'lucide-react-native';
 import {
-  LineChart,
-  BarChart,
-} from 'react-native-chart-kit';
+  TrendingUp, TrendingDown, Activity, Trophy, Minus,
+  Scale, Utensils, Dumbbell, CalendarDays,
+} from 'lucide-react-native';
+import { LineChart, BarChart } from 'react-native-chart-kit';
+import { useAnalytics } from '../hooks/useAnalytics';
+import { Period } from '../types';
+import { formatDate } from '@shared/utils/dateUtils';
+import { AnalyticsStackParamList } from '../../../core/navigation/stacks/AnalyticsStack';
+
+type AnalyticsNav = NativeStackNavigationProp<AnalyticsStackParamList, 'Analytics'>;
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const CHART_WIDTH = SCREEN_WIDTH - Layout.screenPaddingHorizontal * 2 - 32; // card padding
+const CHART_WIDTH  = SCREEN_WIDTH - Layout.screenPaddingHorizontal * 2 - 32;
 
-// ── Static data (replace with real DB queries later) ──────────────────────────
+// ── Sub-components ─────────────────────────────────────────────────────────
 
-const weightData = {
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-  datasets: [{ data: [185, 183, 180, 178, 176, 175], color: () => '#3B82F6', strokeWidth: 3 }],
-};
+function EmptyState({ icon, message, sub }: { icon: React.ReactNode; message: string; sub?: string }) {
+  return (
+    <View style={{ alignItems: 'center', paddingVertical: 32, gap: 6 }}>
+      {icon}
+      <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', textAlign: 'center' }}>
+        {message}
+      </Text>
+      {sub && (
+        <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', textAlign: 'center' }}>
+          {sub}
+        </Text>
+      )}
+    </View>
+  );
+}
 
-const caloriesData = {
-  labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-  datasets: [
-    { data: [2200, 2400, 2100, 2300, 2500, 2200, 2350], color: () => '#3B82F6' },
-    { data: [450, 520, 380, 490, 610, 540, 470],        color: () => '#84CC16' },
-  ],
-  legend: ['Intake', 'Burned'],
-};
+function SkeletonBlock({ height = 16, width = '100%', radius = 6 }: {
+  height?: number; width?: number | string; radius?: number;
+}) {
+  return (
+    <View
+      style={{
+        height,
+        width: width as any,
+        borderRadius: radius,
+        backgroundColor: 'rgba(255,255,255,0.06)',
+      }}
+    />
+  );
+}
 
-const strengthData = {
-  labels: ['Bench', 'Squat', 'Deadlift'],
-  datasets: [
-    { data: [135, 185, 225], color: () => '#A855F7', strokeWidth: 2 },
-    { data: [145, 195, 235], color: () => '#3B82F6', strokeWidth: 2 },
-    { data: [155, 205, 245], color: () => '#84CC16', strokeWidth: 2 },
-    { data: [165, 215, 255], color: () => '#F59E0B', strokeWidth: 2 },
-  ],
-};
-
-const PERSONAL_RECORDS = [
-  { exercise: 'Bench Press', weight: '225 lbs', date: '2 days ago' },
-  { exercise: 'Squat',       weight: '315 lbs', date: '1 week ago' },
-  { exercise: 'Deadlift',    weight: '405 lbs', date: '3 weeks ago' },
-];
-
-type Period = 'week' | 'month' | 'year';
-
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── Main screen ────────────────────────────────────────────────────────────
 
 export default function AnalyticsScreen() {
   const { colors, spacing } = useTheme();
-  const [period, setPeriod] = useState<Period>('month');
-
-  const chartConfig = {
-    backgroundGradientFrom: colors.backgroundSecondary,
-    backgroundGradientTo:   colors.backgroundSecondary,
-    decimalPlaces: 0,
-    color: (opacity = 1) => `rgba(59,130,246,${opacity})`,
-    labelColor: () => 'rgba(255,255,255,0.5)',
-    propsForDots: { r: '4', strokeWidth: '1', stroke: colors.backgroundSecondary },
-    propsForBackgroundLines: { stroke: 'rgba(255,255,255,0.05)', strokeDasharray: '4 4' },
-    style: { borderRadius: Radius.lg },
-  };
+  const { period, setPeriod, data, loading } = useAnalytics();
 
   const cardStyle = {
     backgroundColor: colors.backgroundSecondary,
@@ -75,39 +71,85 @@ export default function AnalyticsScreen() {
     marginBottom: spacing.base,
   };
 
+  const chartConfig = {
+    backgroundGradientFrom: colors.backgroundSecondary,
+    backgroundGradientTo:   colors.backgroundSecondary,
+    decimalPlaces: 0,
+    color: (opacity = 1) => `rgba(59,130,246,${opacity})`,
+    labelColor: () => 'rgba(255,255,255,0.45)',
+    propsForDots: { r: '3', strokeWidth: '1', stroke: colors.backgroundSecondary },
+    propsForBackgroundLines: { stroke: 'rgba(255,255,255,0.05)', strokeDasharray: '3 4' },
+    style: { borderRadius: Radius.lg },
+  };
+
+  const periodLabel = period === 'week' ? '7 days' : period === 'month' ? '30 days' : '12 months';
+
+  // ── Stats values ──
+  const stats = data?.stats;
+  const weightChange = stats?.weightChange ?? 0;
+  const weightChangePct = stats?.weightChangePct ?? 0;
+  const isWeightLoss = weightChange < 0;
+  const isWeightGain = weightChange > 0;
+  const weightChangeColor = isWeightLoss ? '#84CC16' : isWeightGain ? '#EF4444' : '#F59E0B';
+  const weightChangeIcon = isWeightLoss
+    ? <TrendingDown size={16} color={weightChangeColor} />
+    : isWeightGain
+      ? <TrendingUp size={16} color={weightChangeColor} />
+      : <Minus size={16} color={weightChangeColor} />;
+
+  const unit = data?.unitLabel ?? 'kg';
+  const avgWorkouts = stats ? stats.avgWorkoutsPerWeek.toFixed(1) : '—';
+  const navigation = useNavigation<AnalyticsNav>();
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.backgroundPrimary }} edges={['top']}>
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: Layout.screenPaddingHorizontal,
-          paddingBottom: 32,
+          paddingBottom: 40,
         }}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <View style={{ paddingTop: spacing.base, marginBottom: spacing.base }}>
-          <Text style={{ fontSize: 24, fontWeight: '700', color: colors.textPrimary }}>Analytics</Text>
-          <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>Track your progress</Text>
+        <View style={{ paddingTop: spacing.base, marginBottom: spacing.base, flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <View>
+            <Text style={{ fontSize: 24, fontWeight: '700', color: colors.textPrimary }}>Analytics</Text>
+            <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>
+              Track your progress
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('GoalTrackerCalendar')}
+            activeOpacity={0.75}
+            style={{
+              marginTop: 4,
+              width: 40, height: 40, borderRadius: 12,
+              backgroundColor: 'rgba(59,130,246,0.12)',
+              borderWidth: 1, borderColor: 'rgba(59,130,246,0.25)',
+              alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <CalendarDays size={20} color="#3B82F6" />
+          </TouchableOpacity>
         </View>
 
         {/* Period selector */}
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: spacing.base }}>
-          {(['week', 'month', 'year'] as const).map((p) => (
+          {(['week', 'month', 'year'] as Period[]).map((p) => (
             <TouchableOpacity
               key={p}
               onPress={() => setPeriod(p)}
               activeOpacity={0.8}
               style={{
-                paddingHorizontal: 16, paddingVertical: 8, borderRadius: Radius.xl,
+                paddingHorizontal: 18, paddingVertical: 8, borderRadius: Radius.xl,
                 backgroundColor: period === p ? '#3B82F6' : 'rgba(255,255,255,0.05)',
-                shadowColor: period === p ? '#3B82F6' : 'transparent',
-                shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8,
-                elevation: period === p ? 4 : 0,
+                borderWidth: 1,
+                borderColor: period === p ? '#3B82F6' : 'rgba(255,255,255,0.08)',
               }}
             >
               <Text style={{
-                fontSize: 13, fontWeight: '500',
-                color: period === p ? '#fff' : 'rgba(255,255,255,0.6)',
+                fontSize: 13, fontWeight: '600',
+                color: period === p ? '#fff' : 'rgba(255,255,255,0.55)',
                 textTransform: 'capitalize',
               }}>
                 {p}
@@ -116,135 +158,276 @@ export default function AnalyticsScreen() {
           ))}
         </View>
 
-        {/* Key stats row */}
-        <View style={{ flexDirection: 'row', gap: 12, marginBottom: spacing.base }}>
-          {/* Weight Change */}
-          <View style={[cardStyle, { flex: 1, marginBottom: 0, overflow: 'hidden' }]}>
-            <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(132,204,22,0.08)' } as any} />
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-              <TrendingUp size={16} color="#84CC16" />
-              <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>Weight Change</Text>
-            </View>
-            <Text style={{ fontSize: 22, fontWeight: '700', color: '#fff' }}>-10 lbs</Text>
-            <Text style={{ fontSize: 11, color: '#84CC16', marginTop: 4 }}>↓ 5.4% this month</Text>
-          </View>
-
-          {/* Avg Workouts */}
-          <View style={[cardStyle, { flex: 1, marginBottom: 0, overflow: 'hidden' }]}>
-            <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(59,130,246,0.08)' } as any} />
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-              <Activity size={16} color="#3B82F6" />
-              <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>Avg Workouts</Text>
-            </View>
-            <Text style={{ fontSize: 22, fontWeight: '700', color: '#fff' }}>5.2/wk</Text>
-            <Text style={{ fontSize: 11, color: '#3B82F6', marginTop: 4 }}>↑ 12% vs last month</Text>
-          </View>
-        </View>
-
-        {/* Weight Trend */}
-        <View style={cardStyle}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <Text style={{ fontSize: 14, fontWeight: '600', color: 'rgba(255,255,255,0.8)' }}>Weight Trend</Text>
-            <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Last 6 months</Text>
-          </View>
-          <LineChart
-            data={weightData}
-            width={CHART_WIDTH}
-            height={200}
-            chartConfig={{
-              ...chartConfig,
-              fillShadowGradient: '#3B82F6',
-              fillShadowGradientOpacity: 0.2,
-            }}
-            bezier
-            withInnerLines
-            withOuterLines={false}
-            withDots={false}
-            style={{ marginLeft: -16 }}
-            fromZero={false}
-          />
-        </View>
-
-        {/* Calories This Week */}
-        <View style={cardStyle}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <Text style={{ fontSize: 14, fontWeight: '600', color: 'rgba(255,255,255,0.8)' }}>Calories This Week</Text>
-            <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Intake vs Burned</Text>
-          </View>
-          <BarChart
-            data={caloriesData}
-            width={CHART_WIDTH}
-            height={200}
-            chartConfig={{
-              ...chartConfig,
-              color: (opacity = 1) => `rgba(59,130,246,${opacity})`,
-              barPercentage: 0.55,
-            }}
-            withInnerLines
-            withHorizontalLabels
-            showBarTops={false}
-            style={{ marginLeft: -16 }}
-            yAxisLabel=""
-            yAxisSuffix=""
-            fromZero
-          />
-          {/* Legend */}
-          <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 24, marginTop: 8 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#3B82F6' }} />
-              <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>Intake</Text>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#84CC16' }} />
-              <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>Burned</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Strength Progress */}
-        <View style={cardStyle}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <Text style={{ fontSize: 14, fontWeight: '600', color: 'rgba(255,255,255,0.8)' }}>Strength Progress</Text>
-            <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Last 4 weeks</Text>
-          </View>
-          <LineChart
-            data={strengthData}
-            width={CHART_WIDTH}
-            height={200}
-            chartConfig={{
-              ...chartConfig,
-              color: (opacity = 1) => `rgba(255,255,255,${opacity})`,
-            }}
-            bezier
-            withInnerLines
-            withOuterLines={false}
-            style={{ marginLeft: -16 }}
-            fromZero={false}
-          />
-        </View>
-
-        {/* Personal Records */}
-        <View style={[cardStyle, { marginBottom: 0, overflow: 'hidden' }]}>
-          <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(245,158,11,0.08)' } as any} />
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <Trophy size={16} color="#F59E0B" />
-            <Text style={{ fontSize: 14, fontWeight: '600', color: 'rgba(255,255,255,0.8)' }}>Personal Records</Text>
-          </View>
-          {PERSONAL_RECORDS.map((record, i) => (
-            <View key={record.exercise}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10 }}>
-                <View>
-                  <Text style={{ fontSize: 14, fontWeight: '500', color: colors.textPrimary }}>{record.exercise}</Text>
-                  <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{record.date}</Text>
-                </View>
-                <Text style={{ fontSize: 18, fontWeight: '700', color: '#F59E0B' }}>{record.weight}</Text>
+        {/* Loading skeleton */}
+        {loading && (
+          <View style={{ gap: 12, marginBottom: spacing.base }}>
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <View style={[cardStyle, { flex: 1, marginBottom: 0, gap: 8 }]}>
+                <SkeletonBlock height={12} width="60%" />
+                <SkeletonBlock height={24} width="40%" />
+                <SkeletonBlock height={10} width="70%" />
               </View>
-              {i < PERSONAL_RECORDS.length - 1 && (
-                <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.06)' }} />
+              <View style={[cardStyle, { flex: 1, marginBottom: 0, gap: 8 }]}>
+                <SkeletonBlock height={12} width="60%" />
+                <SkeletonBlock height={24} width="40%" />
+                <SkeletonBlock height={10} width="70%" />
+              </View>
+            </View>
+            <View style={[cardStyle, { gap: 12 }]}>
+              <SkeletonBlock height={14} width="50%" />
+              <SkeletonBlock height={160} />
+            </View>
+            <View style={[cardStyle, { gap: 12 }]}>
+              <SkeletonBlock height={14} width="50%" />
+              <SkeletonBlock height={160} />
+            </View>
+          </View>
+        )}
+
+        {/* Actual content */}
+        {!loading && (
+          <>
+            {/* Key stats row */}
+            <View style={{ flexDirection: 'row', gap: 12, marginBottom: spacing.base }}>
+              {/* Weight Change */}
+              <View style={[cardStyle, { flex: 1, marginBottom: 0, overflow: 'hidden' }]}>
+                <View style={{
+                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundColor: `${weightChangeColor}14`,
+                }} />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                  {weightChangeIcon}
+                  <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)' }}>Weight</Text>
+                </View>
+                {data.hasWeightData ? (
+                  <>
+                    <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff' }}>
+                      {weightChange >= 0 ? '+' : ''}{weightChange.toFixed(1)} {unit}
+                    </Text>
+                    <Text style={{ fontSize: 11, color: weightChangeColor, marginTop: 4 }}>
+                      {isWeightLoss ? '↓' : isWeightGain ? '↑' : '→'}{' '}
+                      {Math.abs(weightChangePct).toFixed(1)}% in {periodLabel}
+                    </Text>
+                  </>
+                ) : (
+                  <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>
+                    No data
+                  </Text>
+                )}
+              </View>
+
+              {/* Workouts */}
+              <View style={[cardStyle, { flex: 1, marginBottom: 0, overflow: 'hidden' }]}>
+                <View style={{
+                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundColor: 'rgba(59,130,246,0.08)',
+                }} />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                  <Activity size={16} color="#3B82F6" />
+                  <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)' }}>Workouts</Text>
+                </View>
+                <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff' }}>
+                  {stats?.totalWorkouts ?? 0}
+                  <Text style={{ fontSize: 13, fontWeight: '400', color: 'rgba(255,255,255,0.4)' }}>
+                    {' '}total
+                  </Text>
+                </Text>
+                <Text style={{ fontSize: 11, color: '#3B82F6', marginTop: 4 }}>
+                  {avgWorkouts}/wk avg in {periodLabel}
+                </Text>
+              </View>
+            </View>
+
+            {/* Weight Trend */}
+            <View style={cardStyle}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Scale size={15} color="#3B82F6" />
+                  <Text style={{ fontSize: 14, fontWeight: '600', color: 'rgba(255,255,255,0.85)' }}>
+                    Weight Trend
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                  {data.stats.latestWeight > 0
+                    ? `${data.stats.latestWeight.toFixed(1)} ${unit} now`
+                    : periodLabel}
+                </Text>
+              </View>
+
+              {data.hasWeightData ? (
+                <LineChart
+                  data={{
+                    labels: data.weightChart.labels,
+                    datasets: [{
+                      data: data.weightChart.values,
+                      color: () => '#3B82F6',
+                      strokeWidth: 2,
+                    }],
+                  }}
+                  width={CHART_WIDTH}
+                  height={190}
+                  chartConfig={{
+                    ...chartConfig,
+                    fillShadowGradient: '#3B82F6',
+                    fillShadowGradientOpacity: 0.15,
+                  }}
+                  bezier
+                  withInnerLines
+                  withOuterLines={false}
+                  withDots={period === 'week'}
+                  style={{ marginLeft: -16 }}
+                  fromZero={false}
+                />
+              ) : (
+                <EmptyState
+                  icon={<Scale size={28} color="rgba(255,255,255,0.15)" />}
+                  message="No weight logged in this period"
+                  sub="Log your weight from the Dashboard"
+                />
               )}
             </View>
-          ))}
-        </View>
+
+            {/* Calorie Intake */}
+            <View style={cardStyle}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Utensils size={15} color="#F59E0B" />
+                  <Text style={{ fontSize: 14, fontWeight: '600', color: 'rgba(255,255,255,0.85)' }}>
+                    Calorie Intake
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                  {period === 'week' ? 'Daily totals' : period === 'month' ? 'Weekly totals' : 'Monthly totals'}
+                </Text>
+              </View>
+
+              {data.hasCaloriesData ? (
+                <BarChart
+                  data={{
+                    labels: data.caloriesChart.labels,
+                    datasets: [{ data: data.caloriesChart.values }],
+                  }}
+                  width={CHART_WIDTH}
+                  height={190}
+                  chartConfig={{
+                    ...chartConfig,
+                    color: (opacity = 1) => `rgba(245,158,11,${opacity})`,
+                    barPercentage: period === 'year' ? 0.5 : 0.65,
+                  }}
+                  withInnerLines
+                  withHorizontalLabels
+                  showBarTops={false}
+                  style={{ marginLeft: -16 }}
+                  yAxisLabel=""
+                  yAxisSuffix=""
+                  fromZero
+                />
+              ) : (
+                <EmptyState
+                  icon={<Utensils size={28} color="rgba(255,255,255,0.15)" />}
+                  message="No meals logged in this period"
+                  sub="Log meals to see calorie trends"
+                />
+              )}
+            </View>
+
+            {/* Strength Progress */}
+            <View style={cardStyle}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Dumbbell size={15} color="#A855F7" />
+                  <Text style={{ fontSize: 14, fontWeight: '600', color: 'rgba(255,255,255,0.85)' }}>
+                    Top Lifts
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                  Max weight • {periodLabel}
+                </Text>
+              </View>
+
+              {data.hasStrengthData ? (
+                <BarChart
+                  data={{
+                    labels: data.strengthChart.labels,
+                    datasets: [{ data: data.strengthChart.values }],
+                  }}
+                  width={CHART_WIDTH}
+                  height={190}
+                  chartConfig={{
+                    ...chartConfig,
+                    color: (opacity = 1) => `rgba(168,85,247,${opacity})`,
+                    barPercentage: 0.6,
+                  }}
+                  withInnerLines
+                  withHorizontalLabels
+                  showBarTops={false}
+                  style={{ marginLeft: -16 }}
+                  yAxisLabel=""
+                  yAxisSuffix={` ${unit}`}
+                  fromZero
+                />
+              ) : (
+                <EmptyState
+                  icon={<Dumbbell size={28} color="rgba(255,255,255,0.15)" />}
+                  message="No strength data in this period"
+                  sub="Complete a workout with weighted exercises"
+                />
+              )}
+            </View>
+
+            {/* Personal Records */}
+            <View style={[cardStyle, { marginBottom: 0, overflow: 'hidden' }]}>
+              <View style={{
+                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                backgroundColor: 'rgba(245,158,11,0.06)',
+              }} />
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <Trophy size={16} color="#F59E0B" />
+                <Text style={{ fontSize: 14, fontWeight: '600', color: 'rgba(255,255,255,0.85)' }}>
+                  Personal Records
+                </Text>
+                <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginLeft: 'auto' }}>
+                  All-time
+                </Text>
+              </View>
+
+              {data.personalRecords.length > 0 ? (
+                data.personalRecords.map((record, i) => (
+                  <View key={record.exerciseName}>
+                    <View style={{
+                      flexDirection: 'row', alignItems: 'center',
+                      justifyContent: 'space-between', paddingVertical: 10,
+                    }}>
+                      <View style={{ flex: 1, marginRight: 12 }}>
+                        <Text style={{ fontSize: 14, fontWeight: '500', color: colors.textPrimary }}>
+                          {record.exerciseName}
+                        </Text>
+                        <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
+                          {formatDate(record.achievedAt)}
+                        </Text>
+                      </View>
+                      <View style={{ alignItems: 'flex-end' }}>
+                        <Text style={{ fontSize: 18, fontWeight: '700', color: '#F59E0B' }}>
+                          {record.maxWeight}
+                        </Text>
+                        <Text style={{ fontSize: 11, color: 'rgba(245,158,11,0.6)' }}>{unit}</Text>
+                      </View>
+                    </View>
+                    {i < data.personalRecords.length - 1 && (
+                      <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.05)' }} />
+                    )}
+                  </View>
+                ))
+              ) : (
+                <EmptyState
+                  icon={<Trophy size={28} color="rgba(255,255,255,0.15)" />}
+                  message="No personal records yet"
+                  sub="Complete a weighted workout to set your first PR"
+                />
+              )}
+            </View>
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
