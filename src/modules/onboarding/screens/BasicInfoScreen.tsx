@@ -11,6 +11,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTheme } from '@theme/index';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 import OnboardingLayout from '../components/OnboardingLayout';
 import { useOnboarding } from '../hooks/useOnboarding';
 import { OnboardingStackParamList } from '@core/navigation/stacks/OnboardingStack';
@@ -35,6 +36,8 @@ function WheelColumn({ items, selectedIndex, onSelect, width = 80, visibleItems 
   const half = (wheelH - ITEM_H) / 2;
   const ref = useRef<ScrollView>(null);
   const didScroll = useRef(false);
+  const [activeIdx, setActiveIdx] = useState(selectedIndex);
+  const lastHapticIdx = useRef(selectedIndex);
 
   const scrollTo = useCallback((idx: number, animated = true) => {
     ref.current?.scrollTo({ x: 0, y: idx * ITEM_H, animated });
@@ -47,14 +50,24 @@ function WheelColumn({ items, selectedIndex, onSelect, width = 80, visibleItems 
     }
   }, [selectedIndex, scrollTo]);
 
+  const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const idx = Math.round(e.nativeEvent.contentOffset.y / ITEM_H);
+    const clamped = Math.max(0, Math.min(items.length - 1, idx));
+    if (clamped !== lastHapticIdx.current) {
+      lastHapticIdx.current = clamped;
+      Haptics.selectionAsync();
+    }
+    setActiveIdx(clamped);
+  }, [items.length]);
+
   const handleMomentumEnd = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
       const idx = Math.round(e.nativeEvent.contentOffset.y / ITEM_H);
       const clamped = Math.max(0, Math.min(items.length - 1, idx));
+      setActiveIdx(clamped);
       onSelect(clamped);
-      scrollTo(clamped);
     },
-    [items.length, onSelect, scrollTo],
+    [items.length, onSelect],
   );
 
   return (
@@ -68,7 +81,9 @@ function WheelColumn({ items, selectedIndex, onSelect, width = 80, visibleItems 
           top: half,
           height: ITEM_H,
           borderRadius: 12,
-          backgroundColor: 'rgba(255,255,255,0.1)',
+          backgroundColor: 'rgba(132,204,22,0.1)',
+          borderWidth: 1,
+          borderColor: 'rgba(132,204,22,0.2)',
           zIndex: 2,
         }}
       />
@@ -78,23 +93,24 @@ function WheelColumn({ items, selectedIndex, onSelect, width = 80, visibleItems 
         showsVerticalScrollIndicator={false}
         snapToInterval={ITEM_H}
         decelerationRate="fast"
+        onScroll={handleScroll}
         onMomentumScrollEnd={handleMomentumEnd}
         scrollEventThrottle={16}
         contentContainerStyle={{ paddingTop: half, paddingBottom: half }}
       >
         {items.map((label, i) => {
-          const dist = Math.abs(i - selectedIndex);
+          const dist = Math.abs(i - activeIdx);
           return (
             <TouchableOpacity
               key={i}
               onPress={() => { onSelect(i); scrollTo(i); }}
-              activeOpacity={0.7}
+              activeOpacity={1}
               style={{ height: ITEM_H, alignItems: 'center', justifyContent: 'center' }}
             >
               <Text style={{
                 fontSize: dist === 0 ? 22 : dist === 1 ? 18 : 15,
                 fontWeight: dist === 0 ? '700' : '400',
-                color: dist === 0 ? '#fff' : 'rgba(255,255,255,0.35)',
+                color: dist === 0 ? '#84CC16' : 'rgba(255,255,255,0.35)',
               }}>
                 {label}
               </Text>
@@ -221,7 +237,7 @@ export default function BasicInfoScreen({ navigation }: Props) {
   return (
     <OnboardingLayout
       step={1}
-      totalSteps={3}
+      totalSteps={4}
       title="Tell us about yourself"
       subtitle="Help us personalize your fitness journey"
       onNext={() => navigation.navigate('ActivityGoal')}
@@ -308,13 +324,13 @@ export default function BasicInfoScreen({ navigation }: Props) {
               activeOpacity={1}
               style={{
                 flex: 1, paddingVertical: 12, borderRadius: 14, alignItems: 'center',
-                backgroundColor: draft.unitPreference === opt.value ? '#84CC16' : sub,
+                backgroundColor: draft.unitPreference === opt.value ? '#3B82F6' : sub,
                 borderWidth: 1,
-                borderColor: draft.unitPreference === opt.value ? '#84CC16' : subBorder,
+                borderColor: draft.unitPreference === opt.value ? '#3B82F6' : subBorder,
               }}
             >
               <Text style={{
-                color: draft.unitPreference === opt.value ? '#000' : 'rgba(255,255,255,0.6)',
+                color: '#fff',
                 fontWeight: '600', fontSize: 13,
               }}>
                 {opt.label}
@@ -336,7 +352,7 @@ export default function BasicInfoScreen({ navigation }: Props) {
           <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>
             Height
           </Text>
-          <PickerBox headers={isMetric ? undefined : ['ft', 'in']}>
+          <PickerBox>
             {isMetric ? (
               <WheelColumn items={heightCmList} selectedIndex={heightCmIdx} onSelect={setHeightCmIdx} width={120} visibleItems={3} />
             ) : (

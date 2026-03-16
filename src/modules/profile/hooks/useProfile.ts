@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { UserRow } from '@database/repositories/userRepo';
 import { getWorkoutCompletedDates } from '@database/repositories/workoutRepo';
-import { getProfile, updateProfile, getProfileNutrition } from '../services/profileService';
+import { getProfile, updateProfile, getProfileNutrition, updateNutritionTargets, updateStreakCondition } from '../services/profileService';
 import { ProfileFormData } from '../types';
 import { BMRResult } from '@modules/onboarding/types';
+import { StreakCondition } from '@shared/types/common';
 
 function calculateStreak(dates: string[]): number {
   if (dates.length === 0) return 0;
@@ -71,5 +72,23 @@ export function useProfile() {
     [user, refresh]
   );
 
-  return { user, nutrition, workoutCount, streak, loading, saving, saveProfile, refresh };
+  const saveNutritionTargets = useCallback(
+    async (calories: number | null, protein: number | null): Promise<void> => {
+      if (!user) return;
+      await updateNutritionTargets(user.id, calories, protein);
+      await refresh();
+    },
+    [user, refresh],
+  );
+
+  const saveStreakCondition = useCallback(
+    async (condition: StreakCondition): Promise<void> => {
+      if (!user) return;
+      await updateStreakCondition(user.id, condition);
+      await refresh();
+    },
+    [user, refresh],
+  );
+
+  return { user, nutrition, workoutCount, streak, loading, saving, saveProfile, saveNutritionTargets, saveStreakCondition, refresh };
 }

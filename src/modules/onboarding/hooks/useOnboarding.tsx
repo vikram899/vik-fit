@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { createUser } from '@database/repositories/userRepo';
+import { createUser, getUser, updateUser } from '@database/repositories/userRepo';
 import { toISOString } from '@shared/utils/dateUtils';
 import { OnboardingDraft, BMRResult, DisplayGoal, DisplayActivityLevel } from '../types';
 import { calculateNutrition } from '../services/onboardingService';
@@ -21,7 +21,8 @@ const ACTIVITY_MAP: Record<DisplayActivityLevel, ActivityLevel> = {
   'sedentary': 'sedentary',
   'lightly-active': 'light',
   'moderately-active': 'moderate',
-  'very-active': 'very_active',
+  'very-active': 'active',
+  'athlete': 'very_active',
 };
 
 function computeAge(dob: string): number {
@@ -103,7 +104,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         ? (isImperial ? Math.round(draft.targetWeightKg * 2.20462 * 10) / 10 : draft.targetWeightKg)
         : null;
 
-      await createUser({
+      const userData = {
         name: draft.name.trim(),
         age,
         gender: draft.gender as Gender,
@@ -116,9 +117,14 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         experienceLevel: null,
         targetCaloriesOverride: draft.customCalories,
         targetProteinOverride: draft.customProtein,
-        createdAt: now,
-        updatedAt: now,
-      });
+      };
+
+      const existingUser = await getUser();
+      if (existingUser) {
+        await updateUser(existingUser.id, { ...userData, updatedAt: now });
+      } else {
+        await createUser({ ...userData, createdAt: now, updatedAt: now });
+      }
       return true;
     } catch {
       setError('Failed to save profile. Please try again.');

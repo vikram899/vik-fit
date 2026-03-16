@@ -1,4 +1,4 @@
-import { MacroSummary } from '@shared/types/common';
+import { MacroSummary, StreakCondition } from '@shared/types/common';
 import { MealLogRow } from '@database/repositories/mealRepo';
 
 export interface DashboardData {
@@ -18,5 +18,6 @@ export interface DashboardData {
   todayMacros: MacroSummary;
   mealLogs: MealLogRow[];
   streak: number;
+  streakCondition: StreakCondition;
   todaysWorkouts: { id: number; name: string; isDone: boolean; exerciseCount: number; completedCount: number }[];
 }

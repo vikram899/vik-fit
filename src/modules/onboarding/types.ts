@@ -15,7 +15,8 @@ export type DisplayActivityLevel =
   | 'sedentary'
   | 'lightly-active'
   | 'moderately-active'
-  | 'very-active';
+  | 'very-active'
+  | 'athlete';
 
 export interface OnboardingDraft {
   name: string;

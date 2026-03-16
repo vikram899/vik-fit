@@ -198,12 +198,6 @@ export default function DashboardScreen() {
     setTargetModalVisible(false);
   };
 
-  const todayLabel = new Date().toLocaleDateString([], {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  });
-
   const initials = data?.user?.name
     ? data.user.name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2)
     : '?';
@@ -224,6 +218,11 @@ export default function DashboardScreen() {
             {data?.user ? (
               <Text style={{ fontSize: 28, fontWeight: '800', color: colors.textPrimary, lineHeight: 34 }}>
                 {data.user.name.split(' ')[0]}
+              </Text>
+            ) : null}
+            {data?.user?.goal ? (
+              <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginTop: 6 }}>
+                {GOAL_GREETING[data.user.goal] ?? 'Stay consistent today'}
               </Text>
             ) : null}
           </View>
@@ -317,7 +316,15 @@ export default function DashboardScreen() {
 
                   {/* Header */}
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.base }}>
-                    <Text style={{ fontSize: 14, fontWeight: '500', color: 'rgba(255,255,255,0.8)' }}>Today's Progress</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                      <Text style={{ fontSize: 14, fontWeight: '500', color: 'rgba(255,255,255,0.8)' }}>Today's Progress</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(245,158,11,0.12)', borderRadius: 20, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1, borderColor: 'rgba(245,158,11,0.25)' }}>
+                        <Flame size={11} color="#F59E0B" />
+                        <Text style={{ fontSize: 11, fontWeight: '700', color: '#F59E0B' }}>
+                          {data.streak > 0 ? `${data.streak}d` : '0d'}
+                        </Text>
+                      </View>
+                    </View>
                     <Calendar size={18} color="#3B82F6" />
                   </View>
 
@@ -395,8 +402,10 @@ export default function DashboardScreen() {
                             <Text style={{ fontSize: 15, fontWeight: '600', color: '#84CC16' }}>{calConsumed}</Text>
                           </View>
                           <View style={{ flex: 1 }}>
-                            <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Burned</Text>
-                            <Text style={{ fontSize: 15, fontWeight: '600', color: '#EF4444' }}>{calsBurned > 0 ? calsBurned : '—'}</Text>
+                            <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Remaining</Text>
+                            <Text style={{ fontSize: 15, fontWeight: '600', color: calRemaining < 0 ? '#EF4444' : '#84CC16' }}>
+                              {calRemaining < 0 ? `+${Math.abs(calRemaining)}` : String(calRemaining)}
+                            </Text>
                           </View>
                         </View>
                       </View>
@@ -518,7 +527,7 @@ export default function DashboardScreen() {
                     {/* CTA button */}
                     <TouchableOpacity
                       onPress={() => navigation.navigate('MealsTab', { screen: 'AddMeal' })}
-                      activeOpacity={0.85}
+                      activeOpacity={1}
                       style={{ overflow: 'hidden', borderRadius: Radius.xl, marginBottom: spacing.xl }}
                     >
                       <LinearGradient
@@ -677,7 +686,7 @@ export default function DashboardScreen() {
                     </Text>
                     <TouchableOpacity
                       onPress={openWeightModal}
-                      activeOpacity={0.75}
+                      activeOpacity={1}
                       style={{
                         backgroundColor: 'rgba(132,204,22,0.2)',
                         borderRadius: Radius.md,
@@ -700,19 +709,19 @@ export default function DashboardScreen() {
                     {/* Left: label + big number + target */}
                     <View>
                       <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>Current Weight</Text>
-                      <TouchableOpacity onPress={openWeightModal} activeOpacity={0.7}>
+                      <TouchableOpacity onPress={openWeightModal} activeOpacity={1}>
                         <Text style={{ fontSize: 36, fontWeight: '800', color: colors.textPrimary, lineHeight: 42 }}>
                           {currentWeight} {unit}
                         </Text>
                       </TouchableOpacity>
                       {targetWeight != null ? (
-                        <TouchableOpacity onPress={openTargetModal} activeOpacity={0.7}>
+                        <TouchableOpacity onPress={openTargetModal} activeOpacity={1}>
                           <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
                             Target: {targetWeight} {unit}
                           </Text>
                         </TouchableOpacity>
                       ) : (
-                        <TouchableOpacity onPress={openTargetModal} activeOpacity={0.7}>
+                        <TouchableOpacity onPress={openTargetModal} activeOpacity={1}>
                           <Text style={{ fontSize: 12, color: '#84CC16', fontWeight: '600', marginTop: 4 }}>Set target →</Text>
                         </TouchableOpacity>
                       )}
@@ -758,6 +767,7 @@ export default function DashboardScreen() {
                             <TouchableOpacity
                               key={t}
                               onPress={() => setTrendPeriod(t)}
+                              activeOpacity={1}
                               style={{
                                 paddingHorizontal: 10,
                                 paddingVertical: 4,
@@ -776,10 +786,14 @@ export default function DashboardScreen() {
                           ))}
                         </View>
                       </View>
-                      <WeightSparkline data={data.weightLogs} color="#84CC16" targetWeight={targetWeight ?? null} />
+                      <WeightSparkline
+                        data={data.weightLogs.slice(-(trendPeriod === '7D' ? 7 : trendPeriod === '30D' ? 30 : 90))}
+                        color="#84CC16"
+                        targetWeight={targetWeight ?? null}
+                      />
                     </>
                   ) : (
-                    <TouchableOpacity onPress={openWeightModal} activeOpacity={0.7} style={{ paddingVertical: spacing.sm }}>
+                    <TouchableOpacity onPress={openWeightModal} activeOpacity={1} style={{ paddingVertical: spacing.sm }}>
                       <Text style={{ fontSize: 12, color: '#84CC16' }}>Log more weights to see your trend</Text>
                     </TouchableOpacity>
                   )}
@@ -795,32 +809,6 @@ export default function DashboardScreen() {
               );
             })() : null}
 
-            {/* ── Streak card ── */}
-            {data.streak > 0 ? (
-              <Card
-                style={{
-                  marginBottom: spacing.xl,
-                  backgroundColor: '#1A2318',
-                  borderColor: '#2A3828',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <View>
-                  <Text style={{ ...typography.caption, color: colors.textTertiary, marginBottom: 4 }}>
-                    Current Streak
-                  </Text>
-                  <Text style={{ fontSize: 26, fontWeight: '800', color: colors.textPrimary, lineHeight: 32 }}>
-                    {data.streak} {data.streak === 1 ? 'Day' : 'Days'} {'🔥'}
-                  </Text>
-                  <Text style={{ ...typography.caption, color: colors.textTertiary, marginTop: 4 }}>
-                    {data.streak >= 7 ? 'Incredible, keep going!' : data.streak >= 3 ? 'Keep it up!' : 'Great start!'}
-                  </Text>
-                </View>
-                <Text style={{ fontSize: 40 }}>{'💪'}</Text>
-              </Card>
-            ) : null}
           </>
         ) : null}
       </ScrollView>
@@ -869,10 +857,10 @@ export default function DashboardScreen() {
                 {data?.user?.unitPreference === 'imperial' ? 'lbs' : 'kg'}
               </Text>
             </View>
-            <TouchableOpacity onPress={saveTargetWeight} style={{ backgroundColor: colors.brandPrimary, borderRadius: Radius.md, paddingVertical: spacing.base, alignItems: 'center', marginBottom: spacing.sm }}>
+            <TouchableOpacity onPress={saveTargetWeight} activeOpacity={1} style={{ backgroundColor: colors.brandPrimary, borderRadius: Radius.md, paddingVertical: spacing.base, alignItems: 'center', marginBottom: spacing.sm }}>
               <Text style={{ ...typography.buttonText, color: colors.white }}>Save</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setTargetModalVisible(false)} style={{ alignItems: 'center', paddingVertical: spacing.sm }}>
+            <TouchableOpacity onPress={() => setTargetModalVisible(false)} activeOpacity={1} style={{ alignItems: 'center', paddingVertical: spacing.sm }}>
               <Text style={{ ...typography.caption, color: colors.textTertiary }}>Cancel</Text>
             </TouchableOpacity>
           </View>

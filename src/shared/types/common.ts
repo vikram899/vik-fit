@@ -8,6 +8,8 @@ export type Goal = 'lose_weight' | 'maintain' | 'gain_muscle';
 
 export type UnitPreference = 'metric' | 'imperial';
 
+export type StreakCondition = 'any' | 'meals' | 'workout' | 'calories' | 'protein' | 'weight';
+
 export type ExerciseType =
   | 'strength'
   | 'bodyweight'

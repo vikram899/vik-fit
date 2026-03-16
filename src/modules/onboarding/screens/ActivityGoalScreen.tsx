@@ -3,8 +3,8 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTheme } from '@theme/index';
 import {
-  Flame, Dumbbell, Zap, Scale, Footprints, TrendingUp, Wind, Heart,
-  Moon, Sunrise, Sun,
+  Flame, Dumbbell, Zap, Scale, Footprints, Wind,
+  Moon, Sunrise, Sun, Trophy,
 } from 'lucide-react-native';
 import OnboardingLayout from '../components/OnboardingLayout';
 import { useOnboarding } from '../hooks/useOnboarding';
@@ -14,22 +14,20 @@ import { DisplayGoal, DisplayActivityLevel } from '../types';
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'ActivityGoal'>;
 
 const GOALS: { value: DisplayGoal; label: string; icon: any; color: string }[] = [
-  { value: 'lose-fat',        label: 'Lose Fat',      icon: Flame,      color: '#F59E0B' },
-  { value: 'build-muscle',    label: 'Build Muscle',  icon: Dumbbell,   color: '#3B82F6' },
-  { value: 'recomp',          label: 'Recompose',     icon: Zap,        color: '#EAB308' },
-  { value: 'maintain',        label: 'Maintain',      icon: Scale,      color: '#84CC16' },
-  { value: 'endurance',       label: 'Endurance',     icon: Footprints, color: '#10B981' },
-  { value: 'strength',        label: 'Strength',      icon: TrendingUp, color: '#EF4444' },
-  { value: 'flexibility',     label: 'Flexibility',   icon: Wind,       color: '#EC4899' },
-  { value: 'improve-fitness', label: 'Fitness',       icon: TrendingUp, color: '#A855F7' },
-  { value: 'general-health',  label: 'Health',        icon: Heart,      color: '#6B7280' },
+  { value: 'lose-fat',     label: 'Lose Fat',            icon: Flame,      color: '#F59E0B' },
+  { value: 'build-muscle', label: 'Build Muscle',        icon: Dumbbell,   color: '#3B82F6' },
+  { value: 'recomp',       label: 'Recompose',           icon: Zap,        color: '#EAB308' },
+  { value: 'maintain',     label: 'Maintain',            icon: Scale,      color: '#84CC16' },
+  { value: 'endurance',    label: 'Endurance',           icon: Footprints, color: '#10B981' },
+  { value: 'flexibility',  label: 'Flexibility & Mobility', icon: Wind,    color: '#EC4899' },
 ];
 
 const ACTIVITY: { value: DisplayActivityLevel; label: string; desc: string; icon: any }[] = [
-  { value: 'sedentary',         label: 'Sedentary',         desc: 'Little or no exercise',   icon: Moon    },
-  { value: 'lightly-active',    label: 'Lightly Active',    desc: 'Workout 1–3 days/week',   icon: Sunrise },
-  { value: 'moderately-active', label: 'Moderately Active', desc: 'Workout 3–5 days/week',   icon: Sun     },
-  { value: 'very-active',       label: 'Very Active',       desc: 'Hard training most days', icon: Zap     },
+  { value: 'sedentary',         label: 'Sedentary',           desc: 'Mostly sitting, little exercise',   icon: Moon    },
+  { value: 'lightly-active',    label: 'Lightly Active',      desc: 'Light exercise 1–2 days/week',      icon: Sunrise },
+  { value: 'moderately-active', label: 'Moderately Active',   desc: 'Exercise 3–4 days/week',            icon: Sun     },
+  { value: 'very-active',       label: 'Very Active',         desc: 'Hard training most days',           icon: Zap     },
+  { value: 'athlete',           label: 'Athlete',             desc: 'Intense training or physical job',  icon: Trophy  },
 ];
 
 export default function ActivityGoalScreen({ navigation }: Props) {
@@ -52,7 +50,7 @@ export default function ActivityGoalScreen({ navigation }: Props) {
       nextDisabled={!isValid}
       nextLabel="Next"
     >
-      {/* Goals grid */}
+      {/* Goals grid — 2 columns */}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: spacing.xl }}>
         {GOALS.map((opt) => {
           const Icon = opt.icon;
@@ -67,7 +65,6 @@ export default function ActivityGoalScreen({ navigation }: Props) {
                 backgroundColor: selected ? 'rgba(255,255,255,0.1)' : sub,
                 borderWidth: selected ? 2 : 1,
                 borderColor: selected ? opt.color : subBorder,
-                transform: [{ scale: selected ? 1.02 : 1 }],
               }}
             >
               <View style={{

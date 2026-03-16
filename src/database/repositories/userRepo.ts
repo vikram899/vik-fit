@@ -1,4 +1,5 @@
 import { getDatabase } from '../db';
+import { StreakCondition } from '@shared/types/common';
 
 export interface UserRow {
   id: number;
@@ -14,6 +15,7 @@ export interface UserRow {
   experienceLevel: 'beginner' | 'intermediate' | 'advanced' | null;
   targetCaloriesOverride: number | null;
   targetProteinOverride: number | null;
+  streakCondition: StreakCondition;
   createdAt: string;
   updatedAt: string;
 }
@@ -30,8 +32,8 @@ export async function getUser(): Promise<UserRow | null> {
 export async function createUser(input: CreateUserInput): Promise<number> {
   const db = await getDatabase();
   const result = await db.runAsync(
-    `INSERT INTO users (name, age, gender, height, weight, activityLevel, goal, unitPreference, targetWeight, experienceLevel, targetCaloriesOverride, targetProteinOverride, createdAt, updatedAt)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+    `INSERT INTO users (name, age, gender, height, weight, activityLevel, goal, unitPreference, targetWeight, experienceLevel, targetCaloriesOverride, targetProteinOverride, streakCondition, createdAt, updatedAt)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
     [
       input.name,
       input.age,
@@ -45,6 +47,7 @@ export async function createUser(input: CreateUserInput): Promise<number> {
       input.experienceLevel ?? null,
       input.targetCaloriesOverride ?? null,
       input.targetProteinOverride ?? null,
+      input.streakCondition ?? 'any',
       input.createdAt,
       input.updatedAt,
     ]

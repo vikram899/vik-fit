@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 import { Target, TrendingDown, TrendingUp, Minus } from 'lucide-react-native';
 import OnboardingLayout from '../components/OnboardingLayout';
 import { useOnboarding } from '../hooks/useOnboarding';
@@ -14,11 +15,11 @@ type Props = NativeStackScreenProps<OnboardingStackParamList, 'TargetWeight'>;
 
 // ─── Wheel ────────────────────────────────────────────────────────────────────
 
-const ITEM_H = 56;
+const ITEM_H = 52;
 const WHEEL_BG = '#161618';
 
 function WheelColumn({
-  items, selectedIndex, onSelect, width = 160, visibleItems = 5,
+  items, selectedIndex, onSelect, width = 160, visibleItems = 3,
 }: {
   items: string[]; selectedIndex: number; onSelect: (i: number) => void;
   width?: number; visibleItems?: number;
@@ -27,6 +28,8 @@ function WheelColumn({
   const half = (wheelH - ITEM_H) / 2;
   const ref = useRef<ScrollView>(null);
   const didScroll = useRef(false);
+  const [activeIdx, setActiveIdx] = useState(selectedIndex);
+  const lastHapticIdx = useRef(selectedIndex);
 
   const scrollTo = useCallback((idx: number, animated = true) => {
     ref.current?.scrollTo({ x: 0, y: idx * ITEM_H, animated });
@@ -36,12 +39,22 @@ function WheelColumn({
     if (!didScroll.current) { didScroll.current = true; scrollTo(selectedIndex, false); }
   }, [selectedIndex, scrollTo]);
 
+  const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const idx = Math.round(e.nativeEvent.contentOffset.y / ITEM_H);
+    const clamped = Math.max(0, Math.min(items.length - 1, idx));
+    if (clamped !== lastHapticIdx.current) {
+      lastHapticIdx.current = clamped;
+      Haptics.selectionAsync();
+    }
+    setActiveIdx(clamped);
+  }, [items.length]);
+
   const handleMomentumEnd = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const idx = Math.round(e.nativeEvent.contentOffset.y / ITEM_H);
     const clamped = Math.max(0, Math.min(items.length - 1, idx));
+    setActiveIdx(clamped);
     onSelect(clamped);
-    scrollTo(clamped);
-  }, [items.length, onSelect, scrollTo]);
+  }, [items.length, onSelect]);
 
   return (
     <View style={{ width, height: wheelH, overflow: 'hidden' }}>
@@ -56,15 +69,16 @@ function WheelColumn({
       <ScrollView
         ref={ref} onLayout={handleLayout} showsVerticalScrollIndicator={false}
         snapToInterval={ITEM_H} decelerationRate="fast"
+        onScroll={handleScroll}
         onMomentumScrollEnd={handleMomentumEnd} scrollEventThrottle={16}
         contentContainerStyle={{ paddingTop: half, paddingBottom: half }}
       >
         {items.map((label, i) => {
-          const dist = Math.abs(i - selectedIndex);
+          const dist = Math.abs(i - activeIdx);
           return (
             <TouchableOpacity
               key={i} onPress={() => { onSelect(i); scrollTo(i); }}
-              activeOpacity={0.7}
+              activeOpacity={1}
               style={{ height: ITEM_H, alignItems: 'center', justifyContent: 'center' }}
             >
               <Text style={{

@@ -1,6 +1,6 @@
 import { getUser } from '@database/repositories/userRepo';
-import { getRecentWeightLogs } from '@database/repositories/weightRepo';
-import { getMealLogsByDate, getMealLogDates } from '@database/repositories/mealRepo';
+import { getRecentWeightLogs, getWeightLogDates } from '@database/repositories/weightRepo';
+import { getMealLogsByDate, getMealLogDates, getDailyMacroTotals } from '@database/repositories/mealRepo';
 import {
   getWorkoutTemplatesByWeekday,
   getWorkoutLogsByDate,
@@ -11,19 +11,49 @@ import {
 import { todayDateString, getCurrentWeekday } from '@shared/utils/dateUtils';
 import { calculateNutrition } from '@modules/onboarding/services/onboardingService';
 import { DashboardData } from '../types';
-import { MacroSummary } from '@shared/types/common';
+import { MacroSummary, StreakCondition } from '@shared/types/common';
 
-function computeStreak(mealDates: string[], workoutDates: string[], today: string): number {
-  const dateSet = new Set([...mealDates, ...workoutDates]);
-  const [y, m, d] = today.split('-').map(Number);
-  const checkDate = new Date(Date.UTC(y, m - 1, d));
+function computeStreak(
+  condition: StreakCondition,
+  today: string,
+  opts: {
+    mealDates: Set<string>;
+    workoutDates: Set<string>;
+    weightDates: Set<string>;
+    dailyMacros: Map<string, { calories: number; protein: number }>;
+    targetCalories: number;
+    targetProtein: number;
+  }
+): number {
+  const { mealDates, workoutDates, weightDates, dailyMacros, targetCalories, targetProtein } = opts;
+
+  const qualifies = (date: string): boolean => {
+    switch (condition) {
+      case 'any':      return mealDates.has(date) || workoutDates.has(date);
+      case 'meals':    return mealDates.has(date);
+      case 'workout':  return workoutDates.has(date);
+      case 'weight':   return weightDates.has(date);
+      case 'calories': {
+        const m = dailyMacros.get(date);
+        return m != null && targetCalories > 0 && m.calories >= targetCalories * 0.9;
+      }
+      case 'protein': {
+        const m = dailyMacros.get(date);
+        return m != null && targetProtein > 0 && m.protein >= targetProtein * 0.9;
+      }
+    }
+  };
+
+  const [y, mo, d] = today.split('-').map(Number);
+  const checkDate = new Date(Date.UTC(y, mo - 1, d));
   let streak = 0;
 
   while (true) {
     const yyyy = checkDate.getUTCFullYear();
     const mm = String(checkDate.getUTCMonth() + 1).padStart(2, '0');
     const dd = String(checkDate.getUTCDate()).padStart(2, '0');
-    if (dateSet.has(`${yyyy}-${mm}-${dd}`)) {
+    const dateStr = `${yyyy}-${mm}-${dd}`;
+    if (qualifies(dateStr)) {
       streak++;
       checkDate.setUTCDate(checkDate.getUTCDate() - 1);
     } else {
@@ -38,7 +68,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   const today = todayDateString();
   const weekday = getCurrentWeekday();
 
-  const [user, mealLogs, todaysWorkoutTemplates, workoutLogsToday, skippedIds, mealDates, workoutDates, recentWeightLogs] =
+  const [user, mealLogs, todaysWorkoutTemplates, workoutLogsToday, skippedIds, mealDates, workoutDates, recentWeightLogs, weightDates, dailyMacroRows] =
     await Promise.all([
       getUser(),
       getMealLogsByDate(today),
@@ -48,6 +78,8 @@ export async function getDashboardData(): Promise<DashboardData> {
       getMealLogDates(),
       getWorkoutCompletedDates(),
       getRecentWeightLogs(10),
+      getWeightLogDates(),
+      getDailyMacroTotals(),
     ]);
 
   const todayMacros: MacroSummary = mealLogs.reduce(
@@ -62,10 +94,11 @@ export async function getDashboardData(): Promise<DashboardData> {
 
   let userTargets = null;
   if (user) {
+    const isImperial = user.unitPreference === 'imperial';
     const nutrition = calculateNutrition({
       gender: user.gender,
-      weight: user.weight,
-      height: user.height,
+      weight: isImperial ? user.weight / 2.20462 : user.weight,
+      height: isImperial ? user.height * 2.54 : user.height,
       age: user.age,
       activityLevel: user.activityLevel,
       goal: user.goal,
@@ -94,7 +127,16 @@ export async function getDashboardData(): Promise<DashboardData> {
     visibleTemplates.map((t) => getWorkoutProgressForDate(t.id, today))
   );
 
-  const streak = computeStreak(mealDates, workoutDates, today);
+  const streakCondition = (user?.streakCondition ?? 'any') as StreakCondition;
+  const dailyMacros = new Map(dailyMacroRows.map((r) => [r.date, { calories: r.calories, protein: r.protein }]));
+  const streak = computeStreak(streakCondition, today, {
+    mealDates: new Set(mealDates),
+    workoutDates: new Set(workoutDates),
+    weightDates: new Set(weightDates),
+    dailyMacros,
+    targetCalories: userTargets?.targetCalories ?? 0,
+    targetProtein: userTargets?.targetProtein ?? 0,
+  });
 
   // Weight logs: oldest first for sparkline (reverse the DESC order)
   const weightLogs = recentWeightLogs.map((l) => l.weight).reverse();
@@ -105,6 +147,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     todayMacros,
     mealLogs,
     streak,
+    streakCondition,
     weightLogs,
     lastWeightLoggedAt,
     todaysWorkouts: visibleTemplates.map((t, i) => ({

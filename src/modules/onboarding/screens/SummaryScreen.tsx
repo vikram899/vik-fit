@@ -18,11 +18,8 @@ const GOAL_LABEL: Record<string, string> = {
   'build-muscle': 'Build Muscle',
   'recomp': 'Recomposition',
   'maintain': 'Maintain Weight',
-  'improve-fitness': 'Improve Fitness',
   'endurance': 'Endurance',
-  'strength': 'Strength',
-  'flexibility': 'Flexibility',
-  'general-health': 'General Health',
+  'flexibility': 'Flexibility & Mobility',
 };
 
 const ACTIVITY_LABEL: Record<string, string> = {
@@ -30,6 +27,7 @@ const ACTIVITY_LABEL: Record<string, string> = {
   'lightly-active': 'Lightly Active',
   'moderately-active': 'Moderately Active',
   'very-active': 'Very Active',
+  'athlete': 'Athlete',
 };
 
 function StatTile({ label, value }: { label: string; value: string }) {
@@ -235,7 +233,7 @@ export default function SummaryScreen({ navigation }: Props) {
 
           {editing ? (
             /* ── Edit mode ── */
-            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
               <View style={{ flexDirection: 'row', gap: 12 }}>
                 {/* Calories input */}
                 <View style={{ flex: 1 }}>
@@ -366,7 +364,7 @@ export default function SummaryScreen({ navigation }: Props) {
         }}
       >
         <Text style={{ color: 'rgba(255,255,255,0.9)', textAlign: 'center', fontSize: 14, lineHeight: 20 }}>
-          {'\U0001F4AA'} Let's crush your goals together! Every workout, every meal, and every step forward counts.
+          {'\u{1F4AA}'} Let's crush your goals together! Every workout, every meal, and every step forward counts.
         </Text>
       </LinearGradient>
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { Button } from '@shared/components/ui/Button';
 import { Layout } from '@theme/spacing';
@@ -34,13 +34,14 @@ export default function OnboardingLayout({
   scrollEnabled = true,
 }: OnboardingLayoutProps) {
   const { colors, typography, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
   const pct = Math.round((step / totalSteps) * 100);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.backgroundPrimary }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         {/* Progress bar area */}
         <View style={{ paddingHorizontal: Layout.screenPaddingHorizontal, paddingTop: spacing.lg, paddingBottom: spacing.base }}>
@@ -79,7 +80,7 @@ export default function OnboardingLayout({
         </ScrollView>
 
         {/* Footer */}
-        <View style={{ paddingHorizontal: Layout.screenPaddingHorizontal, paddingBottom: spacing['2xl'], gap: spacing.sm }}>
+        <View style={{ paddingHorizontal: Layout.screenPaddingHorizontal, paddingBottom: insets.bottom + spacing.base, gap: spacing.sm }}>
           {onBack ? (
             <View style={{ flexDirection: 'row', gap: spacing.sm }}>
               <Button label="Back" onPress={onBack} variant="secondary" style={{ flex: 1 }} />

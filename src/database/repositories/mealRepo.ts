@@ -93,6 +93,14 @@ export async function getRecentMealLogs(limit: number = 10): Promise<MealLogRow[
   );
 }
 
+export async function getDailyMacroTotals(): Promise<{ date: string; calories: number; protein: number }[]> {
+  const db = await getDatabase();
+  return db.getAllAsync<{ date: string; calories: number; protein: number }>(
+    `SELECT date(eatenAt) as date, SUM(calories) as calories, SUM(protein) as protein
+     FROM meal_logs GROUP BY date(eatenAt) ORDER BY date DESC;`
+  );
+}
+
 export async function getMealLogDates(): Promise<string[]> {
   const db = await getDatabase();
   const rows = await db.getAllAsync<{ d: string }>(
