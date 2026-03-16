@@ -1,136 +1,126 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTheme } from '@theme/index';
-import { Radius } from '@theme/radius';
+import {
+  Flame, Dumbbell, Zap, Scale, Footprints, TrendingUp, Wind, Heart,
+  Moon, Sunrise, Sun,
+} from 'lucide-react-native';
 import OnboardingLayout from '../components/OnboardingLayout';
 import { useOnboarding } from '../hooks/useOnboarding';
 import { OnboardingStackParamList } from '@core/navigation/stacks/OnboardingStack';
-import { ActivityLevel, Goal } from '@shared/types/common';
+import { DisplayGoal, DisplayActivityLevel } from '../types';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'ActivityGoal'>;
 
-const ACTIVITY_OPTIONS: { label: string; description: string; value: ActivityLevel }[] = [
-  { label: 'Sedentary', description: 'Little to no exercise', value: 'sedentary' },
-  { label: 'Light', description: '1–3 days/week', value: 'light' },
-  { label: 'Moderate', description: '3–5 days/week', value: 'moderate' },
-  { label: 'Active', description: '6–7 days/week', value: 'active' },
-  { label: 'Very Active', description: 'Twice a day or hard labour', value: 'very_active' },
+const GOALS: { value: DisplayGoal; label: string; icon: any; color: string }[] = [
+  { value: 'lose-fat',        label: 'Lose Fat',      icon: Flame,      color: '#F59E0B' },
+  { value: 'build-muscle',    label: 'Build Muscle',  icon: Dumbbell,   color: '#3B82F6' },
+  { value: 'recomp',          label: 'Recompose',     icon: Zap,        color: '#EAB308' },
+  { value: 'maintain',        label: 'Maintain',      icon: Scale,      color: '#84CC16' },
+  { value: 'endurance',       label: 'Endurance',     icon: Footprints, color: '#10B981' },
+  { value: 'strength',        label: 'Strength',      icon: TrendingUp, color: '#EF4444' },
+  { value: 'flexibility',     label: 'Flexibility',   icon: Wind,       color: '#EC4899' },
+  { value: 'improve-fitness', label: 'Fitness',       icon: TrendingUp, color: '#A855F7' },
+  { value: 'general-health',  label: 'Health',        icon: Heart,      color: '#6B7280' },
 ];
 
-const GOAL_OPTIONS: { label: string; description: string; value: Goal }[] = [
-  { label: 'Lose Weight', description: 'Caloric deficit', value: 'lose_weight' },
-  { label: 'Maintain', description: 'Stay at current weight', value: 'maintain' },
-  { label: 'Gain Muscle', description: 'Caloric surplus', value: 'gain_muscle' },
+const ACTIVITY: { value: DisplayActivityLevel; label: string; desc: string; icon: any }[] = [
+  { value: 'sedentary',         label: 'Sedentary',         desc: 'Little or no exercise',   icon: Moon    },
+  { value: 'lightly-active',    label: 'Lightly Active',    desc: 'Workout 1–3 days/week',   icon: Sunrise },
+  { value: 'moderately-active', label: 'Moderately Active', desc: 'Workout 3–5 days/week',   icon: Sun     },
+  { value: 'very-active',       label: 'Very Active',       desc: 'Hard training most days', icon: Zap     },
 ];
 
 export default function ActivityGoalScreen({ navigation }: Props) {
-  const { colors, typography, spacing } = useTheme();
+  const { spacing } = useTheme();
   const { draft, updateDraft } = useOnboarding();
 
-  const isValid = draft.activityLevel !== '' && draft.goal !== '';
+  const isValid = draft.goal !== '' && draft.activityLevel !== '';
+
+  const sub = 'rgba(255,255,255,0.05)';
+  const subBorder = 'rgba(255,255,255,0.1)';
 
   return (
     <OnboardingLayout
-      step={3}
-      totalSteps={5}
-      title="Activity & goal"
-      subtitle="This determines your daily calorie target."
-      onNext={() => navigation.navigate('Summary')}
+      step={2}
+      totalSteps={4}
+      title="What is your main goal?"
+      subtitle="Choose what matters most to you"
+      onNext={() => navigation.navigate('TargetWeight')}
       onBack={() => navigation.goBack()}
       nextDisabled={!isValid}
+      nextLabel="Next"
     >
-      <Text style={{ ...typography.sectionTitle, color: colors.textPrimary, marginBottom: spacing.sm }}>
-        Activity level
-      </Text>
-      <View style={{ gap: spacing.sm, marginBottom: spacing.xl }}>
-        {ACTIVITY_OPTIONS.map((opt) => {
-          const selected = draft.activityLevel === opt.value;
-          return (
-            <TouchableOpacity
-              key={opt.value}
-              onPress={() => updateDraft({ activityLevel: opt.value })}
-              style={{
-                padding: spacing.base,
-                borderRadius: Radius.md,
-                borderWidth: 1.5,
-                borderColor: selected ? colors.brandPrimary : colors.border,
-                backgroundColor: selected ? `${colors.brandPrimary}15` : colors.surface,
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <View>
-                <Text style={{ ...typography.label, color: selected ? colors.brandPrimary : colors.textPrimary }}>
-                  {opt.label}
-                </Text>
-                <Text style={{ ...typography.caption, color: colors.textSecondary }}>
-                  {opt.description}
-                </Text>
-              </View>
-              {selected ? (
-                <View
-                  style={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: Radius.full,
-                    backgroundColor: colors.brandPrimary,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Text style={{ color: colors.white, fontSize: 12 }}>✓</Text>
-                </View>
-              ) : null}
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
-      <Text style={{ ...typography.sectionTitle, color: colors.textPrimary, marginBottom: spacing.sm }}>
-        Goal
-      </Text>
-      <View style={{ gap: spacing.sm }}>
-        {GOAL_OPTIONS.map((opt) => {
+      {/* Goals grid */}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: spacing.xl }}>
+        {GOALS.map((opt) => {
+          const Icon = opt.icon;
           const selected = draft.goal === opt.value;
           return (
             <TouchableOpacity
               key={opt.value}
               onPress={() => updateDraft({ goal: opt.value })}
+              activeOpacity={1}
               style={{
-                padding: spacing.base,
-                borderRadius: Radius.md,
-                borderWidth: 1.5,
-                borderColor: selected ? colors.brandPrimary : colors.border,
-                backgroundColor: selected ? `${colors.brandPrimary}15` : colors.surface,
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
+                width: '47%', padding: 16, borderRadius: 16, alignItems: 'center', gap: 10,
+                backgroundColor: selected ? 'rgba(255,255,255,0.1)' : sub,
+                borderWidth: selected ? 2 : 1,
+                borderColor: selected ? opt.color : subBorder,
+                transform: [{ scale: selected ? 1.02 : 1 }],
               }}
             >
-              <View>
-                <Text style={{ ...typography.label, color: selected ? colors.brandPrimary : colors.textPrimary }}>
-                  {opt.label}
-                </Text>
-                <Text style={{ ...typography.caption, color: colors.textSecondary }}>
-                  {opt.description}
+              <View style={{
+                width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center',
+                backgroundColor: `${opt.color}20`,
+              }}>
+                <Icon size={24} color={opt.color} />
+              </View>
+              <Text style={{ color: '#fff', fontSize: 13, fontWeight: '600', textAlign: 'center' }}>
+                {opt.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      {/* Activity level */}
+      <Text style={{ fontSize: 16, fontWeight: '700', color: '#fff', marginBottom: spacing.sm }}>
+        Activity Level
+      </Text>
+      <View style={{ gap: 10 }}>
+        {ACTIVITY.map((opt) => {
+          const Icon = opt.icon;
+          const selected = draft.activityLevel === opt.value;
+          return (
+            <TouchableOpacity
+              key={opt.value}
+              onPress={() => updateDraft({ activityLevel: opt.value })}
+              activeOpacity={1}
+              style={{
+                padding: 16, borderRadius: 16, flexDirection: 'row', alignItems: 'center', gap: 14,
+                backgroundColor: selected ? '#3B82F6' : sub,
+                borderWidth: 1,
+                borderColor: selected ? '#3B82F6' : subBorder,
+              }}
+            >
+              <View style={{
+                width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center',
+                backgroundColor: selected ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.08)',
+              }}>
+                <Icon size={20} color="#fff" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: '#fff', fontWeight: '600', fontSize: 15 }}>{opt.label}</Text>
+                <Text style={{ color: selected ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.4)', fontSize: 12, marginTop: 2 }}>
+                  {opt.desc}
                 </Text>
               </View>
-              {selected ? (
-                <View
-                  style={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: Radius.full,
-                    backgroundColor: colors.brandPrimary,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Text style={{ color: colors.white, fontSize: 12 }}>✓</Text>
+              {selected && (
+                <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.3)', alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ color: '#fff', fontSize: 12 }}>✓</Text>
                 </View>
-              ) : null}
+              )}
             </TouchableOpacity>
           );
         })}

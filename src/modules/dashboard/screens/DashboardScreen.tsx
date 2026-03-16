@@ -12,11 +12,12 @@ import {
   Platform,
 } from 'react-native';
 import WeightPickerModal from '../components/WeightPickerModal';
+import { ShareableCard } from '../components/ShareableCard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@theme/index';
-import { Plus, TrendingDown, TrendingUp, Check, Flame, Drumstick, Footprints, Dumbbell, Calendar, CircleCheck, CircleAlert, UtensilsCrossed } from 'lucide-react-native';
+import { Plus, TrendingDown, TrendingUp, Check, Flame, Drumstick, Footprints, Dumbbell, Calendar, CircleCheck, CircleAlert, UtensilsCrossed, Share2 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Defs, LinearGradient as SvgGradient, Stop, Text as SvgText } from 'react-native-svg';
 import { useDashboard } from '../hooks/useDashboard';
@@ -174,6 +175,7 @@ export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
 
   const [weightModalVisible, setWeightModalVisible] = useState(false);
+  const [shareCardVisible, setShareCardVisible] = useState(false);
 
   const [targetModalVisible, setTargetModalVisible] = useState(false);
   const [targetInput, setTargetInput] = useState('');
@@ -225,17 +227,34 @@ export default function DashboardScreen() {
               </Text>
             ) : null}
           </View>
-          {/* Avatar */}
-          <View style={{
-            width: 48,
-            height: 48,
-            borderRadius: 24,
-            backgroundColor: '#7C3AED',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginTop: 4,
-          }}>
-            <Text style={{ fontSize: 16, fontWeight: '700', color: '#FFFFFF' }}>{initials}</Text>
+          {/* Share + Avatar */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 }}>
+            <TouchableOpacity
+              onPress={() => setShareCardVisible(true)}
+              activeOpacity={1}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: 'rgba(132,204,22,0.15)',
+                borderWidth: 1,
+                borderColor: 'rgba(132,204,22,0.3)',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Share2 size={18} color="#84CC16" />
+            </TouchableOpacity>
+            <View style={{
+              width: 48,
+              height: 48,
+              borderRadius: 24,
+              backgroundColor: '#7C3AED',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <Text style={{ fontSize: 16, fontWeight: '700', color: '#FFFFFF' }}>{initials}</Text>
+            </View>
           </View>
         </View>
 
@@ -814,6 +833,11 @@ export default function DashboardScreen() {
         onSave={(weight) => logWeightEntry(weight)}
         onClose={() => setWeightModalVisible(false)}
       />
+
+      {/* ── Share Card ── */}
+      {shareCardVisible && data ? (
+        <ShareableCard data={data} onClose={() => setShareCardVisible(false)} />
+      ) : null}
 
       {/* ── Set Target Weight Modal ── */}
       <Modal visible={targetModalVisible} transparent animationType="slide" onRequestClose={() => setTargetModalVisible(false)}>

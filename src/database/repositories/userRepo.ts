@@ -11,6 +11,9 @@ export interface UserRow {
   goal: 'lose_weight' | 'maintain' | 'gain_muscle';
   unitPreference: 'metric' | 'imperial';
   targetWeight: number | null;
+  experienceLevel: 'beginner' | 'intermediate' | 'advanced' | null;
+  targetCaloriesOverride: number | null;
+  targetProteinOverride: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -27,8 +30,8 @@ export async function getUser(): Promise<UserRow | null> {
 export async function createUser(input: CreateUserInput): Promise<number> {
   const db = await getDatabase();
   const result = await db.runAsync(
-    `INSERT INTO users (name, age, gender, height, weight, activityLevel, goal, unitPreference, createdAt, updatedAt)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+    `INSERT INTO users (name, age, gender, height, weight, activityLevel, goal, unitPreference, targetWeight, experienceLevel, targetCaloriesOverride, targetProteinOverride, createdAt, updatedAt)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
     [
       input.name,
       input.age,
@@ -38,6 +41,10 @@ export async function createUser(input: CreateUserInput): Promise<number> {
       input.activityLevel,
       input.goal,
       input.unitPreference,
+      input.targetWeight ?? null,
+      input.experienceLevel ?? null,
+      input.targetCaloriesOverride ?? null,
+      input.targetProteinOverride ?? null,
       input.createdAt,
       input.updatedAt,
     ]

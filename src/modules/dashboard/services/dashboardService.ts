@@ -76,8 +76,8 @@ export async function getDashboardData(): Promise<DashboardData> {
       targetWeight: user.targetWeight,
       goal: user.goal,
       unitPreference: user.unitPreference,
-      targetCalories: nutrition.targetCalories,
-      targetProtein: nutrition.proteinGrams,
+      targetCalories: user.targetCaloriesOverride ?? nutrition.targetCalories,
+      targetProtein: user.targetProteinOverride ?? nutrition.proteinGrams,
       targetCarbs: nutrition.carbsGrams,
       targetFat: nutrition.fatGrams,
     };

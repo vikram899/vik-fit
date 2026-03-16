@@ -6,6 +6,7 @@ import { User, Target, Trophy, Settings, ChevronRight, Calendar, Flame, Award } 
 import { useProfile } from '../hooks/useProfile';
 import { createProfileStyles } from '../styles';
 import { formatWeight, formatHeight } from '@shared/utils/formatUtils';
+import { useAuth } from '@core/AuthContext';
 
 const ACTIVITY_SUBTITLE: Record<string, string> = {
   sedentary: 'Getting Started',
@@ -38,6 +39,7 @@ export default function ProfileScreen() {
   const { colors } = useTheme();
   const s = useMemo(() => createProfileStyles(colors), [colors]);
   const { user, nutrition, workoutCount, streak, loading } = useProfile();
+  const { setHasUser } = useAuth();
 
   if (loading) {
     return (
@@ -219,6 +221,26 @@ export default function ProfileScreen() {
         <View style={s.footer}>
           <Text style={s.footerText}>FitTrack Pro v2.0.1</Text>
         </View>
+
+        {/* ── DEV: Reset Onboarding ── */}
+        <TouchableOpacity
+          onPress={() => setHasUser(false)}
+          style={{
+            marginHorizontal: 16,
+            marginBottom: 32,
+            paddingVertical: 14,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: 'rgba(239,68,68,0.4)',
+            backgroundColor: 'rgba(239,68,68,0.1)',
+            alignItems: 'center',
+          }}
+          activeOpacity={0.75}
+        >
+          <Text style={{ color: '#EF4444', fontWeight: '600', fontSize: 14 }}>
+            [DEV] Go to Onboarding
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
