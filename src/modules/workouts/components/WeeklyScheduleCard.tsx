@@ -14,7 +14,10 @@ interface WeeklyScheduleCardProps {
 export default function WeeklyScheduleCard({ templates, onDayPress }: WeeklyScheduleCardProps) {
   const { colors, typography, spacing } = useTheme();
   const today = getCurrentWeekday();
-  const templateMap = new Map(templates.map((t) => [t.assignedWeekday, t]));
+  const templateMap = new Map<number, WorkoutTemplateRow>();
+  templates.forEach((t) => t.assignedWeekdays.forEach((d) => {
+    if (!templateMap.has(d)) templateMap.set(d, t);
+  }));
 
   return (
     <Card>

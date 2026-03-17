@@ -179,3 +179,48 @@ export async function getLastSetLogsForExercise(exerciseTemplateId: number): Pro
     [exerciseTemplateId]
   );
 }
+
+// Returns { id → { name, type } } for a list of exerciseTemplateIds
+export async function getExerciseInfoByIds(
+  ids: number[]
+): Promise<Map<number, { name: string; type: string }>> {
+  if (ids.length === 0) return new Map();
+  const db = await getDatabase();
+  const placeholders = ids.map(() => '?').join(', ');
+  const rows = await db.getAllAsync<{ id: number; name: string; type: string }>(
+    `SELECT id, name, type FROM exercise_templates WHERE id IN (${placeholders});`,
+    ids
+  );
+  return new Map(rows.map((r) => [r.id, { name: r.name, type: r.type }]));
+}
+
+// Returns the all-time best weight/reps/duration per exerciseTemplateId, excluding a specific workoutLogId
+export async function getHistoricalBestsExcluding(
+  excludeWorkoutLogId: number
+): Promise<Map<number, { bestWeight: number | null; bestReps: number | null; bestDuration: number | null }>> {
+  const db = await getDatabase();
+  const rows = await db.getAllAsync<{
+    exerciseTemplateId: number;
+    bestWeight: number | null;
+    bestReps: number | null;
+    bestDuration: number | null;
+  }>(
+    `SELECT el.exerciseTemplateId,
+            MAX(s.weight) AS bestWeight,
+            MAX(s.reps)   AS bestReps,
+            MAX(s.durationSeconds) AS bestDuration
+     FROM set_logs s
+     JOIN exercise_logs el ON el.id = s.exerciseLogId
+     JOIN workout_logs wl  ON wl.id = el.workoutLogId
+     WHERE wl.endedAt IS NOT NULL
+       AND wl.id != ?
+       AND s.completed = 1
+     GROUP BY el.exerciseTemplateId;`,
+    [excludeWorkoutLogId]
+  );
+  return new Map(rows.map((r) => [r.exerciseTemplateId, {
+    bestWeight: r.bestWeight,
+    bestReps: r.bestReps,
+    bestDuration: r.bestDuration,
+  }]));
+}

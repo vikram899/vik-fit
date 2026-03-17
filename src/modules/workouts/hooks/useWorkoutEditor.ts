@@ -121,19 +121,19 @@ export function useWorkoutEditor(existingTemplateId?: number) {
   }, []);
 
   const saveWorkout = useCallback(
-    async (name: string, description: string | null, assignedWeekday: number | null): Promise<boolean> => {
+    async (name: string, description: string | null, assignedWeekdays: number[]): Promise<boolean> => {
       if (!name.trim()) return false;
       setSaving(true);
       try {
         let templateId: number;
 
         if (existingTemplateId) {
-          await updateTemplate(existingTemplateId, { name, description, assignedWeekday });
+          await updateTemplate(existingTemplateId, { name, description, assignedWeekdays });
           const existing = await getTemplateExercisesWithNames(existingTemplateId);
           await Promise.all(existing.map((e) => removeExercise(e.id)));
           templateId = existingTemplateId;
         } else {
-          templateId = await createTemplate({ name, description, assignedWeekday, isFavorite: 0 });
+          templateId = await createTemplate({ name, description, assignedWeekdays, isFavorite: 0 });
         }
 
         for (let i = 0; i < pendingExercises.length; i++) {

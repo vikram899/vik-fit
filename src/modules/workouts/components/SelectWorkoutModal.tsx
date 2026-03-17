@@ -71,7 +71,7 @@ function WorkoutCard({ t, lastIso, onView, onStart, colors, spacing }: WorkoutCa
       flexDirection: 'row', alignItems: 'center', gap: 10,
     }}>
       {/* Card body — tapping views detail */}
-      <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.75} onPress={onView}>
+      <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onView}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
           <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textPrimary }}>{t.name}</Text>
           <Text style={{ fontSize: 12, fontWeight: '500', color: '#3B82F6' }}>{duration} min</Text>
@@ -108,7 +108,7 @@ function WorkoutCard({ t, lastIso, onView, onStart, colors, spacing }: WorkoutCa
       {/* Quick-start "+" button */}
       <TouchableOpacity
         onPress={onStart}
-        activeOpacity={0.75}
+        activeOpacity={1}
         style={{
           width: 40, height: 40, borderRadius: Radius.md,
           backgroundColor: 'rgba(132,204,22,0.2)',
@@ -148,7 +148,7 @@ export default function SelectWorkoutModal({
   const [newName, setNewName] = useState('');
   const [newMuscleGroups, setNewMuscleGroups] = useState<string[]>([]);
   const [newDuration, setNewDuration] = useState('');
-  const [newWeekday, setNewWeekday] = useState<number | null>(null);
+  const [newWeekdays, setNewWeekdays] = useState<number[]>([]);
   const [creating, setCreating] = useState(false);
 
   const loadData = useCallback(async () => {
@@ -176,7 +176,7 @@ export default function SelectWorkoutModal({
       setNewName('');
       setNewMuscleGroups([]);
       setNewDuration('');
-      setNewWeekday(null);
+      setNewWeekdays([]);
       loadData();
     }
   }, [visible, loadData]);
@@ -205,7 +205,7 @@ export default function SelectWorkoutModal({
       const id = await createTemplate({
         name: newName.trim(),
         description,
-        assignedWeekday: newWeekday,
+        assignedWeekdays: newWeekdays,
         isFavorite: 0,
       });
       onClose();
@@ -217,7 +217,7 @@ export default function SelectWorkoutModal({
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <View style={{ flex: 1, justifyContent: 'flex-end' }}>
           <TouchableOpacity style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.75)' }]} activeOpacity={1} onPress={onClose} />
           <View style={{
@@ -241,7 +241,7 @@ export default function SelectWorkoutModal({
                 <Text style={{ fontSize: 20, fontWeight: '600', color: colors.textPrimary }}>Select Workout</Text>
                 <TouchableOpacity
                   onPress={onClose}
-                  activeOpacity={0.75}
+                  activeOpacity={1}
                   style={{
                     width: 36, height: 36, borderRadius: Radius.md,
                     backgroundColor: 'rgba(255,255,255,0.05)',
@@ -256,7 +256,7 @@ export default function SelectWorkoutModal({
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <TouchableOpacity
                   onPress={() => setActiveTab('saved')}
-                  activeOpacity={0.8}
+                  activeOpacity={1}
                   style={{
                     flex: 1, paddingVertical: 10, borderRadius: Radius.md,
                     backgroundColor: activeTab === 'saved' ? '#3B82F6' : 'rgba(255,255,255,0.05)',
@@ -268,7 +268,7 @@ export default function SelectWorkoutModal({
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => setActiveTab('recent')}
-                  activeOpacity={0.8}
+                  activeOpacity={1}
                   style={{
                     flex: 1, paddingVertical: 10, borderRadius: Radius.md,
                     backgroundColor: activeTab === 'recent' ? '#3B82F6' : 'rgba(255,255,255,0.05)',
@@ -280,7 +280,7 @@ export default function SelectWorkoutModal({
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => setActiveTab('new')}
-                  activeOpacity={0.8}
+                  activeOpacity={1}
                   style={{
                     flex: 1, paddingVertical: 10, borderRadius: Radius.md,
                     backgroundColor: activeTab === 'new' ? '#84CC16' : 'rgba(255,255,255,0.05)',
@@ -331,7 +331,7 @@ export default function SelectWorkoutModal({
                           <WorkoutCard
                             key={t.id}
                             t={t}
-                            lastIso={null}
+                            lastIso={lastPerformedMap.get(t.id)}
                             onView={() => { onClose(); onViewWorkout(t.id); }}
                             onStart={() => { onClose(); onStartWorkout(t.id); }}
                             colors={colors}
@@ -406,7 +406,7 @@ export default function SelectWorkoutModal({
                                     selected ? prev.filter((g) => g !== group) : [...prev, group]
                                   )
                                 }
-                                activeOpacity={0.75}
+                                activeOpacity={1}
                                 style={{
                                   paddingHorizontal: 12, paddingVertical: 8,
                                   borderRadius: Radius.md,
@@ -453,12 +453,14 @@ export default function SelectWorkoutModal({
                         <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Assigned Days</Text>
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                           {DAYS_DISPLAY.map((day) => {
-                            const selected = newWeekday === day.index;
+                            const selected = newWeekdays.includes(day.index);
                             return (
                               <TouchableOpacity
                                 key={day.index}
-                                onPress={() => setNewWeekday(selected ? null : day.index)}
-                                activeOpacity={0.75}
+                                onPress={() => setNewWeekdays((prev) =>
+                                  selected ? prev.filter((d) => d !== day.index) : [...prev, day.index]
+                                )}
+                                activeOpacity={1}
                                 style={{
                                   width: '47%',
                                   paddingVertical: 14, borderRadius: Radius.md,
@@ -495,7 +497,7 @@ export default function SelectWorkoutModal({
                       <TouchableOpacity
                         onPress={handleCreate}
                         disabled={!newName.trim() || creating}
-                        activeOpacity={0.85}
+                        activeOpacity={1}
                         style={{
                           backgroundColor: newName.trim() ? '#84CC16' : 'rgba(132,204,22,0.3)',
                           borderRadius: Radius.xl,

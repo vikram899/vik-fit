@@ -1,15 +1,45 @@
 import { getDatabase } from '../db';
+import { ExerciseType } from '@shared/types/common';
 
 // --- Workout Templates ---
+
+interface RawWorkoutTemplateRow {
+  id: number;
+  name: string;
+  description: string | null;
+  assignedWeekday: number | null; // legacy single-day column
+  assignedWeekdays: string | null; // JSON array e.g. "[1,3,5]"
+  isFavorite: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface WorkoutTemplateRow {
   id: number;
   name: string;
   description: string | null;
-  assignedWeekday: number | null; // 0=Sun, 1=Mon ... 6=Sat
+  assignedWeekdays: number[]; // 0=Sun … 6=Sat, multi-day
   isFavorite: number; // 0 | 1
   createdAt: string;
   updatedAt: string;
+}
+
+function parseTemplateRow(raw: RawWorkoutTemplateRow): WorkoutTemplateRow {
+  let weekdays: number[] = [];
+  if (raw.assignedWeekdays) {
+    try { weekdays = JSON.parse(raw.assignedWeekdays); } catch {}
+  } else if (raw.assignedWeekday != null) {
+    weekdays = [raw.assignedWeekday];
+  }
+  return {
+    id: raw.id,
+    name: raw.name,
+    description: raw.description,
+    assignedWeekdays: weekdays,
+    isFavorite: raw.isFavorite,
+    createdAt: raw.createdAt,
+    updatedAt: raw.updatedAt,
+  };
 }
 
 export type CreateWorkoutTemplateInput = Omit<WorkoutTemplateRow, 'id'>;
@@ -30,9 +60,10 @@ export type CreateWorkoutTemplateExerciseInput = Omit<WorkoutTemplateExerciseRow
 
 export async function getAllWorkoutTemplates(): Promise<WorkoutTemplateRow[]> {
   const db = await getDatabase();
-  return db.getAllAsync<WorkoutTemplateRow>(
-    'SELECT * FROM workout_templates ORDER BY assignedWeekday ASC, name ASC;'
+  const rows = await db.getAllAsync<RawWorkoutTemplateRow>(
+    'SELECT * FROM workout_templates ORDER BY name ASC;'
   );
+  return rows.map(parseTemplateRow);
 }
 
 export interface WorkoutTemplateWithCountRow extends WorkoutTemplateRow {
@@ -41,50 +72,45 @@ export interface WorkoutTemplateWithCountRow extends WorkoutTemplateRow {
 
 export async function getAllWorkoutTemplatesWithCounts(): Promise<WorkoutTemplateWithCountRow[]> {
   const db = await getDatabase();
-  return db.getAllAsync<WorkoutTemplateWithCountRow>(
+  const rows = await db.getAllAsync<RawWorkoutTemplateRow & { exerciseCount: number }>(
     `SELECT wt.*, COUNT(wte.id) as exerciseCount
      FROM workout_templates wt
      LEFT JOIN workout_template_exercises wte ON wte.workoutTemplateId = wt.id
      GROUP BY wt.id
-     ORDER BY wt.assignedWeekday ASC, wt.name ASC;`
+     ORDER BY wt.name ASC;`
   );
+  return rows.map((raw) => ({ ...parseTemplateRow(raw), exerciseCount: raw.exerciseCount }));
 }
 
 export async function getWorkoutTemplateByWeekday(weekday: number): Promise<WorkoutTemplateRow | null> {
-  const db = await getDatabase();
-  const result = await db.getFirstAsync<WorkoutTemplateRow>(
-    'SELECT * FROM workout_templates WHERE assignedWeekday = ? LIMIT 1;',
-    [weekday]
-  );
-  return result ?? null;
+  const all = await getAllWorkoutTemplates();
+  return all.find((t) => t.assignedWeekdays.includes(weekday)) ?? null;
 }
 
 export async function getWorkoutTemplatesByWeekday(weekday: number): Promise<WorkoutTemplateRow[]> {
-  const db = await getDatabase();
-  return db.getAllAsync<WorkoutTemplateRow>(
-    'SELECT * FROM workout_templates WHERE assignedWeekday = ? ORDER BY name ASC;',
-    [weekday]
-  );
+  const all = await getAllWorkoutTemplates();
+  return all.filter((t) => t.assignedWeekdays.includes(weekday));
 }
 
 export async function getWorkoutTemplateById(id: number): Promise<WorkoutTemplateRow | null> {
   const db = await getDatabase();
-  const result = await db.getFirstAsync<WorkoutTemplateRow>(
+  const raw = await db.getFirstAsync<RawWorkoutTemplateRow>(
     'SELECT * FROM workout_templates WHERE id = ?;',
     [id]
   );
-  return result ?? null;
+  return raw ? parseTemplateRow(raw) : null;
 }
 
 export async function createWorkoutTemplate(input: CreateWorkoutTemplateInput): Promise<number> {
   const db = await getDatabase();
   const result = await db.runAsync(
-    `INSERT INTO workout_templates (name, description, assignedWeekday, isFavorite, createdAt, updatedAt)
-     VALUES (?, ?, ?, ?, ?, ?);`,
+    `INSERT INTO workout_templates (name, description, assignedWeekday, assignedWeekdays, isFavorite, createdAt, updatedAt)
+     VALUES (?, ?, ?, ?, ?, ?, ?);`,
     [
       input.name,
       input.description ?? null,
-      input.assignedWeekday ?? null,
+      input.assignedWeekdays.length > 0 ? input.assignedWeekdays[0] : null,
+      JSON.stringify(input.assignedWeekdays),
       input.isFavorite,
       input.createdAt,
       input.updatedAt,
@@ -98,7 +124,10 @@ export async function updateWorkoutTemplate(id: number, input: UpdateWorkoutTemp
   const now = new Date().toISOString();
   const fields = Object.keys(input) as (keyof UpdateWorkoutTemplateInput)[];
   const setClauses = fields.map((f) => `${f} = ?`).join(', ');
-  const values = fields.map((f) => input[f]);
+  const values = fields.map((f) => {
+    if (f === 'assignedWeekdays') return JSON.stringify(input.assignedWeekdays);
+    return (input as Record<string, unknown>)[f];
+  });
 
   await db.runAsync(
     `UPDATE workout_templates SET ${setClauses}, updatedAt = ? WHERE id = ?;`,
@@ -134,7 +163,7 @@ export async function getWorkoutTemplateExercises(
 
 export interface WorkoutTemplateExerciseWithName extends WorkoutTemplateExerciseRow {
   exerciseName: string;
-  exerciseType: 'strength' | 'cardio';
+  exerciseType: ExerciseType;
 }
 
 export async function getWorkoutTemplateExercisesWithNames(

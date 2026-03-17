@@ -56,7 +56,7 @@ export default function WorkoutDetailScreen({ navigation, route }: Props) {
   const [lastPerformed, setLastPerformed] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [assignedWeekday, setAssignedWeekday] = useState<number | null>(null);
+  const [assignedWeekdays, setAssignedWeekdays] = useState<number[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showAddExercise, setShowAddExercise] = useState(false);
 
@@ -69,7 +69,7 @@ export default function WorkoutDetailScreen({ navigation, route }: Props) {
         getLastPerformedLog(workoutTemplateId),
       ]);
       setTemplate(tmpl ?? null);
-      setAssignedWeekday(tmpl?.assignedWeekday ?? null);
+      setAssignedWeekdays(tmpl?.assignedWeekdays ?? []);
       setExercises(exs);
       setLastPerformed(lastLog?.endedAt ?? null);
     } finally {
@@ -83,12 +83,13 @@ export default function WorkoutDetailScreen({ navigation, route }: Props) {
 
   const totalSets = exercises.reduce((acc, ex) => acc + ex.defaultSets, 0);
   const estimatedDuration = Math.max(Math.round(totalSets * 2), 5);
-  const dayName = assignedWeekday != null ? WEEKDAY_FULL[assignedWeekday] : null;
 
   const handleToggleDay = async (dayIndex: number) => {
-    const newWeekday = assignedWeekday === dayIndex ? null : dayIndex;
-    setAssignedWeekday(newWeekday);
-    await updateTemplate(workoutTemplateId, { assignedWeekday: newWeekday });
+    const newWeekdays = assignedWeekdays.includes(dayIndex)
+      ? assignedWeekdays.filter((d) => d !== dayIndex)
+      : [...assignedWeekdays, dayIndex];
+    setAssignedWeekdays(newWeekdays);
+    await updateTemplate(workoutTemplateId, { assignedWeekdays: newWeekdays });
   };
 
   const handleRemoveExercise = async (exerciseId: number) => {
@@ -125,7 +126,7 @@ export default function WorkoutDetailScreen({ navigation, route }: Props) {
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
-            activeOpacity={0.75}
+            activeOpacity={1}
             style={{
               width: 40, height: 40, borderRadius: Radius.md,
               backgroundColor: 'rgba(255,255,255,0.05)',
@@ -138,7 +139,7 @@ export default function WorkoutDetailScreen({ navigation, route }: Props) {
           <View style={{ flexDirection: 'row', gap: 8 }}>
             <TouchableOpacity
               onPress={() => setIsEditing((v) => !v)}
-              activeOpacity={0.8}
+              activeOpacity={1}
               style={{
                 width: 40, height: 40, borderRadius: Radius.md,
                 backgroundColor: isEditing ? '#3B82F6' : 'rgba(255,255,255,0.05)',
@@ -149,7 +150,7 @@ export default function WorkoutDetailScreen({ navigation, route }: Props) {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setShowDeleteConfirm(true)}
-              activeOpacity={0.75}
+              activeOpacity={1}
               style={{
                 width: 40, height: 40, borderRadius: Radius.md,
                 backgroundColor: 'rgba(255,255,255,0.05)',
@@ -166,16 +167,21 @@ export default function WorkoutDetailScreen({ navigation, route }: Props) {
           {template?.name}
         </Text>
 
-        {/* Day tag */}
-        {dayName ? (
-          <View style={{ flexDirection: 'row' }}>
-            <View style={{
-              backgroundColor: 'rgba(132,204,22,0.2)',
-              borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4,
-              borderWidth: 1, borderColor: 'rgba(132,204,22,0.3)',
-            }}>
-              <Text style={{ fontSize: 12, color: '#84CC16' }}>{dayName}</Text>
-            </View>
+        {/* Day tags */}
+        {assignedWeekdays.length > 0 ? (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+            {assignedWeekdays.map((d) => (
+              <View
+                key={d}
+                style={{
+                  backgroundColor: 'rgba(132,204,22,0.2)',
+                  borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4,
+                  borderWidth: 1, borderColor: 'rgba(132,204,22,0.3)',
+                }}
+              >
+                <Text style={{ fontSize: 12, color: '#84CC16' }}>{WEEKDAY_FULL[d]}</Text>
+              </View>
+            ))}
           </View>
         ) : null}
       </View>
@@ -238,7 +244,7 @@ export default function WorkoutDetailScreen({ navigation, route }: Props) {
         {/* ── Start Workout Button ── */}
         <TouchableOpacity
           onPress={() => navigation.navigate('ExecuteWorkout', { workoutTemplateId })}
-          activeOpacity={0.85}
+          activeOpacity={1}
           style={{
             backgroundColor: '#84CC16',
             borderRadius: Radius.xl,
@@ -266,12 +272,12 @@ export default function WorkoutDetailScreen({ navigation, route }: Props) {
             </Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {DAYS_DISPLAY.map((day) => {
-                const selected = assignedWeekday === day.index;
+                const selected = assignedWeekdays.includes(day.index);
                 return (
                   <TouchableOpacity
                     key={day.index}
                     onPress={() => handleToggleDay(day.index)}
-                    activeOpacity={0.75}
+                    activeOpacity={1}
                     style={{
                       width: '47%',
                       paddingVertical: 14,
@@ -293,8 +299,8 @@ export default function WorkoutDetailScreen({ navigation, route }: Props) {
               })}
             </View>
             <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 12 }}>
-              {assignedWeekday != null
-                ? `Assigned to 1 day`
+              {assignedWeekdays.length > 0
+                ? `Assigned to ${assignedWeekdays.length} ${assignedWeekdays.length === 1 ? 'day' : 'days'}`
                 : 'No days assigned'}
             </Text>
           </View>
@@ -353,17 +359,25 @@ export default function WorkoutDetailScreen({ navigation, route }: Props) {
                       {ex.exerciseName}
                     </Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                      <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
-                        {ex.defaultSets} sets × {ex.defaultReps} reps
-                      </Text>
-                      {ex.defaultWeight > 0 ? (
+                      {['cardio', 'flexibility', 'endurance', 'warmup'].includes(ex.exerciseType) ? (
+                        <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
+                          {ex.defaultSets} sets × {ex.defaultReps} sec
+                        </Text>
+                      ) : (
                         <>
-                          <View style={{ width: 4, height: 4, borderRadius: 99, backgroundColor: 'rgba(255,255,255,0.3)' }} />
                           <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
-                            {ex.defaultWeight} lbs
+                            {ex.defaultSets} sets × {ex.defaultReps} reps
                           </Text>
+                          {ex.defaultWeight > 0 ? (
+                            <>
+                              <View style={{ width: 4, height: 4, borderRadius: 99, backgroundColor: 'rgba(255,255,255,0.3)' }} />
+                              <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
+                                {ex.defaultWeight} lbs
+                              </Text>
+                            </>
+                          ) : null}
                         </>
-                      ) : null}
+                      )}
                     </View>
                   </View>
 
@@ -371,7 +385,7 @@ export default function WorkoutDetailScreen({ navigation, route }: Props) {
                   {isEditing ? (
                     <TouchableOpacity
                       onPress={() => handleRemoveExercise(ex.id)}
-                      activeOpacity={0.75}
+                      activeOpacity={1}
                       style={{
                         width: 32, height: 32, borderRadius: 8,
                         backgroundColor: 'rgba(239,68,68,0.2)',
@@ -390,7 +404,7 @@ export default function WorkoutDetailScreen({ navigation, route }: Props) {
         {/* ── Add Exercise ── */}
         <TouchableOpacity
           onPress={() => setShowAddExercise(true)}
-          activeOpacity={0.75}
+          activeOpacity={1}
           style={{
             backgroundColor: 'rgba(255,255,255,0.05)',
             borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
@@ -436,7 +450,7 @@ export default function WorkoutDetailScreen({ navigation, route }: Props) {
             <View style={{ flexDirection: 'row', gap: 12 }}>
               <TouchableOpacity
                 onPress={() => setShowDeleteConfirm(false)}
-                activeOpacity={0.75}
+                activeOpacity={1}
                 style={{
                   flex: 1, paddingVertical: 13, borderRadius: Radius.md,
                   backgroundColor: 'rgba(255,255,255,0.05)',
@@ -447,7 +461,7 @@ export default function WorkoutDetailScreen({ navigation, route }: Props) {
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleDelete}
-                activeOpacity={0.8}
+                activeOpacity={1}
                 style={{
                   flex: 1, paddingVertical: 13, borderRadius: Radius.md,
                   backgroundColor: '#EF4444',

@@ -10,6 +10,7 @@ import { Layout } from '@theme/spacing';
 import { Radius } from '@theme/radius';
 import { Save, Timer, Plus } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { getUser } from '@database/repositories/userRepo';
 
 type Props = NativeStackScreenProps<WorkoutsStackParamList, 'ExecuteWorkout'>;
 
@@ -27,11 +28,18 @@ export default function ExecuteWorkoutScreen({ navigation, route }: Props) {
     useActiveWorkout();
 
   const [elapsed, setElapsed] = useState(0);
+  const [weightUnit, setWeightUnit] = useState<'kg' | 'lbs'>('lbs');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     startWorkout(workoutTemplateId);
   }, [workoutTemplateId]);
+
+  useEffect(() => {
+    getUser().then((u) => {
+      if (u) setWeightUnit(u.unitPreference === 'metric' ? 'kg' : 'lbs');
+    });
+  }, []);
 
   useEffect(() => {
     intervalRef.current = setInterval(() => setElapsed((s) => s + 1), 1000);
@@ -73,8 +81,8 @@ export default function ExecuteWorkoutScreen({ navigation, route }: Props) {
           </Text>
           <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>Keep pushing! 💪</Text>
         </View>
-        <TouchableOpacity onPress={handleFinish} activeOpacity={0.7} style={{ paddingVertical: 6 }}>
-          <Text style={{ fontSize: 15, fontWeight: '600', color: '#3B82F6' }}>Finish</Text>
+        <TouchableOpacity onPress={handleFinish} activeOpacity={1} style={{ paddingVertical: 6, paddingHorizontal: 12 }}>
+          <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Quit</Text>
         </TouchableOpacity>
       </View>
 
@@ -97,7 +105,7 @@ export default function ExecuteWorkoutScreen({ navigation, route }: Props) {
               <Timer size={14} color="#3B82F6" />
               <Text style={{ fontSize: 13, fontWeight: '600', color: '#3B82F6' }}>{restTimer}s</Text>
               <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Rest</Text>
-              <TouchableOpacity onPress={skipRestTimer} style={{ marginLeft: 4 }}>
+              <TouchableOpacity onPress={skipRestTimer} activeOpacity={1} style={{ marginLeft: 4 }}>
                 <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', textDecorationLine: 'underline' }}>skip</Text>
               </TouchableOpacity>
             </>
@@ -164,6 +172,7 @@ export default function ExecuteWorkoutScreen({ navigation, route }: Props) {
                     key={set.setNumber}
                     set={set}
                     exerciseType={exercise.type}
+                    weightUnit={weightUnit}
                     onUpdate={(fields) => updateSet(exIdx, setIdx, fields)}
                     onComplete={() => {
                       updateSet(exIdx, setIdx, { completed: !set.completed });
@@ -177,7 +186,7 @@ export default function ExecuteWorkoutScreen({ navigation, route }: Props) {
               {/* Add Set */}
               <TouchableOpacity
                 onPress={() => addSet(exIdx)}
-                activeOpacity={0.7}
+                activeOpacity={1}
                 style={{
                   marginHorizontal: spacing.sm,
                   marginBottom: spacing.sm,
@@ -213,7 +222,7 @@ export default function ExecuteWorkoutScreen({ navigation, route }: Props) {
       }}>
         <TouchableOpacity
           onPress={handleFinish}
-          activeOpacity={0.85}
+          activeOpacity={1}
           style={{
             backgroundColor: '#84CC16',
             borderRadius: Radius.xl,

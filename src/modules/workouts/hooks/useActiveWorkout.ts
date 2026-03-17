@@ -9,6 +9,11 @@ import {
 import { getTemplateWithExercises } from '../services/workoutTemplateService';
 import { getAllExercises, getPreviousSets } from '../services/exerciseService';
 import { toISOString } from '@shared/utils/dateUtils';
+import { ExerciseType } from '@shared/types/common';
+
+const DURATION_TYPES: ExerciseType[] = ['cardio', 'flexibility', 'endurance', 'warmup'];
+const TIME_AND_REPS_TYPES: ExerciseType[] = ['hiit'];
+const NO_WEIGHT_TYPES: ExerciseType[] = ['bodyweight', 'cardio', 'flexibility', 'endurance', 'hiit', 'warmup'];
 
 export function useActiveWorkout() {
   const [state, setState] = useState<ActiveWorkoutState | null>(null);
@@ -33,12 +38,16 @@ export function useActiveWorkout() {
           getPreviousSets(ex.exerciseTemplateId),
         ]);
         const template2 = exerciseMap.get(ex.exerciseTemplateId);
+        const isDuration = DURATION_TYPES.includes(template2?.type ?? 'strength');
         const sets: ActiveSet[] = Array.from({ length: ex.defaultSets }, (_, i) => {
           const prev = prevSets[i];
           return {
             setNumber: i + 1,
             reps: prev?.reps != null ? String(prev.reps) : String(ex.defaultReps),
             weight: prev?.weight != null ? String(prev.weight) : String(ex.defaultWeight),
+            duration: prev?.durationSeconds != null
+              ? String(prev.durationSeconds)
+              : isDuration ? String(ex.defaultReps) : '60',
             completed: false,
           };
         });
@@ -90,6 +99,7 @@ export function useActiveWorkout() {
         setNumber: (lastSet?.setNumber ?? 0) + 1,
         reps: lastSet?.reps ?? '10',
         weight: lastSet?.weight ?? '0',
+        duration: lastSet?.duration ?? '60',
         completed: false,
       };
       exercises[exerciseIndex] = {
@@ -140,13 +150,16 @@ export function useActiveWorkout() {
       try {
         // Save all completed sets
         for (const exercise of state.exercises) {
+          const isDur = DURATION_TYPES.includes(exercise.type);
+          const isTimeAndReps = TIME_AND_REPS_TYPES.includes(exercise.type);
+          const noWeight = NO_WEIGHT_TYPES.includes(exercise.type);
           for (const set of exercise.sets) {
             await logSet({
               exerciseLogId: exercise.exerciseLogId,
               setNumber: set.setNumber,
-              reps: parseInt(set.reps) || null,
-              weight: parseFloat(set.weight) || null,
-              durationSeconds: null,
+              reps: isDur ? null : (parseInt(set.reps) || null),
+              weight: noWeight ? null : (parseFloat(set.weight) || null),
+              durationSeconds: (isDur || isTimeAndReps) ? (parseInt(set.duration) || null) : null,
               completed: set.completed,
             });
           }

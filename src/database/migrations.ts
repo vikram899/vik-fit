@@ -134,6 +134,28 @@ export const ADD_EXPERIENCE_LEVEL_COLUMN = `ALTER TABLE users ADD COLUMN experie
 export const ADD_CUSTOM_NUTRITION_COLUMNS = `ALTER TABLE users ADD COLUMN targetCaloriesOverride REAL;`;
 export const ADD_CUSTOM_PROTEIN_COLUMN = `ALTER TABLE users ADD COLUMN targetProteinOverride REAL;`;
 export const ADD_STREAK_CONDITION_COLUMN = `ALTER TABLE users ADD COLUMN streakCondition TEXT NOT NULL DEFAULT 'any';`;
+export const ADD_ASSIGNED_WEEKDAYS_COLUMN = `ALTER TABLE workout_templates ADD COLUMN assignedWeekdays TEXT;`;
+export const MIGRATE_ASSIGNED_WEEKDAYS = `UPDATE workout_templates SET assignedWeekdays = '[' || assignedWeekday || ']' WHERE assignedWeekday IS NOT NULL;`;
+
+// Rebuild exercise_templates to fix the CHECK constraint — old installs had a narrower
+// type list that excluded bodyweight, hiit, etc. SQLite can't ALTER a CHECK constraint
+// so we recreate the table while preserving all data.
+export const REBUILD_EXERCISE_TEMPLATES_TABLE = `
+  DROP TABLE IF EXISTS exercise_templates_new;
+  CREATE TABLE exercise_templates_new (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL CHECK(type IN ('strength', 'bodyweight', 'cardio', 'flexibility', 'endurance', 'hiit', 'warmup', 'other')),
+    targetMuscle TEXT NOT NULL,
+    secondaryMuscle TEXT,
+    isFavorite INTEGER NOT NULL DEFAULT 0,
+    createdAt TEXT NOT NULL,
+    updatedAt TEXT NOT NULL
+  );
+  INSERT INTO exercise_templates_new SELECT * FROM exercise_templates;
+  DROP TABLE exercise_templates;
+  ALTER TABLE exercise_templates_new RENAME TO exercise_templates;
+`;
 
 export const CREATE_WEIGHT_LOGS_TABLE = `
   CREATE TABLE IF NOT EXISTS weight_logs (
@@ -162,4 +184,7 @@ export const ALL_MIGRATIONS = [
   ADD_CUSTOM_PROTEIN_COLUMN,
   CREATE_WEIGHT_LOGS_TABLE,
   ADD_STREAK_CONDITION_COLUMN,
+  ADD_ASSIGNED_WEEKDAYS_COLUMN,
+  MIGRATE_ASSIGNED_WEEKDAYS,
+  REBUILD_EXERCISE_TEMPLATES_TABLE,
 ];

@@ -9,7 +9,7 @@ import WorkoutSummaryScreen from '@modules/workouts/screens/WorkoutSummaryScreen
 export type WorkoutsStackParamList = {
   Workouts: undefined;
   WorkoutDetail: { workoutTemplateId: number };
-  CreateWorkout: { workoutTemplateId?: number };
+  CreateWorkout: undefined;
   ExecuteWorkout: { workoutTemplateId: number };
   WorkoutSummary: { workoutLogId: number };
 };

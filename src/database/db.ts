@@ -15,11 +15,21 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 }
 
 async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
-  for (const migration of ALL_MIGRATIONS) {
+  // Bootstrap the migrations tracker table
+  await database.execAsync(
+    'CREATE TABLE IF NOT EXISTS _migrations (id INTEGER PRIMARY KEY);'
+  );
+
+  const applied = await database.getAllAsync<{ id: number }>('SELECT id FROM _migrations;');
+  const appliedSet = new Set(applied.map((r) => r.id));
+
+  for (let i = 0; i < ALL_MIGRATIONS.length; i++) {
+    if (appliedSet.has(i)) continue;
     try {
-      await database.execAsync(migration);
+      await database.execAsync(ALL_MIGRATIONS[i]);
     } catch {
       // Idempotent migrations (e.g. ALTER TABLE on existing column) are safe to ignore
     }
+    await database.runAsync('INSERT OR IGNORE INTO _migrations (id) VALUES (?);', [i]);
   }
 }

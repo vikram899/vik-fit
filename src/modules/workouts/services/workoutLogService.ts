@@ -10,6 +10,8 @@ import {
   createSetLog,
   getSetLogsByExerciseLogId,
   updateSetLog,
+  getExerciseInfoByIds,
+  getHistoricalBestsExcluding,
 } from '@database/repositories/exerciseRepo';
 import { toISOString } from '@shared/utils/dateUtils';
 import { ActiveWorkoutState, ActiveExercise } from '../types';
@@ -87,7 +89,52 @@ export async function getWorkoutSummary(workoutLogId: number) {
     }))
   );
 
-  return { workoutLog, exercises: exercisesWithSets };
+  // Enrich with names, types, PR detection
+  const ids = [...new Set(exercisesWithSets.map((e) => e.exerciseTemplateId))];
+  const [infoMap, histMap] = await Promise.all([
+    getExerciseInfoByIds(ids),
+    getHistoricalBestsExcluding(workoutLogId),
+  ]);
+
+  const exercises = exercisesWithSets.map((ex) => {
+    const info = infoMap.get(ex.exerciseTemplateId);
+    const type = info?.type ?? 'strength';
+    const hist = histMap.get(ex.exerciseTemplateId);
+    const completedSets = ex.sets.filter((s) => s.completed === 1);
+
+    let isPR = false;
+    let prValue = '';
+
+    if (completedSets.length > 0) {
+      if (['cardio', 'flexibility', 'endurance', 'warmup', 'hiit'].includes(type)) {
+        const curBest = Math.max(...completedSets.map((s) => s.durationSeconds ?? 0));
+        const prevBest = hist?.bestDuration ?? null;
+        isPR = curBest > 0 && (prevBest === null || curBest > prevBest);
+        if (isPR) prValue = `${curBest}s`;
+      } else if (type === 'bodyweight') {
+        const curBest = Math.max(...completedSets.map((s) => s.reps ?? 0));
+        const prevBest = hist?.bestReps ?? null;
+        isPR = curBest > 0 && (prevBest === null || curBest > prevBest);
+        if (isPR) prValue = `${curBest} reps`;
+      } else {
+        // strength / other — best set by weight
+        const curBest = Math.max(...completedSets.map((s) => s.weight ?? 0));
+        const prevBest = hist?.bestWeight ?? null;
+        isPR = curBest > 0 && (prevBest === null || curBest > prevBest);
+        if (isPR) prValue = `${curBest}kg`;
+      }
+    }
+
+    return {
+      ...ex,
+      exerciseName: info?.name ?? `Exercise`,
+      exerciseType: type,
+      isPR,
+      prValue,
+    };
+  });
+
+  return { workoutLog, exercises };
 }
 
 export async function getRecentWorkouts(limit: number = 10) {

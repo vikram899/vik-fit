@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, Modal, TouchableOpacity, ScrollView, TextInput,
-  ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet,
+  ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet, Alert,
 } from 'react-native';
 import { X, Search, Plus, Dumbbell, Sparkles, History, User, Timer, Zap } from 'lucide-react-native';
 import { useTheme } from '@theme/index';
@@ -131,6 +131,8 @@ export default function AddExerciseModal({ visible, onClose, workoutTemplateId, 
       const match = all.find((e) => e.name.toLowerCase() === ex.name.toLowerCase());
       const exerciseId = match ? match.id : await createExercise({ name: ex.name, type: ex.type, targetMuscle: ex.targetMuscle });
       await doAdd(exerciseId);
+    } catch (e: any) {
+      Alert.alert('Error', e?.message ?? 'Failed to add exercise. Please try again.');
     } finally {
       setAddingId(null);
     }
@@ -140,6 +142,8 @@ export default function AddExerciseModal({ visible, onClose, workoutTemplateId, 
     setAddingId(ex.id);
     try {
       await doAdd(ex.id);
+    } catch (e: any) {
+      Alert.alert('Error', e?.message ?? 'Failed to add exercise. Please try again.');
     } finally {
       setAddingId(null);
     }
@@ -151,7 +155,8 @@ export default function AddExerciseModal({ visible, onClose, workoutTemplateId, 
     try {
       const exerciseId = await createExercise({ name: newName.trim(), type: newType, targetMuscle: newMuscle });
       await doAdd(exerciseId);
-      await loadCustom();
+    } catch (e: any) {
+      Alert.alert('Error', e?.message ?? 'Failed to create exercise. Please try again.');
     } finally {
       setCreating(false);
     }
@@ -166,7 +171,7 @@ export default function AddExerciseModal({ visible, onClose, workoutTemplateId, 
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <View style={{ flex: 1, justifyContent: 'flex-end' }}>
           <TouchableOpacity
             style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.75)' }]}
@@ -194,7 +199,7 @@ export default function AddExerciseModal({ visible, onClose, workoutTemplateId, 
                 <Text style={{ fontSize: 20, fontWeight: '600', color: colors.textPrimary }}>Add Exercise</Text>
                 <TouchableOpacity
                   onPress={onClose}
-                  activeOpacity={0.75}
+                  activeOpacity={1}
                   style={{ width: 36, height: 36, borderRadius: Radius.md, backgroundColor: 'rgba(255,255,255,0.05)', alignItems: 'center', justifyContent: 'center' }}
                 >
                   <X size={18} color="rgba(255,255,255,0.7)" />
@@ -211,7 +216,7 @@ export default function AddExerciseModal({ visible, onClose, workoutTemplateId, 
                   <TouchableOpacity
                     key={key}
                     onPress={() => setTab(key)}
-                    activeOpacity={0.8}
+                    activeOpacity={1}
                     style={{
                       flex: 1, paddingVertical: 10, borderRadius: Radius.md,
                       backgroundColor: tab === key ? activeColor : 'rgba(255,255,255,0.05)',
@@ -260,7 +265,7 @@ export default function AddExerciseModal({ visible, onClose, workoutTemplateId, 
                       backgroundColor: bg, borderRadius: Radius.md, borderWidth: 1, borderColor: border,
                       padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10,
                     }}>
-                      <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.75} onPress={() => handleAddLibrary(ex)}>
+                      <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={() => handleAddLibrary(ex)}>
                         <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textPrimary, marginBottom: 3 }}>
                           {ex.name}
                         </Text>
@@ -271,7 +276,7 @@ export default function AddExerciseModal({ visible, onClose, workoutTemplateId, 
                       <TouchableOpacity
                         onPress={() => handleAddLibrary(ex)}
                         disabled={addingId === ex.name}
-                        activeOpacity={0.75}
+                        activeOpacity={1}
                         style={{ width: 36, height: 36, borderRadius: Radius.md, backgroundColor: 'rgba(132,204,22,0.15)', alignItems: 'center', justifyContent: 'center' }}
                       >
                         {addingId === ex.name
@@ -296,7 +301,7 @@ export default function AddExerciseModal({ visible, onClose, workoutTemplateId, 
                       backgroundColor: bg, borderRadius: Radius.md, borderWidth: 1, borderColor: border,
                       padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10,
                     }}>
-                      <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.75} onPress={() => handleAddCustom(ex)}>
+                      <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={() => handleAddCustom(ex)}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 3 }}>
                           <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textPrimary }}>{ex.name}</Text>
                           <View style={{
@@ -314,7 +319,7 @@ export default function AddExerciseModal({ visible, onClose, workoutTemplateId, 
                       <TouchableOpacity
                         onPress={() => handleAddCustom(ex)}
                         disabled={addingId === ex.id}
-                        activeOpacity={0.75}
+                        activeOpacity={1}
                         style={{ width: 36, height: 36, borderRadius: Radius.md, backgroundColor: 'rgba(132,204,22,0.15)', alignItems: 'center', justifyContent: 'center' }}
                       >
                         {addingId === ex.id
@@ -352,7 +357,7 @@ export default function AddExerciseModal({ visible, onClose, workoutTemplateId, 
                         <TouchableOpacity
                           key={m}
                           onPress={() => setNewMuscle(m)}
-                          activeOpacity={0.75}
+                          activeOpacity={1}
                           style={{
                             paddingHorizontal: 16, paddingVertical: 10, borderRadius: Radius.md,
                             backgroundColor: newMuscle === m ? '#3B82F6' : bg,
@@ -377,7 +382,7 @@ export default function AddExerciseModal({ visible, onClose, workoutTemplateId, 
                           <TouchableOpacity
                             key={eq}
                             onPress={() => setNewEquipment(active ? null : eq)}
-                            activeOpacity={0.75}
+                            activeOpacity={1}
                             style={{
                               paddingHorizontal: 16, paddingVertical: 10, borderRadius: 99,
                               backgroundColor: active ? '#9333EA' : bg,
@@ -403,7 +408,7 @@ export default function AddExerciseModal({ visible, onClose, workoutTemplateId, 
                           <TouchableOpacity
                             key={type}
                             onPress={() => setNewType(type)}
-                            activeOpacity={0.75}
+                            activeOpacity={1}
                             style={{
                               flexDirection: 'row', alignItems: 'center', gap: 12,
                               padding: 12, borderRadius: Radius.md,
@@ -442,7 +447,7 @@ export default function AddExerciseModal({ visible, onClose, workoutTemplateId, 
                           <TouchableOpacity
                             key={label}
                             onPress={() => setNewDifficulty(active ? null : label)}
-                            activeOpacity={0.75}
+                            activeOpacity={1}
                             style={{
                               flex: 1, paddingVertical: 12, borderRadius: Radius.md,
                               backgroundColor: active ? activeColor : bg,
@@ -463,7 +468,7 @@ export default function AddExerciseModal({ visible, onClose, workoutTemplateId, 
                   <TouchableOpacity
                     onPress={handleCreate}
                     disabled={!newName.trim() || creating}
-                    activeOpacity={0.85}
+                    activeOpacity={1}
                     style={{
                       backgroundColor: newName.trim() ? '#84CC16' : 'rgba(132,204,22,0.3)',
                       borderRadius: Radius.xl,

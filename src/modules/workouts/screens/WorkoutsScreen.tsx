@@ -42,11 +42,17 @@ export default function WorkoutsScreen({ navigation }: Props) {
 
   const today = new Date();
   const currentWeekday = today.getDay();
+  const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD UTC
   const todayLabel = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
   const todaysWorkouts = useMemo(
-    () => templates.filter((t) => t.assignedWeekday === currentWeekday),
-    [templates, currentWeekday]
+    () => templates.filter((t) => {
+      if (!t.assignedWeekdays.includes(currentWeekday)) return false;
+      const lastIso = lastPerformedMap.get(t.id);
+      if (lastIso && lastIso.startsWith(todayStr)) return false; // completed today
+      return true;
+    }),
+    [templates, currentWeekday, lastPerformedMap, todayStr]
   );
 
   // Load last performed for all templates
@@ -87,7 +93,7 @@ export default function WorkoutsScreen({ navigation }: Props) {
           </View>
           <TouchableOpacity
             onPress={() => setSelectModalVisible(true)}
-            activeOpacity={0.85}
+            activeOpacity={1}
             style={{
               width: 48, height: 48, borderRadius: Radius.md,
               backgroundColor: '#3B82F6',
@@ -138,7 +144,7 @@ export default function WorkoutsScreen({ navigation }: Props) {
                     </View>
                     <TouchableOpacity
                       onPress={() => navigation.navigate('WorkoutDetail', { workoutTemplateId: t.id })}
-                      activeOpacity={0.85}
+                      activeOpacity={1}
                       style={{
                         backgroundColor: '#84CC16', borderRadius: Radius.md,
                         paddingVertical: 12,
@@ -170,8 +176,8 @@ export default function WorkoutsScreen({ navigation }: Props) {
                   Create your first workout to get started
                 </Text>
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('CreateWorkout', {})}
-                  activeOpacity={0.85}
+                  onPress={() => navigation.navigate('CreateWorkout', undefined)}
+                  activeOpacity={1}
                   style={{
                     backgroundColor: '#3B82F6', borderRadius: Radius.md,
                     paddingHorizontal: 24, paddingVertical: 12,
@@ -192,7 +198,6 @@ export default function WorkoutsScreen({ navigation }: Props) {
                 {templates.map((t) => {
                   const lastIso = lastPerformedMap.get(t.id);
                   const lastLabel = lastIso ? `Last: ${formatRelativeTime(lastIso)}` : null;
-                  const dayName = t.assignedWeekday != null ? WEEKDAY_FULL[t.assignedWeekday] : null;
                   const meta = parseMeta(t.description);
                   const muscleGroups: string[] = meta.muscleGroups ?? [];
                   const duration = meta.duration ?? Math.max(t.exerciseCount * 5, 10);
@@ -200,7 +205,7 @@ export default function WorkoutsScreen({ navigation }: Props) {
                   return (
                     <TouchableOpacity
                       key={t.id}
-                      activeOpacity={0.75}
+                      activeOpacity={1}
                       onPress={() => navigation.navigate('WorkoutDetail', { workoutTemplateId: t.id })}
                     >
                       <View style={{
@@ -227,9 +232,9 @@ export default function WorkoutsScreen({ navigation }: Props) {
                             <ChevronRight size={18} color="rgba(255,255,255,0.4)" />
                           </View>
 
-                          {/* Muscle + day chips */}
-                          {(muscleGroups.length > 0 || dayName) ? (
-                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginBottom: 6 }}>
+                          {/* Muscle chips */}
+                          {muscleGroups.length > 0 && (
+                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginBottom: 5 }}>
                               {muscleGroups.map((g) => (
                                 <View key={g} style={{
                                   backgroundColor: 'rgba(59,130,246,0.12)',
@@ -239,17 +244,23 @@ export default function WorkoutsScreen({ navigation }: Props) {
                                   <Text style={{ fontSize: 11, color: '#3B82F6' }}>{g}</Text>
                                 </View>
                               ))}
-                              {dayName ? (
-                                <View style={{
+                            </View>
+                          )}
+
+                          {/* Day chips */}
+                          {t.assignedWeekdays.length > 0 && (
+                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginBottom: 6 }}>
+                              {t.assignedWeekdays.map((d) => (
+                                <View key={d} style={{
                                   backgroundColor: 'rgba(132,204,22,0.15)',
                                   borderRadius: 99, paddingHorizontal: 8, paddingVertical: 2,
                                   borderWidth: 1, borderColor: 'rgba(132,204,22,0.3)',
                                 }}>
-                                  <Text style={{ fontSize: 11, color: '#84CC16' }}>{dayName}</Text>
+                                  <Text style={{ fontSize: 11, color: '#84CC16' }}>{WEEKDAY_FULL[d]}</Text>
                                 </View>
-                              ) : null}
+                              ))}
                             </View>
-                          ) : null}
+                          )}
 
                           {/* Stats row */}
                           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -278,7 +289,7 @@ export default function WorkoutsScreen({ navigation }: Props) {
         onClose={() => setSelectModalVisible(false)}
         onViewWorkout={(id) => navigation.navigate('WorkoutDetail', { workoutTemplateId: id })}
         onStartWorkout={(id) => navigation.navigate('ExecuteWorkout', { workoutTemplateId: id })}
-        onCreateNew={(id) => navigation.navigate('CreateWorkout', { workoutTemplateId: id })}
+        onCreateNew={(id) => navigation.navigate('WorkoutDetail', { workoutTemplateId: id })}
       />
     </SafeAreaView>
   );

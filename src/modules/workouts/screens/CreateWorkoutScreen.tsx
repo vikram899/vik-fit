@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, KeyboardAvoidingView,
   Platform, Modal, FlatList, ActivityIndicator, StyleSheet, TextInput, Alert,
@@ -19,6 +19,8 @@ import { ExerciseTemplateRow } from '@database/repositories/exerciseRepo';
 
 type Props = NativeStackScreenProps<WorkoutsStackParamList, 'CreateWorkout'>;
 type PickerStep = 'list' | 'create';
+
+
 
 const MUSCLE_GROUPS = [
   'Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Forearms',
@@ -47,12 +49,11 @@ function getSetColumns(type: ExerciseType) {
   };
 }
 
-export default function CreateWorkoutScreen({ navigation, route }: Props) {
+export default function CreateWorkoutScreen({ navigation }: Props) {
   const { colors, typography, spacing } = useTheme();
-  const existingId = route.params?.workoutTemplateId;
 
   const [name, setName] = useState('');
-  const [assignedWeekday, setAssignedWeekday] = useState<number | null>(null);
+  const [assignedWeekdays, setAssignedWeekdays] = useState<number[]>([]);
 
   const [pickerVisible, setPickerVisible] = useState(false);
   const [pickerStep, setPickerStep] = useState<PickerStep>('list');
@@ -65,12 +66,12 @@ export default function CreateWorkoutScreen({ navigation, route }: Props) {
   const [creatingEx, setCreatingEx] = useState(false);
 
   const {
-    templateData, pendingExercises, allExercises,
+    pendingExercises, allExercises,
     loadingExercises, saving,
     addExerciseToList, removeExerciseFromList,
     updateSet, addSet, removeSet, updateRestTime,
     saveWorkout, createAndAddExercise, deleteExerciseFromLibrary,
-  } = useWorkoutEditor(existingId);
+  } = useWorkoutEditor();
 
   const confirmDeleteExercise = (id: number, name: string) => {
     Alert.alert(
@@ -82,13 +83,6 @@ export default function CreateWorkoutScreen({ navigation, route }: Props) {
       ]
     );
   };
-
-  useEffect(() => {
-    if (templateData) {
-      setName(templateData.name);
-      setAssignedWeekday(templateData.assignedWeekday ?? null);
-    }
-  }, [templateData]);
 
   const addedIds = useMemo(
     () => new Set(pendingExercises.map((e) => e.exerciseTemplateId)),
@@ -110,7 +104,7 @@ export default function CreateWorkoutScreen({ navigation, route }: Props) {
   );
 
   const handleSave = async () => {
-    const ok = await saveWorkout(name.trim(), null, assignedWeekday);
+    const ok = await saveWorkout(name.trim(), null, assignedWeekdays);
     if (ok) navigation.goBack();
   };
 
@@ -156,20 +150,23 @@ export default function CreateWorkoutScreen({ navigation, route }: Props) {
               <Text style={{ ...typography.body, color: colors.brandPrimary }}>← Back</Text>
             </TouchableOpacity>
             <Text style={{ ...typography.screenTitle, color: colors.textPrimary }}>
-              {existingId ? 'Edit Workout' : 'New Workout'}
+              New Workout
             </Text>
           </View>
 
           <Input label="Workout name" value={name} onChangeText={setName} placeholder="e.g. Push Day" containerStyle={{ marginBottom: spacing.base }} />
 
-          <Text style={{ ...typography.label, color: colors.textSecondary, marginBottom: spacing.sm }}>Day (optional)</Text>
+          <Text style={{ ...typography.label, color: colors.textSecondary, marginBottom: spacing.sm }}>Days (optional)</Text>
           <View style={{ flexDirection: 'row', marginBottom: spacing.xl }}>
             {['S','M','T','W','T','F','S'].map((letter, day) => {
-              const selected = assignedWeekday === day;
+              const selected = assignedWeekdays.includes(day);
               return (
                 <TouchableOpacity
                   key={day}
-                  onPress={() => setAssignedWeekday(selected ? null : day)}
+                  activeOpacity={1}
+                  onPress={() => setAssignedWeekdays((prev) =>
+                    selected ? prev.filter((d) => d !== day) : [...prev, day]
+                  )}
                   style={{
                     flex: 1, alignItems: 'center', paddingVertical: spacing.sm,
                     borderRadius: Radius.sm,
@@ -307,7 +304,7 @@ export default function CreateWorkoutScreen({ navigation, route }: Props) {
           )}
 
           <Button
-            label={existingId ? 'Update Workout' : 'Save Workout'}
+            label="Save Workout"
             onPress={handleSave}
             loading={saving}
             disabled={name.trim().length === 0}

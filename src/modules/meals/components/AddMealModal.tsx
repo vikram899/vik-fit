@@ -153,7 +153,7 @@ export default function AddMealModal({ visible, category, onClose, onAdded }: Pr
       {/* Text area – tapping adds the meal */}
       <TouchableOpacity
         onPress={() => instantLog(meal)}
-        activeOpacity={0.7}
+        activeOpacity={1}
         disabled={saving}
         style={{ flex: 1 }}
       >
@@ -178,7 +178,7 @@ export default function AddMealModal({ visible, category, onClose, onAdded }: Pr
       <TouchableOpacity
         onPress={() => instantLog(meal)}
         disabled={saving}
-        activeOpacity={0.75}
+        activeOpacity={1}
         style={{
           width: 40, height: 40, borderRadius: 8,
           backgroundColor: 'rgba(132,204,22,0.2)',
@@ -191,7 +191,7 @@ export default function AddMealModal({ visible, category, onClose, onAdded }: Pr
       {/* Delete button */}
       <TouchableOpacity
         onPress={() => handleDeleteTemplate(meal.id)}
-        activeOpacity={0.75}
+        activeOpacity={1}
         style={{
           width: 40, height: 40, borderRadius: 8,
           backgroundColor: 'rgba(239,68,68,0.2)',
@@ -220,7 +220,7 @@ export default function AddMealModal({ visible, category, onClose, onAdded }: Pr
     >
       <TouchableOpacity
         onPress={() => instantLog(meal)}
-        activeOpacity={0.7}
+        activeOpacity={1}
         disabled={saving}
         style={{ flex: 1 }}
       >
@@ -244,7 +244,7 @@ export default function AddMealModal({ visible, category, onClose, onAdded }: Pr
       <TouchableOpacity
         onPress={() => instantLog(meal)}
         disabled={saving}
-        activeOpacity={0.75}
+        activeOpacity={1}
         style={{
           width: 40, height: 40, borderRadius: 8,
           backgroundColor: 'rgba(132,204,22,0.2)',
@@ -271,7 +271,7 @@ export default function AddMealModal({ visible, category, onClose, onAdded }: Pr
       statusBarTranslucent
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
         <View style={{ flex: 1, justifyContent: 'flex-end' }}>
@@ -457,7 +457,7 @@ export default function AddMealModal({ visible, category, onClose, onAdded }: Pr
                   <TouchableOpacity
                     onPress={handleAddNew}
                     disabled={!name.trim() || !calories || saving}
-                    activeOpacity={0.8}
+                    activeOpacity={1}
                     style={{
                       paddingVertical: 14,
                       borderRadius: Radius.md,

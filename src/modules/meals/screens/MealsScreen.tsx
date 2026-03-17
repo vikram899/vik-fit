@@ -68,8 +68,10 @@ export default function MealsScreen() {
     refresh();
   };
 
-  const handleSaveToFavorites = async (log: MealLogRow) => {
-    await saveLogAsTemplate(log);
+  const handleSaveToFavorites = async (log: MealLogRow): Promise<number> => {
+    const id = await saveLogAsTemplate(log);
+    refresh();
+    return id;
   };
 
   const dateLabel = new Date().toLocaleDateString([], {
@@ -98,7 +100,7 @@ export default function MealsScreen() {
           <TouchableOpacity
             onPress={() => openModal(categoryForCurrentTime())}
             style={s.fab}
-            activeOpacity={0.8}
+            activeOpacity={1}
           >
             <Text style={s.fabText}>+</Text>
           </TouchableOpacity>
@@ -201,13 +203,20 @@ export default function MealsScreen() {
                     />
                   ))}
                 </View>
-              ) : null}
+              ) : (
+                <View style={{ paddingVertical: 14, paddingHorizontal: 4, alignItems: 'center' }}>
+                  <meta.Icon size={22} color="rgba(255,255,255,0.1)" />
+                  <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.25)', marginTop: 6 }}>
+                    Nothing logged for {meta.label.toLowerCase()} yet
+                  </Text>
+                </View>
+              )}
 
               {/* Add to section */}
               <TouchableOpacity
                 onPress={() => openModal(section)}
                 style={[s.addToSection, sectionLogs.length > 0 && s.addToSectionBordered]}
-                activeOpacity={0.7}
+                activeOpacity={1}
               >
                 <Text style={s.addToSectionText}>+  Add to {meta.label}</Text>
               </TouchableOpacity>

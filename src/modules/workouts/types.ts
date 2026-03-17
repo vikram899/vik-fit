@@ -2,8 +2,9 @@ import { ExerciseType } from '@shared/types/common';
 
 export interface ActiveSet {
   setNumber: number;
-  reps: string;
-  weight: string;
+  reps: string;      // used by weight_reps + reps_only modes
+  weight: string;    // used by weight_reps mode
+  duration: string;  // seconds, used by duration mode
   completed: boolean;
 }
 
