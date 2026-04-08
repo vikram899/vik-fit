@@ -52,7 +52,7 @@ interface OnboardingContextValue {
   draft: OnboardingDraft;
   updateDraft: (fields: Partial<OnboardingDraft>) => void;
   getNutritionSummary: () => BMRResult | null;
-  completeOnboarding: () => Promise<boolean>;
+  completeOnboarding: (customCalories?: number | null, customProtein?: number | null) => Promise<boolean>;
   loading: boolean;
   error: string | null;
 }
@@ -83,7 +83,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     });
   }, [draft]);
 
-  const completeOnboarding = useCallback(async (): Promise<boolean> => {
+  const completeOnboarding = useCallback(async (customCalories?: number | null, customProtein?: number | null): Promise<boolean> => {
     setLoading(true);
     setError(null);
     try {
@@ -115,9 +115,10 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         unitPreference: draft.unitPreference as UnitPreference,
         targetWeight: storedTargetWeight,
         experienceLevel: null,
-        targetCaloriesOverride: draft.customCalories,
-        targetProteinOverride: draft.customProtein,
+        targetCaloriesOverride: customCalories !== undefined ? customCalories : draft.customCalories,
+        targetProteinOverride: customProtein !== undefined ? customProtein : draft.customProtein,
       };
+
 
       const existingUser = await getUser();
       if (existingUser) {
@@ -125,6 +126,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       } else {
         await createUser({ ...userData, createdAt: now, updatedAt: now });
       }
+
       return true;
     } catch {
       setError('Failed to save profile. Please try again.');

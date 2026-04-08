@@ -102,8 +102,8 @@ export default function ProfileScreen() {
     const prot = parseInt(proteinInput, 10);
     try {
       await saveNutritionTargets(
-        !isNaN(cal)  && cal  !== computedCalories ? cal  : null,
-        !isNaN(prot) && prot !== computedProtein  ? prot : null,
+        !isNaN(cal)  ? cal  : null,
+        !isNaN(prot) ? prot : null,
         calPctInput,
         calUpperPctInput,
         protPctInput,

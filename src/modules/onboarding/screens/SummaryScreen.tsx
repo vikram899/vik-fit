@@ -45,8 +45,8 @@ export default function SummaryScreen({ navigation }: Props) {
   const { setHasUser } = useAuth();
   const nutrition = getNutritionSummary();
 
-  const computedCalories = nutrition?.targetCalories ?? 0;
-  const computedProtein = nutrition?.proteinGrams ?? 0;
+  const computedCalories = Math.round(nutrition?.targetCalories ?? 0);
+  const computedProtein = Math.round(nutrition?.proteinGrams ?? 0);
 
   const [editing, setEditing] = useState(false);
   const [calInput, setCalInput] = useState('');
@@ -57,18 +57,17 @@ export default function SummaryScreen({ navigation }: Props) {
   const displayProtein = draft.customProtein ?? computedProtein;
 
   const openEdit = () => {
-    setCalInput(String(displayCalories));
-    setProteinInput(String(displayProtein));
+    setCalInput(String(Math.round(displayCalories)));
+    setProteinInput(String(Math.round(displayProtein)));
     setEditing(true);
   };
 
   const saveEdit = () => {
     const cal = parseInt(calInput, 10);
     const prot = parseInt(proteinInput, 10);
-    // Only store override if value differs from computed
     updateDraft({
-      customCalories: !isNaN(cal) && cal !== computedCalories ? cal : null,
-      customProtein: !isNaN(prot) && prot !== computedProtein ? prot : null,
+      customCalories: !isNaN(cal) ? cal : null,
+      customProtein: !isNaN(prot) ? prot : null,
     });
     setEditing(false);
   };
@@ -88,7 +87,15 @@ export default function SummaryScreen({ navigation }: Props) {
   })() : null;
 
   const handleComplete = async () => {
-    const success = await completeOnboarding();
+    let customCal = draft.customCalories;
+    let customProt = draft.customProtein;
+    if (editing) {
+      const cal = parseInt(calInput, 10);
+      const prot = parseInt(proteinInput, 10);
+      customCal = !isNaN(cal) ? cal : null;
+      customProt = !isNaN(prot) ? prot : null;
+    }
+    const success = await completeOnboarding(customCal, customProt);
     if (success) setHasUser(true);
   };
 
