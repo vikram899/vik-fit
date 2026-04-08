@@ -9,6 +9,8 @@ import {
   getWorkoutCompletedDates,
 } from '@database/repositories/workoutRepo';
 import { todayDateString, getCurrentWeekday } from '@shared/utils/dateUtils';
+import { getTodaySteps, getActiveBurned } from '@database/repositories/stepsRepo';
+import { calculateBMR } from '@shared/utils/bmrUtils';
 import { calculateNutrition } from '@modules/onboarding/services/onboardingService';
 import { DashboardData } from '../types';
 import { MacroSummary, StreakCondition } from '@shared/types/common';
@@ -68,7 +70,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   const today = todayDateString();
   const weekday = getCurrentWeekday();
 
-  const [user, mealLogs, todaysWorkoutTemplates, workoutLogsToday, skippedIds, mealDates, workoutDates, recentWeightLogs, weightDates, dailyMacroRows] =
+  const [user, mealLogs, todaysWorkoutTemplates, workoutLogsToday, skippedIds, mealDates, workoutDates, recentWeightLogs, weightDates, dailyMacroRows, todaySteps, activeBurned] =
     await Promise.all([
       getUser(),
       getMealLogsByDate(today),
@@ -80,6 +82,8 @@ export async function getDashboardData(): Promise<DashboardData> {
       getRecentWeightLogs(10),
       getWeightLogDates(),
       getDailyMacroTotals(),
+      getTodaySteps(today),
+      getActiveBurned(today),
     ]);
 
   const todayMacros: MacroSummary = mealLogs.reduce(
@@ -142,12 +146,25 @@ export async function getDashboardData(): Promise<DashboardData> {
   const weightLogs = recentWeightLogs.map((l) => l.weight).reverse();
   const lastWeightLoggedAt = recentWeightLogs[0]?.loggedAt ?? null; // [0] is most recent (DESC order)
 
+  // Resting calories: user override or auto-calculated BMR
+  let restingCalories = 0;
+  if (user) {
+    const isImperial = user.unitPreference === 'imperial';
+    const weightKg = isImperial ? user.weight / 2.20462 : user.weight;
+    const heightCm = isImperial ? user.height * 2.54 : user.height;
+    restingCalories = user.restingCaloriesOverride
+      ?? calculateBMR(weightKg, heightCm, user.age, user.gender);
+  }
+
   return {
     user: userTargets,
     todayMacros,
     mealLogs,
     streak,
     streakCondition,
+    todaySteps,
+    activeBurned,
+    restingCalories,
     weightLogs,
     lastWeightLoggedAt,
     todaysWorkouts: visibleTemplates.map((t, i) => ({

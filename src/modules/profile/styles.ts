@@ -83,39 +83,6 @@ export function createProfileStyles(colors: ThemeColors) {
       color: colors.textTertiary,
       marginTop: 6,
     },
-    // ── Stats Grid ──
-    statsGrid: {
-      flexDirection: 'row' as const,
-      gap: Spacing.sm,
-      marginBottom: Spacing.base,
-    },
-    statTile: {
-      flex: 1,
-      backgroundColor: colors.surface,
-      borderRadius: Radius.md,
-      padding: Spacing.sm,
-      alignItems: 'center' as const,
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-    statIconBox: {
-      width: 40,
-      height: 40,
-      borderRadius: Radius.md,
-      alignItems: 'center' as const,
-      justifyContent: 'center' as const,
-      marginBottom: Spacing.xs,
-    },
-    statValue: {
-      fontSize: 18,
-      fontWeight: '700' as const,
-    },
-    statLabel: {
-      fontSize: 10,
-      color: colors.textTertiary,
-      marginTop: 2,
-      textAlign: 'center' as const,
-    },
     // ── Generic Card ──
     card: {
       backgroundColor: colors.surface,
@@ -223,35 +190,6 @@ export function createProfileStyles(colors: ThemeColors) {
       fontSize: 14,
       fontWeight: '600' as const,
       color: '#84CC16',
-    },
-    // ── Personal Records ──
-    prRow: {
-      flexDirection: 'row' as const,
-      justifyContent: 'space-between' as const,
-      alignItems: 'center' as const,
-      paddingVertical: 10,
-      paddingHorizontal: 12,
-      backgroundColor: 'rgba(255,255,255,0.05)',
-      borderRadius: 12,
-      marginBottom: 6,
-    },
-    prExercise: {
-      fontSize: 14,
-      color: colors.textPrimary,
-    },
-    prRight: {
-      flexDirection: 'row' as const,
-      alignItems: 'center' as const,
-      gap: 8,
-    },
-    prWeight: {
-      fontSize: 14,
-      fontWeight: '600' as const,
-      color: '#F59E0B',
-    },
-    prReps: {
-      fontSize: 12,
-      color: colors.textTertiary,
     },
     // ── Settings ──
     settingsSection: {

@@ -23,17 +23,18 @@ export function useMealLogs() {
       const [result, user] = await Promise.all([getTodaysMealLogs(), getUser()]);
       setLogs(result);
       if (user) {
+        const isImperial = user.unitPreference === 'imperial';
         const nutrition = calculateNutrition({
           gender: user.gender,
-          weight: user.weight,
-          height: user.height,
+          weight: isImperial ? user.weight / 2.20462 : user.weight,
+          height: isImperial ? user.height * 2.54 : user.height,
           age: user.age,
           activityLevel: user.activityLevel,
           goal: user.goal,
         });
         setUserTargets({
-          targetCalories: nutrition.targetCalories,
-          targetProtein: nutrition.proteinGrams,
+          targetCalories: user.targetCaloriesOverride ?? nutrition.targetCalories,
+          targetProtein: user.targetProteinOverride ?? nutrition.proteinGrams,
           targetCarbs: nutrition.carbsGrams,
           targetFat: nutrition.fatGrams,
         });

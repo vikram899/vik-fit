@@ -17,10 +17,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@theme/index';
-import { Plus, TrendingDown, TrendingUp, Check, Flame, Drumstick, Footprints, Dumbbell, Calendar, CircleCheck, CircleAlert, UtensilsCrossed, Share2 } from 'lucide-react-native';
+import { Plus, TrendingDown, Flame, Drumstick, Footprints, Dumbbell, UtensilsCrossed, Share2 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Defs, LinearGradient as SvgGradient, Stop, Text as SvgText } from 'react-native-svg';
 import { useDashboard } from '../hooks/useDashboard';
+import { stepsToCalories } from '@shared/utils/bmrUtils';
 import TodaysWorkoutCard from '../components/TodaysWorkoutCard';
 import { dashboardStyles } from '../styles';
 import { Radius } from '@theme/radius';
@@ -170,12 +171,16 @@ const GOAL_GREETING: Record<string, string> = {
 
 export default function DashboardScreen() {
   const { colors, typography, spacing } = useTheme();
-  const { data, loading, skipWorkout, logWeightEntry, setTargetWeight } = useDashboard();
+  const { data, loading, skipWorkout, logWeightEntry, setTargetWeight, saveSteps, saveActiveBurned } = useDashboard();
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
 
   const [weightModalVisible, setWeightModalVisible] = useState(false);
   const [shareCardVisible, setShareCardVisible] = useState(false);
+  const [stepsModalVisible, setStepsModalVisible] = useState(false);
+  const [stepsInput, setStepsInput] = useState('');
+  const [burnedModalVisible, setBurnedModalVisible] = useState(false);
+  const [burnedInput, setBurnedInput] = useState('');
 
   const [targetModalVisible, setTargetModalVisible] = useState(false);
   const [targetInput, setTargetInput] = useState('');
@@ -265,10 +270,12 @@ export default function DashboardScreen() {
             {data.user ? (() => {
               const calConsumed = Math.round(data.todayMacros.calories);
               const calGoal = Math.round(data.user.targetCalories);
-              const calsBurned = 0; // health tracking not yet integrated
-              const netCalories = calConsumed - calsBurned;
-              const calProgress = calGoal > 0 ? netCalories / calGoal : 0;
-              const calRemaining = calGoal - netCalories;
+              const calsBurned = data.restingCalories + stepsToCalories(data.todaySteps) + data.activeBurned;
+              // Progress bar: how close eating is to the food goal
+              const calProgress = calGoal > 0 ? calConsumed / calGoal : 0;
+              // netBalance: (Eaten − Goal) − activeBurned
+              // positive = over goal, negative = still under
+              const netBalance = (calConsumed - calGoal) - data.activeBurned;
 
               const proteinConsumed = Math.round(data.todayMacros.protein);
               const proteinGoal = Math.round(data.user.targetProtein);
@@ -278,34 +285,12 @@ export default function DashboardScreen() {
               const workoutsDone = data.todaysWorkouts.filter((w) => w.isDone).length;
               const workoutsTotal = data.todaysWorkouts.length;
 
-              const isBalanced = calRemaining >= -50 && calRemaining <= 50;
-              const isOnTrack = isBalanced && proteinProgress >= 1;
-
-              const calBarColor = calProgress > 1 ? '#EF4444' : calProgress > 0.9 ? '#84CC16' : '#F59E0B';
-              const calStatusText = isBalanced
-                ? 'Perfect balance achieved'
-                : calRemaining > 0
-                ? "Eat more to hit today's goal"
-                : 'Burn more to reach deficit target';
-              const calStatusColor = isBalanced ? '#84CC16' : calRemaining > 0 ? '#3B82F6' : '#F59E0B';
-
-              const bannerText = isOnTrack
-                ? 'On track for today'
-                : proteinProgress < 1 && Math.abs(calRemaining) > 200
-                ? 'Protein goal still pending'
-                : calRemaining > 200
-                ? `Eat ${calRemaining} kcal more`
-                : calRemaining < -200
-                ? `Burn ${Math.abs(calRemaining)} kcal to stay in deficit`
-                : proteinProgress < 1
-                ? `${proteinRemaining}g protein remaining`
-                : 'On track for today';
 
               const sub = 'rgba(255,255,255,0.05)';
               const subBorder = 'rgba(255,255,255,0.1)';
 
               return (
-                <Card style={{ marginBottom: spacing.base, overflow: 'hidden' }}>
+                  <Card style={{ overflow: 'hidden', marginBottom: spacing.base }}>
                   {/* Blue → purple gradient overlay */}
                   <LinearGradient
                     colors={['rgba(59,130,246,0.12)', 'rgba(168,85,247,0.12)']}
@@ -325,21 +310,16 @@ export default function DashboardScreen() {
                         </Text>
                       </View>
                     </View>
-                    <Calendar size={18} color="#3B82F6" />
                   </View>
 
                   {/* Calorie Balance — full width */}
                   {(() => {
-                    const isAtGoal = Math.abs(calRemaining) < 50;
-                    const isOverGoal = calRemaining < 0;
-                    const balColor = isAtGoal ? '#84CC16' : isOverGoal ? '#EF4444' : '#00E5FF';
+                    // netBalance = (Eaten − Goal) − activeBurned
+                    // positive → over goal by that much; negative → still under by that much
+                    const netBalance = (calConsumed - calGoal) - data.activeBurned;
+                    const isAtGoal = Math.abs(netBalance) < 50;
+                    const isOverGoal = netBalance > 50;
                     const barColor = isAtGoal ? '#84CC16' : isOverGoal ? '#EF4444' : '#F59E0B';
-                    const balMsg = isAtGoal
-                      ? "Perfect! You've hit today's goal"
-                      : isOverGoal
-                      ? `Burn ${Math.abs(calRemaining)} more kcal to hit today's goal`
-                      : `Eat ${calRemaining} more kcal to hit today's goal`;
-                    const BalIcon = isAtGoal ? Check : isOverGoal ? TrendingDown : TrendingUp;
                     return (
                       <View style={{ backgroundColor: sub, borderRadius: 12, padding: 12, borderWidth: 1, borderColor: subBorder, marginBottom: 12 }}>
                         {/* Header */}
@@ -348,10 +328,10 @@ export default function DashboardScreen() {
                           <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontWeight: '500' }}>Balance</Text>
                         </View>
 
-                        {/* Big balance number — gradient */}
+                        {/* Big number = |(Eaten − Goal) − activeBurned| */}
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 3 }}>
                           {(() => {
-                            const label = Math.abs(calRemaining).toLocaleString();
+                            const label = Math.abs(netBalance).toLocaleString();
                             const gradStart = isAtGoal ? '#84CC16' : isOverGoal ? '#EF4444' : '#22D3EE';
                             const gradEnd   = isAtGoal ? '#84CC16' : isOverGoal ? '#F87171' : '#3B82F6';
                             const W = label.length * 30 + 8;
@@ -377,15 +357,9 @@ export default function DashboardScreen() {
                           <Text style={{ fontSize: 18, color: 'rgba(255,255,255,0.5)' }}>kcal</Text>
                         </View>
 
-                        {/* Progress bar */}
-                        <View style={{ height: 6, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden', marginBottom: 10 }}>
-                          <View style={{ width: `${Math.min(Math.abs(calProgress) * 100, 100)}%`, height: '100%', backgroundColor: barColor, borderRadius: 3 }} />
-                        </View>
-
-                        {/* Message row */}
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-                          <BalIcon size={16} color={balColor} />
-                          <Text style={{ fontSize: 13, fontWeight: '500', color: balColor, flex: 1 }}>{balMsg}</Text>
+                        {/* Progress bar: food eaten vs food goal */}
+                        <View style={{ height: 6, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden', marginBottom: 12 }}>
+                          <View style={{ width: `${Math.min(calProgress * 100, 100)}%`, height: '100%', backgroundColor: barColor, borderRadius: 3 }} />
                         </View>
 
                         {/* Divider */}
@@ -401,12 +375,16 @@ export default function DashboardScreen() {
                             <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Eaten</Text>
                             <Text style={{ fontSize: 15, fontWeight: '600', color: '#84CC16' }}>{calConsumed}</Text>
                           </View>
-                          <View style={{ flex: 1 }}>
-                            <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Remaining</Text>
-                            <Text style={{ fontSize: 15, fontWeight: '600', color: calRemaining < 0 ? '#EF4444' : '#84CC16' }}>
-                              {calRemaining < 0 ? `+${Math.abs(calRemaining)}` : String(calRemaining)}
+                          <TouchableOpacity
+                            activeOpacity={1}
+                            style={{ flex: 1 }}
+                            onPress={() => { setBurnedInput(String(data.activeBurned || '')); setBurnedModalVisible(true); }}
+                          >
+                            <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Burned <Text style={{ color: '#3B82F6' }}>+</Text></Text>
+                            <Text style={{ fontSize: 15, fontWeight: '600', color: colors.textPrimary }}>
+                              {data.activeBurned}
                             </Text>
-                          </View>
+                          </TouchableOpacity>
                         </View>
                       </View>
                     );
@@ -435,19 +413,35 @@ export default function DashboardScreen() {
                     </View>
 
                     {/* Steps */}
-                    <View style={{ flex: 1, backgroundColor: sub, borderRadius: 12, padding: 12, borderWidth: 1, borderColor: subBorder }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 10 }}>
-                        <Footprints size={14} color="#3B82F6" />
-                        <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>Steps</Text>
-                      </View>
-                      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 2, marginBottom: 8 }}>
-                        <Text style={{ fontSize: 22, fontWeight: '700', color: '#fff' }}>—</Text>
-                      </View>
-                      <View style={{ height: 4, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden', marginBottom: 6 }}>
-                        <View style={{ width: '0%', height: '100%', backgroundColor: '#3B82F6', borderRadius: 2 }} />
-                      </View>
-                      <Text style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>10,000 goal</Text>
-                    </View>
+                    {(() => {
+                      const todaySteps = data.todaySteps ?? 0;
+                      const STEP_GOAL = 10000;
+                      const stepPct = Math.min(todaySteps / STEP_GOAL, 1);
+                      const stepDone = todaySteps >= STEP_GOAL;
+                      return (
+                        <TouchableOpacity
+                          onPress={() => { setStepsInput(todaySteps > 0 ? String(todaySteps) : ''); setStepsModalVisible(true); }}
+                          activeOpacity={1}
+                          style={{ flex: 1, backgroundColor: sub, borderRadius: 12, padding: 12, borderWidth: 1, borderColor: subBorder }}
+                        >
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 10 }}>
+                            <Footprints size={14} color="#3B82F6" />
+                            <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>Steps</Text>
+                          </View>
+                          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 2, marginBottom: 8 }}>
+                            <Text style={{ fontSize: 22, fontWeight: '700', color: '#fff' }}>
+                              {todaySteps > 0 ? todaySteps.toLocaleString() : '—'}
+                            </Text>
+                          </View>
+                          <View style={{ height: 4, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden', marginBottom: 6 }}>
+                            <View style={{ width: `${stepPct * 100}%`, height: '100%', backgroundColor: stepDone ? '#84CC16' : '#3B82F6', borderRadius: 2 }} />
+                          </View>
+                          <Text style={{ fontSize: 10, color: stepDone ? '#84CC16' : 'rgba(255,255,255,0.5)' }}>
+                            {stepDone ? 'Goal reached!' : `${STEP_GOAL.toLocaleString()} goal`}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })()}
 
                     {/* Workouts */}
                     <View style={{ flex: 1, backgroundColor: sub, borderRadius: 12, padding: 12, borderWidth: 1, borderColor: subBorder }}>
@@ -472,24 +466,7 @@ export default function DashboardScreen() {
                     </View>
                   </View>
 
-                  {/* Status banner */}
-                  <View style={{
-                    flexDirection: 'row', alignItems: 'center', gap: 8,
-                    paddingHorizontal: 12, paddingVertical: 10,
-                    borderRadius: 8,
-                    backgroundColor: isOnTrack ? 'rgba(132,204,22,0.1)' : 'rgba(245,158,11,0.1)',
-                    borderWidth: 1,
-                    borderColor: isOnTrack ? 'rgba(132,204,22,0.2)' : 'rgba(245,158,11,0.2)',
-                  }}>
-                    {isOnTrack
-                      ? <CircleCheck size={16} color="#84CC16" />
-                      : <CircleAlert size={16} color="#F59E0B" />
-                    }
-                    <Text style={{ fontSize: 12, fontWeight: '500', color: isOnTrack ? '#84CC16' : '#F59E0B' }}>
-                      {bannerText}
-                    </Text>
-                  </View>
-                </Card>
+                  </Card>
               );
             })() : null}
 
@@ -608,7 +585,7 @@ export default function DashboardScreen() {
                     })()}
                   </>
                 )}
-              </Card>
+                  </Card>
             ) : null}
 
             {/* ── Today's Workout cards ── */}
@@ -821,6 +798,100 @@ export default function DashboardScreen() {
         onSave={(weight) => logWeightEntry(weight)}
         onClose={() => setWeightModalVisible(false)}
       />
+
+      {/* ── Log Steps Modal ── */}
+      <Modal visible={stepsModalVisible} transparent animationType="slide" onRequestClose={() => setStepsModalVisible(false)} statusBarTranslucent>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+          <TouchableOpacity style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)' }} activeOpacity={1} onPress={() => setStepsModalVisible(false)} />
+          <View style={{ backgroundColor: colors.backgroundSecondary, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: spacing.xl, paddingBottom: spacing['3xl'] }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xl }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(59,130,246,0.15)', alignItems: 'center', justifyContent: 'center' }}>
+                  <Footprints size={18} color="#3B82F6" />
+                </View>
+                <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textPrimary }}>Log Steps</Text>
+              </View>
+              <TouchableOpacity onPress={() => setStepsModalVisible(false)} activeOpacity={1} style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.06)', alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ fontSize: 18, color: 'rgba(255,255,255,0.5)' }}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: spacing.sm }}>Steps today</Text>
+            <TextInput
+              value={stepsInput}
+              onChangeText={setStepsInput}
+              placeholder="e.g. 8500"
+              placeholderTextColor="rgba(255,255,255,0.3)"
+              keyboardType="number-pad"
+              autoFocus
+              style={{ backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: Radius.md, borderWidth: 1, borderColor: colors.border, paddingHorizontal: spacing.base, paddingVertical: 14, fontSize: 24, fontWeight: '700', color: colors.textPrimary, textAlign: 'center', marginBottom: spacing.xl }}
+            />
+            <TouchableOpacity
+              onPress={async () => {
+                const val = parseInt(stepsInput, 10);
+                if (!isNaN(val) && val >= 0) { await saveSteps(val); setStepsModalVisible(false); }
+              }}
+              disabled={!stepsInput || isNaN(parseInt(stepsInput, 10))}
+              activeOpacity={1}
+              style={{ paddingVertical: 14, borderRadius: Radius.md, backgroundColor: '#3B82F6', alignItems: 'center', opacity: !stepsInput || isNaN(parseInt(stepsInput, 10)) ? 0.5 : 1 }}
+            >
+              <Text style={{ fontSize: 16, fontWeight: '600', color: '#fff' }}>Save</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* ── Log Active Burned Calories Modal ── */}
+      <Modal visible={burnedModalVisible} transparent animationType="slide" onRequestClose={() => setBurnedModalVisible(false)} statusBarTranslucent>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+          <TouchableOpacity style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)' }} activeOpacity={1} onPress={() => setBurnedModalVisible(false)} />
+          <View style={{ backgroundColor: colors.backgroundSecondary, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: spacing.xl, paddingBottom: spacing['3xl'] }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.base }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(239,68,68,0.15)', alignItems: 'center', justifyContent: 'center' }}>
+                  <Flame size={18} color="#EF4444" />
+                </View>
+                <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textPrimary }}>Active Calories Burned</Text>
+              </View>
+              <TouchableOpacity onPress={() => setBurnedModalVisible(false)} activeOpacity={1} style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.06)', alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ fontSize: 18, color: 'rgba(255,255,255,0.5)' }}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: spacing.base }}>
+              Extra calories burned through exercise or activity today (separate from resting & steps).
+            </Text>
+            <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: spacing.sm }}>Calories burned</Text>
+            <TextInput
+              value={burnedInput}
+              onChangeText={setBurnedInput}
+              placeholder="e.g. 300"
+              placeholderTextColor="rgba(255,255,255,0.3)"
+              keyboardType="number-pad"
+              autoFocus
+              style={{ backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: Radius.md, borderWidth: 1, borderColor: colors.border, paddingHorizontal: spacing.base, paddingVertical: 14, fontSize: 24, fontWeight: '700', color: colors.textPrimary, textAlign: 'center', marginBottom: spacing.xl }}
+            />
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <TouchableOpacity
+                onPress={async () => { await saveActiveBurned(0); setBurnedModalVisible(false); }}
+                activeOpacity={1}
+                style={{ flex: 1, paddingVertical: 14, borderRadius: Radius.md, backgroundColor: 'rgba(255,255,255,0.06)', alignItems: 'center' }}
+              >
+                <Text style={{ fontSize: 15, fontWeight: '600', color: 'rgba(255,255,255,0.5)' }}>Reset</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={async () => {
+                  const val = parseInt(burnedInput, 10);
+                  if (!isNaN(val) && val >= 0) { await saveActiveBurned(val); setBurnedModalVisible(false); }
+                }}
+                disabled={!burnedInput || isNaN(parseInt(burnedInput, 10))}
+                activeOpacity={1}
+                style={{ flex: 2, paddingVertical: 14, borderRadius: Radius.md, backgroundColor: '#EF4444', alignItems: 'center', opacity: !burnedInput || isNaN(parseInt(burnedInput, 10)) ? 0.5 : 1 }}
+              >
+                <Text style={{ fontSize: 16, fontWeight: '600', color: '#fff' }}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
 
       {/* ── Share Card ── */}
       {shareCardVisible && data ? (

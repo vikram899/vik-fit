@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { UserRow } from '@database/repositories/userRepo';
 import { getWorkoutCompletedDates } from '@database/repositories/workoutRepo';
-import { getProfile, updateProfile, getProfileNutrition, updateNutritionTargets, updateStreakCondition } from '../services/profileService';
+import { getProfile, updateProfile, getProfileNutrition, updateNutritionTargets, updateStreakCondition, updateUnitPreference } from '../services/profileService';
+import { updateUser } from '@database/repositories/userRepo';
 import { ProfileFormData } from '../types';
 import { BMRResult } from '@modules/onboarding/types';
 import { StreakCondition } from '@shared/types/common';
@@ -73,9 +74,9 @@ export function useProfile() {
   );
 
   const saveNutritionTargets = useCallback(
-    async (calories: number | null, protein: number | null): Promise<void> => {
+    async (calories: number | null, protein: number | null, calPct: number, calUpperPct: number, protPct: number): Promise<void> => {
       if (!user) return;
-      await updateNutritionTargets(user.id, calories, protein);
+      await updateNutritionTargets(user.id, calories, protein, calPct, calUpperPct, protPct);
       await refresh();
     },
     [user, refresh],
@@ -90,5 +91,23 @@ export function useProfile() {
     [user, refresh],
   );
 
-  return { user, nutrition, workoutCount, streak, loading, saving, saveProfile, saveNutritionTargets, saveStreakCondition, refresh };
+  const saveUnitPreference = useCallback(
+    async (unitPreference: 'metric' | 'imperial'): Promise<void> => {
+      if (!user) return;
+      await updateUnitPreference(user.id, unitPreference);
+      await refresh();
+    },
+    [user, refresh],
+  );
+
+  const saveRestingCalories = useCallback(
+    async (calories: number | null): Promise<void> => {
+      if (!user) return;
+      await updateUser(user.id, { restingCaloriesOverride: calories });
+      await refresh();
+    },
+    [user, refresh],
+  );
+
+  return { user, nutrition, workoutCount, streak, loading, saving, saveProfile, saveNutritionTargets, saveStreakCondition, saveUnitPreference, saveRestingCalories, refresh };
 }

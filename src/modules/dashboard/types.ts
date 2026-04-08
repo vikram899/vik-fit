@@ -19,5 +19,8 @@ export interface DashboardData {
   mealLogs: MealLogRow[];
   streak: number;
   streakCondition: StreakCondition;
+  todaySteps: number;
+  activeBurned: number;
+  restingCalories: number;
   todaysWorkouts: { id: number; name: string; isDone: boolean; exerciseCount: number; completedCount: number }[];
 }

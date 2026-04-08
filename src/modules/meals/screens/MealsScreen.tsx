@@ -107,7 +107,7 @@ export default function MealsScreen() {
         </View>
 
         {/* ── Daily Summary ── */}
-        <Card style={s.summaryCard}>
+          <Card style={s.summaryCard}>
           <View style={s.summaryOverlay} pointerEvents="none" />
           <Text style={s.summaryTitle}>Daily Summary</Text>
           <View style={s.summaryRow}>
@@ -120,7 +120,7 @@ export default function MealsScreen() {
             </Text>
           </View>
           <ProgressBar progress={calProgress} gradientColors={['#F59E0B', '#EF4444']} height={8} />
-        </Card>
+          </Card>
 
         {/* ── Macros ── */}
         {userTargets ? (

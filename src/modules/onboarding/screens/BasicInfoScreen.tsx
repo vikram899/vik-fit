@@ -96,6 +96,7 @@ function WheelColumn({ items, selectedIndex, onSelect, width = 80, visibleItems 
         onScroll={handleScroll}
         onMomentumScrollEnd={handleMomentumEnd}
         scrollEventThrottle={16}
+        nestedScrollEnabled={true}
         contentContainerStyle={{ paddingTop: half, paddingBottom: half }}
       >
         {items.map((label, i) => {
@@ -175,7 +176,6 @@ const YEARS = Array.from({ length: 91 }, (_, i) => String(NOW_YEAR - 10 - i));
 export default function BasicInfoScreen({ navigation }: Props) {
   const { spacing } = useTheme();
   const { draft, updateDraft } = useOnboarding();
-  const [pageScrollEnabled, setPageScrollEnabled] = useState(true);
 
   // DOB
   const [monthIdx, setMonthIdx] = useState(0);
@@ -243,7 +243,6 @@ export default function BasicInfoScreen({ navigation }: Props) {
       onNext={() => navigation.navigate('ActivityGoal')}
       nextDisabled={!isValid}
       nextLabel="Next"
-      scrollEnabled={pageScrollEnabled}
     >
       {/* Name */}
       <View style={{ marginBottom: spacing.lg }}>
@@ -268,12 +267,7 @@ export default function BasicInfoScreen({ navigation }: Props) {
       </View>
 
       {/* Date of Birth */}
-      <View
-        style={{ marginBottom: spacing.lg }}
-        onTouchStart={() => setPageScrollEnabled(false)}
-        onTouchEnd={() => setPageScrollEnabled(true)}
-        onTouchCancel={() => setPageScrollEnabled(true)}
-      >
+      <View style={{ marginBottom: spacing.lg }}>
         <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>
           Date of Birth
         </Text>
@@ -341,12 +335,7 @@ export default function BasicInfoScreen({ navigation }: Props) {
       </View>
 
       {/* Height + Weight side by side */}
-      <View
-        style={{ flexDirection: 'row', gap: 10, marginBottom: spacing.base }}
-        onTouchStart={() => setPageScrollEnabled(false)}
-        onTouchEnd={() => setPageScrollEnabled(true)}
-        onTouchCancel={() => setPageScrollEnabled(true)}
-      >
+      <View style={{ flexDirection: 'row', gap: 10, marginBottom: spacing.base }}>
         {/* Height */}
         <View style={{ flex: 1 }}>
           <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>

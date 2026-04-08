@@ -11,7 +11,8 @@
       "Bash(python3 -c \"print\\(open\\(''d:/fitness-app/src/modules/onboarding/screens/SummaryScreen.tsx''\\).read\\(\\)[:100]\\)\")",
       "Bash(grep -l export /d/fitness-app/src/modules/dashboard/components/*.tsx /d/fitness-app/src/modules/meals/components/*.tsx /d/fitness-app/src/modules/workouts/components/*.tsx)",
       "Bash(wc -l /d/fitness-app/src/modules/*/screens/*.tsx)",
-      "Bash(npx expo:*)"
+      "Bash(npx expo:*)",
+      "Bash(python -c \":*)"
     ]
   }
 }

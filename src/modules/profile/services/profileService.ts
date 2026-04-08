@@ -36,10 +36,21 @@ export async function updateStreakCondition(id: number, streakCondition: StreakC
   await updateUser(id, { streakCondition });
 }
 
+export async function updateUnitPreference(id: number, unitPreference: 'metric' | 'imperial'): Promise<void> {
+  await updateUser(id, { unitPreference });
+}
+
+export async function markTourSeen(id: number): Promise<void> {
+  await updateUser(id, { hasSeenTour: 1 });
+}
+
 export async function updateNutritionTargets(
   id: number,
   targetCaloriesOverride: number | null,
   targetProteinOverride: number | null,
+  calorieGoalPct: number,
+  calorieGoalUpperPct: number,
+  proteinGoalPct: number,
 ): Promise<void> {
-  await updateUser(id, { targetCaloriesOverride, targetProteinOverride });
+  await updateUser(id, { targetCaloriesOverride, targetProteinOverride, calorieGoalPct, calorieGoalUpperPct, proteinGoalPct });
 }

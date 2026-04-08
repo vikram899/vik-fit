@@ -11,7 +11,9 @@ import { logMeal, getRecentMeals } from '../services/mealLogService';
 import { getAllTemplates, removeTemplate } from '../services/mealTemplateService';
 import { toISOString } from '@shared/utils/dateUtils';
 import { Radius } from '@theme/radius';
-import { X, Search, Bookmark, Clock, Plus, Trash2 } from 'lucide-react-native';
+import { X, Search, Bookmark, Clock, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react-native';
+
+type Ingredient = { id: string; name: string; calories: string; protein: string; carbs: string; fat: string };
 
 const CATEGORY_LABEL: Record<MealCategory, string> = {
   breakfast: 'Breakfast',
@@ -45,6 +47,15 @@ export default function AddMealModal({ visible, category, onClose, onAdded }: Pr
   const [carbs, setCarbs] = useState('');
   const [fat, setFat] = useState('');
 
+  // Ingredients
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [showIngForm, setShowIngForm] = useState(false);
+  const [ingName, setIngName] = useState('');
+  const [ingCal, setIngCal] = useState('');
+  const [ingProtein, setIngProtein] = useState('');
+  const [ingCarbs, setIngCarbs] = useState('');
+  const [ingFat, setIngFat] = useState('');
+
   const loadData = useCallback(async () => {
     setDataLoading(true);
     try {
@@ -62,8 +73,28 @@ export default function AddMealModal({ visible, category, onClose, onAdded }: Pr
       setTab('saved');
       setSearch('');
       setName(''); setCalories(''); setProtein(''); setCarbs(''); setFat('');
+      setIngredients([]); setShowIngForm(false);
+      setIngName(''); setIngCal(''); setIngProtein(''); setIngCarbs(''); setIngFat('');
     }
   }, [visible, loadData]);
+
+  // Auto-sum ingredient macros into the totals fields
+  useEffect(() => {
+    if (ingredients.length === 0) return;
+    const t = ingredients.reduce(
+      (acc, ing) => ({
+        calories: acc.calories + parseFloat(ing.calories || '0'),
+        protein:  acc.protein  + parseFloat(ing.protein  || '0'),
+        carbs:    acc.carbs    + parseFloat(ing.carbs    || '0'),
+        fat:      acc.fat      + parseFloat(ing.fat      || '0'),
+      }),
+      { calories: 0, protein: 0, carbs: 0, fat: 0 },
+    );
+    setCalories(String(Math.round(t.calories)));
+    setProtein(String(Math.round(t.protein)));
+    setCarbs(String(Math.round(t.carbs)));
+    setFat(String(Math.round(t.fat)));
+  }, [ingredients]);
 
   const handleClose = () => {
     setName(''); setCalories(''); setProtein(''); setCarbs(''); setFat('');
@@ -115,6 +146,28 @@ export default function AddMealModal({ visible, category, onClose, onAdded }: Pr
     await removeTemplate(id);
     setTemplates((prev) => prev.filter((t) => t.id !== id));
     setSearch('');
+  };
+
+  const addIngredient = () => {
+    if (!ingName.trim() || !ingCal) return;
+    setIngredients(prev => [...prev, {
+      id: Date.now().toString(),
+      name: ingName.trim(),
+      calories: ingCal,
+      protein: ingProtein || '0',
+      carbs: ingCarbs || '0',
+      fat: ingFat || '0',
+    }]);
+    setIngName(''); setIngCal(''); setIngProtein(''); setIngCarbs(''); setIngFat('');
+    setShowIngForm(false);
+  };
+
+  const removeIngredient = (id: string) => {
+    setIngredients(prev => {
+      const next = prev.filter(i => i.id !== id);
+      if (next.length === 0) { setCalories(''); setProtein(''); setCarbs(''); setFat(''); }
+      return next;
+    });
   };
 
   const filteredTemplates = templates.filter((t) =>
@@ -409,20 +462,106 @@ export default function AddMealModal({ visible, category, onClose, onAdded }: Pr
               {/* ── NEW ── */}
               {tab === 'new' ? (
                 <>
+                  {/* Meal Name */}
                   <View style={{ marginBottom: spacing.base }}>
                     <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>Meal Name</Text>
                     <TextInput
                       value={name}
                       onChangeText={setName}
-                      placeholder="e.g. Chicken and Rice"
+                      placeholder="e.g. Oatmeal"
                       placeholderTextColor="rgba(255,255,255,0.4)"
                       autoCapitalize="sentences"
                       style={inputStyle}
                     />
                   </View>
 
+                  {/* ── Ingredients ── */}
                   <View style={{ marginBottom: spacing.base }}>
-                    <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>Calories</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm }}>
+                      <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
+                        Ingredients{ingredients.length > 0 ? ` (${ingredients.length})` : ''}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => setShowIngForm(v => !v)}
+                        activeOpacity={1}
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, backgroundColor: 'rgba(132,204,22,0.12)', borderWidth: 1, borderColor: 'rgba(132,204,22,0.25)' }}
+                      >
+                        {showIngForm ? <ChevronUp size={14} color="#84CC16" /> : <Plus size={14} color="#84CC16" />}
+                        <Text style={{ fontSize: 12, fontWeight: '600', color: '#84CC16' }}>
+                          {showIngForm ? 'Cancel' : 'Add Ingredient'}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    {/* Inline ingredient form */}
+                    {showIngForm && (
+                      <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: Radius.md, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', padding: 12, marginBottom: spacing.sm, gap: 8 }}>
+                        <TextInput
+                          value={ingName}
+                          onChangeText={setIngName}
+                          placeholder="Ingredient name (e.g. Oats)"
+                          placeholderTextColor="rgba(255,255,255,0.35)"
+                          autoCapitalize="sentences"
+                          style={[inputStyle, { marginBottom: 0 }]}
+                        />
+                        <View style={{ flexDirection: 'row', gap: 6 }}>
+                          <View style={{ flex: 1.2 }}>
+                            <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>Calories *</Text>
+                            <TextInput value={ingCal} onChangeText={setIngCal} placeholder="0" placeholderTextColor="rgba(255,255,255,0.3)" keyboardType="decimal-pad" style={[inputStyle, { paddingHorizontal: 10, textAlign: 'center' }]} />
+                          </View>
+                          {[
+                            { label: 'Protein', val: ingProtein, set: setIngProtein },
+                            { label: 'Carbs',   val: ingCarbs,   set: setIngCarbs },
+                            { label: 'Fats',    val: ingFat,     set: setIngFat },
+                          ].map(({ label, val, set }) => (
+                            <View key={label} style={{ flex: 1 }}>
+                              <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>{label}</Text>
+                              <TextInput value={val} onChangeText={set} placeholder="0" placeholderTextColor="rgba(255,255,255,0.3)" keyboardType="decimal-pad" style={[inputStyle, { paddingHorizontal: 6, textAlign: 'center' }]} />
+                            </View>
+                          ))}
+                        </View>
+                        <TouchableOpacity
+                          onPress={addIngredient}
+                          disabled={!ingName.trim() || !ingCal}
+                          activeOpacity={1}
+                          style={{ paddingVertical: 10, borderRadius: Radius.md, backgroundColor: !ingName.trim() || !ingCal ? 'rgba(132,204,22,0.3)' : '#84CC16', alignItems: 'center' }}
+                        >
+                          <Text style={{ fontSize: 14, fontWeight: '600', color: '#fff' }}>Add</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+
+                    {/* Ingredient rows */}
+                    {ingredients.map((ing) => (
+                      <View key={ing.id} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: Radius.md, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', paddingHorizontal: 12, paddingVertical: 10, marginBottom: 6, gap: 8 }}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ fontSize: 13, fontWeight: '500', color: colors.textPrimary, marginBottom: 2 }}>{ing.name}</Text>
+                          <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                            {Math.round(parseFloat(ing.calories))} cal · P {Math.round(parseFloat(ing.protein))}g · C {Math.round(parseFloat(ing.carbs))}g · F {Math.round(parseFloat(ing.fat))}g
+                          </Text>
+                        </View>
+                        <TouchableOpacity onPress={() => removeIngredient(ing.id)} activeOpacity={1} style={{ padding: 4 }}>
+                          <Trash2 size={16} color="rgba(239,68,68,0.7)" />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+
+                    {/* Totals row */}
+                    {ingredients.length > 0 && (
+                      <View style={{ flexDirection: 'row', backgroundColor: 'rgba(132,204,22,0.08)', borderRadius: Radius.md, borderWidth: 1, borderColor: 'rgba(132,204,22,0.2)', paddingHorizontal: 12, paddingVertical: 10, marginTop: 2 }}>
+                        <Text style={{ fontSize: 12, fontWeight: '600', color: '#84CC16', flex: 1 }}>Total</Text>
+                        <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
+                          {calories} cal · P {protein}g · C {carbs}g · F {fat}g
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* Manual macro entry (shown always so user can override) */}
+                  <View style={{ marginBottom: spacing.base }}>
+                    <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>
+                      Calories{ingredients.length > 0 ? ' (auto-summed)' : ''}
+                    </Text>
                     <TextInput
                       value={calories}
                       onChangeText={setCalories}

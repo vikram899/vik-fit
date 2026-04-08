@@ -87,10 +87,10 @@ export default function WorkoutsScreen({ navigation }: Props) {
           flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
           paddingTop: spacing.xl, paddingBottom: spacing.base,
         }}>
-          <View>
-            <Text style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary }}>Workouts</Text>
-            <Text style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{todayLabel}</Text>
-          </View>
+            <View>
+              <Text style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary }}>Workouts</Text>
+              <Text style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{todayLabel}</Text>
+            </View>
           <TouchableOpacity
             onPress={() => setSelectModalVisible(true)}
             activeOpacity={1}
@@ -232,24 +232,10 @@ export default function WorkoutsScreen({ navigation }: Props) {
                             <ChevronRight size={18} color="rgba(255,255,255,0.4)" />
                           </View>
 
-                          {/* Muscle chips */}
-                          {muscleGroups.length > 0 && (
-                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginBottom: 5 }}>
-                              {muscleGroups.map((g) => (
-                                <View key={g} style={{
-                                  backgroundColor: 'rgba(59,130,246,0.12)',
-                                  borderRadius: 99, paddingHorizontal: 8, paddingVertical: 2,
-                                  borderWidth: 1, borderColor: 'rgba(59,130,246,0.25)',
-                                }}>
-                                  <Text style={{ fontSize: 11, color: '#3B82F6' }}>{g}</Text>
-                                </View>
-                              ))}
-                            </View>
-                          )}
-
                           {/* Day chips */}
                           {t.assignedWeekdays.length > 0 && (
-                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginBottom: 6 }}>
+                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 5, marginBottom: 8 }}>
+                              <Calendar size={12} color="#84CC16" />
                               {t.assignedWeekdays.map((d) => (
                                 <View key={d} style={{
                                   backgroundColor: 'rgba(132,204,22,0.15)',
@@ -257,6 +243,27 @@ export default function WorkoutsScreen({ navigation }: Props) {
                                   borderWidth: 1, borderColor: 'rgba(132,204,22,0.3)',
                                 }}>
                                   <Text style={{ fontSize: 11, color: '#84CC16' }}>{WEEKDAY_FULL[d]}</Text>
+                                </View>
+                              ))}
+                            </View>
+                          )}
+
+                          {/* Separator */}
+                          {t.assignedWeekdays.length > 0 && muscleGroups.length > 0 && (
+                            <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.05)', marginBottom: 8 }} />
+                          )}
+
+                          {/* Muscle chips */}
+                          {muscleGroups.length > 0 && (
+                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 5, marginBottom: 8 }}>
+                              <Dumbbell size={12} color="#3B82F6" />
+                              {muscleGroups.map((g) => (
+                                <View key={g} style={{
+                                  backgroundColor: 'rgba(59,130,246,0.12)',
+                                  borderRadius: 99, paddingHorizontal: 8, paddingVertical: 2,
+                                  borderWidth: 1, borderColor: 'rgba(59,130,246,0.25)',
+                                }}>
+                                  <Text style={{ fontSize: 11, color: '#3B82F6' }}>{g}</Text>
                                 </View>
                               ))}
                             </View>

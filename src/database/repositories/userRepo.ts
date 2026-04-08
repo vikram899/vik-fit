@@ -15,7 +15,12 @@ export interface UserRow {
   experienceLevel: 'beginner' | 'intermediate' | 'advanced' | null;
   targetCaloriesOverride: number | null;
   targetProteinOverride: number | null;
+  calorieGoalPct: number;       // lower bound %, default 85
+  calorieGoalUpperPct: number;  // upper bound %, default 115
+  proteinGoalPct: number;       // lower bound %, default 85
   streakCondition: StreakCondition;
+  restingCaloriesOverride: number | null;
+  hasSeenTour: number;  // 0 = not seen, 1 = seen
   createdAt: string;
   updatedAt: string;
 }
@@ -32,8 +37,8 @@ export async function getUser(): Promise<UserRow | null> {
 export async function createUser(input: CreateUserInput): Promise<number> {
   const db = await getDatabase();
   const result = await db.runAsync(
-    `INSERT INTO users (name, age, gender, height, weight, activityLevel, goal, unitPreference, targetWeight, experienceLevel, targetCaloriesOverride, targetProteinOverride, streakCondition, createdAt, updatedAt)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+    `INSERT INTO users (name, age, gender, height, weight, activityLevel, goal, unitPreference, targetWeight, experienceLevel, targetCaloriesOverride, targetProteinOverride, streakCondition, hasSeenTour, createdAt, updatedAt)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
     [
       input.name,
       input.age,
@@ -48,6 +53,7 @@ export async function createUser(input: CreateUserInput): Promise<number> {
       input.targetCaloriesOverride ?? null,
       input.targetProteinOverride ?? null,
       input.streakCondition ?? 'any',
+      0, // new users always see the tour
       input.createdAt,
       input.updatedAt,
     ]

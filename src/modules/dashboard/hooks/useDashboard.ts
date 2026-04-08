@@ -5,6 +5,7 @@ import { DashboardData } from '../types';
 import { skipWorkoutForDate } from '@database/repositories/workoutRepo';
 import { logWeight } from '@database/repositories/weightRepo';
 import { getUser, updateUser } from '@database/repositories/userRepo';
+import { upsertSteps, upsertActiveBurned } from '@database/repositories/stepsRepo';
 import { todayDateString } from '@shared/utils/dateUtils';
 
 export function useDashboard() {
@@ -61,5 +62,21 @@ export function useDashboard() {
     [refresh]
   );
 
-  return { data, loading, error, refresh, skipWorkout, logWeightEntry, setTargetWeight };
+  const saveSteps = useCallback(
+    async (steps: number) => {
+      await upsertSteps(todayDateString(), steps);
+      await refresh();
+    },
+    [refresh],
+  );
+
+  const saveActiveBurned = useCallback(
+    async (calories: number) => {
+      await upsertActiveBurned(todayDateString(), calories);
+      await refresh();
+    },
+    [refresh],
+  );
+
+  return { data, loading, error, refresh, skipWorkout, logWeightEntry, setTargetWeight, saveSteps, saveActiveBurned };
 }

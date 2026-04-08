@@ -1,6 +1,27 @@
+import { StyleSheet } from 'react-native';
 import { Spacing, Layout } from '@theme/spacing';
 import { Radius } from '@theme/radius';
 import { ThemeColors } from '@theme/colors';
+
+export const mealsStyles = StyleSheet.create({
+  templateActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.06)',
+  },
+  templateActionsRight: {
+    flexDirection: 'row',
+    gap: 16,
+    alignItems: 'center',
+  },
+  formField: {
+    marginBottom: 12,
+  },
+});
 
 export function createMealsStyles(colors: ThemeColors) {
   return {

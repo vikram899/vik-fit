@@ -134,13 +134,18 @@ export const ADD_EXPERIENCE_LEVEL_COLUMN = `ALTER TABLE users ADD COLUMN experie
 export const ADD_CUSTOM_NUTRITION_COLUMNS = `ALTER TABLE users ADD COLUMN targetCaloriesOverride REAL;`;
 export const ADD_CUSTOM_PROTEIN_COLUMN = `ALTER TABLE users ADD COLUMN targetProteinOverride REAL;`;
 export const ADD_STREAK_CONDITION_COLUMN = `ALTER TABLE users ADD COLUMN streakCondition TEXT NOT NULL DEFAULT 'any';`;
+export const ADD_GOAL_THRESHOLDS_COLUMNS      = `ALTER TABLE users ADD COLUMN calorieGoalPct INTEGER NOT NULL DEFAULT 85;`;
+export const ADD_PROTEIN_GOAL_PCT_COLUMN       = `ALTER TABLE users ADD COLUMN proteinGoalPct INTEGER NOT NULL DEFAULT 85;`;
+export const ADD_CALORIE_GOAL_UPPER_PCT_COLUMN = `ALTER TABLE users ADD COLUMN calorieGoalUpperPct INTEGER NOT NULL DEFAULT 115;`;
 export const ADD_ASSIGNED_WEEKDAYS_COLUMN = `ALTER TABLE workout_templates ADD COLUMN assignedWeekdays TEXT;`;
 export const MIGRATE_ASSIGNED_WEEKDAYS = `UPDATE workout_templates SET assignedWeekdays = '[' || assignedWeekday || ']' WHERE assignedWeekday IS NOT NULL;`;
 
 // Rebuild exercise_templates to fix the CHECK constraint — old installs had a narrower
 // type list that excluded bodyweight, hiit, etc. SQLite can't ALTER a CHECK constraint
 // so we recreate the table while preserving all data.
+// Foreign keys must be OFF while we drop + rename tables.
 export const REBUILD_EXERCISE_TEMPLATES_TABLE = `
+  PRAGMA foreign_keys = OFF;
   DROP TABLE IF EXISTS exercise_templates_new;
   CREATE TABLE exercise_templates_new (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -155,6 +160,7 @@ export const REBUILD_EXERCISE_TEMPLATES_TABLE = `
   INSERT INTO exercise_templates_new SELECT * FROM exercise_templates;
   DROP TABLE exercise_templates;
   ALTER TABLE exercise_templates_new RENAME TO exercise_templates;
+  PRAGMA foreign_keys = ON;
 `;
 
 export const CREATE_WEIGHT_LOGS_TABLE = `
@@ -166,6 +172,38 @@ export const CREATE_WEIGHT_LOGS_TABLE = `
     createdAt TEXT NOT NULL
   );
 `;
+
+export const CREATE_PR_TRACKED_EXERCISES_TABLE = `
+  CREATE TABLE IF NOT EXISTS pr_tracked_exercises (
+    exerciseTemplateId INTEGER PRIMARY KEY,
+    addedAt TEXT NOT NULL
+  );
+`;
+
+// Re-apply threshold columns at new indices so existing users whose migration
+// tracker skipped indices 16–18 (due to a prior index shift) still get them.
+// ALTER TABLE ADD COLUMN fails silently if the column already exists.
+export const ENSURE_CALORIE_GOAL_PCT_COLUMN      = `ALTER TABLE users ADD COLUMN calorieGoalPct INTEGER NOT NULL DEFAULT 85;`;
+export const ENSURE_CALORIE_GOAL_UPPER_PCT_COLUMN = `ALTER TABLE users ADD COLUMN calorieGoalUpperPct INTEGER NOT NULL DEFAULT 115;`;
+export const ENSURE_PROTEIN_GOAL_PCT_COLUMN       = `ALTER TABLE users ADD COLUMN proteinGoalPct INTEGER NOT NULL DEFAULT 85;`;
+
+// DEFAULT 1 = existing users are considered to have already seen the tour.
+// New users get hasSeenTour = 0 explicitly in createUser.
+export const ADD_HAS_SEEN_TOUR_COLUMN = `ALTER TABLE users ADD COLUMN hasSeenTour INTEGER NOT NULL DEFAULT 1;`;
+
+export const ADD_RESTING_CALORIES_COLUMN = `ALTER TABLE users ADD COLUMN restingCaloriesOverride INTEGER;`;
+
+export const CREATE_STEPS_LOGS_TABLE = `
+  CREATE TABLE IF NOT EXISTS steps_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL UNIQUE,
+    steps INTEGER NOT NULL DEFAULT 0,
+    createdAt TEXT NOT NULL,
+    updatedAt TEXT NOT NULL
+  );
+`;
+
+export const ADD_ACTIVE_BURNED_COLUMN = `ALTER TABLE steps_logs ADD COLUMN activeBurned INTEGER NOT NULL DEFAULT 0;`;
 
 export const ALL_MIGRATIONS = [
   CREATE_USERS_TABLE,
@@ -184,7 +222,18 @@ export const ALL_MIGRATIONS = [
   ADD_CUSTOM_PROTEIN_COLUMN,
   CREATE_WEIGHT_LOGS_TABLE,
   ADD_STREAK_CONDITION_COLUMN,
+  ADD_GOAL_THRESHOLDS_COLUMNS,
+  ADD_PROTEIN_GOAL_PCT_COLUMN,
+  ADD_CALORIE_GOAL_UPPER_PCT_COLUMN,
   ADD_ASSIGNED_WEEKDAYS_COLUMN,
   MIGRATE_ASSIGNED_WEEKDAYS,
   REBUILD_EXERCISE_TEMPLATES_TABLE,
+  CREATE_PR_TRACKED_EXERCISES_TABLE,
+  ENSURE_CALORIE_GOAL_PCT_COLUMN,
+  ENSURE_CALORIE_GOAL_UPPER_PCT_COLUMN,
+  ENSURE_PROTEIN_GOAL_PCT_COLUMN,
+  ADD_HAS_SEEN_TOUR_COLUMN,
+  ADD_RESTING_CALORIES_COLUMN,
+  CREATE_STEPS_LOGS_TABLE,
+  ADD_ACTIVE_BURNED_COLUMN,
 ];
