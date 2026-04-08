@@ -1,6 +1,7 @@
 import React from 'react';
 import { Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { Home, Dumbbell, Utensils, TrendingUp, User } from 'lucide-react-native';
 import DashboardStack from './stacks/DashboardStack';
@@ -23,6 +24,8 @@ const ICON_SIZE = 22;
 
 export default function MainTabNavigator() {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const bottomInset = insets.bottom;
 
   return (
     <Tab.Navigator
@@ -32,9 +35,9 @@ export default function MainTabNavigator() {
           backgroundColor: colors.backgroundSecondary,
           borderTopWidth: 1,
           borderTopColor: colors.border,
-          height: Platform.OS === 'ios' ? 80 : 60,
+          height: (Platform.OS === 'ios' ? 60 : 56) + bottomInset,
           paddingTop: 8,
-          paddingBottom: Platform.OS === 'ios' ? 24 : 8,
+          paddingBottom: bottomInset > 0 ? bottomInset : 8,
         },
         tabBarActiveTintColor: colors.brandSecondary,
         tabBarInactiveTintColor: colors.textSecondary,
