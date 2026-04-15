@@ -7,6 +7,7 @@ import { ActivityLevel, Gender, Goal, UnitPreference } from '@shared/types/commo
 
 const GOAL_MAP: Record<DisplayGoal, Goal> = {
   'lose-fat': 'lose_weight',
+  'lose-fat-gain-muscle': 'maintain',
   'build-muscle': 'gain_muscle',
   'recomp': 'maintain',
   'maintain': 'maintain',
@@ -105,7 +106,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         : null;
 
       const userData = {
-        name: draft.name.trim(),
+        name: draft.name.trim() || 'User',
         age,
         gender: draft.gender as Gender,
         height: storedHeight,

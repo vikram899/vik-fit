@@ -120,7 +120,7 @@ export default function WelcomeScreen({ navigation }: Props) {
         paddingBottom: insets.bottom + 24,
       }, buttonStyle]}>
         <TouchableOpacity
-          onPress={() => navigation.navigate('BasicInfo')}
+          onPress={() => navigation.navigate('Gender')}
           activeOpacity={1}
           style={{ borderRadius: 16, overflow: 'hidden' }}
         >

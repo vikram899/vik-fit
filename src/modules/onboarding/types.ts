@@ -2,6 +2,7 @@ import { Gender, UnitPreference } from '@shared/types/common';
 
 export type DisplayGoal =
   | 'lose-fat'
+  | 'lose-fat-gain-muscle'
   | 'build-muscle'
   | 'recomp'
   | 'maintain'
